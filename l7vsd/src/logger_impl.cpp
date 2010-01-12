@@ -109,244 +109,244 @@ l7vs::LoggerImpl::LoggerImpl()
 
 #if    defined(LOGGER_PROCESS_VSD)
     // l7vsd network category initialize
-    category_level_map[LOG_CAT_L7VSD_NETWORK] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSD_NETWORK] = LOG_LV_ERROR;
     name_category_map["l7vsd_network"] = LOG_CAT_L7VSD_NETWORK;
     category_name_map[LOG_CAT_L7VSD_NETWORK] = "l7vsd_network";
 
     // l7vsd network qos category initialize
-    category_level_map[LOG_CAT_L7VSD_NETWORK_QOS] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSD_NETWORK_QOS] = LOG_LV_ERROR;
     name_category_map["l7vsd_network_qos"] = LOG_CAT_L7VSD_NETWORK_QOS;
     category_name_map[LOG_CAT_L7VSD_NETWORK_QOS] = "l7vsd_network_qos";
 
     // l7vsd network bandwidth category initialize
-    category_level_map[LOG_CAT_L7VSD_NETWORK_BANDWIDTH] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSD_NETWORK_BANDWIDTH] = LOG_LV_ERROR;
     name_category_map["l7vsd_network_bandwidth"] = LOG_CAT_L7VSD_NETWORK_BANDWIDTH;
     category_name_map[LOG_CAT_L7VSD_NETWORK_BANDWIDTH] = "l7vsd_network_bandwidth";
 
     // l7vsd network nu_connection category initialize
-    category_level_map[LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION] = LOG_LV_ERROR;
     name_category_map["l7vsd_network_num_connection"] = LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION;
     category_name_map[LOG_CAT_L7VSD_NETWORK_NUM_CONNECTION] = "l7vsd_network_num_connection";
 
     // l7vsd network access log category initialize
-    category_level_map[LOG_CAT_L7VSD_NETWORK_ACCESS] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSD_NETWORK_ACCESS] = LOG_LV_ERROR;
     name_category_map["l7vsd_network_access"] = LOG_CAT_L7VSD_NETWORK_ACCESS;
     category_name_map[LOG_CAT_L7VSD_NETWORK_ACCESS] = "l7vsd_network_access";
 
     // l7vsd mainthread category initialize
-    category_level_map[LOG_CAT_L7VSD_MAINTHREAD] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSD_MAINTHREAD] = LOG_LV_ERROR;
     name_category_map["l7vsd_mainthread"] = LOG_CAT_L7VSD_MAINTHREAD;
     category_name_map[LOG_CAT_L7VSD_MAINTHREAD] = "l7vsd_mainthread";
 
     //l7vsd virtualservice category initialize
-    category_level_map[LOG_CAT_L7VSD_VIRTUALSERVICE] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSD_VIRTUALSERVICE] = LOG_LV_ERROR;
     name_category_map["l7vsd_virtualservice"] = LOG_CAT_L7VSD_VIRTUALSERVICE;
     category_name_map[LOG_CAT_L7VSD_VIRTUALSERVICE] = "l7vsd_virtualservice";
 
     //l7vsd virtualservice thread category initialize
-    category_level_map[LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD] = LOG_LV_ERROR;
     name_category_map["l7vsd_virtualservice_thread"] = LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD;
     category_name_map[LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD] = "l7vsd_virtualservice_thread";
 
     //l7vsd session category initialize
-    category_level_map[LOG_CAT_L7VSD_SESSION] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSD_SESSION] = LOG_LV_ERROR;
     name_category_map["l7vsd_session"] = LOG_CAT_L7VSD_SESSION;
     category_name_map[LOG_CAT_L7VSD_SESSION] = "l7vsd_session";
 
     //l7vsd session thread category initialize
-    category_level_map[LOG_CAT_L7VSD_SESSION_THREAD] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSD_SESSION_THREAD] = LOG_LV_ERROR;
     name_category_map["l7vsd_session_thread"] = LOG_CAT_L7VSD_SESSION_THREAD;
     category_name_map[LOG_CAT_L7VSD_SESSION_THREAD] = "l7vsd_session_thread";
 
     //l7vsd realserver category initialize
-    category_level_map[LOG_CAT_L7VSD_REALSERVER] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSD_REALSERVER] = LOG_LV_ERROR;
     name_category_map["l7vsd_realserver"] = LOG_CAT_L7VSD_REALSERVER;
     category_name_map[LOG_CAT_L7VSD_REALSERVER] = "l7vsd_realserver";
 
     //l7vsd sorryserver category initialize
-    category_level_map[LOG_CAT_L7VSD_SORRYSERVER] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSD_SORRYSERVER] = LOG_LV_ERROR;
     name_category_map["l7vsd_sorryserver"] = LOG_CAT_L7VSD_SORRYSERVER;
     category_name_map[LOG_CAT_L7VSD_SORRYSERVER] = "l7vsd_sorryserver";
 
     //l7vsd module category initialize
-    category_level_map[LOG_CAT_L7VSD_MODULE] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSD_MODULE] = LOG_LV_ERROR;
     name_category_map["l7vsd_module"] = LOG_CAT_L7VSD_MODULE;
     category_name_map[LOG_CAT_L7VSD_MODULE] = "l7vsd_module";
 
     //l7vsd replication category initialize
-    category_level_map[LOG_CAT_L7VSD_REPLICATION] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSD_REPLICATION] = LOG_LV_ERROR;
     name_category_map["l7vsd_replication"] = LOG_CAT_L7VSD_REPLICATION;
     category_name_map[LOG_CAT_L7VSD_REPLICATION] = "l7vsd_replication";
 
     //l7vsd replication send thread category initialize
-    category_level_map[LOG_CAT_L7VSD_REPLICATION_SENDTHREAD] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSD_REPLICATION_SENDTHREAD] = LOG_LV_ERROR;
     name_category_map["l7vsd_replication_sendthread"] = LOG_CAT_L7VSD_REPLICATION_SENDTHREAD;
     category_name_map[LOG_CAT_L7VSD_REPLICATION_SENDTHREAD] = "l7vsd_replication_sendthread";
 
     //l7vsd parameter category initialize
-    category_level_map[LOG_CAT_L7VSD_PARAMETER] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSD_PARAMETER] = LOG_LV_ERROR;
     name_category_map["l7vsd_parameter"] = LOG_CAT_L7VSD_PARAMETER;
     category_name_map[LOG_CAT_L7VSD_PARAMETER] = "l7vsd_parameter";
 
     //l7vsd logger category initialize
-    category_level_map[LOG_CAT_L7VSD_LOGGER] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSD_LOGGER] = LOG_LV_ERROR;
     name_category_map["l7vsd_logger"] = LOG_CAT_L7VSD_LOGGER;
     category_name_map[LOG_CAT_L7VSD_LOGGER] = "l7vsd_logger";
 
     //l7vsd command category initialize
-    category_level_map[LOG_CAT_L7VSD_COMMAND] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSD_COMMAND] = LOG_LV_ERROR;
     name_category_map["l7vsd_command"] = LOG_CAT_L7VSD_COMMAND;
     category_name_map[LOG_CAT_L7VSD_COMMAND] = "l7vsd_command";
 
     //l7vsd start stop category initialize
-    category_level_map[LOG_CAT_L7VSD_START_STOP] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSD_START_STOP] = LOG_LV_ERROR;
     name_category_map["l7vsd_start_stop"] = LOG_CAT_L7VSD_START_STOP;
     category_name_map[LOG_CAT_L7VSD_START_STOP] = "l7vsd_start_stop";
 
     //l7vsd system category initialize
-    category_level_map[LOG_CAT_L7VSD_SYSTEM] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSD_SYSTEM] = LOG_LV_ERROR;
     name_category_map["l7vsd_system"] = LOG_CAT_L7VSD_SYSTEM;
     category_name_map[LOG_CAT_L7VSD_SYSTEM] = "l7vsd_system";
 
     //l7vsd system memory category initialize
-    category_level_map[LOG_CAT_L7VSD_SYSTEM_MEMORY] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSD_SYSTEM_MEMORY] = LOG_LV_ERROR;
     name_category_map["l7vsd_system_memory"] = LOG_CAT_L7VSD_SYSTEM_MEMORY;
     category_name_map[LOG_CAT_L7VSD_SYSTEM_MEMORY] = "l7vsd_system_memory";
 
     //l7vsd system endpoint category initialize
-    category_level_map[LOG_CAT_L7VSD_SYSTEM_ENDPOINT] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSD_SYSTEM_ENDPOINT] = LOG_LV_ERROR;
     name_category_map["l7vsd_system_endpoint"] = LOG_CAT_L7VSD_SYSTEM_ENDPOINT;
     category_name_map[LOG_CAT_L7VSD_SYSTEM_ENDPOINT] = "l7vsd_system_endpoint";
 
     //l7vsd signal category initialize
-    category_level_map[LOG_CAT_L7VSD_SYSTEM_SIGNAL] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSD_SYSTEM_SIGNAL] = LOG_LV_ERROR;
     name_category_map["l7vsd_system_signal"] = LOG_CAT_L7VSD_SYSTEM_SIGNAL;
     category_name_map[LOG_CAT_L7VSD_SYSTEM_SIGNAL] = "l7vsd_system_signal";
 
     //l7vsd system enviroment category initialize
-    category_level_map[LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT] = LOG_LV_ERROR;
     name_category_map["l7vsd_system_environment"] = LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT;
     category_name_map[LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT] = "l7vsd_system_environment";
 
     //l7vsd snmpbridge category initialize
-    category_level_map[LOG_CAT_L7VSD_SNMPBRIDGE] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSD_SNMPBRIDGE] = LOG_LV_ERROR;
     name_category_map["l7vsd_snmpbridge"] = LOG_CAT_L7VSD_SNMPBRIDGE;
     category_name_map[LOG_CAT_L7VSD_SNMPBRIDGE] = "l7vsd_snmpbridge";
 
     //l7vsd protocol module category initialize
-    category_level_map[LOG_CAT_PROTOCOL] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_PROTOCOL] = LOG_LV_ERROR;
     name_category_map["l7vsd_protocol"] = LOG_CAT_PROTOCOL;
     category_name_map[LOG_CAT_PROTOCOL] = "l7vsd_protocol";
 
     //l7vsd schedule module category initialize
-    category_level_map[LOG_CAT_SCHEDULE] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_SCHEDULE] = LOG_LV_ERROR;
     name_category_map["l7vsd_schedule"] = LOG_CAT_SCHEDULE;
     category_name_map[LOG_CAT_SCHEDULE] = "l7vsd_schedule";
 
 #elif defined(LOGGER_PROCESS_ADM)
     //l7vsadm parse category initialize
-    category_level_map[LOG_CAT_L7VSADM_PARSE] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSADM_PARSE] = LOG_LV_ERROR;
     name_category_map["l7vsadm_parse"] = LOG_CAT_L7VSADM_PARSE;
     category_name_map[LOG_CAT_L7VSADM_PARSE] = "l7vsadm_parse";
 
     //l7vsadm operate category initialize
-    category_level_map[LOG_CAT_L7VSADM_OPERATE] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSADM_OPERATE] = LOG_LV_ERROR;
     name_category_map["l7vsadm_operate"] = LOG_CAT_L7VSADM_OPERATE;
     category_name_map[LOG_CAT_L7VSADM_OPERATE] = "l7vsadm_operate";
 
     //l7vsadm config result category initialize
-    category_level_map[LOG_CAT_L7VSADM_CONFIG_RESULT] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSADM_CONFIG_RESULT] = LOG_LV_ERROR;
     name_category_map["l7vsadm_config_result"] = LOG_CAT_L7VSADM_CONFIG_RESULT;
     category_name_map[LOG_CAT_L7VSADM_CONFIG_RESULT] = "l7vsadm_config_result";
 
     //l7vsadm common category initialize
-    category_level_map[LOG_CAT_L7VSADM_COMMON] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSADM_COMMON] = LOG_LV_ERROR;
     name_category_map["l7vsadm_common"] = LOG_CAT_L7VSADM_COMMON;
     category_name_map[LOG_CAT_L7VSADM_COMMON] = "l7vsadm_common";
 
     //l7vsadm logger category initialize
-    category_level_map[LOG_CAT_L7VSADM_LOGGER] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSADM_LOGGER] = LOG_LV_ERROR;
     name_category_map["l7vsadm_logger"] = LOG_CAT_L7VSADM_LOGGER;
     category_name_map[LOG_CAT_L7VSADM_LOGGER] = "l7vsadm_logger";
 
     //l7vsadm parameter category initialize
-    category_level_map[LOG_CAT_L7VSADM_PARAMETER] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSADM_PARAMETER] = LOG_LV_ERROR;
     name_category_map["l7vsadm_parameter"] = LOG_CAT_L7VSADM_PARAMETER;
     category_name_map[LOG_CAT_L7VSADM_PARAMETER] = "l7vsadm_parameter";
 
     //l7vsadm module category initialize
-    category_level_map[LOG_CAT_L7VSADM_MODULE] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_L7VSADM_MODULE] = LOG_LV_ERROR;
     name_category_map["l7vsadm_module"] = LOG_CAT_L7VSADM_MODULE;
     category_name_map[LOG_CAT_L7VSADM_MODULE] = "l7vsadm_module";
 
     //l7vsadm protocol module category initialize
-    category_level_map[LOG_CAT_PROTOCOL] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_PROTOCOL] = LOG_LV_ERROR;
     name_category_map["l7vsadm_protocol"] = LOG_CAT_PROTOCOL;
     category_name_map[LOG_CAT_PROTOCOL] = "l7vsadm_protocol";
 
     //l7vsadm schedule module category initialize
-    category_level_map[LOG_CAT_SCHEDULE] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_SCHEDULE] = LOG_LV_ERROR;
     name_category_map["l7vsadm_schedule"] = LOG_CAT_SCHEDULE;
     category_name_map[LOG_CAT_SCHEDULE] = "l7vsadm_schedule";
 
 #elif defined(LOGGER_PROCESS_SNM)
     //snmpagent start stop category initialize
-    category_level_map[LOG_CAT_SNMPAGENT_START_STOP] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_SNMPAGENT_START_STOP] = LOG_LV_ERROR;
     name_category_map["snmpagent_start_stop"] = LOG_CAT_SNMPAGENT_START_STOP;
     category_name_map[LOG_CAT_SNMPAGENT_START_STOP] = "snmpagent_start_stop";
 
     //snmpagent manager recive category initialize
-    category_level_map[LOG_CAT_SNMPAGENT_MANAGER_RECEIVE] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_SNMPAGENT_MANAGER_RECEIVE] = LOG_LV_ERROR;
     name_category_map["snmpagent_manager_receive"] = LOG_CAT_SNMPAGENT_MANAGER_RECEIVE;
     category_name_map[LOG_CAT_SNMPAGENT_MANAGER_RECEIVE] = "snmpagent_manager_receive";
 
     //snmpagent manager send category initialize
-    category_level_map[LOG_CAT_SNMPAGENT_MANAGER_SEND] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_SNMPAGENT_MANAGER_SEND] = LOG_LV_ERROR;
     name_category_map["snmpagent_manager_send"] = LOG_CAT_SNMPAGENT_MANAGER_SEND;
     category_name_map[LOG_CAT_SNMPAGENT_MANAGER_SEND] = "snmpagent_manager_send";
 
     //snmpagent l7vsd recv category initialize
-    category_level_map[LOG_CAT_SNMPAGENT_L7VSD_RECEIVE] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_SNMPAGENT_L7VSD_RECEIVE] = LOG_LV_ERROR;
     name_category_map["snmpagent_l7vsd_receive"] = LOG_CAT_SNMPAGENT_L7VSD_RECEIVE;
     category_name_map[LOG_CAT_SNMPAGENT_L7VSD_RECEIVE] = "snmpagent_l7vsd_receive";
 
     //snmpagent l7vsd recv category initialize
-    category_level_map[LOG_CAT_SNMPAGENT_L7VSD_SEND] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_SNMPAGENT_L7VSD_SEND] = LOG_LV_ERROR;
     name_category_map["snmpagent_l7vsd_send"] = LOG_CAT_SNMPAGENT_L7VSD_SEND;
     category_name_map[LOG_CAT_SNMPAGENT_L7VSD_SEND] = "snmpagent_l7vsd_send";
 
     //snmpagent logger category initialize
-    category_level_map[LOG_CAT_SNMPAGENT_LOGGER] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_SNMPAGENT_LOGGER] = LOG_LV_ERROR;
     name_category_map["snmpagent_logger"] = LOG_CAT_SNMPAGENT_LOGGER;
     category_name_map[LOG_CAT_SNMPAGENT_LOGGER] = "snmpagent_logger";
 
     //snmpagent parameter category initialize
-    category_level_map[LOG_CAT_SNMPAGENT_PARAMETER] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_SNMPAGENT_PARAMETER] = LOG_LV_ERROR;
     name_category_map["snmpagent_parameter"] = LOG_CAT_SNMPAGENT_PARAMETER;
     category_name_map[LOG_CAT_SNMPAGENT_PARAMETER] = "snmpagent_parameter";
 
     //snmpagent system category initialize
-    category_level_map[LOG_CAT_SNMPAGENT_SYSTEM] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_SNMPAGENT_SYSTEM] = LOG_LV_ERROR;
     name_category_map["snmpagent_system"] = LOG_CAT_SNMPAGENT_SYSTEM;
     category_name_map[LOG_CAT_SNMPAGENT_SYSTEM] = "snmpagent_system";
 
     //snmpagent system category initialize
-    category_level_map[LOG_CAT_SNMPAGENT_SYSTEM_MEMORY] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_SNMPAGENT_SYSTEM_MEMORY] = LOG_LV_ERROR;
     name_category_map["snmpagent_system_memory"] = LOG_CAT_SNMPAGENT_SYSTEM_MEMORY;
     category_name_map[LOG_CAT_SNMPAGENT_SYSTEM_MEMORY] = "snmpagent_system_memory";
 
     //snmpagent system category initialize
-    category_level_map[LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT] = LOG_LV_ERROR;
     name_category_map["snmpagent_system_endpoint"] = LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT;
     category_name_map[LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT] = "snmpagent_system_endpoint";
 
     //snmpagent system category initialize
-    category_level_map[LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL] = LOG_LV_ERROR;
     name_category_map["snmpagent_system_signal"] = LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL;
     category_name_map[LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL] = "snmpagent_system_signal";
 
     //snmpagent system category initialize
-    category_level_map[LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT] = LOG_LV_DEBUG;
+    category_level_map[LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT] = LOG_LV_ERROR;
     name_category_map["snmpagent_system_environment"] = LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT;
     category_name_map[LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT] = "snmpagent_system_environment";
 
