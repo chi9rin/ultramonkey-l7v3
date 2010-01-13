@@ -834,32 +834,35 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
         }
         /*------DEBUG LOG END------*/
 
-        replication_area_lock();
-        /*-------- DEBUG LOG --------*/
-        if (unlikely(LOG_LV_DEBUG == getloglevel()))
+        if (data_addr)
         {
-            putLogDebug(300024, "function : protocol_module_sslid::check_message_result protocol_module_sslid::"
-                        "set_parameter() : replication_area_lock() end.", __FILE__, __LINE__);
-        }
-        /*------DEBUG LOG END------*/
+            replication_area_lock();
+            /*-------- DEBUG LOG --------*/
+            if (unlikely(LOG_LV_DEBUG == getloglevel()))
+            {
+                putLogDebug(300024, "function : protocol_module_sslid::check_message_result protocol_module_sslid::"
+                            "set_parameter() : replication_area_lock() end.", __FILE__, __LINE__);
+            }
+            /*------DEBUG LOG END------*/
 
-        session_data_processor->read_session_data_from_replication_area(redata);
-        /*-------- DEBUG LOG --------*/
-        if (unlikely(LOG_LV_DEBUG == getloglevel()))
-        {
-            putLogDebug(300025, "function : protocol_module_sslid::check_message_result protocol_module_sslid::"
-                        "set_parameter() : read_session_data_from_replication_area() end.", __FILE__, __LINE__);
-        }
-        /*------DEBUG LOG END------*/
+            session_data_processor->read_session_data_from_replication_area(redata);
+            /*-------- DEBUG LOG --------*/
+            if (unlikely(LOG_LV_DEBUG == getloglevel()))
+            {
+                putLogDebug(300025, "function : protocol_module_sslid::check_message_result protocol_module_sslid::"
+                            "set_parameter() : read_session_data_from_replication_area() end.", __FILE__, __LINE__);
+            }
+            /*------DEBUG LOG END------*/
 
-        replication_area_unlock();
-        /*-------- DEBUG LOG --------*/
-        if (unlikely(LOG_LV_DEBUG == getloglevel()))
-        {
-            putLogDebug(300026, "function : protocol_module_sslid::check_message_result protocol_module_sslid::"
-                        "set_parameter() : replication_area_unlock() end.", __FILE__, __LINE__);
+            replication_area_unlock();
+            /*-------- DEBUG LOG --------*/
+            if (unlikely(LOG_LV_DEBUG == getloglevel()))
+            {
+                putLogDebug(300026, "function : protocol_module_sslid::check_message_result protocol_module_sslid::"
+                            "set_parameter() : replication_area_unlock() end.", __FILE__, __LINE__);
+            }
+            /*------DEBUG LOG END------*/
         }
-        /*------DEBUG LOG END------*/
     }
     catch (const std::bad_alloc& ba)
     {

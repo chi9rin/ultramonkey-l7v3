@@ -995,36 +995,38 @@ namespace l7vs
             }
             /*------DEBUG LOG END------*/
 
-            replication_area_lock();
-
-            /*-------- DEBUG LOG --------*/
-            if (unlikely(LOG_LV_DEBUG == getloglevel()))
+            if (data_addr)
             {
-                putLogDebug(600027, "function : protocol_module_ip::check_message_result protocol_module_ip::"
-                            "set_parameter() : replication_area_lock() end.", __FILE__, __LINE__);
+                replication_area_lock();
+
+                /*-------- DEBUG LOG --------*/
+                if (unlikely(LOG_LV_DEBUG == getloglevel()))
+                {
+                    putLogDebug(600027, "function : protocol_module_ip::check_message_result protocol_module_ip::"
+                                "set_parameter() : replication_area_lock() end.", __FILE__, __LINE__);
+                }
+                /*------DEBUG LOG END------*/
+
+                ip_data_processor->read_session_data_from_replication_area(redata);
+
+                /*-------- DEBUG LOG --------*/
+                if (unlikely(LOG_LV_DEBUG == getloglevel()))
+                {
+                    putLogDebug(600028, "function : protocol_module_ip::check_message_result protocol_module_ip::"
+                                "set_parameter() : read_session_data_from_replication_area() end.", __FILE__, __LINE__);
+                }
+                /*------DEBUG LOG END------*/
+
+                replication_area_unlock();
+            
+                /*-------- DEBUG LOG --------*/
+                if (unlikely(LOG_LV_DEBUG == getloglevel()))
+                {
+                    putLogDebug(600029, "function : protocol_module_ip::check_message_result protocol_module_ip::"
+                                "set_parameter() : replication_area_unlock() end.", __FILE__, __LINE__);
+                }
+                /*------DEBUG LOG END------*/
             }
-            /*------DEBUG LOG END------*/
-
-            ip_data_processor->read_session_data_from_replication_area(redata);
-
-            /*-------- DEBUG LOG --------*/
-            if (unlikely(LOG_LV_DEBUG == getloglevel()))
-            {
-                putLogDebug(600028, "function : protocol_module_ip::check_message_result protocol_module_ip::"
-                            "set_parameter() : read_session_data_from_replication_area() end.", __FILE__, __LINE__);
-            }
-            /*------DEBUG LOG END------*/
-
-            replication_area_unlock();
-
-            /*-------- DEBUG LOG --------*/
-            if (unlikely(LOG_LV_DEBUG == getloglevel()))
-            {
-                putLogDebug(600029, "function : protocol_module_ip::check_message_result protocol_module_ip::"
-                            "set_parameter() : replication_area_unlock() end.", __FILE__, __LINE__);
-            }
-            /*------DEBUG LOG END------*/
-
         }
         catch (const std::bad_alloc& ba)
         {
