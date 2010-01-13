@@ -348,17 +348,17 @@ namespace l7vs{
         int                    int_val;
 
         int_val    = param.get_int( PARAM_COMP_SESSION, PARAM_UP_BUFFER_SIZE, vs_err );
-        if(likely( !vs_err )){
+        if((likely( !vs_err )) && (0 < int_val)){
             upstream_buffer_size    = int_val;
         }else{
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 3, "up buffer param error set default 8192" , __FILE__, __LINE__ );    
+            Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 1, "up buffer param error set default 8192" , __FILE__, __LINE__ );    
         }
 
         int_val    = param.get_int( PARAM_COMP_SESSION, PARAM_DOWN_BUFFER_SIZE, vs_err );
-        if(likely( !vs_err )){
+        if((likely( !vs_err )) && (0 < int_val)){
             downstream_buffer_size    = int_val;
         }else{
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 4, "down buffer param error set default 8192" , __FILE__, __LINE__ );    
+            Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 2, "down buffer param error set default 8192" , __FILE__, __LINE__ );    
         }
 
         protocol_module = parent_service.get_protocol_module();
