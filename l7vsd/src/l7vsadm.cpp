@@ -1247,6 +1247,16 @@ bool    l7vs::l7vsadm::parse_rs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cm
         if( -1 == request.vs_element.realserver_vector.front().weight ){
             request.vs_element.realserver_vector.front().weight = 1;
         }
+    }else{
+        // Existence check of the parameter
+        if( count_map["-w"] == 0 &&
+            count_map["--weight"] == 0){
+
+            std::string    buf("All option omitted for edit rs command.");
+            l7vsadm_err.setter( true, buf );
+            Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 112, buf, __FILE__, __LINE__ );
+            return false;
+        }
     }
 
     //conflict check
