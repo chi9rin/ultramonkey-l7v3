@@ -62,6 +62,15 @@ bool    l7vs::l7vsadm::parse_list_func(    l7vs::l7vsadm_request::COMMAND_CODE_T
 
     request.command = cmd;    // set command
     if( argc < 3 ) return true;    // option is none. this pattern is true
+
+    if( argc > 3 ){
+        std::stringstream buf;
+        buf << "Argument argc is illegal for " << argv[1] << " command.";
+        l7vsadm_err.setter( true, buf.str() );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 117, buf.str(), __FILE__, __LINE__ );
+        return false;
+    }
+
     for( int pos = 2; pos < argc; ++pos ){     //search option function from argv strings
         parse_opt_map_type::iterator itr = list_option_dic.find( argv[pos] );
         if( itr != list_option_dic.end() ){    // option string function find.
@@ -100,6 +109,24 @@ bool    l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cm
     Logger    logger( LOG_CAT_L7VSADM_COMMON, 3, "l7vsadm::parse_vs_func", __FILE__, __LINE__ );
 
     request.command = cmd;    // set command
+    if( l7vsadm_request::CMD_FLUSH_VS == cmd ){
+        if( argc != 2 ){
+            std::stringstream buf;
+            buf << "Argument argc is illegal for " << argv[1] << " command.";
+            l7vsadm_err.setter( true, buf.str() );
+            Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 118, buf.str(), __FILE__, __LINE__ );
+            return false;
+        }
+    }else{
+        if( argc < 6 ){
+            std::stringstream buf;
+            buf << "Argument argc is illegal for " << argv[1] << " command.";
+            l7vsadm_err.setter( true, buf.str() );
+            Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 119, buf.str(), __FILE__, __LINE__ );
+            return false;
+        }
+    }
+
     std::map< std::string, int > count_map;
 
     for(parse_opt_map_type::iterator itr = vs_option_dic.begin() ;
@@ -216,6 +243,106 @@ bool    l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cm
             Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 116, buf, __FILE__, __LINE__ );
             return false;
         }
+    }
+
+    //conflict check
+    std::string conflict_option_name;
+    bool is_conflict = false;
+
+    for( std::map< std::string, int >::iterator itr = count_map.begin() ;
+        itr != count_map.end() ; ++itr ){
+        if(itr->second > 1){
+            conflict_option_name = itr->first;
+            is_conflict = true;
+            break;
+        }
+    }
+
+    if(is_conflict == false &&  
+        count_map["-t"] == 1 && count_map ["--tcp-service"] == 1){
+        //-t(--tcp-service)
+        conflict_option_name = "--tcp-service";
+        is_conflict = true;
+    }
+    if(is_conflict == false &&  
+        count_map["-m"] == 1 && count_map ["--proto-module"] == 1){
+        //-m(--proto-module)
+        conflict_option_name = "--proto-module";
+        is_conflict = true;
+    }
+    if(is_conflict == false &&  
+        count_map["-s"] == 1 && count_map ["--scheduler"] == 1){
+        //-s(--scheduler)
+        conflict_option_name = "--scheduler";
+        is_conflict = true;
+    }
+    if(is_conflict == false &&  
+        count_map["-u"] == 1 && count_map ["--upper"] == 1){
+        //-u(--upper)
+        conflict_option_name = "--upper";
+        is_conflict = true;
+    }
+    if(is_conflict == false &&  
+        count_map["-b"] == 1 && count_map ["--bypass"] == 1){
+        //-b(--bypass)
+        conflict_option_name = "--bypass";
+        is_conflict = true;
+    }
+    if(is_conflict == false &&  
+        count_map["-f"] == 1 && count_map ["--flag"] == 1){
+        //-f(--flag)
+        conflict_option_name = "--flag";
+        is_conflict = true;
+    }
+    if(is_conflict == false &&  
+        count_map["-Q"] == 1 && count_map ["--qos-up"] == 1){
+        //-Q(--qos-up)
+        conflict_option_name = "--qos-up";
+        is_conflict = true;
+    }
+    if(is_conflict == false &&  
+        count_map["-q"] == 1 && count_map ["--qos-down"] == 1){
+        //-q(--qos-down)
+        conflict_option_name = "--qos-down";
+        is_conflict = true;
+    }
+    if(is_conflict == false &&  
+        count_map["-p"] == 1 && count_map ["--udp"] == 1){
+        //-p(--udp)
+        conflict_option_name = "--udp";
+        is_conflict = true;
+    }
+    if(is_conflict == false &&  
+        count_map["-z"] == 1 && count_map ["--ssl"] == 1){
+        //-z(--ssl)
+        conflict_option_name = "--ssl";
+        is_conflict = true;
+    }
+    if(is_conflict == false &&  
+        count_map["-O"] == 1 && count_map ["--sockopt"] == 1){
+        //-O(--sockopt)
+        conflict_option_name = "--sockopt";
+        is_conflict = true;
+    }
+    if(is_conflict == false &&  
+        count_map["-L"] == 1 && count_map ["--access-log"] == 1){
+        //-L(--access-log)
+        conflict_option_name = "--access-log";
+        is_conflict = true;
+    }
+    if(is_conflict == false &&  
+        count_map["-a"] == 1 && count_map ["--access-log-name"] == 1){
+        //-a(--access-log-name)
+        conflict_option_name = "--access-log-name";
+        is_conflict = true;
+    }
+
+    if( is_conflict == true ){
+        std::stringstream buf;
+        buf << "Option " << conflict_option_name << " is conflict.";
+        l7vsadm_err.setter( true, buf.str() );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 120, buf.str(), __FILE__, __LINE__ );
+        return false;
     }
 
     return true;
@@ -550,16 +677,10 @@ bool    l7vs::l7vsadm::parse_opt_vs_qosup_func( int& pos, int argc, char* argv[]
         if( *ritr == 'G' || *ritr == 'g' ){
             std::string    strval = tmp.substr(0, tmp.length() - 1);
             unsigned long long    ullval    = boost::lexical_cast< unsigned long long > ( strval );
-            if( ( ULLONG_MAX / 1000 / 1000 / 1000 ) < ullval ){
+            if( ullval > 999 ){
                 std::string    buf("qos_upstream value is too big.");
                 l7vsadm_err.setter( true, buf );
                 Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 34, buf, __FILE__, __LINE__ );
-                return false;
-            }
-            if( ullval > 999 ){
-                std::string    buf("invalid qos_upstream value.");
-                l7vsadm_err.setter( true, buf );
-                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 108, buf, __FILE__, __LINE__ );
                 return false;
             }
             elem.qos_upstream = ullval * 1000 * 1000 * 1000;        // set qos_upstream
@@ -567,16 +688,10 @@ bool    l7vs::l7vsadm::parse_opt_vs_qosup_func( int& pos, int argc, char* argv[]
         else if( *ritr == 'M' || *ritr == 'm' ){
             std::string    strval = tmp.substr(0, tmp.length() - 1);
             unsigned long long    ullval    = boost::lexical_cast< unsigned long long > ( strval );
-            if( ( ULLONG_MAX / 1000 / 1000 ) < ullval ){
+            if( ullval > 999 ){
                 std::string    buf("qos_upstream value is too big.");
                 l7vsadm_err.setter( true, buf );
                 Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 35, buf, __FILE__, __LINE__ );
-                return false;
-            }
-            if( ullval > 999 ){
-                std::string    buf("invalid qos_upstream value.");
-                l7vsadm_err.setter( true, buf );
-                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 109, buf, __FILE__, __LINE__ );
                 return false;
             }
             elem.qos_upstream = ullval * 1000 * 1000;        // set qos_upstream
@@ -584,16 +699,10 @@ bool    l7vs::l7vsadm::parse_opt_vs_qosup_func( int& pos, int argc, char* argv[]
         else if( *ritr == 'K' || *ritr == 'k' ){
             std::string    strval = tmp.substr(0, tmp.length() - 1);
             unsigned long long    ullval    = boost::lexical_cast< unsigned long long > ( strval );
-            if( ( ULLONG_MAX / 1000 ) < ullval ){
+            if( ullval > 999 ){
                 std::string    buf("qos_upstream value is too big.");
                 l7vsadm_err.setter( true, buf );
                 Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 36, buf, __FILE__, __LINE__ );
-                return false;
-            }
-            if( ullval > 999 ){
-                std::string    buf("invalid qos_upstream value.");
-                l7vsadm_err.setter( true, buf );
-                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 110, buf, __FILE__, __LINE__ );
                 return false;
             }
             elem.qos_upstream = ullval * 1000;        // set qos_upstream
@@ -601,7 +710,7 @@ bool    l7vs::l7vsadm::parse_opt_vs_qosup_func( int& pos, int argc, char* argv[]
         else{
             unsigned long long ullval = boost::lexical_cast< unsigned long long > ( argv[pos] );
             if( ullval > 999 ){
-                std::string    buf("invalid qos_upstream value.");
+                std::string    buf("qos_upstream value is too big.");
                 l7vsadm_err.setter( true, buf );
                 Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 111, buf, __FILE__, __LINE__ );
                 return false;
@@ -645,16 +754,10 @@ bool    l7vs::l7vsadm::parse_opt_vs_qosdown_func( int& pos, int argc, char* argv
         if( *ritr == 'G' || *ritr == 'g' ){
             std::string    strval = tmp.substr(0, tmp.length() - 1);
             unsigned long long    ullval    = boost::lexical_cast< unsigned long long > ( strval );
-            if( ( ULLONG_MAX / 1000 / 1000 / 1000 ) < ullval ){
+            if( ullval > 999 ){
                 std::string    buf("qos_downstream value is too big.");
                 l7vsadm_err.setter( true, buf );
                 Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 39, buf, __FILE__, __LINE__ );
-                return false;
-            }
-            if( ullval > 999 ){
-                std::string    buf("invalid qos_downstream value.");
-                l7vsadm_err.setter( true, buf );
-                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 112, buf, __FILE__, __LINE__ );
                 return false;
             }
             elem.qos_downstream = ullval * 1000 * 1000 * 1000;        // set qos_upstream
@@ -662,16 +765,10 @@ bool    l7vs::l7vsadm::parse_opt_vs_qosdown_func( int& pos, int argc, char* argv
         else if( *ritr == 'M' || *ritr == 'm' ){
             std::string    strval = tmp.substr(0, tmp.length() - 1);
             unsigned long long    ullval    = boost::lexical_cast< unsigned long long > ( strval );
-            if( ( ULLONG_MAX / 1000 / 1000 ) < ullval ){
+            if( ullval > 999 ){
                 std::string    buf("qos_downstream value is too big.");
                 l7vsadm_err.setter( true, buf );
                 Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 40, buf, __FILE__, __LINE__ );
-                return false;
-            }
-            if( ullval > 999 ){
-                std::string    buf("invalid qos_downstream value.");
-                l7vsadm_err.setter( true, buf );
-                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 113, buf, __FILE__, __LINE__ );
                 return false;
             }
             elem.qos_downstream = ullval * 1000 * 1000;        // set qos_upstream
@@ -679,16 +776,10 @@ bool    l7vs::l7vsadm::parse_opt_vs_qosdown_func( int& pos, int argc, char* argv
         else if( *ritr == 'K' || *ritr == 'k' ){
             std::string    strval = tmp.substr(0, tmp.length() - 1);
             unsigned long long    ullval    = boost::lexical_cast< unsigned long long > ( strval );
-            if( ( ULLONG_MAX / 1000 ) < ullval ){
+            if( ullval > 999 ){
                 std::string    buf("qos_downstream value is too big.");
                 l7vsadm_err.setter( true, buf );
                 Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 41, buf, __FILE__, __LINE__ );
-                return false;
-            }
-            if( ullval > 999 ){
-                std::string    buf("invalid qos_downstream value.");
-                l7vsadm_err.setter( true, buf );
-                Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 114, buf, __FILE__, __LINE__ );
                 return false;
             }
             elem.qos_downstream = ullval * 1000;        // set qos_upstream
@@ -696,7 +787,7 @@ bool    l7vs::l7vsadm::parse_opt_vs_qosdown_func( int& pos, int argc, char* argv
         else{
             unsigned long long ullval = boost::lexical_cast< unsigned long long > ( argv[pos] );
             if( ullval > 999 ){
-                std::string    buf("invalid qos_downstream value.");
+                std::string    buf("qos_downstream value is too big.");
                 l7vsadm_err.setter( true, buf );
                 Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 115, buf, __FILE__, __LINE__ );
                 return false;
@@ -1074,13 +1165,32 @@ bool    l7vs::l7vsadm::parse_opt_vs_socket_func( int& pos, int argc, char* argv[
 bool    l7vs::l7vsadm::parse_rs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
     Logger    logger( LOG_CAT_L7VSADM_COMMON, 13, "l7vsadm::parse_rs_func", __FILE__, __LINE__ );
 
+    if( argc < 8 ) {
+        //argument num err
+        std::stringstream buf;
+        buf << "Argument argc is illegal for ";
+        buf << argv[1];
+        buf << " command.";
+        
+        l7vsadm_err.setter( true, buf.str() );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 121, buf.str(), __FILE__, __LINE__ );
+        return false;
+    }
+
     request.command = cmd;
 
     request.vs_element.realserver_vector.push_back( realserver_element() );
 
+    std::map< std::string, int > count_map;
+    for(parse_opt_map_type::iterator itr = rs_option_dic.begin() ;
+        itr != rs_option_dic.end() ; ++itr ){
+        count_map[ itr->first ] = 0;
+    }
+
     for( int pos = 2; pos < argc; ++pos ){
         parse_opt_map_type::iterator itr = rs_option_dic.find( argv[pos] );
         if( itr != rs_option_dic.end() ){
+            count_map[ itr->first ]++;
             if( ! itr->second( pos, argc, argv ) ) return false;
         }
         else{
@@ -1137,6 +1247,53 @@ bool    l7vs::l7vsadm::parse_rs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cm
         if( -1 == request.vs_element.realserver_vector.front().weight ){
             request.vs_element.realserver_vector.front().weight = 1;
         }
+    }
+
+    //conflict check
+    std::string conflict_option_name;
+    bool is_conflict = false;
+
+    for( std::map< std::string, int >::iterator itr = count_map.begin() ;
+        itr != count_map.end() ; ++itr ){
+        if(itr->second > 1){
+            conflict_option_name = itr->first;
+            is_conflict = true;
+            break;
+        }
+    }
+
+    if(is_conflict == false &&  
+        count_map["-t"] == 1 && count_map ["--tcp-service"] == 1){
+        //-t(--tcp-service)
+        conflict_option_name = "--tcp-service";
+        is_conflict = true;
+    }
+    if(is_conflict == false &&  
+        count_map["-m"] == 1 && count_map ["--proto-module"] == 1){
+        //-m(--proto-module)
+        conflict_option_name = "--proto-module";
+        is_conflict = true;
+    }
+    if(is_conflict == false &&  
+        count_map["-r"] == 1 && count_map ["--real-server"] == 1){
+        //-r(--real-server)
+        conflict_option_name = "--real-server";
+        is_conflict = true;
+    }
+    if( (is_conflict == false) &&  
+        (count_map["-w"] == 1) && (count_map ["--weight"] == 1) && 
+        (l7vsadm_request::CMD_DEL_RS != cmd) ){
+        //-w(--weight)
+        conflict_option_name = "--weight";
+        is_conflict = true;
+    }
+    
+    if( is_conflict == true ){
+        std::stringstream buf;
+        buf << "Option " << conflict_option_name << " is conflict.";
+        l7vsadm_err.setter( true, buf.str() );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 122, buf.str(), __FILE__, __LINE__ );
+        return false;
     }
 
     return true;
@@ -1242,7 +1399,20 @@ bool    l7vs::l7vsadm::parse_opt_rs_realserver_func( int& pos, int argc, char* a
 bool    l7vs::l7vsadm::parse_replication_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
     Logger    logger( LOG_CAT_L7VSADM_COMMON, 16, "l7vsadm::parse_replication_func", __FILE__, __LINE__ );
 
+    if( argc < 3 || argc > 4 ) {
+        //argument num err
+        std::stringstream buf;
+        buf << "Argument argc is illegal for ";
+        buf << argv[1];
+        buf << " command.";
+        
+        l7vsadm_err.setter( true, buf.str() );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 123, buf.str(), __FILE__, __LINE__ );
+        return false;
+    }
+    
     request.command = cmd;
+
     for( int pos = 2; pos < argc; ++pos ){
         parse_opt_map_type::iterator itr = replication_option_dic.find( argv[pos] );
         if( itr != replication_option_dic.end() ){
@@ -1263,6 +1433,7 @@ bool    l7vs::l7vsadm::parse_replication_func( l7vs::l7vsadm_request::COMMAND_CO
         Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 60, buf, __FILE__, __LINE__ );
         return false;
     }
+
     return true;
 }
 
@@ -1366,7 +1537,20 @@ bool    l7vs::l7vsadm::parse_opt_replication_dump_func( int& pos, int argc, char
 bool    l7vs::l7vsadm::parse_log_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
     Logger    logger( LOG_CAT_L7VSADM_COMMON, 22, "l7vsadm::parse_log_func", __FILE__, __LINE__ );
 
+    if( argc != 6 ) {
+        //argument num err
+        std::stringstream buf;
+        buf << "Argument argc is illegal for ";
+        buf << argv[1];
+        buf << " command.";
+        
+        l7vsadm_err.setter( true, buf.str() );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 124, buf.str(), __FILE__, __LINE__ );
+        return false;
+    }
+
     request.command = cmd;
+
     for( int pos = 2; pos < argc; ++pos ){
         parse_opt_map_type::iterator itr = log_option_dic.find( argv[pos] );
         if( itr != log_option_dic.end() ){    // option string function find.
@@ -1395,6 +1579,7 @@ bool    l7vs::l7vsadm::parse_log_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG c
         Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 68, buf, __FILE__, __LINE__ );
         return false;
     }
+
     return true;
 }
 //
@@ -1409,9 +1594,13 @@ bool    l7vs::l7vsadm::parse_opt_log_category_func( int& pos, int argc, char* ar
 
     if( request.log_category != LOG_CAT_NONE ){
         // double target commands.
-        std::string    buf("logcategory is double specified.");
-        l7vsadm_err.setter( true, buf );
-        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 69, buf, __FILE__, __LINE__ );
+        std::stringstream buf;
+        buf << "Option ";
+        buf << argv[pos];
+        buf << " conflict.";
+
+        l7vsadm_err.setter( true, buf.str() );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 69, buf.str(), __FILE__, __LINE__ );
         return false;
     }
     if( ++pos >= argc ){
@@ -1441,9 +1630,13 @@ bool    l7vs::l7vsadm::parse_opt_log_level_func( int& pos, int argc, char* argv[
 
     if( request.log_level != LOG_LV_NONE ){
         // double target commands.
-        std::string    buf("loglevel is double specified.");
-        l7vsadm_err.setter( true, buf );
-        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 72, buf, __FILE__, __LINE__ );
+        std::stringstream buf;
+        buf << "Option ";
+        buf << argv[pos];
+        buf << " conflict.";
+
+        l7vsadm_err.setter( true, buf.str() );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 72, buf.str(), __FILE__, __LINE__ );
         return false;
     }
     if( ++pos >= argc ){
@@ -1472,7 +1665,20 @@ bool    l7vs::l7vsadm::parse_opt_log_level_func( int& pos, int argc, char* argv[
 bool    l7vs::l7vsadm::parse_snmp_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
     Logger    logger( LOG_CAT_L7VSADM_COMMON, 25, "l7vsadm::parse_snmp_func", __FILE__, __LINE__ );
 
+    if( argc != 6 ) {
+        //argument num err
+        std::stringstream buf;
+        buf << "Argument argc is illegal for ";
+        buf << argv[1];
+        buf << " command.";
+        
+        l7vsadm_err.setter( true, buf.str() );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 125, buf.str(), __FILE__, __LINE__ );
+        return false;
+    }
+
     request.command = cmd;
+
     for( int pos = 2; pos < argc; ++pos ){
         parse_opt_map_type::iterator itr = snmp_option_dic.find( argv[pos] );
         if( itr != snmp_option_dic.end() ){    // option string function find.
@@ -1501,6 +1707,7 @@ bool    l7vs::l7vsadm::parse_snmp_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG 
         Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 77, buf, __FILE__, __LINE__ );
         return false;
     }
+
     return true;
 }
 //! snmp log category set function
@@ -1512,9 +1719,13 @@ bool    l7vs::l7vsadm::parse_opt_snmp_log_category_func( int& pos, int argc, cha
 
     if( request.snmp_log_category != LOG_CAT_NONE ){
         // double target commands.
-        std::string    buf("snmp logcategory is double specified.");
-        l7vsadm_err.setter( true, buf );
-        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 78, buf, __FILE__, __LINE__ );
+        std::stringstream buf;
+        buf << "Option ";
+        buf << argv[pos];
+        buf << " conflict.";
+
+        l7vsadm_err.setter( true, buf.str() );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 78, buf.str(), __FILE__, __LINE__ );
         return false;
     }
     if( ++pos >= argc ){
@@ -1544,9 +1755,13 @@ bool    l7vs::l7vsadm::parse_opt_snmp_log_level_func( int& pos, int argc, char* 
 
     if( request.snmp_log_level != LOG_LV_NONE ){
         // double target commands.
-        std::string    buf("snmp loglevel is double specified.");
-        l7vsadm_err.setter( true, buf );
-        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 81, buf, __FILE__, __LINE__ );
+        std::stringstream buf;
+        buf << "Option ";
+        buf << argv[pos];
+        buf << " conflict.";
+
+        l7vsadm_err.setter( true, buf.str() );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 81, buf.str(), __FILE__, __LINE__ );
         return false;
     }
     if( ++pos >= argc ){
@@ -1575,7 +1790,20 @@ bool    l7vs::l7vsadm::parse_opt_snmp_log_level_func( int& pos, int argc, char* 
 bool    l7vs::l7vsadm::parse_parameter_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char* argv[] ){
     Logger    logger( LOG_CAT_L7VSADM_COMMON, 28, "l7vsadm::parse_parameter_func", __FILE__, __LINE__ );
 
+    if( argc != 4 ) {
+        //argument num err
+        std::stringstream buf;
+        buf << "Argument argc is illegal for ";
+        buf << argv[1];
+        buf << " command.";
+        
+        l7vsadm_err.setter( true, buf.str() );
+        Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 126, buf.str(), __FILE__, __LINE__ );
+        return false;
+    }
+    
     request.command = cmd;
+
     for( int pos = 2; pos < argc; ++pos ){
         parse_opt_map_type::iterator itr = parameter_option_dic.find( argv[pos] );
         if( itr != parameter_option_dic.end() ){    // option string function find.
@@ -1590,6 +1818,7 @@ bool    l7vs::l7vsadm::parse_parameter_func( l7vs::l7vsadm_request::COMMAND_CODE
             return false;
         }
     }
+
     if( PARAM_COMP_NOCAT == request.reload_param ){
         // not specified reload_param
         std::string    buf("reload component not specified.");
@@ -1597,6 +1826,7 @@ bool    l7vs::l7vsadm::parse_parameter_func( l7vs::l7vsadm_request::COMMAND_CODE
         Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 85, buf, __FILE__, __LINE__ );
         return false;
     }
+
     return true;
 }
 //
