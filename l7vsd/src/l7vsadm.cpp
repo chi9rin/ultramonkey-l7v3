@@ -345,6 +345,61 @@ bool    l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cm
         return false;
     }
 
+    if( ( strcmp( argv[ 1 ] , "-A" ) == 0 ) 
+    || ( strcmp( argv[ 1 ] , "--add-service" ) == 0 ) ) {
+        protocol_module_control&	ctrl 
+                = protocol_module_control::getInstance();
+        ctrl.initialize( L7VS_MODULE_PATH );
+        protocol_module_base* module;
+        try{
+            module 
+                = ctrl.load_module( request.vs_element.protocol_module_name );
+        }
+        catch( ... ){
+            std::stringstream buf;
+            buf << "protocol module load error:" 
+                << request.vs_element.protocol_module_name;
+            l7vsadm_err.setter( true, buf.str() );
+            Logger::putLogError( 
+                        LOG_CAT_L7VSADM_PARSE, 
+                        108, 
+                        buf.str(), 
+                        __FILE__, 
+                        __LINE__ );
+            return false;
+        }
+        if( !module ){
+            //don't find protocol module.
+            std::stringstream buf;
+            buf << "protocol module not found:" 
+                << request.vs_element.protocol_module_name;
+            l7vsadm_err.setter( true, buf.str() );
+            Logger::putLogError( 
+                LOG_CAT_L7VSADM_PARSE, 
+                109, buf.str(), 
+                __FILE__, 
+                __LINE__ );
+            return false;
+        }
+        
+        bool module_used_flag = module->is_exec_OK( VS_CONTACT_CLASS_SSL );
+        if( module_used_flag == false ) {
+            //don't find protocol module.
+            std::stringstream buf;
+            buf << "When \"protocol_module sslid\" was designated," 
+                << " it isn't possible to designate \"-z\" option.";
+            l7vsadm_err.setter( true, buf.str() );
+            Logger::putLogError( 
+                LOG_CAT_L7VSADM_PARSE, 
+                110, 
+                buf.str(), 
+                __FILE__, 
+                __LINE__ );
+            return false;
+        }
+    }
+
+
     return true;
 }
 //
@@ -881,60 +936,6 @@ bool    l7vs::l7vsadm::parse_opt_vs_ssl_file_func( int& pos, int argc, char* arg
     }
     fclose(fp);
 
-    if( ( strcmp( argv[ 1 ] , "-A" ) == 0 ) 
-    || ( strcmp( argv[ 1 ] , "--add-service" ) == 0 ) ) {
-        protocol_module_control&	ctrl 
-                = protocol_module_control::getInstance();
-        ctrl.initialize( L7VS_MODULE_PATH );
-        protocol_module_base* module;
-        try{
-            module 
-                = ctrl.load_module( request.vs_element.protocol_module_name );
-        }
-        catch( ... ){
-            std::stringstream buf;
-            buf << "protocol module load error:" 
-                << request.vs_element.protocol_module_name;
-            l7vsadm_err.setter( true, buf.str() );
-            Logger::putLogError( 
-                        LOG_CAT_L7VSADM_PARSE, 
-                        108, 
-                        buf.str(), 
-                        __FILE__, 
-                        __LINE__ );
-            return false;
-        }
-        if( !module ){
-            //don't find protocol module.
-            std::stringstream buf;
-            buf << "protocol module not found:" 
-                << request.vs_element.protocol_module_name;
-            l7vsadm_err.setter( true, buf.str() );
-            Logger::putLogError( 
-                LOG_CAT_L7VSADM_PARSE, 
-                109, buf.str(), 
-                __FILE__, 
-                __LINE__ );
-            return false;
-        }
-        
-        bool module_used_flag = module->is_exec_OK( VS_CONTACT_CLASS_SSL );
-        if( module_used_flag == false ) {
-            //don't find protocol module.
-            std::stringstream buf;
-            buf << "When \"protocol_module sslid\" was designated," 
-                << " it isn't possible to designate \"-z\" option.";
-            l7vsadm_err.setter( true, buf.str() );
-            Logger::putLogError( 
-                LOG_CAT_L7VSADM_PARSE, 
-                110, 
-                buf.str(), 
-                __FILE__, 
-                __LINE__ );
-            return false;
-        }
-    }
-
     request.vs_element.ssl_file_name = conf_file_name;
     return true;
 }
@@ -961,10 +962,7 @@ bool    l7vs::l7vsadm::parse_opt_vs_access_log_func( int& pos, int argc, char* a
             Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 94, buf, __FILE__, __LINE__ );
             return false;
         }
-        if( 0 == tmp )
-            request.vs_element.access_log_flag = INT_MAX;    // clear value
-        else
-            request.vs_element.access_log_flag = 1;
+        request.vs_element.access_log_flag = tmp;
     }
     catch( boost::bad_lexical_cast& e ){
         // don't convert argv[pos] is
@@ -2501,6 +2499,7 @@ void    l7vs::l7vsadm::set_parameter(){
         }
     }
     else{
+        command_wait_interval = L7VSADM_DEFAULT_WAIT_INTERVAL;
         std::string    msg("Get cmd_interval parameter error. Use default value.");
         Logger::putLogWarn(LOG_CAT_L7VSADM_COMMON, 2, msg, __FILE__, __LINE__);
     }
@@ -2517,6 +2516,7 @@ void    l7vs::l7vsadm::set_parameter(){
         }
     }
     else{
+        command_wait_count = L7VSADM_DEFAULT_WAIT_COUNT;
         std::string    msg("Get cmd_count parameter error. Use default value.");
         Logger::putLogWarn(LOG_CAT_L7VSADM_COMMON, 4, msg, __FILE__, __LINE__);
     }
