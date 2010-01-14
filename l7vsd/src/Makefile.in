@@ -150,13 +150,13 @@ SOURCES = $(libl7vsadm_logger_a_SOURCES) \
 	$(libl7vsadm_parameter_a_SOURCES) $(libl7vsd_logger_a_SOURCES) \
 	$(libl7vsd_parameter_a_SOURCES) \
 	$(libsnmpagent_logger_a_SOURCES) \
-	$(libsnmpagent_parameter_a_SOURCES) \
+	$(libsnmpagent_parameter_a_SOURCES) $(l7vsadm_SOURCES) \
 	$(l7vsd_SOURCES)
 DIST_SOURCES = $(libl7vsadm_logger_a_SOURCES) \
 	$(libl7vsadm_parameter_a_SOURCES) $(libl7vsd_logger_a_SOURCES) \
 	$(libl7vsd_parameter_a_SOURCES) \
 	$(libsnmpagent_logger_a_SOURCES) \
-	$(libsnmpagent_parameter_a_SOURCES) \
+	$(libsnmpagent_parameter_a_SOURCES) $(l7vsadm_SOURCES) \
 	$(l7vsd_SOURCES)
 ETAGS = etags
 CTAGS = ctags

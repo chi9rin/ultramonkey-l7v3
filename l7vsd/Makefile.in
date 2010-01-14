@@ -160,6 +160,7 @@ snmpagent_libs = @snmpagent_libs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 SUBDIRS = init.d src module
+AUTOMAKE_OPTIONS = foreign
 all: all-recursive
 
 .SUFFIXES:

@@ -47,13 +47,14 @@ if test `uname -m` == "x86_64"; then
 	AC_SUBST( libdir, [/usr/lib64] )
 else
 	AC_SUBST( libdir, [/usr/lib] )
+	AC_SUBST( CXXFLAGS, -march=i686 )
 fi
 
 AC_ARG_WITH(
 	l7vs-moddir,
 	[	--with-l7vs-moddir=DIR	l7vs module is to be installed in DIR.
 								[default=LIBDIR/l7vs] ],
-	[	l7vs_moddir-"$withval" ],
+	[	l7vs_moddir="$withval" ],
 	[	l7vs_moddir="${libdir}/l7vs" ]
 )
 
@@ -91,6 +92,8 @@ AC_SUBST(MANDIR)
 AC_SUBST(snmpagent_libs)
 
 AC_CONFIG_FILES([doc/Makefile]
+                [doc/conf/Makefile]
+                [doc/sslfiles/Makefile]
                 [l7directord/Makefile]
                 [l7vsd/Makefile]
                 [l7vsd/init.d/Makefile]

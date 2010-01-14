@@ -20902,13 +20902,15 @@ if test `uname -m` == "x86_64"; then
 else
 	libdir=/usr/lib
 
+	CXXFLAGS=-march=i686
+
 fi
 
 
 # Check whether --with-l7vs-moddir or --without-l7vs-moddir was given.
 if test "${with_l7vs_moddir+set}" = set; then
   withval="$with_l7vs_moddir"
-  	l7vs_moddir-"$withval"
+  	l7vs_moddir="$withval"
 else
   	l7vs_moddir="${libdir}/l7vs"
 
@@ -20955,7 +20957,7 @@ exec_prefix=/usr
 
 
 
-                                                                                                    ac_config_files="$ac_config_files doc/Makefile l7directord/Makefile l7vsd/Makefile l7vsd/init.d/Makefile l7vsd/module/Makefile l7vsd/module/protocol/Makefile l7vsd/module/schedule/Makefile l7vsd/src/Makefile snmpagent/Makefile Makefile"
+                                                                                                                        ac_config_files="$ac_config_files doc/Makefile doc/conf/Makefile doc/sslfiles/Makefile l7directord/Makefile l7vsd/Makefile l7vsd/init.d/Makefile l7vsd/module/Makefile l7vsd/module/protocol/Makefile l7vsd/module/schedule/Makefile l7vsd/src/Makefile snmpagent/Makefile Makefile"
 
 
           ac_config_files="$ac_config_files l7vsd.spec"
@@ -21516,6 +21518,8 @@ do
   case "$ac_config_target" in
   # Handling of arguments.
   "doc/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
+  "doc/conf/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/conf/Makefile" ;;
+  "doc/sslfiles/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/sslfiles/Makefile" ;;
   "l7directord/Makefile" ) CONFIG_FILES="$CONFIG_FILES l7directord/Makefile" ;;
   "l7vsd/Makefile" ) CONFIG_FILES="$CONFIG_FILES l7vsd/Makefile" ;;
   "l7vsd/init.d/Makefile" ) CONFIG_FILES="$CONFIG_FILES l7vsd/init.d/Makefile" ;;
