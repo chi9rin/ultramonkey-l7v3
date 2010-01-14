@@ -345,8 +345,8 @@ bool    l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cm
         return false;
     }
 
-    if( ( strcmp( argv[ 1 ] , "-A" ) == 0 ) 
-    || ( strcmp( argv[ 1 ] , "--add-service" ) == 0 ) ) {
+    if( l7vsadm_request::CMD_ADD_VS == cmd && 
+        ( count_map["-z"] > 0 || count_map["--ssl"] > 0 ) ) {
         protocol_module_control&	ctrl 
                 = protocol_module_control::getInstance();
         ctrl.initialize( L7VS_MODULE_PATH );
