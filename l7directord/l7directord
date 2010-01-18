@@ -2390,13 +2390,20 @@ sub check_http {
         if ( $v->{service} eq 'https'){
             $https_option = '--no-check-certificate';
         }
-        my $command = "/usr/bin/wget " . "-t 1 --timeout $v->{negotiatetimeout} $https_option ".  $r->{url} . ' > /dev/null 2>&1';
-        if( system_wrapper( $command )) {
+        my $recstr = $r->{receive};
+        my $command = "/usr/bin/wget " . "-q -t 1 --timeout $v->{negotiatetimeout} $https_option ".  $r->{url} . ' -O - ';
+        my ($result, $output) = command_wrapper( $command );
+        if( $result ) {
             ld_log( _message( 'WRN1103', 'web', $r->{server}{ip}, $port ) ) if (!defined $status || $status eq $SERVICE_UP);
             return $SERVICE_DOWN;
         }
+        elsif (defined $recstr && $output !~ /$recstr/) {
+            ld_log( _message( 'WRN1103', $recstr, $r->{server}{ip}, $port ) ) if (!defined $status || $status eq $SERVICE_UP);
+            ld_debug(2, "check_http: $r->{url} is down\n");
+            return $SERVICE_DOWN;
+        }
+
         $status_line = '200 OK';
-        return $SERVICE_UP ;
 
     }
 
