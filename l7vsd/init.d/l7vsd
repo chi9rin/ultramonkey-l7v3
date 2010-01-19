@@ -1,7 +1,7 @@
 #!/bin/sh
 # Start/Stop script for l7vsd
 #
-# chkconfig: 2345 95 34
+# chkconfig: - 95 34
 # description: Start and stop l7vsd
 #              
 # processname: l7vsd
@@ -16,10 +16,11 @@ PROG="l7vsd"
 DAEMON="/usr/sbin/l7vsd"
 SOCKFILE="/var/run/l7vs/l7vs"
 PIDFILE="/var/run/l7vsd.pid"
+LOCKFILE="/var/lock/subsys/l7vsd"
 
 start() {
     if [ -e $PIDFILE ]; then
-	PROCS=`ps ax | grep $PROG | grep -v grep | wc -l`
+	PROCS=`ps ax | grep $DAEMON | grep -v grep | wc -l`
 	if [ $PROCS -ne 0 ]; then
 	    echo "$PROG is running."
 	    RETVAL=-1
@@ -32,12 +33,13 @@ start() {
     `$DAEMON $L7VSD_OPTIONS`
     RETVAL=$?
 
-    if [ $RETVAL != 0 ]; then
+    if [ $RETVAL -ne 0 ]; then
 	echo "error occured."
 	echo "$PROG was not started."
     else
 	echo "done."
 	pidof $PROG > $PIDFILE
+	touch $LOCKFILE
     fi
 
     return $RETVAL
@@ -56,7 +58,7 @@ stop() {
     kill $PID
     RETVAL=$?
     
-    if [ $RETVAL == 0 ]; then
+    if [ $RETVAL -eq 0 ]; then
 	echo "done."
 	cleanup
     fi
@@ -79,6 +81,7 @@ status() {
 cleanup() {
 	rm -rf $PIDFILE
 	rm -rf $SOCKFILE
+	rm -rf $LOCKFILE
 }
 
 
