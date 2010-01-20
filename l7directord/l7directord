@@ -1396,7 +1396,7 @@ sub ld_setup {
                           . q{"}. $v->{accesslog_rotate_rotation_timing_value}. q{"};
                     $v->{other_virtual_key} 
                        .= ' --ac-rotate-rotation-timing-value '
-                          . q{"}. $v->{accesslog_rotate_rotation_timing_value}. q{"};
+                          .  $v->{accesslog_rotate_rotation_timing_value};
                     $option_key_flag = 1;
                 }
                 if ( $option_key_flag == 0 ) {
@@ -1796,8 +1796,6 @@ sub ld_start {
                     ld_delete_virtual($nv);
                     # no such service, create a new one
                     ld_add_virtual($nv);
-                    $nv->{other_virtual_key}
-                        = $current_service->{$vip_id}{other_virtual_option};
                 }
                 else {
                     # service already exists, modify it
@@ -1805,6 +1803,28 @@ sub ld_start {
                 }
             }
             else {
+                my $newipport;
+                my $del_vip_id;
+                # Module Change
+                for my $check ( keys  %{ $current_service }  ){
+                    next if !defined $check ;
+                    $del_vip_id = $check;
+                    # protcol name delete
+                    $check =~ s/(^[\w]+:)//;
+                    ## module name delete
+                    $check =~ s/(:[\w]+$)//;
+                    $newipport = get_ip_port($nv);
+                    if ( $check eq $newipport) {
+                        for ( @{ $CONFIG{old_virtual} } ) {
+                            my $virtual_id = get_virtual_id_str($_);
+                            next if !defined $virtual_id ;
+                            if ( $del_vip_id eq $virtual_id ) {
+                                ld_delete_virtual($_);
+                                delete $current_service->{$del_vip_id};
+                            }
+                        }
+                    }
+                }
                 # no such service, create a new one
                 ld_add_virtual($nv);
             }
@@ -1895,6 +1915,7 @@ sub ld_start {
     if ( defined $CONFIG{old_virtual} ) {
         for my $nv ( @{ $CONFIG{old_virtual} } ) {
             my $vip_id = get_virtual_id_str($nv);
+            next if !defined $vip_id ;
             if ( exists $current_service->{$vip_id} ) {
                 # service still exists, remove it
                 ld_delete_virtual($nv);
