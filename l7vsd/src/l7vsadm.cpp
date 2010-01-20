@@ -1002,6 +1002,8 @@ bool    l7vs::l7vsadm::parse_opt_vs_access_log_logrotate_func( int& pos, int arg
         return false;
     }
     
+    request.vs_element.access_log_rotate_key_info = "";
+    
     // create access log  args.
     std::vector< std::string > arguments_vector;
     virtualservice_element::access_log_rotate_arguments_map_type arguments_map;
@@ -1013,7 +1015,13 @@ bool    l7vs::l7vsadm::parse_opt_vs_access_log_logrotate_func( int& pos, int arg
             break;    // module option end.
         }
         arguments_vector.push_back( argv[pos] );
+
+        request.vs_element.access_log_rotate_key_info += argv[pos];
+        request.vs_element.access_log_rotate_key_info += " ";
+
     }
+    boost::algorithm::erase_last( request.vs_element.access_log_rotate_key_info , " " );
+
     if( 0 < arguments_vector.size() ){
         if( 0 == ( arguments_vector.size() % 2 ) ){
             for( unsigned int i = 0; i < ( arguments_vector.size() - 1 ); ++i ){
@@ -1047,12 +1055,9 @@ bool    l7vs::l7vsadm::parse_opt_vs_access_log_logrotate_func( int& pos, int arg
     
     request.vs_element.access_log_file_name = access_log_file_name;
     request.vs_element.access_log_rotate_arguments.clear();
-    request.vs_element.access_log_rotate_key_info = "";
     BOOST_FOREACH( virtualservice_element::access_log_rotate_arguments_pair_type pair, arguments_map ){
         request.vs_element.access_log_rotate_arguments.insert( pair );
-        request.vs_element.access_log_rotate_key_info += pair.first + " " + pair.second + " ";
     }
-    boost::algorithm::erase_last( request.vs_element.access_log_rotate_key_info , " " );
 
     return true;
 }
