@@ -221,6 +221,11 @@ bool    l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cm
         Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 89, buf, __FILE__, __LINE__ );
         return false;
     }
+    
+    if ( l7vsadm_request::CMD_EDIT_VS == cmd ) {
+        request.vs_element.access_log_flag = -1;
+    }
+    
     if( l7vsadm_request::CMD_EDIT_VS == cmd){
         // Existence check of the parameter
         if( count_map["-s"] == 0 &&

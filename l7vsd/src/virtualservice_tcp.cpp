@@ -932,8 +932,6 @@ void    l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservic
     }
 
     virtualservice_element&    elem = const_cast<virtualservice_element&>( in );
-    //郢昜ｻ｣ﾎ帷ｹ晢ｽ｡郢晢ｽｼ郢ｧ・ｿ邵ｺ逾（rtualService邵ｺ・ｫ闕ｳﾂ髢ｾ・ｴ邵ｺ蜷ｶ・狗ｸｺ蛹ｺ・､諛域ｸ言
-    //udpmode邵ｺ・ｨtcp_accept_endpoint邵ｺ・ｨprotocol_module_name邵ｺ蠕｡・ｸﾂ髢ｾ・ｴ邵ｺ蜷ｶ・狗ｸｺ阮吮・
     if( ( element.udpmode != elem.udpmode ) ||
         ( element.tcp_accept_endpoint != elem.tcp_accept_endpoint ) ||
         ( element.protocol_module_name != elem.protocol_module_name ) ){
@@ -1039,24 +1037,28 @@ void    l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservic
         active_sessions.do_all( boost::bind( &session_thread_control::session_sorry_mode_change, _1, elem.sorry_flag ) );
     }
 
-    // access log flag ON and access log filename not set.
-    if ( elem.access_log_flag == 1 && element.access_log_file_name == "" ) {
-        //ERROR case
-        Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 15, SCHEDMOD_LOAD_ERROR_MSG, __FILE__, __LINE__ );
-        err.setter( true, "access log flag change err." );
-        return;
-    }
+    if( elem.access_log_flag != -1 ) {
+    
+        // access log flag ON and access log filename not set.
+        if ( elem.access_log_flag == 1 && element.access_log_file_name == "" ) {
+            //ERROR case
+            Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 15, SCHEDMOD_LOAD_ERROR_MSG, __FILE__, __LINE__ );
+            err.setter( true, "access log flag change err." );
+            return;
+        }
 
-    // access log flag check and send access log output ON or OFF message to tcp_session
-    element.access_log_flag = elem.access_log_flag;
-    if (elem.access_log_flag==1 && access_log_flag==false ) {
-        active_sessions.do_all( boost::bind( &session_thread_control::session_accesslog_output_mode_on, _1 ) );
-        access_log_flag = true;
-    } else if ( elem.access_log_flag==0 && access_log_flag==true ) {
-        active_sessions.do_all( boost::bind( &session_thread_control::session_accesslog_output_mode_off, _1 ) );
-        access_log_flag = false;
-    }
+        // access log flag check and send access log output ON or OFF message to tcp_session
+        element.access_log_flag = elem.access_log_flag;
+        if (elem.access_log_flag==1 && access_log_flag==false ) {
+            active_sessions.do_all( boost::bind( &session_thread_control::session_accesslog_output_mode_on, _1 ) );
+            access_log_flag = true;
+        } else if ( elem.access_log_flag==0 && access_log_flag==true ) {
+            active_sessions.do_all( boost::bind( &session_thread_control::session_accesslog_output_mode_off, _1 ) );
+            access_log_flag = false;
+        }
 
+    }
+        
     err.setter( false, "" );
 
     if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
