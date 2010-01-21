@@ -2568,8 +2568,9 @@ bool    l7vs::l7vsadm::execute( int argc, char* argv[] ){
 
     // Get l7vsadm execute file path from /proc/(pid)/exe (symbolic link)
     char l7vsadm_file_path[256];
+    ssize_t retsize;
     memset(l7vsadm_file_path, 0, sizeof(l7vsadm_file_path));
-    readlink("/proc/self/exe", l7vsadm_file_path, sizeof(l7vsadm_file_path));
+    retsize = readlink("/proc/self/exe", l7vsadm_file_path, sizeof(l7vsadm_file_path));
 
     // L7vsadm command conflict check. (Try l7vsadm execute file lock)
     file_lock    lock( l7vsadm_file_path, l7vsadm_err );
