@@ -196,7 +196,7 @@ namespace l7vs{
                 __FILE__, __LINE__ );
         }
 
-        rd_scoped_lock scope_lock(close_mutex);
+        rw_scoped_lock scope_lock(close_mutex);
         std::size_t res_size = 0;
         if(likely(non_blocking_flag)){
             res_size = my_socket.write_some(buffers,ec);
@@ -224,7 +224,7 @@ namespace l7vs{
         boost::asio::mutable_buffers_1 buffers,
         boost::system::error_code& ec){
 
-        rd_scoped_lock scope_lock(close_mutex);
+        rw_scoped_lock scope_lock(close_mutex);
         std::size_t res_size = 0;
         if(unlikely(open_flag && non_blocking_flag)){
             //set TCP_QUICKACK
