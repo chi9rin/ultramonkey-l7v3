@@ -376,51 +376,56 @@ namespace l7vs{
 
         // Reset SSL structure to allow another connection.
         if ( ssl_flag ) {
-            if ( ssl_cache_flag ) {
-                if (unlikely(ssl_clear_keep_cache(client_ssl_socket.get_socket().impl()->ssl) == false)) {
-                    //Error ssl_clear_keep_cache
-                    std::stringstream buf;
-                    buf << "Thread ID[";
-                    buf << boost::this_thread::get_id();
-                    buf << "] ssl_clear_keep_cache failed";
-                    Logger::putLogError( LOG_CAT_L7VSD_SESSION, 110, buf.str(), __FILE__, __LINE__ );
-                    msg.flag = true;
-                    msg.message = "ssl_clear_keep_cache failed";
+            if(client_ssl_socket.is_handshake_error()){
+                // remake socket
+                client_ssl_socket.clear_socket();
+            }else{
+                if ( ssl_cache_flag ) {
+                    if (unlikely(ssl_clear_keep_cache(client_ssl_socket.get_socket().impl()->ssl) == false)) {
+                        //Error ssl_clear_keep_cache
+                        std::stringstream buf;
+                        buf << "Thread ID[";
+                        buf << boost::this_thread::get_id();
+                        buf << "] ssl_clear_keep_cache failed";
+                        Logger::putLogError( LOG_CAT_L7VSD_SESSION, 110, buf.str(), __FILE__, __LINE__ );
+                        msg.flag = true;
+                        msg.message = "ssl_clear_keep_cache failed";
+                    } else {
+                        //----Debug log----------------------------------------------------------------------
+                        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+                            std::stringstream buf;
+                            buf << "Thread ID[";
+                            buf << boost::this_thread::get_id();
+                            buf << "] ssl_clear_keep_cache ok";
+                            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 81,
+                                        buf.str(),
+                                        __FILE__, __LINE__ );
+                        }
+                        //----Debug log----------------------------------------------------------------------
+                    }
                 } else {
-                    //----Debug log----------------------------------------------------------------------
-                    if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+                    if (unlikely(SSL_clear(client_ssl_socket.get_socket().impl()->ssl) == 0)) {
+                        //Error SSL_clear
                         std::stringstream buf;
                         buf << "Thread ID[";
                         buf << boost::this_thread::get_id();
-                        buf << "] ssl_clear_keep_cache ok";
-                        Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 81,
-                                    buf.str(),
-                                    __FILE__, __LINE__ );
+                        buf << "] SSL_clear failed";
+                        Logger::putLogError( LOG_CAT_L7VSD_SESSION, 111, buf.str(), __FILE__, __LINE__ );
+                        msg.flag = true;
+                        msg.message = "SSL_clear failed";
+                    }else{
+                        //----Debug log----------------------------------------------------------------------
+                        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+                            std::stringstream buf;
+                            buf << "Thread ID[";
+                            buf << boost::this_thread::get_id();
+                            buf << "] SSL_clear ok";
+                            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 82,
+                                        buf.str(),
+                                        __FILE__, __LINE__ );
+                        }
+                        //----Debug log----------------------------------------------------------------------
                     }
-                    //----Debug log----------------------------------------------------------------------
-                }
-            } else {
-                if (unlikely(SSL_clear(client_ssl_socket.get_socket().impl()->ssl) == 0)) {
-                    //Error SSL_clear
-                    std::stringstream buf;
-                    buf << "Thread ID[";
-                    buf << boost::this_thread::get_id();
-                    buf << "] SSL_clear failed";
-                    Logger::putLogError( LOG_CAT_L7VSD_SESSION, 111, buf.str(), __FILE__, __LINE__ );
-                    msg.flag = true;
-                    msg.message = "SSL_clear failed";
-                }else{
-                    //----Debug log----------------------------------------------------------------------
-                    if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                        std::stringstream buf;
-                        buf << "Thread ID[";
-                        buf << boost::this_thread::get_id();
-                        buf << "] SSL_clear ok";
-                        Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 82,
-                                    buf.str(),
-                                    __FILE__, __LINE__ );
-                    }
-                    //----Debug log----------------------------------------------------------------------
                 }
             }
         }

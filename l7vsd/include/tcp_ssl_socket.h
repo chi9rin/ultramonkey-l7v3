@@ -50,15 +50,19 @@ namespace l7vs{
                        boost::asio::ssl::context& context,
                        const tcp_socket_option_info set_option)
                        :
-                       my_socket(io, context),
+                       my_io(io),
+                       my_context(context),
+                       my_socket(NULL),
                        open_flag(false),
                        non_blocking_flag(false),
-                       opt_info(set_option){
+                       opt_info(set_option),
+                       handshake_error_flag(false){
                 if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( 
                     LOG_CAT_L7VSD_SESSION ) ) ){
                     Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 1, 
                         "tcp_ssl_socket::tcp_ssl_socket", __FILE__, __LINE__ );
                 }
+                my_socket = new ssl_socket(io,my_context);
             }
             //! destructor
             ~tcp_ssl_socket(){
@@ -67,6 +71,11 @@ namespace l7vs{
                     Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 2, 
                         "tcp_ssl_socket::~tcp_ssl_socket", __FILE__, __LINE__ );
                 }
+                if(my_socket != NULL){
+                    delete my_socket;
+                    my_socket = NULL;
+                }
+
             }
             
             //! get reference control socket
@@ -75,7 +84,7 @@ namespace l7vs{
                 if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
                     Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 3, "tcp_ssl_socket::get_socket", __FILE__, __LINE__ );
                 }
-                return my_socket;
+                return *my_socket;
             }
 
             //! handshake socket
@@ -109,10 +118,27 @@ namespace l7vs{
             bool is_open(){
                 return open_flag;
             }
+            //! socket remake
+            void clear_socket(){
+                if(my_socket != NULL){
+                    delete my_socket;
+                    my_socket = NULL;
+                }
+                my_socket = new ssl_socket(my_io,my_context);
+                handshake_error_flag = false;
+            }
+            //! is handshake error
+            bool is_handshake_error(){
+                return handshake_error_flag;
+            }
 
         protected:
+            //! io service object
+            boost::asio::io_service& my_io;
+            //! SSL context object
+            boost::asio::ssl::context& my_context;
             //! control socket
-            ssl_socket my_socket;
+            ssl_socket* my_socket;
             //! socket close mutex
             wr_mutex close_mutex;
             //! socket open flag
@@ -121,6 +147,9 @@ namespace l7vs{
             bool non_blocking_flag;
             //! socket option 
             tcp_socket_option_info opt_info;
+            //! handshake error flag
+            bool handshake_error_flag;
+
     };// class tcp_ssl_socket
 }// namespace l7vs
 
