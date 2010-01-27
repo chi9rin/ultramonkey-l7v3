@@ -352,7 +352,7 @@ bool    l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cm
 
     if( l7vsadm_request::CMD_ADD_VS == cmd && 
         ( count_map["-z"] > 0 || count_map["--ssl"] > 0 ) ) {
-        protocol_module_control&	ctrl 
+        protocol_module_control& ctrl 
                 = protocol_module_control::getInstance();
         ctrl.initialize( L7VS_MODULE_PATH );
         protocol_module_base* module;

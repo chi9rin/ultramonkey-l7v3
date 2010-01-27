@@ -39,7 +39,7 @@ void    session_thread_control::upstream_run(){
     }
 
     cpu_set_t       mask;
-    //numが1以上なら、その数だけCPU_SETする
+    // when num>0, do CPU_SET times of "num_of_core_uses".
     if( 0 < num_of_core_uses ){
         CPU_ZERO( &mask );
         for( int i = 0; i < num_of_core_uses; ++i ){
@@ -103,7 +103,7 @@ void    session_thread_control::downstream_run(){
         Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 4, fmt.str(), __FILE__, __LINE__ );
     }
     cpu_set_t       mask;
-    //numが1以上なら、その数だけCPU_SETする
+    // when num>0, do CPU_SET times of "num_of_core_uses".
     if( 0 < num_of_core_uses ){
         CPU_ZERO( &mask );
         for( int i = 0; i < num_of_core_uses; ++i ){

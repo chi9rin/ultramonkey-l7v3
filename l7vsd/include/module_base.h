@@ -128,12 +128,12 @@ public:
         virtual_service_endpoint_udp = invirtual_service_endpoint_udp;
     }
 
-    //replication用インターフェイス
-    //これが呼ばれたら、replication領域にデータを書き込む
-    //注意：内部でループは不要です。
-    //　　　ループとタイマー制御はvirtual_serviceで行います。
-    //　　　virtual_serviceは設定時間に1回replication_interruptをCallします。
-    //　　　replication_interrupt呼ばれたら1回データ書き込みを行います。
+    // For replication interface
+    // when call this function, write data to replication area.
+    // Caution: Not need loop inside.
+    //      Because Loop and Timer control is in virtual_service.
+    //      virtual_service call replication_interrupt in specified time at once.
+    //      when called, replication_interrupt write data at once.
     //! replication interval interrrupt
     //! timer thread call this function. from virtualservice.
     virtual    void    replication_interrupt() = 0;

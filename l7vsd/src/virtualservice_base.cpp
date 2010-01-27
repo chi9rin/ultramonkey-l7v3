@@ -344,9 +344,9 @@ cpu_set_t    l7vs::virtualservice_base::get_cpu_mask( std::string    nic_name ){
     // read interrupts.
     while( getline( ifs,  buff ) ){
         if( string::npos == buff.find( nic_name ) ) continue;
-        //割り込みIDを取得
+        // get interrupt ID
         algorithm::split( split_vec, buff, algorithm::is_any_of( ":" ));
-        if( !split_vec.size() ) return mask;    //interrupt分割不可
+        if( !split_vec.size() ) return mask;    // cannot split interrupt
         algorithm::trim( split_vec[0] );
         target_interrupt = lexical_cast<unsigned int>( split_vec[0] );
         for( size_t i = 0; i < cpu_nic_map.size(); ++i ){
