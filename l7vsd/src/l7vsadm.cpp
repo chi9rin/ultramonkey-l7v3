@@ -134,6 +134,10 @@ bool    l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cm
         count_map[ itr->first ] = 0;
     }
 
+    if ( l7vsadm_request::CMD_EDIT_VS == cmd ) {
+        request.vs_element.access_log_flag = -1;
+    }
+    
     for( int pos = 2; pos < argc; ++pos ){    // check options.
         parse_opt_map_type::iterator itr = vs_option_dic.find( argv[pos] );
         if( itr != vs_option_dic.end() ){    // find option
@@ -220,10 +224,6 @@ bool    l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cm
         l7vsadm_err.setter( true, buf );
         Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 89, buf, __FILE__, __LINE__ );
         return false;
-    }
-    
-    if ( l7vsadm_request::CMD_EDIT_VS == cmd ) {
-        request.vs_element.access_log_flag = -1;
     }
     
     if( l7vsadm_request::CMD_EDIT_VS == cmd){
