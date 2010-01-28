@@ -616,7 +616,7 @@ void    l7vsd::set_loglevel( const LOG_CATEGORY_TAG* cat, const LOG_LEVEL_TAG* l
         // set loglevel all
         if( !Logger::setLogLevelAll( *level ) ){
             std::string msg("set loglevel all failed.");
-            Logger::putLogError(LOG_CAT_L7VSD_LOGGER, 50, msg, __FILE__, __LINE__);
+            Logger::putLogError(LOG_CAT_L7VSD_LOGGER, 122, msg, __FILE__, __LINE__);
             err.setter( true, msg );
             return;
         }
@@ -624,7 +624,7 @@ void    l7vsd::set_loglevel( const LOG_CATEGORY_TAG* cat, const LOG_LEVEL_TAG* l
     else{
         if( !Logger::setLogLevel( *cat, *level ) ){
             std::string msg("set loglevel failed.");
-            Logger::putLogError(LOG_CAT_L7VSD_LOGGER, 51, msg, __FILE__, __LINE__);
+            Logger::putLogError(LOG_CAT_L7VSD_LOGGER, 123, msg, __FILE__, __LINE__);
             err.setter( true, msg );
             return;
         }
@@ -673,7 +673,7 @@ void    l7vsd::snmp_set_loglevel( const LOG_CATEGORY_TAG* cat, const LOG_LEVEL_T
         // set loglevel all
         if( 0 != bridge->change_loglevel_allcategory( *level ) ){
             std::string msg("set snmp loglevel all failed.");
-            Logger::putLogError(LOG_CAT_L7VSD_LOGGER, 52, msg, __FILE__, __LINE__);
+            Logger::putLogError(LOG_CAT_L7VSD_LOGGER, 124, msg, __FILE__, __LINE__);
             err.setter( true, msg );
             return;
         }
@@ -681,7 +681,7 @@ void    l7vsd::snmp_set_loglevel( const LOG_CATEGORY_TAG* cat, const LOG_LEVEL_T
     else{
         if( 0 != bridge->change_loglevel( *cat, *level ) ){
             std::string msg("set snmp loglevel failed.");
-            Logger::putLogError(LOG_CAT_L7VSD_LOGGER, 53, msg, __FILE__, __LINE__);
+            Logger::putLogError(LOG_CAT_L7VSD_LOGGER, 125, msg, __FILE__, __LINE__);
             err.setter( true, msg );
             return;
         }
