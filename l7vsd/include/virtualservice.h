@@ -128,6 +128,8 @@ public:
                                     tcp_schedule_func_type;
 
     typedef l7vs::atomic<unsigned long long> AUUL;
+	//typedef l7vs::atomic<unsigned int> AUI;
+
 
     //!    @struct    replication_header replication header structure
     struct    replication_header{
@@ -212,6 +214,9 @@ protected:
     AUUL wait_count_up;         //! upstream recv wait count
     AUUL wait_count_down;       //! downstream recv wait count
 
+	AUUL	ir_running;
+	AUUL	stop_flag;
+
     // protocol module option string
     std::string             protocol_module_for_indication_options;
 
@@ -264,7 +269,7 @@ public:
     explicit virtualservice_base( const l7vsd&,
                                   const replication&,
                                   const virtualservice_element& );
-    virtual ~virtualservice_base(){};
+    virtual ~virtualservice_base(){ dispatcher.reset();dispatcher.stop(); };
 
     virtual void initialize( error_code& ) = 0;
     virtual void finalize( error_code& ) = 0;

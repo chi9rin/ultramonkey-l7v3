@@ -175,9 +175,12 @@ void    l7vs::virtualservice_tcp::handle_replication_interrupt( const boost::sys
     rep_noconst.unlock( REP_AREA_NAME );
 
     //register handle_replication_interrupt
+
+	if(0!=stop_flag.get()){
     replication_timer->expires_from_now( boost::posix_time::milliseconds( param_data.rep_interval ) );
     replication_timer->async_wait( boost::bind( &virtualservice_tcp::handle_replication_interrupt, 
                                             this, boost::asio::placeholders::error ) );
+	}
 
     if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
         Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 21, "out_function : void virtualservice_tcp::handle_replication_interrupt( const boost::system::error_code& err )", __FILE__, __LINE__ );
@@ -726,6 +729,14 @@ void    l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
                 }
                 return;
             }
+            catch( ... ){
+                Logger::putLogFatal( 
+                    LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "unknown error, create session.", __FILE__, __LINE__ );
+                if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
+                    Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "out_function : void virtualservice_tcp::initialize( l7vs::error_code& err ) : unknown error.", __FILE__, __LINE__ );
+                }
+                return;
+            }
         }
         if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
             boost::format    fmt1( "pool_session.size   = %d" );
@@ -768,7 +779,7 @@ void        l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
     }
 
     //stop main loop
-    stop();
+    //stop();
 
     while(active_sessions.size()){
         boost::this_thread::yield();
@@ -861,7 +872,7 @@ void        l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
         }
     }
 
-    vsd.release_virtual_service( element );
+    //vsd.release_virtual_service( element );
 
     if( access_log_file_name != "" ) {
         // erase access log instance.
@@ -874,6 +885,8 @@ void        l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
                                    __FILE__, __LINE__ );
         }
     }
+
+    vsd.release_virtual_service( element );
     
     err.setter( false, "" );
 
@@ -1464,12 +1477,26 @@ void    l7vs::virtualservice_tcp::stop(){
 
     boost::system::error_code    err;
 
+	stop_flag++;
+
+	while(ir_running.get()){
+        	boost::this_thread::yield();
+	}
+
     acceptor_.close( err );
     if( err ){
         Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 18, err.message(), __FILE__, __LINE__ );
     }
 
     //stop dispatcher
+
+	size_t ret1 = calc_bps_timer->cancel();
+	size_t ret2 = replication_timer->cancel();
+	size_t ret3 = protomod_rep_timer->cancel();
+	size_t ret4 = schedmod_rep_timer->cancel();
+
+        Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 18, (boost::format("ret1=%d,ret2=%d,ret3=%d,ret4=%d") % ret1 % ret2 % ret3 % ret4).str(), __FILE__, __LINE__ );
+	dispatcher.reset();
     dispatcher.stop();
 }
 

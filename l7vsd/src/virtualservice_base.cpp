@@ -63,6 +63,9 @@ l7vs::virtualservice_base::virtualservice_base(    const l7vs::l7vsd& invsd,
     wait_count_up    = 0;
     wait_count_down    = 0;
 
+	ir_running = 0;
+	stop_flag = 0;
+
     calc_bps_timer.reset( new boost::asio::deadline_timer( dispatcher ) );
     replication_timer.reset( new boost::asio::deadline_timer( dispatcher ) );
     protomod_rep_timer.reset( new boost::asio::deadline_timer( dispatcher ) );
@@ -158,11 +161,18 @@ void    l7vs::virtualservice_base::handle_protomod_replication( const boost::sys
     }
     if( likely( !err ) ){
         if( likely( NULL != protomod ) ){
+
+		ir_running++;
+
             protomod->replication_interrupt();
+		if(0!=stop_flag.get()){
             //register handle_protomod_replication
             protomod_rep_timer->expires_from_now( boost::posix_time::milliseconds( param_data.rep_interval ) );
             protomod_rep_timer->async_wait( boost::bind( &l7vs::virtualservice_tcp::handle_protomod_replication, 
                                                     this, boost::asio::placeholders::error ) );
+		}
+		ir_running--;
+
         }else{
             l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 1, PROTOMOD_NOTLOAD_ERROR_MSG, __FILE__, __LINE__ );
         }
@@ -190,11 +200,20 @@ void    l7vs::virtualservice_base::handle_schedmod_replication( const boost::sys
     }
     if( likely( !err ) ){
         if( likely( NULL != schedmod ) ){
+
+		//si_runnig
+		ir_running++;
+
+		if(0!=stop_flag.get()){
             schedmod->replication_interrupt();
             //register handle_schedmod_replication
             schedmod_rep_timer->expires_from_now( boost::posix_time::milliseconds( param_data.rep_interval ) );
             schedmod_rep_timer->async_wait( boost::bind( &l7vs::virtualservice_tcp::handle_schedmod_replication, 
                                                     this, boost::asio::placeholders::error ) );
+
+		}
+		ir_running--;
+
         }else{
             l7vs::Logger::putLogError( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 3, SCHEDMOD_NOTLOAD_ERROR_MSG, __FILE__, __LINE__ );
         }
@@ -276,9 +295,11 @@ void    l7vs::virtualservice_base::handle_throughput_update( const boost::system
         }
 
         //register timer event
+	if(0!=stop_flag.get()){
         calc_bps_timer->expires_from_now( boost::posix_time::milliseconds( param_data.bps_interval ) );
         calc_bps_timer->async_wait( boost::bind( &l7vs::virtualservice_tcp::handle_throughput_update, 
                                                 this, boost::asio::placeholders::error ) );
+	}
         if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
             boost::format formatter1("throughput(upstream) dump   : %d, wait_count_up dump  : %d");
             formatter1 % throughput_up.get() % wait_count_up.get();
