@@ -102,11 +102,14 @@ void    l7vs::virtualservice_tcp::handle_replication_interrupt( const boost::sys
         return;
     }
 
+    interrupt_running_flag++;
+
     bool    newdata    = true;
     replication&    rep_noconst = const_cast<replication&>( rep );
 
     if( replication::REPLICATION_SINGLE == rep_noconst.get_status() ){
         Logger::putLogInfo( LOG_CAT_L7VSD_VIRTUALSERVICE, 1, "replication mode is single.", __FILE__, __LINE__ );
+        interrupt_running_flag--;
         return;
     }
 
@@ -122,6 +125,7 @@ void    l7vs::virtualservice_tcp::handle_replication_interrupt( const boost::sys
     replication_header*    rep_header_ptr = reinterpret_cast<replication_header*>( rep_noconst.pay_memory( REP_AREA_NAME, rep_size) );
     if( (rep_header_ptr == NULL) || (0 == rep_size) ){
         Logger::putLogWarn( LOG_CAT_L7VSD_VIRTUALSERVICE, 1, REP_BLOCK_SIZE_ERR_MSG, __FILE__, __LINE__ );
+        interrupt_running_flag--;
         return;
     }
 
@@ -129,6 +133,7 @@ void    l7vs::virtualservice_tcp::handle_replication_interrupt( const boost::sys
     if( ( rep_size * DATA_SIZE ) <
         ((sizeof(replication_data) * MAX_REPLICATION_DATA_NUM) + sizeof(replication_header)) ){
         Logger::putLogWarn( LOG_CAT_L7VSD_VIRTUALSERVICE, 2, REP_AREA_SIZE_ERR_MSG, __FILE__, __LINE__ );
+        interrupt_running_flag--;
         return;
     }
 
@@ -174,13 +179,13 @@ void    l7vs::virtualservice_tcp::handle_replication_interrupt( const boost::sys
     //unlock replication area
     rep_noconst.unlock( REP_AREA_NAME );
 
-    //register handle_replication_interrupt
-
-	if(0!=stop_flag.get()){
-    replication_timer->expires_from_now( boost::posix_time::milliseconds( param_data.rep_interval ) );
-    replication_timer->async_wait( boost::bind( &virtualservice_tcp::handle_replication_interrupt, 
-                                            this, boost::asio::placeholders::error ) );
-	}
+    if( 0 == virtualservice_stop_flag.get() ){
+        //register handle_replication_interrupt
+        replication_timer->expires_from_now( boost::posix_time::milliseconds( param_data.rep_interval ) );
+        replication_timer->async_wait( boost::bind( &virtualservice_tcp::handle_replication_interrupt, 
+                                                this, boost::asio::placeholders::error ) );
+    }
+    interrupt_running_flag--;
 
     if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
         Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 21, "out_function : void virtualservice_tcp::handle_replication_interrupt( const boost::system::error_code& err )", __FILE__, __LINE__ );
@@ -1468,12 +1473,10 @@ void    l7vs::virtualservice_tcp::stop(){
     Logger    funcLog( LOG_CAT_L7VSD_VIRTUALSERVICE, 81, "function : void virtualservice_tcp::stop()", __FILE__, __LINE__ );
 
     boost::system::error_code    err;
-
-	stop_flag++;
-
-	while(ir_running.get()){
-        	boost::this_thread::yield();
-	}
+    virtualservice_stop_flag++;
+    while( interrupt_running_flag.get() ){
+        boost::this_thread::yield();
+    }
 
     acceptor_.close( err );
     if( err ){
@@ -1481,14 +1484,12 @@ void    l7vs::virtualservice_tcp::stop(){
     }
 
     //stop dispatcher
+    calc_bps_timer->cancel();
+    replication_timer->cancel();
+    protomod_rep_timer->cancel();
+    schedmod_rep_timer->cancel();
 
-	size_t ret1 = calc_bps_timer->cancel();
-	size_t ret2 = replication_timer->cancel();
-	size_t ret3 = protomod_rep_timer->cancel();
-	size_t ret4 = schedmod_rep_timer->cancel();
-
-        Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 18, (boost::format("ret1=%d,ret2=%d,ret3=%d,ret4=%d") % ret1 % ret2 % ret3 % ret4).str(), __FILE__, __LINE__ );
-	dispatcher.reset();
+    dispatcher.reset();
     dispatcher.stop();
 }
 

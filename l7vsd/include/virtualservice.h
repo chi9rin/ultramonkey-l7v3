@@ -214,8 +214,8 @@ protected:
     AUUL wait_count_up;         //! upstream recv wait count
     AUUL wait_count_down;       //! downstream recv wait count
 
-	AUUL	ir_running;
-	AUUL	stop_flag;
+    AUUL interrupt_running_flag;    //! interrunpt routine is running
+    AUUL virtualservice_stop_flag;  //! virtualservice is now shutting down
 
     // protocol module option string
     std::string             protocol_module_for_indication_options;

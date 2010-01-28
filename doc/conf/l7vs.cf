@@ -155,8 +155,8 @@ con_count = 10
 #
 [l7vsd]
 maxfileno = 65535
-task_scheduler_algorithm    = 2
-task_scheduler_priority     = 99
+#task_scheduler_algorithm    = 2
+#task_scheduler_priority     = 99
 
 #
 # virtualservice setting

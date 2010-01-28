@@ -947,42 +947,43 @@ int    l7vsd::run( int argc, char* argv[] ) {
 
         //set process scheduler & priority
         int    scheduler = SCHED_OTHER;
+        bool   change_scheduler = true;
         int    int_val = param.get_int(PARAM_COMP_L7VSD, PARAM_SCHED_ALGORITHM, err);
         if( err ){
-            logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 4, "task scheduler algorithm parameter not found.", __FILE__, __LINE__ );
-        }else{
+            change_scheduler = false;
+        }
+        if( change_scheduler ){
             if( (SCHED_FIFO == int_val) || (SCHED_RR == int_val) || (SCHED_OTHER == int_val) || (SCHED_BATCH == int_val) ){
                 scheduler = int_val;
             }else{
                 logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 5, "invalid parameter for task scheduler algorithm.", __FILE__, __LINE__ );
-               // scheduler = SCHED_OTHER;
             }
-        }
-        int    proc_pri  = param.get_int(PARAM_COMP_L7VSD, PARAM_SCHED_PRIORITY, err);
-        if( err ){
-            logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 6, "task scheduler priority parameter not found.", __FILE__, __LINE__ );
-            proc_pri  = sched_get_priority_min( scheduler );
-        }else{
-            if( (SCHED_FIFO == scheduler) || (SCHED_RR == scheduler) ){
-                if(proc_pri < 1 || 99 < proc_pri){
-                    logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 7, "invalid parameter for task scheduler priority.", __FILE__, __LINE__ );
-                    proc_pri  = sched_get_priority_min( scheduler );
+            int    proc_pri  = param.get_int(PARAM_COMP_L7VSD, PARAM_SCHED_PRIORITY, err);
+            if( err ){
+                logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 6, "task scheduler priority parameter not found.", __FILE__, __LINE__ );
+                proc_pri  = sched_get_priority_min( scheduler );
+            }else{
+                if( (SCHED_FIFO == scheduler) || (SCHED_RR == scheduler) ){
+                    if(proc_pri < 1 || 99 < proc_pri){
+                        logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 7, "invalid parameter for task scheduler priority.", __FILE__, __LINE__ );
+                        proc_pri  = sched_get_priority_min( scheduler );
+                    }
+                }
+                if( (SCHED_OTHER == scheduler) || (SCHED_BATCH == scheduler) ){
+                    if(proc_pri != 0){
+                        logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 8, "invalid parameter for task scheduler priority.", __FILE__, __LINE__ );
+                        proc_pri  = sched_get_priority_min( scheduler );
+                    }
                 }
             }
-            if( (SCHED_OTHER == scheduler) || (SCHED_BATCH == scheduler) ){
-                if(proc_pri != 0){
-                    logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 8, "invalid parameter for task scheduler priority.", __FILE__, __LINE__ );
-                    proc_pri  = sched_get_priority_min( scheduler );
-                }
+    
+            sched_param        scheduler_param;
+            int    ret_val        = sched_getparam( 0, &scheduler_param );
+            scheduler_param.__sched_priority    = proc_pri;
+            ret_val            = sched_setscheduler( 0, scheduler, &scheduler_param );
+            if(ret_val != 0){
+                logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 9, "task scheduler setting failed.", __FILE__, __LINE__ );
             }
-        }
-
-        sched_param        scheduler_param;
-        int    ret_val        = sched_getparam( 0, &scheduler_param );
-        scheduler_param.__sched_priority    = proc_pri;
-        ret_val            = sched_setscheduler( 0, scheduler, &scheduler_param );
-        if(ret_val != 0){
-            logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 9, "task scheduler setting failed.", __FILE__, __LINE__ );
         }
 
         struct rlimit lim;
