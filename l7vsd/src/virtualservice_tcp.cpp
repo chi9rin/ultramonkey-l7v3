@@ -729,14 +729,6 @@ void    l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
                 }
                 return;
             }
-            catch( ... ){
-                Logger::putLogFatal( 
-                    LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "unknown error, create session.", __FILE__, __LINE__ );
-                if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
-                    Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "out_function : void virtualservice_tcp::initialize( l7vs::error_code& err ) : unknown error.", __FILE__, __LINE__ );
-                }
-                return;
-            }
         }
         if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
             boost::format    fmt1( "pool_session.size   = %d" );
