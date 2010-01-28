@@ -401,11 +401,12 @@ void    l7vs::virtualservice_tcp::handle_accept( const l7vs::session_thread_cont
 
     //waiting, pool_sessions.size become over 1
     //pick up session from pool
-    session_thread_control*        stc_ptr_register_accept;
-    do{
+    session_thread_control* stc_ptr_register_accept;
+    stc_ptr_register_accept = pool_sessions.pop();
+    while( unlikely( !stc_ptr_register_accept ) ){
+        boost::this_thread::yield();
         stc_ptr_register_accept = pool_sessions.pop();
-    }
-    while( unlikely( !stc_ptr_register_accept ) );
+    } 
 
     //session add wait_sessions
     boost::mutex::scoped_lock    up_wait_lk( stc_ptr_register_accept->get_upthread_mutex() );
