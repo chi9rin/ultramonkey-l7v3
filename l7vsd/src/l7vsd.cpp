@@ -251,9 +251,31 @@ void    l7vsd::add_virtual_service( const virtualservice_element* in_vselement, 
         vsptr->set_virtualservice( *in_vselement, err );
         if( err )    return;
 
-        // create thread and run
-        vs_threads.create_thread( boost::bind( &virtual_service::run, vsptr ) );
+        try{
+        
+            // create thread and run
+            vs_threads.create_thread( boost::bind( &virtual_service::run, vsptr ) );
 
+        }
+        catch( ... ){
+            std::stringstream    buf;
+            buf << "virtualservice thread initialize failed.";
+            Logger::putLogError(LOG_CAT_L7VSD_MAINTHREAD, 8, buf.str(), __FILE__, __LINE__);
+            err.setter( true, buf.str() );
+            
+            vsptr->stop();
+            l7vs::error_code finalize_err;
+            vsptr->finalize( finalize_err );
+            
+            /*-------- DEBUG LOG --------*/
+            if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_MAINTHREAD ) ){
+                Logger::putLogDebug( LOG_CAT_L7VSD_MAINTHREAD, 41, "out l7vsd::add_virtual_service", __FILE__, __LINE__ );
+            }
+            /*------ DEBUG LOG END ------*/
+            
+            return;
+        }
+            
         // add to vslist
         vslist.push_back( vsptr );
 

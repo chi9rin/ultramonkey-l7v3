@@ -406,7 +406,7 @@ void    l7vs::virtualservice_tcp::handle_accept( const l7vs::session_thread_cont
     while( unlikely( !stc_ptr_register_accept ) ){
         boost::this_thread::yield();
         stc_ptr_register_accept = pool_sessions.pop();
-    } 
+    }
 
     //session add wait_sessions
     boost::mutex::scoped_lock    up_wait_lk( stc_ptr_register_accept->get_upthread_mutex() );
@@ -704,11 +704,20 @@ void    l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
                     return;
                 }
                 session_thread_control*    p_stc = new session_thread_control( sess, vsnic_cpumask, rsnic_cpumask, -1 );
+                p_stc->start_thread();
                 while( !pool_sessions.push( p_stc ) ){}
             }
-            catch( std::bad_alloc ex ){
+            catch( ... ){
                 Logger::putLogFatal( 
                     LOG_CAT_L7VSD_VIRTUALSERVICE, 1, "error, create session.", __FILE__, __LINE__ );
+                
+                err.setter( true, "error, create session." );
+                
+                stop();
+                l7vs::error_code finalize_err;
+                finalize_err.setter(false,"");
+                finalize( finalize_err );
+                
                 if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
                     boost::format formatter("out_function : void virtualservice_tcp::initialize( "
                                             "l7vs::error_code& err ) : err = %s, err.message = %s");
@@ -765,18 +774,22 @@ void        l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
         boost::this_thread::yield();
     }
 
-    for(;;){
-        tcp_session*                tmp_session    = NULL;
-        session_thread_control*        tmp_stc        = NULL;
-        waiting_sessions.pop( tmp_session, tmp_stc );
-        if( !tmp_stc ){
-            break;
-        }
+    if( waiting_sessions.size() > 0 ) {
+    
         for(;;){
-            if( likely( pool_sessions.push( tmp_stc ) ) )break;
+            tcp_session*                tmp_session    = NULL;
+            session_thread_control*        tmp_stc        = NULL;
+            waiting_sessions.pop( tmp_session, tmp_stc );
+            if( !tmp_stc ){
+                break;
+            }
+            for(;;){
+                if( likely( pool_sessions.push( tmp_stc ) ) )break;
+            }
         }
-    }
 
+    }
+        
     //release sessions[i]->join();
     while( !pool_sessions.empty() ){
         session_thread_control*    stc = pool_sessions.pop();

@@ -30,6 +30,36 @@
 namespace l7vs{
 
 //
+//!    @brief create up down thread
+//
+void    session_thread_control::start_thread(){
+    
+    int            int_val;
+
+    upthread.reset( new boost::thread( &session_thread_control::upstream_run, this ) );    //! upstream thread create
+    downthread.reset( new boost::thread( &session_thread_control::downstream_run, this ) );//! downstream thread create
+
+    //pthread_setschedparam
+    int    retval, sched_policy;
+    sched_param    scheduler_param;
+    int_val    = pthread_getschedparam( upthread->native_handle(), &sched_policy, &scheduler_param );
+    if( SCHED_FIFO == sched_algorithm ){
+        scheduler_param.__sched_priority    = sched_priority;
+        sched_policy    = SCHED_FIFO;
+    }else if( SCHED_RR == sched_algorithm ){
+        scheduler_param.__sched_priority    = sched_priority;
+        sched_policy    = SCHED_RR;
+    }else if( SCHED_BATCH == sched_algorithm ){
+        sched_policy    = SCHED_BATCH;
+    }
+    if( 0 <= sched_algorithm ){
+        retval            = pthread_setschedparam( upthread->native_handle(), sched_algorithm, &scheduler_param );
+        retval            = pthread_setschedparam( downthread->native_handle(), sched_algorithm, &scheduler_param );
+    }
+    
+}
+    
+//
 //!    @brief upstream thread bind function.
 //
 void    session_thread_control::upstream_run(){
