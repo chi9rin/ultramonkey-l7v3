@@ -1,0 +1,237 @@
+.TH L7VSADM 8 "12 Aug 2009" "UltraMonkey-L7"
+.SH NAME
+.B l7vsadm
+\- UltraMonkey-L7 administration tool
+.SH SYNOPSIS
+.B l7vsadm
+[\-A | \-E] \-t \fIservice\-address\fR:\fIserivice\-port\fR \-m \fIproto\-module\fR [\fImodule\-args\fR] [\-s \fIscheduler\fR] [\-u \fIconnection\-count\fR] [\-b \fIsorry\-server\fR] [\-f \fIsorry\-flag\fR] [\-Q \fIQoSval\-service\fR] [\-q \fIQoSval\-clients\fR]
+
+.B l7vsadm
+\-D \-t \fIservice\-address\fR:\fIserivice\-port\fR  \-m \fIproto\-module\fR [\fImodule\-args\fR]
+
+.B l7vsadm
+\-C
+
+.B l7vsadm
+[\-a | \-e] -t \fIservice\-address\fR:\fIserivice\-port\fR  \-m \fIproto\-module\fR [\fImodule\-args\fR] \-r \fIserver\-address\fR:\fIserver\-port\fR  [\-w \fIweight\fR]
+
+.B l7vsadm
+\-d \-t \fIservice\-address\fR:\fIserivice\-port\fR  \-m \fIproto\-module\fR [\fImodule\-args\fR] \-r \fIserver\-address\fR:\fIserver\-port\fR 
+
+.B l7vsadm
+\-R [\-s \fIreplication\-switch\fR | \-f | \-d]
+
+.B l7vsadm
+\-L \-c \fIlog\-category\fR \-l \fIlog\-level\fR
+
+.B l7vsadm
+\-P \-r \fIreload\-parameter\fR
+
+.B l7vsadm
+\-l [\-n]
+
+.B l7vsadm
+\-V [\-n]
+
+.B l7vsadm
+\-K [\-n]
+
+.B l7vsadm
+\-h
+
+.SH DESCRIPTION
+Control the virtual services, alternating logging levels and etc...
+
+.TP
+.B "\-A, \-\-add\-service"
+Add the virtual service. Must be used with \-t and \-m arguments.
+
+.TP
+.B "\-E, \-\-edit\-service"
+Edit the virtual service. Must be used with \-t and \-m arguments.
+
+.TP
+.B "\-D, \-\-delete\-service"
+Delete the virtual service. Must be used with \-t and \-m arguments.
+
+.TP
+.B "\-C, \-\-flush"
+Flush all virtual services.
+
+.TP
+.B "\-a, \-\-add\-server"
+Add the real server to existing virtual service. 
+
+.br 
+# l7vsadm -A -t 192.168.0.1:80 -m sessionless
+.br 
+# l7vsadm -a -t 192.168.0.1:80 -m sessionless -r 192.168.0.100:80 
+
+.TP
+.B "\-e, \-\-edit\-server"
+Edit the real server that registered to the existing virtual service.
+
+.br
+# l7vsadm -A -t 192.168.0.1:80 -m sessionless
+.br
+# l7vsadm -a -t 192.168.0.1:80 -m sessionless -r 192.168.9.100:80 -w 1
+.br
+# l7vsadm -e -t 192.168.0.1:80 -m sessionless -r 192.168.9.100:80 -w 0
+
+.TP
+.B "\-d, \-\-delete\-server"
+Delete the real server that registered to the existing virtual service.
+
+.br
+# l7vsadm -A -t 192.168.0.1:80 -m sessionless
+.br
+# l7vsadm -a -t 192.168.0.1:80 -m sessionless -r 192.168.9.100:80
+.br
+# l7vsadm -d -t 192.168.0.1:80 -m sessionless -r 192.168.9.100:80
+
+
+.TP
+.B "\-R, \-\-replication"
+Edit replication function. This option must be using with \fB\-L\fR or \fB\-P\fR option.
+
+.TP
+.B "\-L, \-\-log"
+Edit logging level. Must be used with \fB\-c\fR option.
+
+.TP
+.B "\-P, \-\-parameter"
+Reload configuration file. Must be used with \fB\-r\fR option.
+
+.TP
+.B \-l, \-\-list
+List the registered virtual services.
+
+.TP
+.B \-K \-\-key
+List the registered virtual services with keywords.
+
+.TP
+.B \-V, \-\-verbose
+List the registered virtual services, keywords and settings.
+
+
+.TP
+.B \-h \-\-help
+Show help messages.
+
+
+.SH OPTIONS
+
+.TP
+.B "\-t , \-\-tcp\-service \fIservice\-address\fR"
+Create the TCP service. 
+
+.br
+\fIservice\-address\fR := { IPv4ADDR | HOSTNAME }:{PORTNUM | SERVICENAME }
+
+
+.TP
+.B "\-m , \-\-proto\-module \fIproto\-module\fR \fI[module\-args]\fR"
+Specify the protocol module.
+
+.br
+\fIproto\-module\fR := { url | sslid | sessionless | pfilter | ip }
+
+.br 
+\fImodule\-args\fR := see the operation manual.
+
+.TP
+.B "\-s, \-\-scheduler \fIscheduler\fR"
+Specify the scheduler module.
+
+.br
+\fIscheduler\fR := { rr | lc | wrr }
+
+.TP
+.B "\-u, \-\-upper \fIconnection\-count\fR"
+Set up maximum connection limit.
+
+.br
+\fIconnection\-count\fR := { 0 - 10000 }
+
+.TP
+.B "\-b, \-\-bypass \fIsorry\-server\fR"
+Set up sorry server.
+
+.br
+\fIsorry\-server\fR := { IPv4ADDR | HOSTNAME }:{PORTNUM | SERVICENAME }
+
+.TP
+.B "\-f, \-\-flag \fIsorry\-flag\fR"
+Switch sorry server flag. When \fBsorry\-flag\fR is 0, switched off.
+
+.br
+\fIsorry\-flag\fR := { 0 | 1 }
+
+.TP
+.B "\-Q, \-\-qos\-up \fIQoSVal\-up\fR"
+Set QoS(client->realserver) limit.
+
+.TP
+.B "\-q, \-\-qos\-down \fIQoSVal\-down\fR"
+Set QoS(realserver->client) limit.
+
+.TP
+.B "\-r, \-\-real\-server \fIserver\-address\fR"
+Specify the real server.
+
+.br
+\fIsorry\-server\fR := { IPv4ADDR | HOSTNAME }:{PORTNUM | SERVICENAME }
+
+.TP
+.B "\-w, \-\-weight \fIweight\fR"
+Set up weight value.
+
+.TP
+.B "\-s , \-\-status \fIreplication\-switch\fR"
+Switch replication system.
+
+.br
+\fIreplication\-switch\fR := { start | stop }
+
+
+.TP
+.B "\-f, \-\-force"
+Run force replication.
+
+.TP
+.B "\-d, \-\-dump"
+Dump replication data area.
+
+.TP
+.B "\-c , \-\-category \fIlog\-category\fR"
+Specify target log category.
+
+.br
+\fIlog\-category\fR := { l7vsd_network | l7vsd_network.bandwidth | l7vsd_network.num_connection | l7vsd_network.qos | l7vsd_virtual_service | l7vsd_real_server | l7vsd_real_server.balancing | l7vsd_sorry_server | l7vsd_replication | l7vsd_start_stop | l7vsd_system | l7vsd_system.memory | l7vsd_system.socket | l7vsd_system.signal | l7vsd_environment | l7vsd_environment.parameter | l7vsd_logger | l7vsd_parameter | l7vsd_event | l7vsd_schedule | l7vsd_program | l7vsd_protocol | l7vsd_module | all }
+
+.TP
+.B -l , \-\-level \fIlevel\fR
+Specify logging level.
+
+.br
+\fIlevel\fR := { fatal | error | warn | info | debug }
+
+.TP
+.B "\-r, \-\-reload \fIreload\-parameter\fR"
+
+Reload configuration file.
+
+.br
+\fIreload\-parameter\fR := { all | replication | logger }
+
+.TP
+.B "\-n, \-\-numeric"
+Don't resolve hostname and service name when listing the virtual services and real server.
+
+
+.SH SEE ALSO
+.BR l7vsd (8)
+
+.SH AUTHOR
+UltraMonkey-L7 Project team <ultramonkey-l7-users@lists.sourceforge.jp>

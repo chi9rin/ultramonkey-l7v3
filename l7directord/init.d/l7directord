@@ -1,0 +1,83 @@
+#!/bin/sh
+#
+# Start/Stop script for l7directord
+#
+# chkconfig: - 96 36
+# description: Start and stop l7directord on non-heartbeat systems
+#              Using the config file /etc/ha.d/conf/l7directord.cf
+#              
+# processname: l7directord
+# config: /etc/ha.d/conf/l7directord.cf
+#
+# Author: NTT COMWARE
+# Released: August 2005
+# Licence: GNU General Public Licence
+
+LOCKFILE="/var/lock/subsys/l7directord"
+
+# Source function library.
+if
+  [ -f /etc/rc.d/init.d/functions ]
+then
+  . /etc/rc.d/init.d/functions
+else
+  action() {
+    echo "$1"
+    shift
+    $@
+  }
+fi
+
+[ -x /usr/sbin/l7directord ] || exit 0
+
+
+######################################################################
+# Read arument and take action as appropriate
+######################################################################
+
+case "$1" in
+  start)
+        action "Starting l7directord ... " /usr/sbin/l7directord start
+	if [ $? -eq 0 ]; then
+	    touch $LOCKFILE
+	fi
+	;;
+  stop)
+        echo -n "Stopping l7directord ... "
+        /usr/sbin/l7directord stop
+        if
+            [ $? != 0 ]
+        then
+            action "" /bin/false
+        else 
+            while [ -f /var/run/l7directord.l7directord.pid ]
+            do
+                sleep 1
+            done
+	    rm -f $LOCKFILE
+            action "" /bin/true
+        fi
+	;;
+  restart)
+	$0 stop
+	$0 start
+	;;
+  try-restart)
+        action "Try restarting l7directord ... " /usr/sbin/l7directord try-restart
+	;;
+  status)
+	/usr/sbin/l7directord status
+	;;
+  reload)
+  	/usr/sbin/l7directord reload
+	;;
+  configtest)
+  	/usr/sbin/l7directord configtest
+	;;
+  *)
+	echo "Usage: l7directord
+	{start|stop|restart|try-restart|status|reload|configtest}"
+	exit 1
+esac
+
+exit 0

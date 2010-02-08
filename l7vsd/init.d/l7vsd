@@ -1,0 +1,125 @@
+#!/bin/sh
+# Start/Stop script for l7vsd
+#
+# chkconfig: - 95 34
+# description: Start and stop l7vsd
+#              
+# processname: l7vsd
+#
+# Author: Shinya TAKEBAYASHI
+# Released: January 2008
+# Licence: GNU General Public Licence
+
+L7VSD_OPTIONS=""
+
+PROG="l7vsd"
+DAEMON="/usr/sbin/l7vsd"
+SOCKFILE="/var/run/l7vs/l7vs"
+PIDFILE="/var/run/l7vsd.pid"
+LOCKFILE="/var/lock/subsys/l7vsd"
+
+start() {
+    if [ -e $PIDFILE ]; then
+	PROCS=`ps ax | grep $DAEMON | grep -v grep | wc -l`
+	if [ $PROCS -ne 0 ]; then
+	    echo "$PROG is running."
+	    RETVAL=-1
+	    return
+	fi
+	cleanup
+    fi
+
+    echo -n "Starting $PROG: " 
+    `$DAEMON $L7VSD_OPTIONS`
+    RETVAL=$?
+
+    if [ $RETVAL -ne 0 ]; then
+	echo "error occured."
+	echo "$PROG was not started."
+    else
+	echo "done."
+	pidof $PROG > $PIDFILE
+	touch $LOCKFILE
+    fi
+
+    return $RETVAL
+}
+
+stop() {
+    PID=`pidof l7vsd`
+    if [ -z $PID ]; then
+	echo "$PROG is not running."
+	RETVAL=-1
+	cleanup
+	return
+    fi
+
+    echo -n "Stopping $PROG: "
+    kill $PID
+    RETVAL=$?
+    
+    if [ $RETVAL -eq 0 ]; then
+	echo "done."
+	cleanup
+    fi
+
+    return $RETVAL
+}
+
+status() {
+    if [ ! -e $PIDFILE ]; then
+	echo "$PROG is not running."
+	RETVAL=-1
+    else
+	echo -n "$PROG running with pid: "
+	cat $PIDFILE
+	RETVAL=$?
+    fi
+    return $RETVAL
+}
+
+cleanup() {
+	rm -rf $PIDFILE
+	rm -rf $SOCKFILE
+	rm -rf $LOCKFILE
+}
+
+
+# Prefer for Running script
+if [ ! -x $DAEMON ]; then
+    echo "$DAEMON does not exist!"
+    exit -1
+fi
+
+case "$1" in
+    start)
+	start
+	;;
+    
+    stop)
+	stop
+	;;
+    
+    status)
+	status
+	;;
+
+    restart)
+	stop
+	sleep 1
+	start
+	;;
+
+    condrestart)
+	stop
+	sleep 1
+	start
+	;;
+    
+    *)
+	echo $"Usage: $0 {start|stop|restart|condrestart|status}"
+	RETVAL=-1
+
+esac
+
+exit $RETVAL
