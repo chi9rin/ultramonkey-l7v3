@@ -72,8 +72,8 @@ namespace l7vs{
         protocol_module(NULL),
         session_pause_flag(false),
         client_socket(session_io,set_option),
-        upstream_buffer_size(8192),
-        downstream_buffer_size(8192),
+        upstream_buffer_size(-1),
+        downstream_buffer_size(-1),
         virtualservice_endpoint(listen_endpoint),
         access_log_flag(false),
         access_logger(set_access_logger),
@@ -350,15 +350,11 @@ namespace l7vs{
         int_val    = param.get_int( PARAM_COMP_SESSION, PARAM_UP_BUFFER_SIZE, vs_err );
         if((likely( !vs_err )) && (0 < int_val)){
             upstream_buffer_size    = int_val;
-        }else{
-            Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 1, "up buffer param error set default 8192" , __FILE__, __LINE__ );    
         }
 
         int_val    = param.get_int( PARAM_COMP_SESSION, PARAM_DOWN_BUFFER_SIZE, vs_err );
         if((likely( !vs_err )) && (0 < int_val)){
             downstream_buffer_size    = int_val;
-        }else{
-            Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 2, "down buffer param error set default 8192" , __FILE__, __LINE__ );    
         }
 
         protocol_module = parent_service.get_protocol_module();
@@ -858,23 +854,25 @@ namespace l7vs{
         }
         if(likely( !is_exit )){
             //set client_socket options(recieve buffer size)
-            boost::asio::socket_base::receive_buffer_size    opt1( upstream_buffer_size );
-            if (!ssl_flag) {
-                client_socket.get_socket().lowest_layer().set_option( opt1 ,ec);
-            } else {
-                client_ssl_socket.get_socket().lowest_layer().set_option( opt1 ,ec);
-            }
-            if(unlikely( ec )){
-                //client socket Error!
-                std::stringstream buf;
-                buf << "Thread ID[";
-                buf << boost::this_thread::get_id();
-                buf << "] client socket recieve buffer size error : ";
-                buf << ec.message();
-                Logger::putLogError( LOG_CAT_L7VSD_SESSION, 12, buf.str(), __FILE__, __LINE__ );
-                {
-                    rw_scoped_lock scoped_lock(exit_flag_update_mutex);
-                    exit_flag = true;
+            if (upstream_buffer_size > 0) {
+                boost::asio::socket_base::receive_buffer_size opt1(upstream_buffer_size);
+                if (!ssl_flag) {
+                    client_socket.get_socket().lowest_layer().set_option(opt1, ec);
+                } else {
+                    client_ssl_socket.get_socket().lowest_layer().set_option(opt1, ec);
+                }
+                if(unlikely( ec )){
+                    //client socket Error!
+                    std::stringstream buf;
+                    buf << "Thread ID[";
+                    buf << boost::this_thread::get_id();
+                    buf << "] client socket recieve buffer size error : ";
+                    buf << ec.message();
+                    Logger::putLogError( LOG_CAT_L7VSD_SESSION, 12, buf.str(), __FILE__, __LINE__ );
+                    {
+                        rw_scoped_lock scoped_lock(exit_flag_update_mutex);
+                        exit_flag = true;
+                    }
                 }
             }
         }
@@ -885,23 +883,25 @@ namespace l7vs{
         }
         if(likely( !is_exit )){
             //set client_socket options(send buffer size)
-            boost::asio::socket_base::send_buffer_size        opt2( downstream_buffer_size );
-            if (!ssl_flag) {
-                client_socket.get_socket().lowest_layer().set_option( opt2 ,ec);
-            } else {
-                client_ssl_socket.get_socket().lowest_layer().set_option( opt2 ,ec);
-            }
-            if(unlikely( ec )){
-                //client socket Error!
-                std::stringstream buf;
-                buf << "Thread ID[";
-                buf << boost::this_thread::get_id();
-                buf << "] client socket send buffer size error : ";
-                buf << ec.message();
-                Logger::putLogError( LOG_CAT_L7VSD_SESSION, 13, buf.str(), __FILE__, __LINE__ );
-                {
-                    rw_scoped_lock scoped_lock(exit_flag_update_mutex);
-                    exit_flag = true;
+            if (downstream_buffer_size > 0) {
+                boost::asio::socket_base::send_buffer_size opt2(downstream_buffer_size);
+                if (!ssl_flag) {
+                    client_socket.get_socket().lowest_layer().set_option(opt2, ec);
+                } else {
+                    client_ssl_socket.get_socket().lowest_layer().set_option(opt2, ec);
+                }
+                if(unlikely( ec )){
+                    //client socket Error!
+                    std::stringstream buf;
+                    buf << "Thread ID[";
+                    buf << boost::this_thread::get_id();
+                    buf << "] client socket send buffer size error : ";
+                    buf << ec.message();
+                    Logger::putLogError( LOG_CAT_L7VSD_SESSION, 13, buf.str(), __FILE__, __LINE__ );
+                    {
+                        rw_scoped_lock scoped_lock(exit_flag_update_mutex);
+                        exit_flag = true;
+                    }
                 }
             }
         }
@@ -1855,32 +1855,36 @@ namespace l7vs{
                 }
 
                 //set realserver_socket options(recieve buffer size)
-                boost::asio::socket_base::receive_buffer_size    opt1( downstream_buffer_size );
-                new_socket->get_socket().set_option(opt1 , ec);
-                if(unlikely( ec )){
-                    // socket set nonblocking mode error
-                    std::stringstream buf;
-                    buf << "Thread ID[";
-                    buf << boost::this_thread::get_id();
-                    buf << "] realserver socket recieve buffer size error : ";
-                    buf << ec.message();
-                    Logger::putLogError( LOG_CAT_L7VSD_SESSION, 35, buf.str(), __FILE__, __LINE__ );
-                    up_thread_exit(process_type);
-                    return;
+                if (downstream_buffer_size > 0) {
+                    boost::asio::socket_base::receive_buffer_size opt1(downstream_buffer_size);
+                    new_socket->get_socket().set_option(opt1, ec);
+                    if(unlikely( ec )){
+                        // socket set nonblocking mode error
+                        std::stringstream buf;
+                        buf << "Thread ID[";
+                        buf << boost::this_thread::get_id();
+                        buf << "] realserver socket recieve buffer size error : ";
+                        buf << ec.message();
+                        Logger::putLogError( LOG_CAT_L7VSD_SESSION, 35, buf.str(), __FILE__, __LINE__ );
+                        up_thread_exit(process_type);
+                        return;
+                    }
                 }
                 //set realserver_socket options(send buffer size)
-                boost::asio::socket_base::send_buffer_size        opt2( upstream_buffer_size );
-                new_socket->get_socket().set_option(opt2 , ec);
-                if(unlikely( ec )){
-                    // socket set nonblocking mode error
-                    std::stringstream buf;
-                    buf << "Thread ID[";
-                    buf << boost::this_thread::get_id();
-                    buf << "] realserver socket send buffer size error : ";
-                    buf << ec.message();
-                    Logger::putLogError( LOG_CAT_L7VSD_SESSION, 36, buf.str(), __FILE__, __LINE__ );
-                    up_thread_exit(process_type);
-                    return;
+                if (upstream_buffer_size > 0) {
+                    boost::asio::socket_base::send_buffer_size opt2(upstream_buffer_size);
+                    new_socket->get_socket().set_option(opt2, ec);
+                    if(unlikely( ec )){
+                        // socket set nonblocking mode error
+                        std::stringstream buf;
+                        buf << "Thread ID[";
+                        buf << boost::this_thread::get_id();
+                        buf << "] realserver socket send buffer size error : ";
+                        buf << ec.message();
+                        Logger::putLogError( LOG_CAT_L7VSD_SESSION, 36, buf.str(), __FILE__, __LINE__ );
+                        up_thread_exit(process_type);
+                        return;
+                    }
                 }
 
                 socket_element push_element;
