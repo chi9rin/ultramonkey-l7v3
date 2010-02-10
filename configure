@@ -1046,7 +1046,7 @@ Optional Packages:
 								default=LIBDIR/l7vs
 	--with-l7vsadm-sockdir=DIR	l7vsadm sockfile PATH.
 									default=/var/run/l7vs
-	--wigh-l7vs-buffer-size=NUM	l7vsd using heap buffer size.
+	--with-l7vs-buffer-size=NUM	l7vsd using heap buffer size.
 									default=4096
 	--with-l7vs-config-dir=DIR	l7vs configfile PATH.
 									default=/etc/l7vs/l7vs.cf

@@ -104,11 +104,8 @@ void    l7vs::virtualservice_base::load_parameter( l7vs::error_code& err ){
     std::string            str_val;
     //get realserver_side networkI/F card name
     str_val    = param.get_string( l7vs::PARAM_COMP_VIRTUALSERVICE, PARAM_RS_SIDE_NIC_NAME, vs_err );
-    if( !vs_err )
+    if( !vs_err ) {
         param_data.nic_realserver_side    = str_val;
-    else{
-        err.setter( true, "nic_realserver_side parameter does not exist." );
-        return;
     }
     //get session pool size value
     int_val    = param.get_int( l7vs::PARAM_COMP_VIRTUALSERVICE, PARAM_POOLSIZE_KEY_NAME, vs_err );

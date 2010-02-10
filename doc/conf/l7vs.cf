@@ -160,10 +160,8 @@ maxfileno = 65535
 # virtualservice setting
 #
 [virtualservice]
-nic_realserver_side         = "eth0"
 session_thread_pool_size    = 32
 throughput_calc_interval    = 500
-num_of_core_uses            = 0
 
 #
 # l7vsd replication setting

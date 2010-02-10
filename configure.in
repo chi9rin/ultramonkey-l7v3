@@ -68,7 +68,7 @@ AC_ARG_WITH(
 
 AC_ARG_WITH(
 	l7vs-buffer-size,
-	[	--wigh-l7vs-buffer-size=NUM	l7vsd using heap buffer size.
+	[	--with-l7vs-buffer-size=NUM	l7vsd using heap buffer size.
 									[default=4096] ],
 	[	l7vs_max_buffer_size="$withval" ],
 	[	l7vs_max_buffer_size=4096 ]
