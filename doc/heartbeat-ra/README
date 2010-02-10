@@ -3,12 +3,9 @@ Heartbeat Resource Agent and example configuration files.
 == Files ==
 L7directord:	Resource Agent for l7directord.
 L7vsd:		Resource Agent for l7vsd.
-SSLProxy:	Resource Agent for sslproxy.
 VIPcheck:	Resource Agent for VIP.
 authkeys:	Heartbeat authkey example.
 cib.xml-sample:	Heartbeat cib.xml example.
-cib.xml-sample.ssl:
-		Heartbeat cib.xml example using SSLProxy.
 ha.cf:		Heartbeat ha.cf example.
 logd.cf:	Heartbeat logd.cf example.
 

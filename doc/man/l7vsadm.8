@@ -1,4 +1,4 @@
-.TH L7VSADM 8 "12 Aug 2009" "UltraMonkey-L7"
+.TH L7VSADM 8 "10 Feb 2010" "UltraMonkey-L7"
 .SH NAME
 .B l7vsadm
 \- UltraMonkey-L7 administration tool
@@ -123,7 +123,7 @@ Show help messages.
 .SH OPTIONS
 
 .TP
-.B "\-t , \-\-tcp\-service \fIservice\-address\fR"
+.B "\-t, \-\-tcp\-service \fIservice\-address\fR"
 Create the TCP service. 
 
 .br
@@ -131,7 +131,7 @@ Create the TCP service.
 
 
 .TP
-.B "\-m , \-\-proto\-module \fIproto\-module\fR \fI[module\-args]\fR"
+.B "\-m, \-\-proto\-module \fIproto\-module\fR \fI[module\-args]\fR"
 Specify the protocol module.
 
 .br
@@ -188,7 +188,7 @@ Specify the real server.
 Set up weight value.
 
 .TP
-.B "\-s , \-\-status \fIreplication\-switch\fR"
+.B "\-s, \-\-status \fIreplication\-switch\fR"
 Switch replication system.
 
 .br
@@ -204,14 +204,14 @@ Run force replication.
 Dump replication data area.
 
 .TP
-.B "\-c , \-\-category \fIlog\-category\fR"
+.B "\-c, \-\-category \fIlog\-category\fR"
 Specify target log category.
 
 .br
 \fIlog\-category\fR := { l7vsd_network | l7vsd_network.bandwidth | l7vsd_network.num_connection | l7vsd_network.qos | l7vsd_virtual_service | l7vsd_real_server | l7vsd_real_server.balancing | l7vsd_sorry_server | l7vsd_replication | l7vsd_start_stop | l7vsd_system | l7vsd_system.memory | l7vsd_system.socket | l7vsd_system.signal | l7vsd_environment | l7vsd_environment.parameter | l7vsd_logger | l7vsd_parameter | l7vsd_event | l7vsd_schedule | l7vsd_program | l7vsd_protocol | l7vsd_module | all }
 
 .TP
-.B -l , \-\-level \fIlevel\fR
+.B -l, \-\-level \fIlevel\fR
 Specify logging level.
 
 .br

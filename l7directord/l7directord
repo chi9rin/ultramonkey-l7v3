@@ -4949,7 +4949,7 @@ yes: outputs/no: doesn't output.
 
 The rotation type designates "date" "size" "datesize".
 
-=item B<accesslog_rotate_max_backup_index = I<n>
+=item B<accesslog_rotate_max_backup_index = >I<n>
 
 The maximum number of back-up file is designated.
 

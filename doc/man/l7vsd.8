@@ -1,9 +1,9 @@
-.TH L7VSD 8 "12 Aug 2009" "UltraMonkey-L7"
+.TH L7VSD 8 "10 Feb 2010" "UltraMonkey-L7"
 .SH NAME
 .B l7vsd
 \- UltraMonkey-L7 the load balancing framework
 .SH SYNOPSIS
-.B l7vsd [\-d | \-b | \-h ]
+.B l7vsd [ \-h ]
 
 .SH DESCRIPTION
 \fBl7vsd\fR is the core framework in UltraMonkey\-L7 to serve the virtual services. 
@@ -14,14 +14,6 @@ Please use \fBl7vsadm(8)\fR to control \fBl7vsd\fR.
 
 .SH OPTIONS
 .TP
-.B "\-d"
-Run as a debug mode.
-
-.TP
-.B "\-b"
-Run as a blocking mode.
-
-.TP
 .B "\-h"
 Print a help message.
 
@@ -29,6 +21,10 @@ Print a help message.
 .TP
 .B "/etc/l7vs/l7vs.cf"
 configuration file
+
+.TP
+.B "/etc/l7vs/sslproxy/sslproxy.target.cf"
+SSL configuration file
 
 .SH SEE ALSO
 .BR l7vsadm (8)
