@@ -197,6 +197,7 @@ sharedstatedir = @sharedstatedir@
 snmpagent_libs = @snmpagent_libs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
+ultramonkeyl7_version = @ultramonkeyl7_version@
 SUBDIRS = doc l7directord l7vsd
 AUTOMAKE_OPTIONS = foreign
 all: config.h

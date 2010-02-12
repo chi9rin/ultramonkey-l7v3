@@ -200,6 +200,7 @@ sharedstatedir = @sharedstatedir@
 snmpagent_libs = @snmpagent_libs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
+ultramonkeyl7_version = @ultramonkeyl7_version@
 AUTOMAKE_OPTIONS = foreign
 L7VS_MODDIR = @l7vs_moddir@
 MAX_BUFFER_SIZE = @l7vs_max_buffer_size@

@@ -1,2 +1,2 @@
-SUBDIRS = conf sslfiles
+SUBDIRS = conf sslfiles heartbeat-ra
 AUTOMAKE_OPTIONS = foreign
