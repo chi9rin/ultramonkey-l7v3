@@ -1,29 +1,22 @@
 About UltraMonkey-L7
----------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
 Welcome
 =======
     UltraMonkey-L7 is a opensource layer-7 load balancing software.
     
 
-    <<< Notes concerning the use of this software package >>>
-
-    Due to a possible conflict with an U.S. patent owned by F5 Networks,
-    the use of the cookie-based persistence module included in this package
-    is restricted to Japan.
-
-
 System requirements
 ===================
 
            OS : Linux 2.6.9(or later)on x86 and x86_64 architecture
-                We recommend to use Redhat Enterprise Linux.
+                We recommend to use Red Hat Enterprise Linux.
 
           CPU : Intel x86 and x86_64 or compatible architecture processors
 
        Memory : 2 GB(recommended)
 
-    Libraries : log4cxx(C++LoggingLibraries) boost(C++TemplateLibraries)
+    Libraries : log4cxx(C++ Logging Libraries) boost(C++ Template Libraries)
     
 
 License
@@ -32,22 +25,12 @@ License
     UltraMonkey-L7 is distributed using LGPL License.
 
 
-Release plan in the future
-==========================
-
-    - Mar. 2008
-       * cookie-based persistence module: passive mode, etc...
-       * GUI administration tool
-       * more useful health monitors(log, SNMP, etc...)
-
-
 About UltraMonkey-L7 Project
 ============================
 
     To get more information about UltraMonkey-L7, please visit our project
     Web Site.
 
-         Project Web Site - http://ultramonkey-l7.sourceforge.jp/
       Software repository - http://sourceforge.jp/projects/ultramonkey-l7/
 
 
