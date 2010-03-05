@@ -30,6 +30,7 @@
 //#include <boost/asio/ssl.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
+#include <sys/epoll.h>
 
 #include "wrlock.h"
 #include "protocol_module_base.h"
@@ -314,7 +315,12 @@ namespace l7vs{
             //! socket option 
             tcp_socket_option_info socket_opt_info;
 
-           
+            // epoll using member
+            #define EVENT_NUM       2
+            #define EPOLL_TIMEOUT   50      //[mS]
+            struct epoll_event  down_client_events[EVENT_NUM];
+            int    down_client_epollfd;
+
             //! handshake timer handler
             //! @param[in]        error is error code object
             virtual void handle_ssl_handshake_timer(

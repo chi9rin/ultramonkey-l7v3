@@ -280,6 +280,8 @@ namespace l7vs{
         add_down_thread_vs_message_func.second = boost::bind(&tcp_session::down_thread_exit,this,_1);
         virtual_service_message_down_thread_function_map.insert(add_down_thread_vs_message_func);
 
+        // epoll impliment
+        down_client_epollfd = epoll_create( EVENT_NUM );
     }
     //! destructor
     tcp_session::~tcp_session(){
@@ -312,6 +314,7 @@ namespace l7vs{
             else
                 break;
         }
+        close( down_client_epollfd );
     }
     //! initialize
     session_result_message tcp_session::initialize(){
@@ -2896,11 +2899,77 @@ namespace l7vs{
         std::size_t data_size = down_thread_data_client_side.get_size();
         std::size_t send_data_size = down_thread_data_client_side.get_send_size();
         std::size_t send_size;
-        if (!ssl_flag) {
-            send_size = client_socket.write_some(boost::asio::buffer(data_buff.data()+send_data_size,data_size-send_data_size),ec);
+
+        struct epoll_event event;
+        int int_ret_epoll;
+        event.events = EPOLLET | EPOLLOUT | EPOLLHUP;
+        if ( !ssl_flag ) {
+            int_ret_epoll = epoll_ctl( down_client_epollfd, EPOLL_CTL_ADD, client_socket.get_socket().native(), &event );
         } else {
-            send_size = client_ssl_socket.write_some(boost::asio::buffer(data_buff.data()+send_data_size,data_size-send_data_size),ec);
+            int_ret_epoll = epoll_ctl( down_client_epollfd, EPOLL_CTL_ADD, client_ssl_socket.get_socket().lowest_layer().native(), &event );
         }
+        if (int_ret_epoll < 0) {
+            std::stringstream buf;
+            buf << "down_thread_client_send : epoll_ctl EPOLL_CTL_ADD error : ";
+            buf << strerror(errno);
+            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
+            down_thread_exit(process_type);
+            return;
+        }
+
+        int_ret_epoll = epoll_wait( down_client_epollfd, down_client_events, EVENT_NUM, EPOLL_TIMEOUT );
+        if (int_ret_epoll > 0) {
+            if (!ssl_flag) {
+                send_size = client_socket.write_some(boost::asio::buffer(data_buff.data()+send_data_size,data_size-send_data_size),ec);
+            } else {
+                send_size = client_ssl_socket.write_some(boost::asio::buffer(data_buff.data()+send_data_size,data_size-send_data_size),ec);
+            }
+        } else {
+            if (int_ret_epoll < 0) {
+                std::stringstream buf;
+                buf << "down_thread_client_send : epoll_wait error : ";
+                buf << strerror(errno);
+                Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
+            } else if (int_ret_epoll == 0) {
+                std::stringstream buf;
+                buf << "down_thread_client_send : epoll_wait timeout ";
+                buf << EPOLL_TIMEOUT;
+                buf << "mS";
+                Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
+            }
+            event.events = EPOLLET | EPOLLOUT | EPOLLHUP;
+            if ( !ssl_flag ) {
+                int_ret_epoll = epoll_ctl( down_client_epollfd, EPOLL_CTL_DEL, client_socket.get_socket().native(), &event );
+            } else {
+                int_ret_epoll = epoll_ctl( down_client_epollfd, EPOLL_CTL_DEL, client_ssl_socket.get_socket().lowest_layer().native(), &event );
+            }
+            if (int_ret_epoll < 0) {
+                std::stringstream buf;
+                buf << "down_thread_client_send : epoll_ctl EPOLL_CTL_DEL error : ";
+                buf << strerror(errno);
+                Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
+                down_thread_exit(process_type);
+                return;
+            }
+            boost::this_thread::yield();
+            return;
+        }
+
+        event.events = EPOLLET | EPOLLOUT | EPOLLHUP;
+        if ( !ssl_flag ) {
+            int_ret_epoll = epoll_ctl( down_client_epollfd, EPOLL_CTL_DEL, client_socket.get_socket().native(), &event );
+        } else {
+            int_ret_epoll = epoll_ctl( down_client_epollfd, EPOLL_CTL_DEL, client_ssl_socket.get_socket().lowest_layer().native(), &event );
+        }
+        if (int_ret_epoll < 0) {
+            std::stringstream buf;
+            buf << "down_thread_client_send : epoll_ctl EPOLL_CTL_DEL error : ";
+            buf << strerror(errno);
+            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
+            down_thread_exit(process_type);
+            return;
+        }
+
         DOWN_THREAD_FUNC_TYPE_TAG func_tag;
         if(!ec){
             send_data_size += send_size;
@@ -2947,6 +3016,7 @@ namespace l7vs{
         }else{
             if(ec == boost::asio::error::try_again){
                 func_tag = DOWN_FUNC_CLIENT_SEND;
+                boost::this_thread::yield();
             }else{
                 func_tag = DOWN_FUNC_CLIENT_DISCONNECT;
             }
