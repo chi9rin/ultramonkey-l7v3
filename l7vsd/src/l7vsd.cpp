@@ -251,9 +251,31 @@ void    l7vsd::add_virtual_service( const virtualservice_element* in_vselement, 
         vsptr->set_virtualservice( *in_vselement, err );
         if( err )    return;
 
-        // create thread and run
-        vs_threads.create_thread( boost::bind( &virtual_service::run, vsptr ) );
+        try{
+        
+            // create thread and run
+            vs_threads.create_thread( boost::bind( &virtual_service::run, vsptr ) );
 
+        }
+        catch( ... ){
+            std::stringstream    buf;
+            buf << "virtualservice thread initialize failed.";
+            Logger::putLogError(LOG_CAT_L7VSD_MAINTHREAD, 8, buf.str(), __FILE__, __LINE__);
+            err.setter( true, buf.str() );
+            
+            vsptr->stop();
+            l7vs::error_code finalize_err;
+            vsptr->finalize( finalize_err );
+            
+            /*-------- DEBUG LOG --------*/
+            if( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_MAINTHREAD ) ){
+                Logger::putLogDebug( LOG_CAT_L7VSD_MAINTHREAD, 41, "out l7vsd::add_virtual_service", __FILE__, __LINE__ );
+            }
+            /*------ DEBUG LOG END ------*/
+            
+            return;
+        }
+            
         // add to vslist
         vslist.push_back( vsptr );
 
@@ -594,7 +616,7 @@ void    l7vsd::set_loglevel( const LOG_CATEGORY_TAG* cat, const LOG_LEVEL_TAG* l
         // set loglevel all
         if( !Logger::setLogLevelAll( *level ) ){
             std::string msg("set loglevel all failed.");
-            Logger::putLogError(LOG_CAT_L7VSD_LOGGER, 50, msg, __FILE__, __LINE__);
+            Logger::putLogError(LOG_CAT_L7VSD_LOGGER, 122, msg, __FILE__, __LINE__);
             err.setter( true, msg );
             return;
         }
@@ -602,7 +624,7 @@ void    l7vsd::set_loglevel( const LOG_CATEGORY_TAG* cat, const LOG_LEVEL_TAG* l
     else{
         if( !Logger::setLogLevel( *cat, *level ) ){
             std::string msg("set loglevel failed.");
-            Logger::putLogError(LOG_CAT_L7VSD_LOGGER, 51, msg, __FILE__, __LINE__);
+            Logger::putLogError(LOG_CAT_L7VSD_LOGGER, 123, msg, __FILE__, __LINE__);
             err.setter( true, msg );
             return;
         }
@@ -651,7 +673,7 @@ void    l7vsd::snmp_set_loglevel( const LOG_CATEGORY_TAG* cat, const LOG_LEVEL_T
         // set loglevel all
         if( 0 != bridge->change_loglevel_allcategory( *level ) ){
             std::string msg("set snmp loglevel all failed.");
-            Logger::putLogError(LOG_CAT_L7VSD_LOGGER, 52, msg, __FILE__, __LINE__);
+            Logger::putLogError(LOG_CAT_L7VSD_LOGGER, 124, msg, __FILE__, __LINE__);
             err.setter( true, msg );
             return;
         }
@@ -659,7 +681,7 @@ void    l7vsd::snmp_set_loglevel( const LOG_CATEGORY_TAG* cat, const LOG_LEVEL_T
     else{
         if( 0 != bridge->change_loglevel( *cat, *level ) ){
             std::string msg("set snmp loglevel failed.");
-            Logger::putLogError(LOG_CAT_L7VSD_LOGGER, 53, msg, __FILE__, __LINE__);
+            Logger::putLogError(LOG_CAT_L7VSD_LOGGER, 125, msg, __FILE__, __LINE__);
             err.setter( true, msg );
             return;
         }
@@ -925,8 +947,7 @@ int    l7vsd::run( int argc, char* argv[] ) {
 
         //set process scheduler & priority
         int    scheduler = SCHED_OTHER;
-        bool    change_scheduler = true;
-
+        bool   change_scheduler = true;
         int    int_val = param.get_int(PARAM_COMP_L7VSD, PARAM_SCHED_ALGORITHM, err);
         if( err ){
             change_scheduler = false;
@@ -936,9 +957,7 @@ int    l7vsd::run( int argc, char* argv[] ) {
                 scheduler = int_val;
             }else{
                 logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 5, "invalid parameter for task scheduler algorithm.", __FILE__, __LINE__ );
-               // scheduler = SCHED_OTHER;
             }
-
             int    proc_pri  = param.get_int(PARAM_COMP_L7VSD, PARAM_SCHED_PRIORITY, err);
             if( err ){
                 logger.putLogWarn( LOG_CAT_L7VSD_MAINTHREAD, 6, "task scheduler priority parameter not found.", __FILE__, __LINE__ );
@@ -1025,7 +1044,7 @@ int    l7vsd::run( int argc, char* argv[] ) {
 //        // snmp trap function set
 //        Logger::setSnmpSendtrap( boost::bind( &snmpbridge::send_trap, bridge, _1 ) );
 //
-        adaptive_wait wait( 8, 512 );
+
         // main loop
         for(;;){
             if( unlikely( exit_requested ) ){
@@ -1034,18 +1053,12 @@ int    l7vsd::run( int argc, char* argv[] ) {
                 logger.putLogInfo( LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__ );
                 break;
             }
-            if( 0 < dispatcher.poll() ){
-                wait.reset();
-            }
-            else{
-                wait.wait();
-            }
-            //dispatcher.poll();
-            //timespec    wait_val;
-            //wait_val.tv_sec        = 0;
-            //wait_val.tv_nsec    = 10;
-            //nanosleep( &wait_val, NULL );
-            //boost::this_thread::yield();
+            dispatcher.poll();
+            timespec    wait_val;
+            wait_val.tv_sec        = 0;
+            wait_val.tv_nsec    = 10;
+            nanosleep( &wait_val, NULL );
+            boost::this_thread::yield();
         }
     
         // snmp trap function unset

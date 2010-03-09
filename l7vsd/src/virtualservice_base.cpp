@@ -104,11 +104,8 @@ void    l7vs::virtualservice_base::load_parameter( l7vs::error_code& err ){
     std::string            str_val;
     //get realserver_side networkI/F card name
     str_val    = param.get_string( l7vs::PARAM_COMP_VIRTUALSERVICE, PARAM_RS_SIDE_NIC_NAME, vs_err );
-    if( !vs_err )
+    if( !vs_err ) {
         param_data.nic_realserver_side    = str_val;
-    else{
-        err.setter( true, "nic_realserver_side parameter does not exist." );
-        return;
     }
     //get session pool size value
     int_val    = param.get_int( l7vs::PARAM_COMP_VIRTUALSERVICE, PARAM_POOLSIZE_KEY_NAME, vs_err );
@@ -226,8 +223,8 @@ void    l7vs::virtualservice_base::handle_schedmod_replication( const boost::sys
 void    l7vs::virtualservice_base::handle_throughput_update( const boost::system::error_code& err ){
     if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
         boost::format formatter("in_function : void virtualservice_base::handle_throughput_update( "
-                                "const boost::system::error_code& err ) : err = %s, err.message = %s");
-        formatter % ( err ? "true" : "false") % err.message();
+                                "const boost::system::error_code& err ) : err = %s, err.message = %s, current_up_recvsize = %ld, current_down_recvsize = %ld, wait_count_up = %ld, wait_count_down = %ld");
+        formatter % ( err ? "true" : "false") % err.message() % current_up_recvsize.get() % current_down_recvsize.get() % wait_count_up.get() % wait_count_down.get();
         l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 7, formatter.str(), __FILE__, __LINE__ );
     }
     if( likely( !err ) ){
@@ -237,26 +234,53 @@ void    l7vs::virtualservice_base::handle_throughput_update( const boost::system
         if( wait_count_up != 0 )    wait_count_up--;
         if( wait_count_down != 0 )    wait_count_down--;
 
+        if( wait_count_up == 0 ) {
+            throughput_up = 0;
+        }
+        
+        if( wait_count_down == 0 ) {
+            throughput_down = 0;
+        }
+        
         if( current_up_recvsize != 0 ){
+            
+            double byte_sec_up_val = 0.0;
             if( 0 != element.qos_upstream ){
                 // wait_count = ( current_throughput(byte/s)(=(recvsize / interval(ms)) * 1000 ) / qos_limit_throughput ) - 1(thistime)
-                wait_count_up = ( ( ( current_up_recvsize.get() / param_data.bps_interval ) * 1000 ) / element.qos_upstream );
+                //wait_count_up = ( ( ( current_up_recvsize.get() / param_data.bps_interval ) * 1000 ) / element.qos_upstream );
+                
+                byte_sec_up_val = ( (double)current_up_recvsize.get() / param_data.bps_interval );
+                wait_count_up = (unsigned long long)( ( byte_sec_up_val * 1000 ) / element.qos_upstream );
+                
                 if( wait_count_up > 0 )    wait_count_up--;
             }
             // throughput = recvsize / ( (thistime(1) + all_wait_time) * interval(ms) ) * 1000
-            throughput_up = ( current_up_recvsize.get() / ( param_data.bps_interval * ( wait_count_up.get() + 1 ) ) ) * 1000;
+            //throughput_up = ( current_up_recvsize.get() / ( param_data.bps_interval * ( wait_count_up.get() + 1 ) ) ) * 1000;
+
+            byte_sec_up_val = ( (double)current_up_recvsize.get() / ( param_data.bps_interval * ( wait_count_up.get() + 1 ) ) );
+            throughput_up = (unsigned long long)( byte_sec_up_val * 1000 );
+            
             current_up_recvsize = 0ULL;
         }
 
         if( current_down_recvsize != 0 ){
 
+            double byte_sec_down_val = 0.0;
             if( 0 != element.qos_downstream ){
                 // wait_count = ( current_throughput(byte/s)(=(recvsize / interval(ms)) * 1000 ) / qos_limit_throughput ) - 1(thistime)
-                wait_count_down = ( ( ( current_down_recvsize.get() / param_data.bps_interval ) * 1000 ) / element.qos_downstream );
+                //wait_count_down = ( ( ( current_down_recvsize.get() / param_data.bps_interval ) * 1000 ) / element.qos_downstream );
+
+                byte_sec_down_val = ( (double)current_down_recvsize.get() / param_data.bps_interval );
+                wait_count_down = (unsigned long long)( ( byte_sec_down_val * 1000 ) / element.qos_downstream );
+                
                 if( wait_count_down > 0 )    wait_count_down--;
             }
             // throughput = recvsize / ( (thistime(1) + all_wait_time) * interval(ms) ) * 1000
-            throughput_down = ( current_down_recvsize.get() / ( param_data.bps_interval * ( wait_count_down.get() + 1 ) ) ) * 1000;
+            //throughput_down = ( current_down_recvsize.get() / ( param_data.bps_interval * ( wait_count_down.get() + 1 ) ) ) * 1000;
+
+            byte_sec_down_val = ( (double)current_down_recvsize.get() / ( param_data.bps_interval * ( wait_count_down.get() + 1 ) ) );
+            throughput_down = (unsigned long long)( byte_sec_down_val * 1000 );
+            
             current_down_recvsize = 0ULL;
         }
 
@@ -269,11 +293,11 @@ void    l7vs::virtualservice_base::handle_throughput_update( const boost::system
         interrupt_running_flag--;
 
         if( unlikely( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD ) ) ){
-            boost::format formatter1("throughput(upstream) dump   : %d");
-            formatter1 % throughput_up.get();
+            boost::format formatter1("throughput(upstream) dump   : %d, wait_count_up dump  : %d");
+            formatter1 % throughput_up.get() % wait_count_up.get();
             l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 8, formatter1.str(), __FILE__, __LINE__ );
-            boost::format formatter2("throughput(downstream) dump : %d");
-            formatter2 % throughput_down.get();
+            boost::format formatter2("throughput(downstream) dump : %d, wait_count_down dump  : %d");
+            formatter2 % throughput_down.get() % wait_count_down.get();
             l7vs::Logger::putLogDebug( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 9, formatter2.str(), __FILE__, __LINE__ );
         }
     }else
@@ -333,9 +357,9 @@ cpu_set_t    l7vs::virtualservice_base::get_cpu_mask( std::string    nic_name ){
     // read interrupts.
     while( getline( ifs,  buff ) ){
         if( string::npos == buff.find( nic_name ) ) continue;
-        //割り込みIDを取得
+        // get interrupt ID
         algorithm::split( split_vec, buff, algorithm::is_any_of( ":" ));
-        if( !split_vec.size() ) return mask;    //interrupt分割不可
+        if( !split_vec.size() ) return mask;    // cannot split interrupt
         algorithm::trim( split_vec[0] );
         target_interrupt = lexical_cast<unsigned int>( split_vec[0] );
         for( size_t i = 0; i < cpu_nic_map.size(); ++i ){

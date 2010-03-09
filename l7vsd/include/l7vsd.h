@@ -47,7 +47,6 @@
 #include "logger.h"
 #include "logger_access_manager.h"
 #include "parameter.h"
-#include "adaptive_wait.h"
 
 #ifndef    L7VS_MODULE_PATH
     #define L7VS_MODULE_PATH        "."

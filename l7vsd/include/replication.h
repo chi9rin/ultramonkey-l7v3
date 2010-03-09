@@ -31,7 +31,6 @@
 #include <boost/thread/condition.hpp>
 #include <boost/shared_ptr.hpp>
 #include <stdint.h>
-#include "adaptive_wait.h"
 
 //! Max Number of Components
 #define CMP_MAX    (100)

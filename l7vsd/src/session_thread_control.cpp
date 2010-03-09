@@ -30,6 +30,36 @@
 namespace l7vs{
 
 //
+//!    @brief create up down thread
+//
+void    session_thread_control::start_thread(){
+    
+    int            int_val;
+
+    upthread.reset( new boost::thread( &session_thread_control::upstream_run, this ) );    //! upstream thread create
+    downthread.reset( new boost::thread( &session_thread_control::downstream_run, this ) );//! downstream thread create
+
+    //pthread_setschedparam
+    int    retval, sched_policy;
+    sched_param    scheduler_param;
+    int_val    = pthread_getschedparam( upthread->native_handle(), &sched_policy, &scheduler_param );
+    if( SCHED_FIFO == sched_algorithm ){
+        scheduler_param.__sched_priority    = sched_priority;
+        sched_policy    = SCHED_FIFO;
+    }else if( SCHED_RR == sched_algorithm ){
+        scheduler_param.__sched_priority    = sched_priority;
+        sched_policy    = SCHED_RR;
+    }else if( SCHED_BATCH == sched_algorithm ){
+        sched_policy    = SCHED_BATCH;
+    }
+    if( 0 <= sched_algorithm ){
+        retval            = pthread_setschedparam( upthread->native_handle(), sched_algorithm, &scheduler_param );
+        retval            = pthread_setschedparam( downthread->native_handle(), sched_algorithm, &scheduler_param );
+    }
+    
+}
+    
+//
 //!    @brief upstream thread bind function.
 //
 void    session_thread_control::upstream_run(){
@@ -39,7 +69,7 @@ void    session_thread_control::upstream_run(){
     }
 
     cpu_set_t       mask;
-    //numが1以上なら、その数だけCPU_SETする
+    // when num>0, do CPU_SET times of "num_of_core_uses".
     if( 0 < num_of_core_uses ){
         CPU_ZERO( &mask );
         for( int i = 0; i < num_of_core_uses; ++i ){
@@ -103,7 +133,7 @@ void    session_thread_control::downstream_run(){
         Logger::putLogDebug( LOG_CAT_L7VSD_VIRTUALSERVICE, 4, fmt.str(), __FILE__, __LINE__ );
     }
     cpu_set_t       mask;
-    //numが1以上なら、その数だけCPU_SETする
+    // when num>0, do CPU_SET times of "num_of_core_uses".
     if( 0 < num_of_core_uses ){
         CPU_ZERO( &mask );
         for( int i = 0; i < num_of_core_uses; ++i ){

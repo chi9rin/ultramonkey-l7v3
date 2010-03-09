@@ -150,6 +150,7 @@ sharedstatedir = @sharedstatedir@
 snmpagent_libs = @snmpagent_libs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
+ultramonkeyl7_version = @ultramonkeyl7_version@
 AUTOMAKE_OPTIONS = foreign
 L7VS_SSL_CONFDIR = /etc/l7vs/sslproxy
 all: all-am

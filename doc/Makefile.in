@@ -159,7 +159,8 @@ sharedstatedir = @sharedstatedir@
 snmpagent_libs = @snmpagent_libs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-SUBDIRS = conf sslfiles
+ultramonkeyl7_version = @ultramonkeyl7_version@
+SUBDIRS = conf sslfiles heartbeat-ra
 AUTOMAKE_OPTIONS = foreign
 all: all-recursive
 

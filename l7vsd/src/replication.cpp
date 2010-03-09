@@ -1460,7 +1460,6 @@ void        replication::service_thread(){
         boost::mutex::scoped_lock lock( service_thread_mutex );
         flag = service_flag;
     }
-    adaptive_wait wait( 8, 512 );
     for ( ; ; ){
         if ( flag == WAIT || flag == WAIT_REQ ){
             boost::mutex::scoped_lock    lock( service_thread_mutex );
@@ -1469,19 +1468,12 @@ void        replication::service_thread(){
         } else if ( flag == EXIT ){
             break;
         } else {
-            if( 0 < service_io.poll() ){
-                wait.reset();
-            }
-            else{
-                wait.wait();
-            }
-
-            //service_io.poll();
-            //timespec    wait_val;
-            //wait_val.tv_sec        = 0;
-            //wait_val.tv_nsec    = 10;
-            //nanosleep( &wait_val, NULL );
-            //boost::this_thread::yield();
+            service_io.poll();
+            timespec    wait_val;
+            wait_val.tv_sec        = 0;
+            wait_val.tv_nsec    = 10;
+            nanosleep( &wait_val, NULL );
+            boost::this_thread::yield();
         }
         {
             boost::mutex::scoped_lock    lock( service_thread_mutex );

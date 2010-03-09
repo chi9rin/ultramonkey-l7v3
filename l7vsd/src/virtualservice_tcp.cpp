@@ -407,15 +407,12 @@ void    l7vs::virtualservice_tcp::handle_accept( const l7vs::session_thread_cont
     stc_ptr_noconst->startupstream();
     stc_ptr_noconst->startdownstream();
 
-    adaptive_wait register_wait( 1, 128 );
-
     //waiting, pool_sessions.size become over 1
     //pick up session from pool
-    session_thread_control*        stc_ptr_register_accept;
+    session_thread_control* stc_ptr_register_accept;
     stc_ptr_register_accept = pool_sessions.pop();
     while( unlikely( !stc_ptr_register_accept ) ){
-        //boost::this_thread::yield();
-        register_wait.wait();
+        boost::this_thread::yield();
         stc_ptr_register_accept = pool_sessions.pop();
     }
 
@@ -715,11 +712,20 @@ void    l7vs::virtualservice_tcp::initialize( l7vs::error_code& err ){
                     return;
                 }
                 session_thread_control*    p_stc = new session_thread_control( sess, vsnic_cpumask, rsnic_cpumask, -1 );
+                p_stc->start_thread();
                 while( !pool_sessions.push( p_stc ) ){}
             }
-            catch( std::bad_alloc ex ){
+            catch( ... ){
                 Logger::putLogFatal( 
                     LOG_CAT_L7VSD_VIRTUALSERVICE, 1, "error, create session.", __FILE__, __LINE__ );
+                
+                err.setter( true, "error, create session." );
+                
+                stop();
+                l7vs::error_code finalize_err;
+                finalize_err.setter(false,"");
+                finalize( finalize_err );
+                
                 if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
                     boost::format formatter("out_function : void virtualservice_tcp::initialize( "
                                             "l7vs::error_code& err ) : err = %s, err.message = %s");
@@ -772,25 +778,26 @@ void        l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
     //stop main loop
     //stop();
 
-    adaptive_wait active_session_wait( 1, 128 );
-
     while(active_sessions.size()){
-        //boost::this_thread::yield();
-        active_session_wait.wait();
+        boost::this_thread::yield();
     }
 
-    for(;;){
-        tcp_session*                tmp_session    = NULL;
-        session_thread_control*        tmp_stc        = NULL;
-        waiting_sessions.pop( tmp_session, tmp_stc );
-        if( !tmp_stc ){
-            break;
-        }
+    if( waiting_sessions.size() > 0 ) {
+    
         for(;;){
-            if( likely( pool_sessions.push( tmp_stc ) ) )break;
+            tcp_session*                tmp_session    = NULL;
+            session_thread_control*        tmp_stc        = NULL;
+            waiting_sessions.pop( tmp_session, tmp_stc );
+            if( !tmp_stc ){
+                break;
+            }
+            for(;;){
+                if( likely( pool_sessions.push( tmp_stc ) ) )break;
+            }
         }
-    }
 
+    }
+        
     //release sessions[i]->join();
     while( !pool_sessions.empty() ){
         session_thread_control*    stc = pool_sessions.pop();
@@ -862,7 +869,7 @@ void        l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
         }
     }
 
-    vsd.release_virtual_service( element );
+    //vsd.release_virtual_service( element );
 
     if( access_log_file_name != "" ) {
         // erase access log instance.
@@ -875,6 +882,8 @@ void        l7vs::virtualservice_tcp::finalize( l7vs::error_code& err ){
                                    __FILE__, __LINE__ );
         }
     }
+
+    vsd.release_virtual_service( element );
     
     err.setter( false, "" );
 
@@ -947,8 +956,6 @@ void    l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservic
     }
 
     virtualservice_element&    elem = const_cast<virtualservice_element&>( in );
-    //郢昜ｻ｣ﾎ帷ｹ晢ｽ｡郢晢ｽｼ郢ｧ・ｿ邵ｺ逾（rtualService邵ｺ・ｫ闕ｳﾂ髢ｾ・ｴ邵ｺ蜷ｶ・狗ｸｺ蛹ｺ・､諛域ｸ言
-    //udpmode邵ｺ・ｨtcp_accept_endpoint邵ｺ・ｨprotocol_module_name邵ｺ蠕｡・ｸﾂ髢ｾ・ｴ邵ｺ蜷ｶ・狗ｸｺ阮吮・
     if( ( element.udpmode != elem.udpmode ) ||
         ( element.tcp_accept_endpoint != elem.tcp_accept_endpoint ) ||
         ( element.protocol_module_name != elem.protocol_module_name ) ){
@@ -1054,24 +1061,28 @@ void    l7vs::virtualservice_tcp::edit_virtualservice( const l7vs::virtualservic
         active_sessions.do_all( boost::bind( &session_thread_control::session_sorry_mode_change, _1, elem.sorry_flag ) );
     }
 
-    // access log flag ON and access log filename not set.
-    if ( elem.access_log_flag == 1 && element.access_log_file_name == "" ) {
-        //ERROR case
-        Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 15, SCHEDMOD_LOAD_ERROR_MSG, __FILE__, __LINE__ );
-        err.setter( true, "access log flag change err." );
-        return;
-    }
+    if( elem.access_log_flag != -1 ) {
+    
+        // access log flag ON and access log filename not set.
+        if ( elem.access_log_flag == 1 && element.access_log_file_name == "" ) {
+            //ERROR case
+            Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE, 15, SCHEDMOD_LOAD_ERROR_MSG, __FILE__, __LINE__ );
+            err.setter( true, "access log flag change err." );
+            return;
+        }
 
-    // access log flag check and send access log output ON or OFF message to tcp_session
-    element.access_log_flag = elem.access_log_flag;
-    if (elem.access_log_flag==1 && access_log_flag==false ) {
-        active_sessions.do_all( boost::bind( &session_thread_control::session_accesslog_output_mode_on, _1 ) );
-        access_log_flag = true;
-    } else if ( elem.access_log_flag==0 && access_log_flag==true ) {
-        active_sessions.do_all( boost::bind( &session_thread_control::session_accesslog_output_mode_off, _1 ) );
-        access_log_flag = false;
-    }
+        // access log flag check and send access log output ON or OFF message to tcp_session
+        element.access_log_flag = elem.access_log_flag;
+        if (elem.access_log_flag==1 && access_log_flag==false ) {
+            active_sessions.do_all( boost::bind( &session_thread_control::session_accesslog_output_mode_on, _1 ) );
+            access_log_flag = true;
+        } else if ( elem.access_log_flag==0 && access_log_flag==true ) {
+            active_sessions.do_all( boost::bind( &session_thread_control::session_accesslog_output_mode_off, _1 ) );
+            access_log_flag = false;
+        }
 
+    }
+        
     err.setter( false, "" );
 
     if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_VIRTUALSERVICE ) ) ){
@@ -1462,14 +1473,9 @@ void    l7vs::virtualservice_tcp::stop(){
     Logger    funcLog( LOG_CAT_L7VSD_VIRTUALSERVICE, 81, "function : void virtualservice_tcp::stop()", __FILE__, __LINE__ );
 
     boost::system::error_code    err;
-
     virtualservice_stop_flag++;
-
-    adaptive_wait interrupt_wait( 1, 128 );
-
     while( interrupt_running_flag.get() ){
-        //boost::this_thread::yield();
-        interrupt_wait.wait();
+        boost::this_thread::yield();
     }
 
     acceptor_.close( err );

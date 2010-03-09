@@ -134,6 +134,10 @@ bool    l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cm
         count_map[ itr->first ] = 0;
     }
 
+    if ( l7vsadm_request::CMD_EDIT_VS == cmd ) {
+        request.vs_element.access_log_flag = -1;
+    }
+    
     for( int pos = 2; pos < argc; ++pos ){    // check options.
         parse_opt_map_type::iterator itr = vs_option_dic.find( argv[pos] );
         if( itr != vs_option_dic.end() ){    // find option
@@ -221,6 +225,7 @@ bool    l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cm
         Logger::putLogError( LOG_CAT_L7VSADM_PARSE, 89, buf, __FILE__, __LINE__ );
         return false;
     }
+    
     if( l7vsadm_request::CMD_EDIT_VS == cmd){
         // Existence check of the parameter
         if( count_map["-s"] == 0 &&
@@ -347,7 +352,7 @@ bool    l7vs::l7vsadm::parse_vs_func( l7vs::l7vsadm_request::COMMAND_CODE_TAG cm
 
     if( l7vsadm_request::CMD_ADD_VS == cmd && 
         ( count_map["-z"] > 0 || count_map["--ssl"] > 0 ) ) {
-        protocol_module_control&	ctrl 
+        protocol_module_control& ctrl 
                 = protocol_module_control::getInstance();
         ctrl.initialize( L7VS_MODULE_PATH );
         protocol_module_base* module;
@@ -1002,6 +1007,8 @@ bool    l7vs::l7vsadm::parse_opt_vs_access_log_logrotate_func( int& pos, int arg
         return false;
     }
     
+    request.vs_element.access_log_rotate_key_info = "";
+    
     // create access log  args.
     std::vector< std::string > arguments_vector;
     virtualservice_element::access_log_rotate_arguments_map_type arguments_map;
@@ -1013,7 +1020,13 @@ bool    l7vs::l7vsadm::parse_opt_vs_access_log_logrotate_func( int& pos, int arg
             break;    // module option end.
         }
         arguments_vector.push_back( argv[pos] );
+
+        request.vs_element.access_log_rotate_key_info += argv[pos];
+        request.vs_element.access_log_rotate_key_info += " ";
+
     }
+    boost::algorithm::erase_last( request.vs_element.access_log_rotate_key_info , " " );
+
     if( 0 < arguments_vector.size() ){
         if( 0 == ( arguments_vector.size() % 2 ) ){
             for( unsigned int i = 0; i < ( arguments_vector.size() - 1 ); ++i ){
@@ -1047,12 +1060,9 @@ bool    l7vs::l7vsadm::parse_opt_vs_access_log_logrotate_func( int& pos, int arg
     
     request.vs_element.access_log_file_name = access_log_file_name;
     request.vs_element.access_log_rotate_arguments.clear();
-    request.vs_element.access_log_rotate_key_info = "";
     BOOST_FOREACH( virtualservice_element::access_log_rotate_arguments_pair_type pair, arguments_map ){
         request.vs_element.access_log_rotate_arguments.insert( pair );
-        request.vs_element.access_log_rotate_key_info += pair.first + " " + pair.second + " ";
     }
-    boost::algorithm::erase_last( request.vs_element.access_log_rotate_key_info , " " );
 
     return true;
 }
@@ -2563,8 +2573,9 @@ bool    l7vs::l7vsadm::execute( int argc, char* argv[] ){
 
     // Get l7vsadm execute file path from /proc/(pid)/exe (symbolic link)
     char l7vsadm_file_path[256];
+    ssize_t retsize;
     memset(l7vsadm_file_path, 0, sizeof(l7vsadm_file_path));
-    readlink("/proc/self/exe", l7vsadm_file_path, sizeof(l7vsadm_file_path));
+    retsize = readlink("/proc/self/exe", l7vsadm_file_path, sizeof(l7vsadm_file_path));
 
     // L7vsadm command conflict check. (Try l7vsadm execute file lock)
     file_lock    lock( l7vsadm_file_path, l7vsadm_err );

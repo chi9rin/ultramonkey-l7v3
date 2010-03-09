@@ -2686,10 +2686,10 @@ namespace l7vs
                 session_data_ptr = session_thread_it->second;
             }
 
-            //current_message_rest_size　>　0
+            //current_message_rest_size > 0
             if (session_data_ptr->current_message_rest_size > 0)
             {
-                //data size　>　0
+                //data size > 0
                 if (session_data_ptr->data_length > 0)
                 {
                     //set return status
@@ -2708,7 +2708,7 @@ namespace l7vs
             //current_message_rest_size is 0
             else
             {
-                //data size　>　0
+                //data size > 0
                 if (session_data_ptr->data_length > 0)
                 {
                     //data state is HTTP_BODY
@@ -3428,10 +3428,10 @@ namespace l7vs
                 session_data_ptr = session_thread_it->second;
             }
 
-            //current_message_rest_size　>　0
+            //current_message_rest_size > 0
             if (session_data_ptr->current_message_rest_size > 0)
             {
-                //data size　>　0
+                //data size > 0
                 if (session_data_ptr->data_length > 0)
                 {
                     //set return status
@@ -3450,7 +3450,7 @@ namespace l7vs
             //current_message_rest_size is 0
             else
             {
-                //data size　>　0
+                //data size > 0
                 if (session_data_ptr->data_length> 0)
                 {
                     //data state is HTTP_BODY
@@ -4655,10 +4655,10 @@ namespace l7vs
                 session_data_ptr = session_thread_it->second;
             }
 
-            //current_message_rest_size　>　0
+            //current_message_rest_size > 0
             if (session_data_ptr->current_message_rest_size > 0)
             {
-                //data size　>　0
+                //data size > 0
                 if (session_data_ptr->data_length > 0)
                 {
                     //set return status
@@ -4677,7 +4677,7 @@ namespace l7vs
             //current_message_rest_size is 0
             else
             {
-                //data size　>　0
+                //data size > 0
                 if (session_data_ptr->data_length > 0)
                 {
                     //data state is HTTP_BODY

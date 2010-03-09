@@ -1,7 +1,7 @@
 AC_PREREQ(2.59)
 AC_INIT(l7vsd)
 PACKAGENAME=l7vsd
-VERSION=3.0.0-0
+VERSION=3.0.0-1
 
 AM_INIT_AUTOMAKE($PACKAGENAME, $VERSION, no-define )
 AC_CONFIG_SRCDIR([config.h.in])
@@ -68,7 +68,7 @@ AC_ARG_WITH(
 
 AC_ARG_WITH(
 	l7vs-buffer-size,
-	[	--wigh-l7vs-buffer-size=NUM	l7vsd using heap buffer size.
+	[	--with-l7vs-buffer-size=NUM	l7vsd using heap buffer size.
 									[default=4096] ],
 	[	l7vs_max_buffer_size="$withval" ],
 	[	l7vs_max_buffer_size=4096 ]
@@ -90,10 +90,12 @@ AC_SUBST(l7vs_max_buffer_size)
 AC_SUBST(l7vs_config)
 AC_SUBST(MANDIR)
 AC_SUBST(snmpagent_libs)
+AC_SUBST(ultramonkeyl7_version,ultramonkeyl7-$VERSION)
 
 AC_CONFIG_FILES([doc/Makefile]
                 [doc/conf/Makefile]
                 [doc/sslfiles/Makefile]
+                [doc/heartbeat-ra/Makefile]
                 [l7directord/Makefile]
                 [l7vsd/Makefile]
                 [l7vsd/init.d/Makefile]

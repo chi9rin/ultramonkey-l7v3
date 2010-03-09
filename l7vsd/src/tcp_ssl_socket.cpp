@@ -43,9 +43,11 @@ namespace l7vs{
         rw_scoped_lock scope_lock(close_mutex);
 
         bool bres = false;
-        my_socket.handshake(boost::asio::ssl::stream_base::server, ec);
+        my_socket->handshake(boost::asio::ssl::stream_base::server, ec);
         if( !ec ){
             bres = true;
+        }else if( ec != boost::asio::error::try_again ){
+            handshake_error_flag = true;
         }
 
         if (unlikely( LOG_LV_DEBUG == Logger::getLogLevel(
@@ -70,7 +72,7 @@ namespace l7vs{
             buf << "Thread ID[";
             buf << boost::this_thread::get_id();
             buf << "] tcp_ssl_socket::accept [";
-            buf << my_socket.lowest_layer().remote_endpoint(ec);
+            buf << my_socket->lowest_layer().remote_endpoint(ec);
             buf << "]";
             Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 54, buf.str(), 
                 __FILE__, __LINE__ );
@@ -81,7 +83,7 @@ namespace l7vs{
         if(opt_info.nodelay_opt){
             boost::system::error_code ec;
             boost::asio::ip::tcp::no_delay set_option(opt_info.nodelay_val);
-            my_socket.lowest_layer().set_option(set_option,ec);
+            my_socket->lowest_layer().set_option(set_option,ec);
             if(unlikely(ec)){
                 //ERROR
                 Logger::putLogError( LOG_CAT_L7VSD_SESSION, 107,
@@ -96,7 +98,7 @@ namespace l7vs{
             int val = opt_info.cork_val;
             size_t len = sizeof(val);
             boost::asio::detail::socket_ops::setsockopt(
-                my_socket.lowest_layer().native(),IPPROTO_TCP,
+                my_socket->lowest_layer().native(),IPPROTO_TCP,
                 TCP_CORK,&val,len,ec);
             if(unlikely(ec)){
                 //ERROR
@@ -117,7 +119,7 @@ namespace l7vs{
             Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 56, 
                 "in_function : tcp_ssl_socket::close", __FILE__, __LINE__ );
         }
-        
+
         rw_scoped_lock scope_lock(close_mutex);
 
         //----Debug log--------------------------------------------------------
@@ -129,7 +131,7 @@ namespace l7vs{
                 buf << "Thread ID[";
                 buf << boost::this_thread::get_id();
                 buf << "] tcp_ssl_socket::close [";
-                buf << my_socket.lowest_layer().remote_endpoint(ec);
+                buf << my_socket->lowest_layer().remote_endpoint(ec);
                 buf << "]";
                 Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 58, buf.str(), 
                     __FILE__, __LINE__ );
@@ -141,8 +143,8 @@ namespace l7vs{
             open_flag = false;
             bres = true;
         }
-        my_socket.lowest_layer().close(ec);
-        
+        my_socket->lowest_layer().close(ec);
+
         if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( 
             LOG_CAT_L7VSD_SESSION ) ) ){
             Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 57, 
@@ -166,7 +168,7 @@ namespace l7vs{
         rd_scoped_lock scope_lock(close_mutex);
         bool bres = false;
         boost::asio::socket_base::non_blocking_io cmd(true);
-        my_socket.lowest_layer().io_control(cmd,ec);
+        my_socket->lowest_layer().io_control(cmd,ec);
         if(likely( !ec )){
             // OK
             bres = true;
@@ -196,10 +198,10 @@ namespace l7vs{
                 __FILE__, __LINE__ );
         }
 
-        rd_scoped_lock scope_lock(close_mutex);
+        rw_scoped_lock scope_lock(close_mutex);
         std::size_t res_size = 0;
         if(likely(non_blocking_flag)){
-            res_size = my_socket.write_some(buffers,ec);
+            res_size = my_socket->write_some(buffers,ec);
             if(unlikely(ec)){
                 if (likely(!open_flag)) {
                     res_size = 0;
@@ -224,7 +226,7 @@ namespace l7vs{
         boost::asio::mutable_buffers_1 buffers,
         boost::system::error_code& ec){
 
-        rd_scoped_lock scope_lock(close_mutex);
+        rw_scoped_lock scope_lock(close_mutex);
         std::size_t res_size = 0;
         if(unlikely(open_flag && non_blocking_flag)){
             //set TCP_QUICKACK
@@ -232,7 +234,7 @@ namespace l7vs{
                 int val = opt_info.quickack_val;
                 std::size_t len = sizeof(val);
                 boost::asio::detail::socket_ops::setsockopt(
-                    my_socket.lowest_layer().native(),IPPROTO_TCP,
+                    my_socket->lowest_layer().native(),IPPROTO_TCP,
                     TCP_QUICKACK,&val,len,ec);
                 if(unlikely(ec)){
                     //ERROR
@@ -245,8 +247,8 @@ namespace l7vs{
                         buf.str() , __FILE__, __LINE__ );
                 }
             }
-            //boost::this_thread::yield();
-            res_size = my_socket.read_some(buffers,ec);
+            boost::this_thread::yield();
+            res_size = my_socket->read_some(buffers,ec);
         }
         return res_size;
     }

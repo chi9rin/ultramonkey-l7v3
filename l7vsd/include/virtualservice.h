@@ -46,8 +46,6 @@
 #include "udp_session.h"
 #include "session_thread_control.h"
 #include "replication.h"
-#include "adaptive_wait.h"
-
 
 #include "protocol_module_base.h"
 #include "schedule_module_base.h"
@@ -60,6 +58,9 @@
 #define PARAM_POOLSIZE_KEY_NAME    "session_thread_pool_size"
 #define PARAM_BPS_CALC_INTERVAL    "throughput_calc_interval"
 #define PARAM_REP_INTERVAL         "interval"
+
+//! Default nic of realserver side
+#define RS_SIDE_NIC_NAME_DEFAULT   "eth0"
 
 #define PROTOMOD_NOTLOAD_ERROR_MSG "Protocol Module not loaded"
 #define SCHEDMOD_NOTLOAD_ERROR_MSG "Schedule Module not loaded"
@@ -130,6 +131,8 @@ public:
                                     tcp_schedule_func_type;
 
     typedef l7vs::atomic<unsigned long long> AUUL;
+	//typedef l7vs::atomic<unsigned int> AUI;
+
 
     //!    @struct    replication_header replication header structure
     struct    replication_header{
@@ -168,7 +171,8 @@ protected:
         int         session_pool_size;
         long        bps_interval;
         long        rep_interval;
-        parameter_data() :  session_pool_size( SESSION_POOL_NUM_DEFAULT ),
+        parameter_data() :  nic_realserver_side( RS_SIDE_NIC_NAME_DEFAULT ),
+                            session_pool_size( SESSION_POOL_NUM_DEFAULT ),
                             bps_interval( BPS_INTERVAL_DEFAULT ),
                             rep_interval( REP_INTERVAL_DEFAULT ){}
     };
@@ -269,7 +273,7 @@ public:
     explicit virtualservice_base( const l7vsd&,
                                   const replication&,
                                   const virtualservice_element& );
-    virtual ~virtualservice_base(){};
+    virtual ~virtualservice_base(){ dispatcher.reset();dispatcher.stop(); };
 
     virtual void initialize( error_code& ) = 0;
     virtual void finalize( error_code& ) = 0;

@@ -30,6 +30,7 @@
 //#include <boost/asio/ssl.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
+#include <sys/epoll.h>
 
 #include "wrlock.h"
 #include "protocol_module_base.h"
@@ -39,15 +40,11 @@
 #include "tcp_realserver_connect_socket_list.h"
 #include "tcp_data.h"
 #include "lockfree_queue.h"
-#include "adaptive_wait.h"
-#include <sys/epoll.h>
 
 #define TCP_SESSION_THREAD_STATE_BIT 8
 
 #define    PARAM_UP_BUFFER_SIZE    "upstream_buffer_size"
 #define    PARAM_DOWN_BUFFER_SIZE    "downstream_buffer_size"
-#define MAXEVENTS  (1)
-#define EPTIMEOUT  (-1)
 
 namespace l7vs{
 
@@ -318,10 +315,17 @@ namespace l7vs{
             //! socket option 
             tcp_socket_option_info socket_opt_info;
 
-            int up_cl_epollfd;
-            int up_rs_epollfd;
-            int down_cl_epollfd;
-            int down_rs_epollfd;
+            // epoll using member
+            #define EVENT_NUM       2
+            #define EPOLL_TIMEOUT   50      //[microsecond]
+            struct epoll_event  up_client_events[EVENT_NUM];
+            struct epoll_event  up_realserver_events[EVENT_NUM];
+            struct epoll_event  down_client_events[EVENT_NUM];
+            struct epoll_event  down_realserver_events[EVENT_NUM];
+            int    up_client_epollfd;
+            int    up_realserver_epollfd;
+            int    down_client_epollfd;
+            int    down_realserver_epollfd;
 
             //! handshake timer handler
             //! @param[in]        error is error code object
@@ -515,7 +519,6 @@ namespace l7vs{
             //! down thread close all socket
             virtual void down_thread_all_socket_close(void);
 
-            
     };// class tcp_session
 }// namespace l7vs
 

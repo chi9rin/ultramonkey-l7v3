@@ -286,7 +286,7 @@ namespace l7vs{
                         buf.str() , __FILE__, __LINE__ );
                 }
             }
-            //boost::this_thread::yield();
+            boost::this_thread::yield();
             res_size = my_socket.read_some(buffers,ec);
         }
         return res_size;

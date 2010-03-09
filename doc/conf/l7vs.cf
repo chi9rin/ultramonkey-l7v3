@@ -155,17 +155,13 @@ con_count = 10
 #
 [l7vsd]
 maxfileno = 65535
-# task_scheduler_algorithm    = 2
-# task_scheduler_priority     = 99
 
 #
 # virtualservice setting
 #
 [virtualservice]
-nic_realserver_side         = "eth0"
 session_thread_pool_size    = 32
 throughput_calc_interval    = 500
-num_of_core_uses            = 0
 
 #
 # l7vsd replication setting
@@ -193,8 +189,3 @@ ip_addr = "127.0.0.1"
 port = 60162
 interval = 1000
 status = 0
-
-[session]
-upstream_buffer_size = 8192
-downstream_buffer_size = 8192
-

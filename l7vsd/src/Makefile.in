@@ -264,6 +264,7 @@ sharedstatedir = @sharedstatedir@
 snmpagent_libs = @snmpagent_libs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
+ultramonkeyl7_version = @ultramonkeyl7_version@
 AUTOMAKE_OPTIONS = foreign
 noinst_LIBRARIES = libl7vsd_parameter.a libl7vsadm_parameter.a libsnmpagent_parameter.a \
 			libl7vsd_logger.a libl7vsadm_logger.a libsnmpagent_logger.a 
