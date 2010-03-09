@@ -45,6 +45,8 @@
 
 #define    PARAM_UP_BUFFER_SIZE    "upstream_buffer_size"
 #define    PARAM_DOWN_BUFFER_SIZE    "downstream_buffer_size"
+#define    PARAM_EPOLL_TRIGGER    "epoll_trigger"
+#define    PARAM_EPOLL_TIMEOUT    "epoll_timeout"
 
 namespace l7vs{
 
@@ -317,15 +319,26 @@ namespace l7vs{
 
             // epoll using member
             #define EVENT_NUM       2
-            #define EPOLL_TIMEOUT   50      //[microsecond]
             struct epoll_event  up_client_events[EVENT_NUM];
             struct epoll_event  up_realserver_events[EVENT_NUM];
+            struct epoll_event  up_sorryserver_events[EVENT_NUM];
             struct epoll_event  down_client_events[EVENT_NUM];
             struct epoll_event  down_realserver_events[EVENT_NUM];
+            struct epoll_event  down_sorryserver_events[EVENT_NUM];
             int    up_client_epollfd;
             int    up_realserver_epollfd;
+            int    up_sorryserver_epollfd;
             int    down_client_epollfd;
             int    down_realserver_epollfd;
+            int    down_sorryserver_epollfd;
+            bool   up_client_epollfd_registered;
+            bool   up_realserver_epollfd_registered;
+            bool   up_sorryserver_epollfd_registered;
+            bool   down_client_epollfd_registered;
+            bool   down_realserver_epollfd_registered;
+            bool   down_sorryserver_epollfd_registered;
+            bool   is_epoll_edge_trigger;
+            int    epoll_timeout;
 
             //! handshake timer handler
             //! @param[in]        error is error code object
