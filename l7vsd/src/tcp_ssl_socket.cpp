@@ -143,6 +143,7 @@ namespace l7vs{
             open_flag = false;
             bres = true;
         }
+        my_socket->shutdown(ec);
         my_socket->lowest_layer().close(ec);
 
         if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( 
