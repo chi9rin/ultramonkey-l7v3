@@ -147,8 +147,6 @@ snmpagent_system_environment     = "warn"
 [l7vsadm]
 cmd_interval = 1
 cmd_count = 10
-con_interval = 1
-con_count = 10
 
 #
 # l7vsd setting
