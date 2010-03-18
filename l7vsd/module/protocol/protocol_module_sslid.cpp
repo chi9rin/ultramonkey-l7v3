@@ -1413,8 +1413,8 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_accept(
 
 //! called from after session recv in client socket. use in upstream thread.
 //! @param[in] upstream thread id
-//! @param[in] recive buffer refarence.
-//! @param[in] recive length
+//! @param[in] receive buffer refarence.
+//! @param[in] receive length
 //! @return session use EVENT mode(CLIENT_RECV, REALSERVER_SELECT, FINALIZE).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
     const boost::thread::id thread_id,
@@ -2887,7 +2887,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_send(
 //! called from after realserver recvive for TCP/IP
 //! @param[in] downstream thread id
 //! @param[in] realserver TCP/IP endpoint reference
-//! @param[in] realserver recive buffer reference.
+//! @param[in] realserver receive buffer reference.
 //! @param[in] recv data length
 //! @return session use EVENT mode(REALSERVER_RECV, CLIENT_CONNECTION_CHECK, FINALIZE).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
@@ -3166,10 +3166,10 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
     return status;
 }
 
-//! called from after realserver recive.for UDP
+//! called from after realserver receive.for UDP
 //! @param[in] downstream thread id
 //! @param[in] realserver UDP endpoint reference
-//! @param[in] recive from realserver buffer reference
+//! @param[in] receive from realserver buffer reference
 //! @param[in] recv data length
 //! @return session use EVENT mode(STOP).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
@@ -3194,10 +3194,10 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
     return STOP;
 }
 
-//! called from after sorryserver recive
+//! called from after sorryserver receive
 //! @param[in] downstream thread id
 //! @param[in] sorryserver endpoint reference
-//! @param[in] recive from realserver buffer reference.
+//! @param[in] receive from realserver buffer reference.
 //! @param[in] recv data length
 //! @return     session use EVENT mode.
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_recv(

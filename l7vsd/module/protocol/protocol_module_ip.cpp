@@ -1647,8 +1647,8 @@ namespace l7vs
 
     //! called from after session recv in client socket. use in upstream thread.
     //! @param[in]    upstream thread id
-    //! @param[in]    recive buffer refarence.
-    //! @param[in]    recive length
+    //! @param[in]    receive buffer refarence.
+    //! @param[in]    receive length
     //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_client_recv(const boost::thread::id thread_id,
             const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer, const size_t recvlen)
@@ -3677,10 +3677,10 @@ namespace l7vs
         return status;
     }
 
-    //! called from after realserver recive.for UDP
+    //! called from after realserver receive.for UDP
     //! @param[in]    downstream thread id
     //! @param[in]    realserver UDP endpoint reference
-    //! @param[in]    recive from realserver buffer reference
+    //! @param[in]    receive from realserver buffer reference
     //! @param[in]    recv data length
     //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_realserver_recv(
@@ -3705,7 +3705,7 @@ namespace l7vs
     //! called from after realserver recvive for TCP/IP
     //! @param[in]    downstream thread id
     //! @param[in]    realserver TCP/IP endpoint reference
-    //! @param[in]    realserver recive buffer reference.
+    //! @param[in]    realserver receive buffer reference.
     //! @param[in]    recv data length
     //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_realserver_recv(
@@ -4045,10 +4045,10 @@ namespace l7vs
 
 
 
-    //! called from after sorryserver recive
+    //! called from after sorryserver receive
     //! @param[in]    downstream thread id
     //! @param[in]    sorryserver endpoint reference
-    //! @param[in]    recive from realserver buffer reference.
+    //! @param[in]    receive from realserver buffer reference.
     //! @param[in]    recv data length
     //! @return     session use EVENT mode
     protocol_module_base::EVENT_TAG protocol_module_ip::handle_sorryserver_recv(

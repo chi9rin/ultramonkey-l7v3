@@ -506,7 +506,7 @@ namespace l7vs
         typedef std::vector<std::string>::const_iterator vec_str_it;
 
         //set forwarded flag true
-        forwarded_for = 1;
+        forwarded_for = FORWARDED_FOR_ON;
 
         try
         {
@@ -628,7 +628,7 @@ namespace l7vs
                 //forward flag = OFF
                 if (!forward_checked)
                 {
-                    forwarded_for = 0;
+                    forwarded_for = FORWARDED_FOR_OFF;
                 }
             }
 
@@ -827,8 +827,8 @@ namespace l7vs
             p_up->last_status = INITIALIZE;
             p_up->client_endpoint_tcp = client_endpoint_tcp;
 
-            recive_data recv_data;
-            p_up->recive_data_map[client_endpoint_tcp] = recv_data;
+            receive_data recv_data;
+            p_up->receive_data_map[client_endpoint_tcp] = recv_data;
 
             /*-------- DEBUG LOG --------*/
             if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -955,7 +955,7 @@ namespace l7vs
         thread_data_ptr p_up;
         thread_data_ptr p_down;
         session_thread_data_map_it session_thread_data_it;
-        recive_data_map_it recive_data_it;
+        receive_data_map_it receive_data_it;
 
         //session thread free
         try
@@ -1135,8 +1135,8 @@ namespace l7vs
 
     //! called from after session recv in client socket. use in upstream thread.
     //! @param[in]    upstream thread id
-    //! @param[in]    recive buffer refarence.
-    //! @param[in]    recive length
+    //! @param[in]    receive buffer refarence.
+    //! @param[in]    receive length
     //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(const boost::thread::id thread_id,
             const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer, const size_t recvlen)
@@ -1178,7 +1178,7 @@ namespace l7vs
         bool bret = false;
         CHECK_RESULT_TAG check_result;
         session_thread_data_map_it session_thread_it;
-        recive_data_map_it recive_data_it;
+        receive_data_map_it receive_data_it;
 
         //parameter check
         if (recvlen > recvbuffer.size())
@@ -1226,8 +1226,8 @@ namespace l7vs
             //end flag off
             else
             {
-                recive_data_it = session_data->recive_data_map.find(session_data->client_endpoint_tcp);
-                if (unlikely(recive_data_it == session_data->recive_data_map.end()))
+                receive_data_it = session_data->receive_data_map.find(session_data->client_endpoint_tcp);
+                if (unlikely(receive_data_it == session_data->receive_data_map.end()))
                 {
                     boost::format formatter("Invalid endpoint. thread id : %d.");
                     formatter % boost::this_thread::get_id();
@@ -1235,7 +1235,7 @@ namespace l7vs
                     throw -1;
                 }
 
-                recive_data& recv_data = recive_data_it->second;
+                receive_data& recv_data = receive_data_it->second;
 
                 send_status_it it = recv_data.send_status_list.begin();
                 send_status_it it_end = recv_data.send_status_list.end();
@@ -1341,13 +1341,13 @@ namespace l7vs
                 }
                 /*------DEBUG LOG END------*/
 
-                //recive buffer process
+                //receive buffer process
                 //buffer rest size < request size
-                if (recv_data.recive_buffer_rest_size < recvlen)
+                if (recv_data.receive_buffer_rest_size < recvlen)
                 {
                     //buffer max size < remain size + request size
                     //buffer is need reallocate
-                    if (recv_data.recive_buffer_max_size < data_remain_size + recvlen)
+                    if (recv_data.receive_buffer_max_size < data_remain_size + recvlen)
                     {
                         //the buffer's size that will be allocated is exceed the upper limit value
                         if (MAX_SESSIONLESS_MODULE_BUFFER_SIZE < data_remain_size + recvlen)
@@ -1371,7 +1371,7 @@ namespace l7vs
                         }
 
                         buffer_size = (data_remain_size + recvlen) > MAX_BUFFER_SIZE ? (data_remain_size + recvlen) : MAX_BUFFER_SIZE;
-                        //recive_buffer1's memory allocate and initialization
+                        //receive_buffer1's memory allocate and initialization
                         buffer1 = new char[buffer_size];
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -1382,7 +1382,7 @@ namespace l7vs
                         }
                         /*------DEBUG LOG END------*/
                         memset(buffer1, 0, buffer_size);
-                        //recive_buffer2's memory allocate and initialization
+                        //receive_buffer2's memory allocate and initialization
                         buffer2 = new char[buffer_size];
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -1398,7 +1398,7 @@ namespace l7vs
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
                             std::string datadump;
-                            dump_memory(recv_data.recive_buffer + data_remain_start, data_remain_size, datadump);
+                            dump_memory(recv_data.receive_buffer + data_remain_start, data_remain_size, datadump);
                             boost::format formatter(
                                 "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_client_recv() : before memcpy (data dump) : "
@@ -1408,7 +1408,7 @@ namespace l7vs
                         }
                         /*------DEBUG LOG END------*/
                         //copy data from old buffer to new buffer
-                        memcpy(buffer1, recv_data.recive_buffer + data_remain_start, data_remain_size);
+                        memcpy(buffer1, recv_data.receive_buffer + data_remain_start, data_remain_size);
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
@@ -1451,49 +1451,49 @@ namespace l7vs
                         }
                         /*------DEBUG LOG END------*/
                         //free old buffer1 and old buffer2
-                        if (recv_data.recive_buffer1 != NULL)
+                        if (recv_data.receive_buffer1 != NULL)
                         {
                             /*-------- DEBUG LOG --------*/
                             if (unlikely(LOG_LV_DEBUG == getloglevel()))
                             {
                                 boost::format formatter("delete : address = &(%d).");
-                                formatter % static_cast<void*>(recv_data.recive_buffer1);
+                                formatter % static_cast<void*>(recv_data.receive_buffer1);
                                 putLogDebug(100049, formatter.str(), __FILE__,
                                             __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
-                            delete[] recv_data.recive_buffer1;
-                            recv_data.recive_buffer1 = NULL;
+                            delete[] recv_data.receive_buffer1;
+                            recv_data.receive_buffer1 = NULL;
                         }
 
-                        if (recv_data.recive_buffer2 != NULL)
+                        if (recv_data.receive_buffer2 != NULL)
                         {
                             /*-------- DEBUG LOG --------*/
                             if (unlikely(LOG_LV_DEBUG == getloglevel()))
                             {
                                 boost::format formatter("delete : address = &(%d).");
-                                formatter % static_cast<void*>(recv_data.recive_buffer2);
+                                formatter % static_cast<void*>(recv_data.receive_buffer2);
                                 putLogDebug(100050, formatter.str(), __FILE__,
                                             __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
-                            delete[] recv_data.recive_buffer2;
-                            recv_data.recive_buffer2 = NULL;
+                            delete[] recv_data.receive_buffer2;
+                            recv_data.receive_buffer2 = NULL;
                         }
 
                         //set new buffer pointer
-                        recv_data.recive_buffer1 = buffer1;
-                        recv_data.recive_buffer2 = buffer2;
-                        recv_data.recive_buffer = recv_data.recive_buffer1;
+                        recv_data.receive_buffer1 = buffer1;
+                        recv_data.receive_buffer2 = buffer2;
+                        recv_data.receive_buffer = recv_data.receive_buffer1;
                         //set new buffer's max size
-                        recv_data.recive_buffer_max_size = buffer_size;
+                        recv_data.receive_buffer_max_size = buffer_size;
                     }
                     //buffer's max size >= remain data size + requst size
                     //buffer isn't need reallocate, but switch
                     else
                     {
                         //pointer valid check
-                        if (unlikely(recv_data.recive_buffer1 == NULL || recv_data.recive_buffer2 == NULL))
+                        if (unlikely(recv_data.receive_buffer1 == NULL || recv_data.receive_buffer2 == NULL))
                         {
                             boost::format formatter("Invalid pointer. thread id : %d.");
                             formatter % boost::this_thread::get_id();
@@ -1501,15 +1501,15 @@ namespace l7vs
                             throw -1;
                         }
                         //using buffer is buffer1
-                        if (recv_data.recive_buffer == recv_data.recive_buffer1)
+                        if (recv_data.receive_buffer == recv_data.receive_buffer1)
                         {
                             //buffer2 initialization
-                            memset(recv_data.recive_buffer2, 0, recv_data.recive_buffer_max_size);
+                            memset(recv_data.receive_buffer2, 0, recv_data.receive_buffer_max_size);
                             /*-------- DEBUG LOG --------*/
                             if (unlikely(LOG_LV_DEBUG == getloglevel()))
                             {
                                 std::string datadump;
-                                dump_memory(recv_data.recive_buffer + data_remain_start, data_remain_size, datadump);
+                                dump_memory(recv_data.receive_buffer + data_remain_start, data_remain_size, datadump);
                                 boost::format formatter(
                                     "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_client_recv() : before memcpy (data dump) : "
@@ -1519,12 +1519,12 @@ namespace l7vs
                             }
                             /*------DEBUG LOG END------*/
                             //copy data from buffer1 to buffer2
-                            memcpy(recv_data.recive_buffer2, recv_data.recive_buffer + data_remain_start, data_remain_size);
+                            memcpy(recv_data.receive_buffer2, recv_data.receive_buffer + data_remain_start, data_remain_size);
                             /*-------- DEBUG LOG --------*/
                             if (unlikely(LOG_LV_DEBUG == getloglevel()))
                             {
                                 std::string datadump;
-                                dump_memory(recv_data.recive_buffer2, recvlen, datadump);
+                                dump_memory(recv_data.receive_buffer2, recvlen, datadump);
                                 boost::format formatter(
                                     "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_client_recv() : after memcpy (data dump) : "
@@ -1546,12 +1546,12 @@ namespace l7vs
                                 putLogDebug(100053, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
-                            memcpy(recv_data.recive_buffer2 + data_remain_size, recvbuffer.data(), recvlen);
+                            memcpy(recv_data.receive_buffer2 + data_remain_size, recvbuffer.data(), recvlen);
                             /*-------- DEBUG LOG --------*/
                             if (unlikely(LOG_LV_DEBUG == getloglevel()))
                             {
                                 std::string datadump;
-                                dump_memory(recv_data.recive_buffer2 + data_remain_size, recvlen, datadump);
+                                dump_memory(recv_data.receive_buffer2 + data_remain_size, recvlen, datadump);
                                 boost::format formatter(
                                     "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_client_recv() : after memcpy (data dump) : "
@@ -1561,18 +1561,18 @@ namespace l7vs
                             }
                             /*------DEBUG LOG END------*/
                             //set buffer2 as using buffer
-                            recv_data.recive_buffer = recv_data.recive_buffer2;
+                            recv_data.receive_buffer = recv_data.receive_buffer2;
                         }
                         //using buffer is buffer2
                         else
                         {
                             //buffer1 initializtion
-                            memset(recv_data.recive_buffer1, 0, recv_data.recive_buffer_max_size);
+                            memset(recv_data.receive_buffer1, 0, recv_data.receive_buffer_max_size);
                             /*-------- DEBUG LOG --------*/
                             if (unlikely(LOG_LV_DEBUG == getloglevel()))
                             {
                                 std::string datadump;
-                                dump_memory(recv_data.recive_buffer + data_remain_start, data_remain_size, datadump);
+                                dump_memory(recv_data.receive_buffer + data_remain_start, data_remain_size, datadump);
                                 boost::format formatter(
                                     "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_client_recv() : before memcpy (data dump) : "
@@ -1582,12 +1582,12 @@ namespace l7vs
                             }
                             /*------DEBUG LOG END------*/
                             //copy data from buffer2 to buffer1
-                            memcpy(recv_data.recive_buffer1, recv_data.recive_buffer + data_remain_start, data_remain_size);
+                            memcpy(recv_data.receive_buffer1, recv_data.receive_buffer + data_remain_start, data_remain_size);
                             /*-------- DEBUG LOG --------*/
                             if (unlikely(LOG_LV_DEBUG == getloglevel()))
                             {
                                 std::string datadump;
-                                dump_memory(recv_data.recive_buffer1, data_remain_size, datadump);
+                                dump_memory(recv_data.receive_buffer1, data_remain_size, datadump);
                                 boost::format formatter(
                                     "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_client_recv() : after memcpy (data dump) : "
@@ -1609,12 +1609,12 @@ namespace l7vs
                                 putLogDebug(100057, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
-                            memcpy(recv_data.recive_buffer1 + data_remain_size, recvbuffer.data(), recvlen);
+                            memcpy(recv_data.receive_buffer1 + data_remain_size, recvbuffer.data(), recvlen);
                             /*-------- DEBUG LOG --------*/
                             if (unlikely(LOG_LV_DEBUG == getloglevel()))
                             {
                                 std::string datadump;
-                                dump_memory(recv_data.recive_buffer1 + data_remain_size, recvlen, datadump);
+                                dump_memory(recv_data.receive_buffer1 + data_remain_size, recvlen, datadump);
                                 boost::format formatter(
                                     "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                     "handle_client_recv() : after memcpy (data dump) : "
@@ -1624,12 +1624,12 @@ namespace l7vs
                             }
                             /*------DEBUG LOG END------*/
                             //set buffer1 as using buffer
-                            recv_data.recive_buffer = recv_data.recive_buffer1;
+                            recv_data.receive_buffer = recv_data.receive_buffer1;
                         }
                     }
 
                     //set buffer's rest size
-                    recv_data.recive_buffer_rest_size = recv_data.recive_buffer_max_size - data_remain_size - recvlen;
+                    recv_data.receive_buffer_rest_size = recv_data.receive_buffer_max_size - data_remain_size - recvlen;
 
                     //remain_size recalc
                     data_remain_size += recvlen;
@@ -1647,7 +1647,7 @@ namespace l7vs
                 else
                 {
                     //pointer valid check
-                    if (unlikely(recv_data.recive_buffer == NULL))
+                    if (unlikely(recv_data.receive_buffer == NULL))
                     {
                         boost::format formatter("Invalid pointer. thread id : %d.");
                         formatter % boost::this_thread::get_id();
@@ -1667,24 +1667,24 @@ namespace l7vs
                     }
                     /*------DEBUG LOG END------*/
                     //copy data from parameter to using buffer
-                    memcpy(recv_data.recive_buffer + recv_data.recive_buffer_max_size - recv_data.recive_buffer_rest_size,
+                    memcpy(recv_data.receive_buffer + recv_data.receive_buffer_max_size - recv_data.receive_buffer_rest_size,
                            recvbuffer.data(), recvlen);
                     /*-------- DEBUG LOG --------*/
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
                     {
                         std::string datadump;
-                        dump_memory(recv_data.recive_buffer + recv_data.recive_buffer_max_size - recv_data.recive_buffer_rest_size,
+                        dump_memory(recv_data.receive_buffer + recv_data.receive_buffer_max_size - recv_data.receive_buffer_rest_size,
                                     recvlen, datadump);
                         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                 "handle_client_recv() : after memcpy (data dump) : "
                                                 "data begin = %d, data_size = %d, data = %s");
-                        formatter % (recv_data.recive_buffer_max_size - recv_data.recive_buffer_rest_size )
+                        formatter % (recv_data.receive_buffer_max_size - recv_data.receive_buffer_rest_size )
                         % recvlen % datadump;
                         putLogDebug(100060, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
                     //buffer's rest size recalc
-                    recv_data.recive_buffer_rest_size -= recvlen;
+                    recv_data.receive_buffer_rest_size -= recvlen;
                     //remain data size recalc
                     data_remain_size += recvlen;
                 }
@@ -1733,56 +1733,41 @@ namespace l7vs
                     //status is SEND_NG
                     else if (it->status == SEND_NG)
                     {
-                        //check http method
-                        check_result = check_http_method(recv_data.recive_buffer + it->send_offset, data_remain_size);
-                        /*-------- DEBUG LOG --------*/
-                        if (unlikely(LOG_LV_DEBUG == getloglevel()))
-                        {
-                            boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                                    "handle_client_recv() : call check_http_method : "
-                                                    "return_value = %d. thread id : %d.");
-                            formatter % check_result % boost::this_thread::get_id();
-                            putLogDebug(100061, formatter.str(), __FILE__, __LINE__ );
-                        }
-                        /*------DEBUG LOG END------*/
-                        //check http method result is OK
-                        if (check_result == CHECK_OK)
-                        {
-                            //check http version
-                            check_result = check_http_version(recv_data.recive_buffer + it->send_offset, data_remain_size);
+                        if (forwarded_for == FORWARDED_FOR_ON) {
+                            //check http method
+                            check_result = check_http_method(recv_data.receive_buffer + it->send_offset, data_remain_size);
                             /*-------- DEBUG LOG --------*/
                             if (unlikely(LOG_LV_DEBUG == getloglevel()))
                             {
                                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                                        "handle_client_recv() : call check_http_version : "
+                                                        "handle_client_recv() : call check_http_method : "
                                                         "return_value = %d. thread id : %d.");
                                 formatter % check_result % boost::this_thread::get_id();
-                                putLogDebug(100062, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100061, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
-                        }
-                        //check method and version result is OK
-                        if (check_result == CHECK_OK)
-                        {
-                            //search http header
-                            bret = find_http_header(recv_data.recive_buffer + it->send_offset, data_remain_size, http_header,
-                                                    header_offset, header_offset_len);
-                            /*-------- DEBUG LOG --------*/
-                            if (unlikely(LOG_LV_DEBUG == getloglevel()))
+                            //check http method result is CHECK_OK
+                            if (check_result == CHECK_OK)
                             {
-                                boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                                        "handle_client_recv() : call find_http_header : "
-                                                        "return_value = %d. thread id : %d.");
-                                formatter % static_cast<int>(bret) % boost::this_thread::get_id();
-                                putLogDebug(100063, formatter.str(), __FILE__, __LINE__ );
+                                //check http version
+                                check_result = check_http_version(recv_data.receive_buffer + it->send_offset, data_remain_size);
+                                /*-------- DEBUG LOG --------*/
+                                if (unlikely(LOG_LV_DEBUG == getloglevel()))
+                                {
+                                    boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                                                            "handle_client_recv() : call check_http_version : "
+                                                            "return_value = %d. thread id : %d.");
+                                    formatter % check_result % boost::this_thread::get_id();
+                                    putLogDebug(100062, formatter.str(), __FILE__, __LINE__ );
+                                }
+                                /*------DEBUG LOG END------*/
                             }
-                            /*------DEBUG LOG END------*/
-                            //search http header result is OK
-                            if (bret)
+                            //check method and version result is CHECK_OK
+                            if (check_result == CHECK_OK)
                             {
-                                //search Content_Length header
-                                bret = find_http_header(recv_data.recive_buffer + it->send_offset, data_remain_size,
-                                                        content_header, content_length_header_offset, content_length_header_len);
+                                //search http header
+                                bret = find_http_header(recv_data.receive_buffer + it->send_offset, data_remain_size, http_header,
+                                                        header_offset, header_offset_len);
                                 /*-------- DEBUG LOG --------*/
                                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
                                 {
@@ -1790,66 +1775,100 @@ namespace l7vs
                                                             "handle_client_recv() : call find_http_header : "
                                                             "return_value = %d. thread id : %d.");
                                     formatter % static_cast<int>(bret) % boost::this_thread::get_id();
-                                    putLogDebug(100064, formatter.str(), __FILE__, __LINE__ );
+                                    putLogDebug(100063, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
-                                //search Content_Length result is OK
+                                //search http header result is OK
                                 if (bret)
                                 {
-                                    //Get Content_Length header's numeric value
-                                    for (pos = 0; recv_data.recive_buffer[it->send_offset + content_length_header_offset + pos] != ':' && pos
-                                            < content_length_header_len; ++pos)
-                                        ;
-                                    if (pos == content_length_header_len)
+                                    //search Content_Length header
+                                    bret = find_http_header(recv_data.receive_buffer + it->send_offset, data_remain_size,
+                                                            content_header, content_length_header_offset, content_length_header_len);
+                                    /*-------- DEBUG LOG --------*/
+                                    if (unlikely(LOG_LV_DEBUG == getloglevel()))
                                     {
-                                        throw std::string("Content_Length field's value is invalid.");
+                                        boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                                                                "handle_client_recv() : call find_http_header : "
+                                                                "return_value = %d. thread id : %d.");
+                                        formatter % static_cast<int>(bret) % boost::this_thread::get_id();
+                                        putLogDebug(100064, formatter.str(), __FILE__, __LINE__ );
                                     }
-
-                                    ++pos;
-
-                                    str_value.assign(recv_data.recive_buffer + it->send_offset + content_length_header_offset + pos,
-                                                     content_length_header_len - pos);
-
-                                    size_t pos_end = str_value.find_last_of('\r');
-                                    if (pos_end != std::string::npos)
+                                    /*------DEBUG LOG END------*/
+                                    //search Content_Length result is OK
+                                    if (bret)
                                     {
-                                        str_value = str_value.erase(pos_end);
+                                        //Get Content_Length header's numeric value
+                                        for (pos = 0; recv_data.receive_buffer[it->send_offset + content_length_header_offset + pos] != ':' && pos
+                                                < content_length_header_len; ++pos)
+                                            ;
+                                        if (pos == content_length_header_len)
+                                        {
+                                            throw std::string("Content_Length field's value is invalid.");
+                                        }
+    
+                                        ++pos;
+    
+                                        str_value.assign(recv_data.receive_buffer + it->send_offset + content_length_header_offset + pos,
+                                                         content_length_header_len - pos);
+    
+                                        size_t pos_end = str_value.find_last_of('\r');
+                                        if (pos_end != std::string::npos)
+                                        {
+                                            str_value = str_value.erase(pos_end);
+                                        }
+    
+                                        for (pos = 0; !isgraph(str_value[pos]) && str_value[pos] != '\0'; ++pos);
+    
+                                        str_value = str_value.substr(pos);
+    
+                                        try
+                                        {
+                                            content_len_value = boost::lexical_cast<size_t>(str_value.c_str());
+                                        }
+                                        catch (const boost::bad_lexical_cast& ex)
+                                        {
+                                            throw std::string("Content_Length field's value is invalid.");
+                                        }
+    
+                                        //send_rest_size recalc
+                                        //set whole http header's length + Content_Length's value
+                                        it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len + content_len_value;
                                     }
-
-                                    for (pos = 0; !isgraph(str_value[pos]) && str_value[pos] != '\0'; ++pos);
-
-                                    str_value = str_value.substr(pos);
-
-                                    try
+                                    //search Content_Length result is NG
+                                    else
                                     {
-                                        content_len_value = boost::lexical_cast<size_t>(str_value.c_str());
+                                        //send_rest_size recalc
+                                        //set whole http header's length
+                                        if (header_offset_len == 0)
+                                        {
+                                            it->send_rest_size = header_offset + header_offset_len + cr_lf_len;
+                                        } else
+                                        {
+                                            it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len;
+                                        }
                                     }
-                                    catch (const boost::bad_lexical_cast& ex)
-                                    {
-                                        throw std::string("Content_Length field's value is invalid.");
-                                    }
-
-                                    //send_rest_size recalc
-                                    //set whole http header's length + Content_Length's value
-                                    it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len + content_len_value;
+                                    //set edit_division flag on
+                                    it->edit_division = EDIT_DIVISION_EDIT;
                                 }
-                                //search Content_Length result is NG
+                                //search http header result is NG
                                 else
                                 {
-                                    //send_rest_size recalc
-                                    //set whole http header's length
-                                    if (header_offset_len == 0)
-                                    {
-                                        it->send_rest_size = header_offset + header_offset_len + cr_lf_len;
-                                    } else
-                                    {
-                                        it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len;
-                                    }
+                                    //unsend_size recalc
+                                    it->unsend_size += request_data_remain_size;
+                                    //request data rest size recalc
+                                    request_data_remain_size = 0;
+                                    break;
                                 }
-                                //set edit_division flag on
-                                it->edit_division = EDIT_DIVISION_EDIT;
                             }
-                            //search http header result is NG
+                            //check method and version result is CHECK_NG
+                            else if (check_result == CHECK_NG)
+                            {
+                                //set edit_division flag off
+                                it->edit_division = EDIT_DIVISION_NO_EDIT;
+                                //send_rest_size recalc
+                                it->send_rest_size = it->unsend_size + request_data_remain_size;
+                            }
+                            //check method and version result is CHECK_IMPOSSIBLE
                             else
                             {
                                 //unsend_size recalc
@@ -1859,22 +1878,12 @@ namespace l7vs
                                 break;
                             }
                         }
-                        //check method and version result is NG
-                        else if (check_result == CHECK_NG)
+                        else 
                         {
                             //set edit_division flag off
                             it->edit_division = EDIT_DIVISION_NO_EDIT;
                             //send_rest_size recalc
                             it->send_rest_size = it->unsend_size + request_data_remain_size;
-                        }
-                        //check method and version result is CHECK_INPOSSIBLE
-                        else
-                        {
-                            //unsend_size recalc
-                            it->unsend_size += request_data_remain_size;
-                            //request data rest size recalc
-                            request_data_remain_size = 0;
-                            break;
                         }
 
                         //recalc fields value according to send_rest_size and request rest size
@@ -1948,130 +1957,146 @@ namespace l7vs
                     recv_data.send_status_list.push_back(new_send_state);
                     std::list<send_status>::reverse_iterator new_send_it = recv_data.send_status_list.rbegin();
                     //cacl offset
-                    new_send_it->send_offset = recv_data.recive_buffer_max_size - recv_data.recive_buffer_rest_size
+                    new_send_it->send_offset = recv_data.receive_buffer_max_size - recv_data.receive_buffer_rest_size
                                                - request_data_remain_size;
 
-                    //check http method
-                    check_result = check_http_method(recv_data.recive_buffer + new_send_it->send_offset,
-                                                     request_data_remain_size);
-                    /*-------- DEBUG LOG --------*/
-                    if (unlikely(LOG_LV_DEBUG == getloglevel()))
-                    {
-                        boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                                "handle_client_recv() : call check_http_method : "
-                                                "return_value = %d. thread id : %d.");
-                        formatter % check_result % boost::this_thread::get_id();
-                        putLogDebug(100066, formatter.str(), __FILE__, __LINE__ );
-                    }
-                    /*------DEBUG LOG END------*/
-                    //check http method result is OK
-                    if (check_result == CHECK_OK)
-                    {
-                        //check http version
-                        check_result = check_http_version(recv_data.recive_buffer + new_send_it->send_offset,
-                                                          request_data_remain_size);
+                    if (forwarded_for == FORWARDED_FOR_ON) {
+                        //check http method
+                        check_result = check_http_method(recv_data.receive_buffer + new_send_it->send_offset,
+                                                         request_data_remain_size);
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                                    "handle_client_recv() : call check_http_version : "
+                                                    "handle_client_recv() : call check_http_method : "
                                                     "return_value = %d. thread id : %d.");
                             formatter % check_result % boost::this_thread::get_id();
-                            putLogDebug(100067, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100066, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
-                    }
-                    //check http method and version result is OK
-                    if (check_result == CHECK_OK)
-                    {
-                        //search whole http header, get whole http header's offset and length
-                        bret = find_http_header(recv_data.recive_buffer + new_send_it->send_offset, request_data_remain_size,
-                                                http_header, header_offset, header_offset_len);
-                        /*-------- DEBUG LOG --------*/
-                        if (unlikely(LOG_LV_DEBUG == getloglevel()))
+                        //check http method result is CHECK_OK
+                        if (check_result == CHECK_OK)
                         {
-                            boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                                    "handle_client_recv() : call find_http_header : "
-                                                    "return_value = %d. thread id : %d.");
-                            formatter % check_result % boost::this_thread::get_id();
-                            putLogDebug(100068, formatter.str(), __FILE__, __LINE__ );
+                            //check http version
+                            check_result = check_http_version(recv_data.receive_buffer + new_send_it->send_offset,
+                                                              request_data_remain_size);
+                            /*-------- DEBUG LOG --------*/
+                            if (unlikely(LOG_LV_DEBUG == getloglevel()))
+                            {
+                                boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                                                        "handle_client_recv() : call check_http_version : "
+                                                        "return_value = %d. thread id : %d.");
+                                formatter % check_result % boost::this_thread::get_id();
+                                putLogDebug(100067, formatter.str(), __FILE__, __LINE__ );
+                            }
+                            /*------DEBUG LOG END------*/
                         }
-                        /*------DEBUG LOG END------*/
-                        //searched whole http header
-                        if (bret)
+                        //check http method and version result is CHECK_OK
+                        if (check_result == CHECK_OK)
                         {
-                            //search ContentLength http header, get ContentLength header's offset and length
-                            bret = find_http_header(recv_data.recive_buffer + new_send_it->send_offset,
-                                                    request_data_remain_size, content_header, content_length_header_offset, content_length_header_len);
+                            //search whole http header, get whole http header's offset and length
+                            bret = find_http_header(recv_data.receive_buffer + new_send_it->send_offset, request_data_remain_size,
+                                                    http_header, header_offset, header_offset_len);
                             /*-------- DEBUG LOG --------*/
                             if (unlikely(LOG_LV_DEBUG == getloglevel()))
                             {
                                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                         "handle_client_recv() : call find_http_header : "
                                                         "return_value = %d. thread id : %d.");
-                                formatter % static_cast<int>(bret) % boost::this_thread::get_id();
-                                putLogDebug(100069, formatter.str(), __FILE__, __LINE__ );
+                                formatter % check_result % boost::this_thread::get_id();
+                                putLogDebug(100068, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
-
-                            //searched ContentLength http header
+                            //searched whole http header
                             if (bret)
                             {
-                                //Get Content_Length header's numeric value
-                                for (pos = 0;
-                                        recv_data.recive_buffer[new_send_it->send_offset + content_length_header_offset + pos] != ':'
-                                        && pos < content_length_header_len;
-                                        ++pos);
-                                if (pos == content_length_header_len)
+                                //search ContentLength http header, get ContentLength header's offset and length
+                                bret = find_http_header(recv_data.receive_buffer + new_send_it->send_offset,
+                                                        request_data_remain_size, content_header, content_length_header_offset, content_length_header_len);
+                                /*-------- DEBUG LOG --------*/
+                                if (unlikely(LOG_LV_DEBUG == getloglevel()))
                                 {
-                                    throw std::string("Content_Length field's value is invalid.");
+                                    boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                                                            "handle_client_recv() : call find_http_header : "
+                                                            "return_value = %d. thread id : %d.");
+                                    formatter % static_cast<int>(bret) % boost::this_thread::get_id();
+                                    putLogDebug(100069, formatter.str(), __FILE__, __LINE__ );
                                 }
-
-                                ++pos;
-
-                                str_value.assign(recv_data.recive_buffer + new_send_it->send_offset + content_length_header_offset + pos,
-                                                 content_length_header_len - pos);
-
-                                size_t pos_end = str_value.find_last_of('\r');
-                                if (pos_end != std::string::npos)
+                                /*------DEBUG LOG END------*/
+    
+                                //searched ContentLength http header
+                                if (bret)
                                 {
-                                    str_value = str_value.erase(pos_end);
+                                    //Get Content_Length header's numeric value
+                                    for (pos = 0;
+                                            recv_data.receive_buffer[new_send_it->send_offset + content_length_header_offset + pos] != ':'
+                                            && pos < content_length_header_len;
+                                            ++pos);
+                                    if (pos == content_length_header_len)
+                                    {
+                                        throw std::string("Content_Length field's value is invalid.");
+                                    }
+    
+                                    ++pos;
+    
+                                    str_value.assign(recv_data.receive_buffer + new_send_it->send_offset + content_length_header_offset + pos,
+                                                     content_length_header_len - pos);
+    
+                                    size_t pos_end = str_value.find_last_of('\r');
+                                    if (pos_end != std::string::npos)
+                                    {
+                                        str_value = str_value.erase(pos_end);
+                                    }
+    
+                                    for (pos = 0; !isgraph(str_value[pos]) && str_value[pos] != '\0'; ++pos);
+    
+                                    str_value = str_value.substr(pos);
+                                    try
+                                    {
+                                        content_len_value = boost::lexical_cast<size_t>(str_value.c_str());
+                                    }
+                                    catch (const boost::bad_lexical_cast& ex)
+                                    {
+                                        throw std::string("Content_Length field's value is invalid.");
+                                    }
+                                    //send_rest_size recalc
+                                    //set whole http header's  + whole http header's length + Content_Length's value
+                                    new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len + content_len_value;
                                 }
-
-                                for (pos = 0; !isgraph(str_value[pos]) && str_value[pos] != '\0'; ++pos);
-
-                                str_value = str_value.substr(pos);
-                                try
-                                {
-                                    content_len_value = boost::lexical_cast<size_t>(str_value.c_str());
-                                }
-                                catch (const boost::bad_lexical_cast& ex)
-                                {
-                                    throw std::string("Content_Length field's value is invalid.");
-                                }
-                                //send_rest_size recalc
-                                //set whole http header's  + whole http header's length + Content_Length's value
-                                new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len + content_len_value;
-                            }
-                            //not searched ContentLength http header
-                            else
-                            {
-                                //send_rest_size recalc
-                                //set whole http header's  + whole http header's length
-                                if (header_offset_len == 0)
-                                {
-                                    new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_len;
-                                }
+                                //not searched ContentLength http header
                                 else
                                 {
-                                    new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len;
+                                    //send_rest_size recalc
+                                    //set whole http header's  + whole http header's length
+                                    if (header_offset_len == 0)
+                                    {
+                                        new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_len;
+                                    }
+                                    else
+                                    {
+                                        new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len;
+                                    }
+    
                                 }
-
+                                //set edit_division flag on
+                                new_send_it->edit_division = EDIT_DIVISION_EDIT;
                             }
-                            //set edit_division flag on
-                            new_send_it->edit_division = EDIT_DIVISION_EDIT;
+                            //not searched whole http header
+                            else
+                            {
+                                new_send_it->unsend_size = request_data_remain_size;
+                                request_data_remain_size = 0;
+                                break;
+                            }
                         }
-                        //not searched whole http header
+                        //check http method or version result is CHECK_NG
+                        else if (check_result == CHECK_NG)
+                        {
+                            new_send_it->edit_division = EDIT_DIVISION_NO_EDIT;
+                            new_send_it->send_rest_size = request_data_remain_size;
+                        }
+    
+                        //check http method or version result is CHECK_IMPOSSIBLE
                         else
                         {
                             new_send_it->unsend_size = request_data_remain_size;
@@ -2079,19 +2104,10 @@ namespace l7vs
                             break;
                         }
                     }
-                    //check http method or version result is NG
-                    else if (check_result == CHECK_NG)
+                    else
                     {
                         new_send_it->edit_division = EDIT_DIVISION_NO_EDIT;
                         new_send_it->send_rest_size = request_data_remain_size;
-                    }
-
-                    //check http method or version result is impossible
-                    else
-                    {
-                        new_send_it->unsend_size = request_data_remain_size;
-                        request_data_remain_size = 0;
-                        break;
                     }
 
                     //recalc fields value according to send_rest_size and request rest size
@@ -2251,7 +2267,7 @@ namespace l7vs
         thread_data_ptr session_data;
         session_thread_data_map_it session_thread_it;
         session_thread_data_map_it session_thread_it_end;
-        recive_data_map_it recive_data_it;
+        receive_data_map_it receive_data_it;
 
         if (schedule_tcp.empty())
         {
@@ -2312,29 +2328,7 @@ namespace l7vs
             {
                 //save rs endpoint
                 session_data->target_endpoint = rs_endpoint;
-
-                recive_data_it = session_data->recive_data_map.find(session_data->client_endpoint_tcp);
-                if (unlikely(recive_data_it == session_data->recive_data_map.end()))
-                {
-                    boost::format formatter("Invalid endpoint. thread id : %d.");
-                    formatter % boost::this_thread::get_id();
-                    putLogError(100039, formatter.str(), __FILE__, __LINE__ );
-                    throw -1;
-                }
-                recive_data& recv_data = recive_data_it->second;
-
-                send_status_it it = recv_data.send_status_list.begin();
-                send_status_it it_end = recv_data.send_status_list.end();
-
-                it = find_if(it, it_end, data_send_possible());
-                if (it != it_end)
-                {
-                    status = REALSERVER_CONNECT;
-                }
-                else
-                {
-                    status = CLIENT_RECV;
-                }
+                status = REALSERVER_CONNECT;
             }
             else
             {
@@ -2455,7 +2449,7 @@ namespace l7vs
         const std::string str_forword_for = "X-Forwarded-For";
         thread_data_ptr session_data;
         session_thread_data_map_it session_thread_it;
-        recive_data_map_it recive_data_it;
+        receive_data_map_it receive_data_it;
 
         try
         {
@@ -2476,8 +2470,8 @@ namespace l7vs
             }
 
             //endpoint check
-            recive_data_it = session_data->recive_data_map.find(session_data->client_endpoint_tcp);
-            if (unlikely(recive_data_it == session_data->recive_data_map.end()))
+            receive_data_it = session_data->receive_data_map.find(session_data->client_endpoint_tcp);
+            if (unlikely(receive_data_it == session_data->receive_data_map.end()))
             {
                 boost::format formatter("Invalid endpoint. thread id : %d.");
                 formatter % boost::this_thread::get_id();
@@ -2485,14 +2479,11 @@ namespace l7vs
                 throw -1;
             }
 
-            //recive_buffer pointer check
-            recive_data& recv_data = recive_data_it->second;
-            if (unlikely(recv_data.recive_buffer == NULL))
+            //receive_buffer pointer check
+            receive_data& recv_data = receive_data_it->second;
+            if (unlikely(recv_data.receive_buffer == NULL))
             {
-                boost::format formatter("Invalid pointer. thread id : %d.");
-                formatter % boost::this_thread::get_id();
-                putLogError(100044, formatter.str(), __FILE__, __LINE__ );
-                throw -1;
+                return CLIENT_RECV;
             }
 
             //send list check
@@ -2522,7 +2513,7 @@ namespace l7vs
                     edata.insert_posission = 0;
                     edata.replace_size = 0;
                     //search X-Forwarded-For header
-                    ret = find_http_header(recv_data.recive_buffer + it->send_offset, it->send_possible_size,
+                    ret = find_http_header(recv_data.receive_buffer + it->send_offset, it->send_possible_size,
                                            str_forword_for, header_offset, header_offset_len);
                     /*-------- DEBUG LOG --------*/
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -2538,7 +2529,7 @@ namespace l7vs
                     if (ret)
                     {
                         //edit X-Forwarded-For header, set it to edata.data
-                        edata.data.assign(recv_data.recive_buffer + it->send_offset + header_offset, header_offset_len);
+                        edata.data.assign(recv_data.receive_buffer + it->send_offset + header_offset, header_offset_len);
                         edata.data += ", ";
                         edata.data += session_data->client_endpoint_tcp.address().to_string();
                         //save new X-Forwarded-For header offset
@@ -2552,7 +2543,7 @@ namespace l7vs
                     else
                     {
                         //search whole http header, get whole http header's offset and length
-                        ret = find_http_header(recv_data.recive_buffer + it->send_offset, it->send_possible_size, "",
+                        ret = find_http_header(recv_data.receive_buffer + it->send_offset, it->send_possible_size, "",
                                                header_offset, header_offset_len);
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -2626,7 +2617,7 @@ namespace l7vs
                                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
                                 {
                                     std::string datadump;
-                                    dump_memory(recv_data.recive_buffer + it->send_offset + it->send_end_size,
+                                    dump_memory(recv_data.receive_buffer + it->send_offset + it->send_end_size,
                                                 it->send_possible_size, datadump);
                                     boost::format formatter(
                                         "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
@@ -2637,9 +2628,9 @@ namespace l7vs
                                     putLogDebug(100085, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
-                                //copy data from recive_buffer to sendbuffer by sending_possible size
+                                //copy data from receive_buffer to sendbuffer by sending_possible size
                                 memcpy(sendbuffer.data() + send_buffer_end_size - send_buffer_remian_size,
-                                       recv_data.recive_buffer + it->send_offset + it->send_end_size,
+                                       recv_data.receive_buffer + it->send_offset + it->send_end_size,
                                        it->send_possible_size);
                                 /*-------- DEBUG LOG --------*/
                                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -2670,7 +2661,7 @@ namespace l7vs
                                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
                                 {
                                     std::string datadump;
-                                    dump_memory(recv_data.recive_buffer + it->send_offset + it->send_end_size,
+                                    dump_memory(recv_data.receive_buffer + it->send_offset + it->send_end_size,
                                                 copy_size, datadump);
 
                                     boost::format formatter(
@@ -2682,9 +2673,9 @@ namespace l7vs
                                     putLogDebug(100087, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
-                                //copy data from recive_buffer to sendbuffer by send buffer rest size
+                                //copy data from receive_buffer to sendbuffer by send buffer rest size
                                 memcpy(sendbuffer.data() + send_buffer_end_size - send_buffer_remian_size,
-                                       recv_data.recive_buffer + it->send_offset + it->send_end_size, copy_size);
+                                       recv_data.receive_buffer + it->send_offset + it->send_end_size, copy_size);
                                 /*-------- DEBUG LOG --------*/
                                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
                                 {
@@ -2723,7 +2714,7 @@ namespace l7vs
                             if (unlikely(LOG_LV_DEBUG == getloglevel()))
                             {
                                 std::string datadump;
-                                dump_memory(recv_data.recive_buffer + it->send_offset + it->send_end_size,
+                                dump_memory(recv_data.receive_buffer + it->send_offset + it->send_end_size,
                                             copy_size, datadump);
 
                                 boost::format formatter(
@@ -2736,7 +2727,7 @@ namespace l7vs
                             }
                             /*------DEBUG LOG END------*/
                             memcpy(sendbuffer.data() + send_buffer_end_size - send_buffer_remian_size,
-                                   recv_data.recive_buffer + it->send_offset + it->send_end_size, copy_size);
+                                   recv_data.receive_buffer + it->send_offset + it->send_end_size, copy_size);
                             /*-------- DEBUG LOG --------*/
                             if (unlikely(LOG_LV_DEBUG == getloglevel()))
                             {
@@ -2811,7 +2802,7 @@ namespace l7vs
                             if (unlikely(LOG_LV_DEBUG == getloglevel()))
                             {
                                 std::string datadump;
-                                dump_memory(recv_data.recive_buffer + it->send_offset + it->send_end_size,
+                                dump_memory(recv_data.receive_buffer + it->send_offset + it->send_end_size,
                                             copy_size, datadump);
 
                                 boost::format formatter(
@@ -2825,7 +2816,7 @@ namespace l7vs
                             /*------DEBUG LOG END------*/
                             //copy data as large as possible
                             memcpy(sendbuffer.data() + send_buffer_end_size - send_buffer_remian_size,
-                                   recv_data.recive_buffer + it->send_offset + it->send_end_size, copy_size);
+                                   recv_data.receive_buffer + it->send_offset + it->send_end_size, copy_size);
                             /*-------- DEBUG LOG --------*/
                             if (unlikely(LOG_LV_DEBUG == getloglevel()))
                             {
@@ -2872,7 +2863,7 @@ namespace l7vs
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
                     {
                         std::string datadump;
-                        dump_memory(recv_data.recive_buffer + it->send_offset,
+                        dump_memory(recv_data.receive_buffer + it->send_offset,
                                     copy_size, datadump);
                         boost::format formatter(
                             "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
@@ -2884,7 +2875,7 @@ namespace l7vs
                     }
                     /*------DEBUG LOG END------*/
                     //copy data by send_possible size
-                    memcpy(sendbuffer.data(), recv_data.recive_buffer + it->send_offset, copy_size);
+                    memcpy(sendbuffer.data(), recv_data.receive_buffer + it->send_offset, copy_size);
                     /*-------- DEBUG LOG --------*/
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
                     {
@@ -2909,7 +2900,7 @@ namespace l7vs
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
                     {
                         std::string datadump;
-                        dump_memory(recv_data.recive_buffer + it->send_offset, send_buffer_remian_size, datadump);
+                        dump_memory(recv_data.receive_buffer + it->send_offset, send_buffer_remian_size, datadump);
 
                         boost::format formatter(
                             "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
@@ -2921,7 +2912,7 @@ namespace l7vs
                     }
                     /*------DEBUG LOG END------*/
                     //copy data by buffer rest size
-                    memcpy(sendbuffer.data(), recv_data.recive_buffer + it->send_offset, send_buffer_remian_size);
+                    memcpy(sendbuffer.data(), recv_data.receive_buffer + it->send_offset, send_buffer_remian_size);
                     /*-------- DEBUG LOG --------*/
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
                     {
@@ -3106,7 +3097,7 @@ namespace l7vs
         EVENT_TAG status = FINALIZE;
         thread_data_ptr session_data;
         session_thread_data_map_it session_thread_it;
-        recive_data_map_it recive_data_it;
+        receive_data_map_it receive_data_it;
 
         try
         {
@@ -3127,8 +3118,8 @@ namespace l7vs
             }
 
             //endpoint check
-            recive_data_it = session_data->recive_data_map.find(session_data->client_endpoint_tcp);
-            if (unlikely(recive_data_it == session_data->recive_data_map.end()))
+            receive_data_it = session_data->receive_data_map.find(session_data->client_endpoint_tcp);
+            if (unlikely(receive_data_it == session_data->receive_data_map.end()))
             {
                 boost::format formatter("Invalid endpoint. thread id : %d.");
                 formatter % boost::this_thread::get_id();
@@ -3136,7 +3127,7 @@ namespace l7vs
                 throw -1;
             }
 
-            recive_data& recv_data = recive_data_it->second;
+            receive_data& recv_data = receive_data_it->second;
 
             send_status_it it = recv_data.send_status_list.begin();
             send_status_it it_end = recv_data.send_status_list.end();
@@ -3183,13 +3174,13 @@ namespace l7vs
             //sending possible data is not exist
             else
             {
-                //can recive from client continue
+                //can receive from client continue
                 if (it->send_rest_size > 0)
                 {
                     //change status from SEND_OK to SEND_CONTINUE
                     it->status = SEND_CONTINUE;
                 }
-                //can not recive from client continue
+                //can not receive from client continue
                 else
                 {
                     //change status from SEND_OK to SEND_END
@@ -3280,7 +3271,7 @@ namespace l7vs
 
         thread_data_ptr session_data;
         session_thread_data_map_it session_thread_it;
-        recive_data_map_it recive_data_it;
+        receive_data_map_it receive_data_it;
 
         try
         {
@@ -3300,8 +3291,8 @@ namespace l7vs
             session_data->target_endpoint = sorry_endpoint;
 
             //endpoint check
-            recive_data_it = session_data->recive_data_map.find(session_data->client_endpoint_tcp);
-            if (unlikely(recive_data_it == session_data->recive_data_map.end()))
+            receive_data_it = session_data->receive_data_map.find(session_data->client_endpoint_tcp);
+            if (unlikely(receive_data_it == session_data->receive_data_map.end()))
             {
                 boost::format formatter("Invalid endpoint. thread id : %d.");
                 formatter % boost::this_thread::get_id();
@@ -3309,7 +3300,7 @@ namespace l7vs
                 throw -1;
             }
 
-            recive_data& recv_data = recive_data_it->second;
+            receive_data& recv_data = receive_data_it->second;
 
             send_status_it it = recv_data.send_status_list.begin();
             send_status_it it_end = recv_data.send_status_list.end();
@@ -3412,7 +3403,7 @@ namespace l7vs
         const std::string str_forword_for = "X-Forwarded-For";
         thread_data_ptr session_data;
         session_thread_data_map_it session_thread_it;
-        recive_data_map_it recive_data_it;
+        receive_data_map_it receive_data_it;
 
         try
         {
@@ -3433,9 +3424,9 @@ namespace l7vs
             }
 
             //endpoint check
-            recive_data_it = session_data->recive_data_map.find(session_data->client_endpoint_tcp);
-            if (unlikely(recive_data_it
-                         == session_data->recive_data_map.end()))
+            receive_data_it = session_data->receive_data_map.find(session_data->client_endpoint_tcp);
+            if (unlikely(receive_data_it
+                         == session_data->receive_data_map.end()))
             {
                 boost::format formatter("Invalid endpoint. thread id : %d.");
                 formatter % boost::this_thread::get_id();
@@ -3443,9 +3434,9 @@ namespace l7vs
                 throw -1;
             }
 
-            //recive_buffer pointer check
-            recive_data& recv_data = recive_data_it->second;
-            if (unlikely(recv_data.recive_buffer == NULL))
+            //receive_buffer pointer check
+            receive_data& recv_data = receive_data_it->second;
+            if (unlikely(recv_data.receive_buffer == NULL))
             {
                 boost::format formatter("Invalid pointer. thread id : %d.");
                 formatter % boost::this_thread::get_id();
@@ -3483,7 +3474,7 @@ namespace l7vs
                     //search uri
                     if (strlen(sorry_uri.data()) > 0)
                     {
-                        ret = find_uri(recv_data.recive_buffer + it->send_offset, it->send_possible_size, url_offset,
+                        ret = find_uri(recv_data.receive_buffer + it->send_offset, it->send_possible_size, url_offset,
                                        url_offset_len);
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -3514,7 +3505,7 @@ namespace l7vs
                     if (forwarded_for == FORWARDED_FOR_ON)
                     {
                         //search X-Forwarded-For header
-                        ret = find_http_header(recv_data.recive_buffer + it->send_offset, it->send_possible_size,
+                        ret = find_http_header(recv_data.receive_buffer + it->send_offset, it->send_possible_size,
                                                str_forword_for.c_str(), header_offset, header_offset_len);
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -3531,7 +3522,7 @@ namespace l7vs
                         if (ret)
                         {
                             //edit X-Forwarded-For header, put it to edata.data
-                            edata.data.assign(recv_data.recive_buffer + it->send_offset + header_offset, header_offset_len);
+                            edata.data.assign(recv_data.receive_buffer + it->send_offset + header_offset, header_offset_len);
                             edata.data += ", ";
                             edata.data += session_data->client_endpoint_tcp.address().to_string();
                             //save new X-Forwarded-For header offset
@@ -3545,7 +3536,7 @@ namespace l7vs
                         else
                         {
                             //search whole http header, get whole http header's offset and length
-                            ret = find_http_header(recv_data.recive_buffer + it->send_offset, it->send_possible_size, "",
+                            ret = find_http_header(recv_data.receive_buffer + it->send_offset, it->send_possible_size, "",
                                                    header_offset, header_offset_len);
                             /*-------- DEBUG LOG --------*/
                             if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -3615,13 +3606,13 @@ namespace l7vs
                             //send_buffer_remian_size is larger
                             if (send_buffer_remian_size > it->send_possible_size)
                             {
-                                //copy data from recive_buffer to sendbuffer by sending_possible size
+                                //copy data from receive_buffer to sendbuffer by sending_possible size
                                 copy_size = it->send_possible_size;
                                 /*-------- DEBUG LOG --------*/
                                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
                                 {
                                     std::string datadump;
-                                    dump_memory(recv_data.recive_buffer + it->send_offset + it->send_end_size,
+                                    dump_memory(recv_data.receive_buffer + it->send_offset + it->send_end_size,
                                                 copy_size, datadump);
                                     boost::format formatter(
                                         "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
@@ -3633,7 +3624,7 @@ namespace l7vs
                                 }
                                 /*------DEBUG LOG END------*/
                                 memcpy(sendbuffer.data() + send_buffer_end_size - send_buffer_remian_size,
-                                       recv_data.recive_buffer + it->send_offset + it->send_end_size, copy_size);
+                                       recv_data.receive_buffer + it->send_offset + it->send_end_size, copy_size);
                                 /*-------- DEBUG LOG --------*/
                                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
                                 {
@@ -3661,7 +3652,7 @@ namespace l7vs
                                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
                                 {
                                     std::string datadump;
-                                    dump_memory(recv_data.recive_buffer + it->send_offset + it->send_end_size,
+                                    dump_memory(recv_data.receive_buffer + it->send_offset + it->send_end_size,
                                                 copy_size, datadump);
                                     boost::format formatter(
                                         "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
@@ -3672,9 +3663,9 @@ namespace l7vs
                                     putLogDebug(100120, formatter.str(), __FILE__, __LINE__ );
                                 }
                                 /*------DEBUG LOG END------*/
-                                //copy data from recive_buffer to sendbuffer by send buffer rest size
+                                //copy data from receive_buffer to sendbuffer by send buffer rest size
                                 memcpy(sendbuffer.data() + send_buffer_end_size - send_buffer_remian_size,
-                                       recv_data.recive_buffer + it->send_offset + it->send_end_size,
+                                       recv_data.receive_buffer + it->send_offset + it->send_end_size,
                                        copy_size);
                                 /*-------- DEBUG LOG --------*/
                                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -3714,7 +3705,7 @@ namespace l7vs
                             if (unlikely(LOG_LV_DEBUG == getloglevel()))
                             {
                                 std::string datadump;
-                                dump_memory(recv_data.recive_buffer + it->send_offset + it->send_end_size,
+                                dump_memory(recv_data.receive_buffer + it->send_offset + it->send_end_size,
                                             copy_size, datadump);
 
                                 boost::format formatter(
@@ -3727,7 +3718,7 @@ namespace l7vs
                             }
                             /*------DEBUG LOG END------*/
                             memcpy(sendbuffer.data() + send_buffer_end_size - send_buffer_remian_size,
-                                   recv_data.recive_buffer + it->send_offset + it->send_end_size, copy_size);
+                                   recv_data.receive_buffer + it->send_offset + it->send_end_size, copy_size);
                             /*-------- DEBUG LOG --------*/
                             if (unlikely(LOG_LV_DEBUG == getloglevel()))
                             {
@@ -3816,7 +3807,7 @@ namespace l7vs
                             /*------DEBUG LOG END------*/
                             //copy data as large as possible
                             memcpy(sendbuffer.data() + send_buffer_end_size - send_buffer_remian_size,
-                                   recv_data.recive_buffer + it->send_offset + it->send_end_size, send_buffer_remian_size);
+                                   recv_data.receive_buffer + it->send_offset + it->send_end_size, send_buffer_remian_size);
                             /*-------- DEBUG LOG --------*/
                             if (unlikely(LOG_LV_DEBUG == getloglevel()))
                             {
@@ -3862,7 +3853,7 @@ namespace l7vs
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
                     {
                         std::string datadump;
-                        dump_memory(recv_data.recive_buffer+ it->send_offset, copy_size, datadump);
+                        dump_memory(recv_data.receive_buffer+ it->send_offset, copy_size, datadump);
 
                         boost::format formatter(
                             "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
@@ -3874,7 +3865,7 @@ namespace l7vs
                     }
                     /*------DEBUG LOG END------*/
                     //copy data by send_possible size
-                    memcpy(sendbuffer.data(), recv_data.recive_buffer
+                    memcpy(sendbuffer.data(), recv_data.receive_buffer
                            + it->send_offset, copy_size);
                     /*-------- DEBUG LOG --------*/
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -3901,7 +3892,7 @@ namespace l7vs
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
                     {
                         std::string datadump;
-                        dump_memory(recv_data.recive_buffer+ it->send_offset, send_buffer_remian_size, datadump);
+                        dump_memory(recv_data.receive_buffer+ it->send_offset, send_buffer_remian_size, datadump);
 
                         boost::format formatter(
                             "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
@@ -3913,7 +3904,7 @@ namespace l7vs
                     }
                     /*------DEBUG LOG END------*/
                     //copy data by buffer rest size
-                    memcpy(sendbuffer.data(), recv_data.recive_buffer
+                    memcpy(sendbuffer.data(), recv_data.receive_buffer
                            + it->send_offset, send_buffer_remian_size);
                     /*-------- DEBUG LOG --------*/
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -4106,7 +4097,7 @@ namespace l7vs
         EVENT_TAG status = FINALIZE;
         thread_data_ptr session_data;
         session_thread_data_map_it session_thread_it;
-        recive_data_map_it recive_data_it;
+        receive_data_map_it receive_data_it;
 
         try
         {
@@ -4127,9 +4118,9 @@ namespace l7vs
             }
 
             //endpoint check
-            recive_data_it = session_data->recive_data_map.find(session_data->client_endpoint_tcp);
-            if (unlikely(recive_data_it
-                         == session_data->recive_data_map.end()))
+            receive_data_it = session_data->receive_data_map.find(session_data->client_endpoint_tcp);
+            if (unlikely(receive_data_it
+                         == session_data->receive_data_map.end()))
             {
                 boost::format formatter("Invalid endpoint. thread id : %d.");
                 formatter % boost::this_thread::get_id();
@@ -4137,7 +4128,7 @@ namespace l7vs
                 throw -1;
             }
 
-            recive_data& recv_data = recive_data_it->second;
+            receive_data& recv_data = receive_data_it->second;
 
             send_status_it it = recv_data.send_status_list.begin();
             send_status_it it_end = recv_data.send_status_list.end();
@@ -4183,13 +4174,13 @@ namespace l7vs
             //sending possible data is not exist
             else
             {
-                //can recive from clent continue
+                //can receive from clent continue
                 if (it->send_rest_size > 0)
                 {
                     //change status from SEND_OK to SEND_CONTINUE
                     it->status = SEND_CONTINUE;
                 }
-                //can not recive from clent continue
+                //can not receive from clent continue
                 else
                 {
                     //change status from SEND_OK to SEND_END
@@ -4257,10 +4248,10 @@ namespace l7vs
         return status;
     }
 
-    //! called from after realserver recive.for UDP
+    //! called from after realserver receive.for UDP
     //! @param[in]    downstream thread id
     //! @param[in]    realserver UDP endpoint reference
-    //! @param[in]    recive from realserver buffer reference
+    //! @param[in]    receive from realserver buffer reference
     //! @param[in]    recv data length
     //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_recv(
@@ -4286,7 +4277,7 @@ namespace l7vs
     //! called from after realserver recvive for TCP/IP
     //! @param[in]    downstream thread id
     //! @param[in]    realserver TCP/IP endpoint reference
-    //! @param[in]    realserver recive buffer reference.
+    //! @param[in]    realserver receive buffer reference.
     //! @param[in]    recv data length
     //! @return        session use EVENT mode.
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_recv(
@@ -4332,7 +4323,7 @@ namespace l7vs
         bool bret = false;
         CHECK_RESULT_TAG check_result;
         session_thread_data_map_it session_thread_it;
-        recive_data_map_it recive_data_it;
+        receive_data_map_it receive_data_it;
 
         //parameter check
         if (recvlen > recvbuffer.size())
@@ -4374,16 +4365,16 @@ namespace l7vs
                 session_data = session_thread_it->second;
             }
 
-            recive_data_it = session_data->recive_data_map.find(rs_endpoint);
-            if (recive_data_it == session_data->recive_data_map.end())
+            receive_data_it = session_data->receive_data_map.find(rs_endpoint);
+            if (receive_data_it == session_data->receive_data_map.end())
             {
-                recive_data recv_data;
-                session_data->recive_data_map[rs_endpoint] = recv_data;
+                receive_data recv_data;
+                session_data->receive_data_map[rs_endpoint] = recv_data;
             }
 
             session_data->target_endpoint = rs_endpoint;
 
-            recive_data& recv_data = session_data->recive_data_map[rs_endpoint];
+            receive_data& recv_data = session_data->receive_data_map[rs_endpoint];
 
             send_status_it it = recv_data.send_status_list.begin();
             send_status_it it_end = recv_data.send_status_list.end();
@@ -4487,13 +4478,13 @@ namespace l7vs
                 putLogDebug(100146, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
-            //recive buffer process
+            //receive buffer process
             //buffer rest size < request size
-            if (recv_data.recive_buffer_rest_size < recvlen)
+            if (recv_data.receive_buffer_rest_size < recvlen)
             {
                 //buffer max size < remain size + request size
                 //buffer is need reallocate
-                if (recv_data.recive_buffer_max_size < data_remain_size + recvlen)
+                if (recv_data.receive_buffer_max_size < data_remain_size + recvlen)
                 {
                     //the buffer's size that will be allocated is exceed the upper limit value
                     if (MAX_SESSIONLESS_MODULE_BUFFER_SIZE < data_remain_size + recvlen)
@@ -4518,7 +4509,7 @@ namespace l7vs
 
                         return FINALIZE;
                     }
-                    //recive_buffer1's memory allocate and initialization
+                    //receive_buffer1's memory allocate and initialization
                     buffer_size = (data_remain_size + recvlen) > MAX_BUFFER_SIZE ? (data_remain_size + recvlen) : MAX_BUFFER_SIZE;
                     buffer1 = new char[buffer_size];
                     /*-------- DEBUG LOG --------*/
@@ -4530,7 +4521,7 @@ namespace l7vs
                     }
                     /*-------- DEBUG LOG --------*/
                     memset(buffer1, 0, buffer_size);
-                    //recive_buffer2's memory allocate and initialization
+                    //receive_buffer2's memory allocate and initialization
                     buffer2 = new char[buffer_size];
                     /*-------- DEBUG LOG --------*/
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -4546,7 +4537,7 @@ namespace l7vs
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
                     {
                         std::string datadump;
-                        dump_memory(recv_data.recive_buffer + data_remain_start, data_remain_size, datadump);
+                        dump_memory(recv_data.receive_buffer + data_remain_start, data_remain_size, datadump);
 
                         boost::format formatter(
                             "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
@@ -4557,7 +4548,7 @@ namespace l7vs
                     }
                     /*------DEBUG LOG END------*/
                     //copy data from old buffer to new buffer
-                    memcpy(buffer1, recv_data.recive_buffer + data_remain_start, data_remain_size);
+                    memcpy(buffer1, recv_data.receive_buffer + data_remain_start, data_remain_size);
                     /*-------- DEBUG LOG --------*/
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
                     {
@@ -4601,49 +4592,49 @@ namespace l7vs
                     }
                     /*------DEBUG LOG END------*/
                     //free old buffer1 and old buffer2
-                    if (recv_data.recive_buffer1 != NULL)
+                    if (recv_data.receive_buffer1 != NULL)
                     {
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
                             boost::format formatter("delete : address = &(%d).");
-                            formatter % static_cast<void*>(recv_data.recive_buffer1);
+                            formatter % static_cast<void*>(recv_data.receive_buffer1);
                             putLogDebug(100154, formatter.str(), __FILE__,
                                         __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
-                        delete[] recv_data.recive_buffer1;
-                        recv_data.recive_buffer1 = NULL;
+                        delete[] recv_data.receive_buffer1;
+                        recv_data.receive_buffer1 = NULL;
                     }
 
-                    if (recv_data.recive_buffer2 != NULL)
+                    if (recv_data.receive_buffer2 != NULL)
                     {
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
                             boost::format formatter("delete : address = &(%d).");
-                            formatter % static_cast<void*>(recv_data.recive_buffer2);
+                            formatter % static_cast<void*>(recv_data.receive_buffer2);
                             putLogDebug(100155, formatter.str(), __FILE__,
                                         __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
-                        delete[] recv_data.recive_buffer2;
-                        recv_data.recive_buffer2 = NULL;
+                        delete[] recv_data.receive_buffer2;
+                        recv_data.receive_buffer2 = NULL;
                     }
 
                     //set new buffer pointer
-                    recv_data.recive_buffer1 = buffer1;
-                    recv_data.recive_buffer2 = buffer2;
-                    recv_data.recive_buffer = recv_data.recive_buffer1;
+                    recv_data.receive_buffer1 = buffer1;
+                    recv_data.receive_buffer2 = buffer2;
+                    recv_data.receive_buffer = recv_data.receive_buffer1;
                     //set new buffer's max size
-                    recv_data.recive_buffer_max_size = buffer_size;
+                    recv_data.receive_buffer_max_size = buffer_size;
                 }
                 //buffer's max size >= remain data size + requst size
                 //buffer isn't need reallocate, but switch
                 else
                 {
                     //pointer valid check
-                    if (unlikely(recv_data.recive_buffer1 == NULL || recv_data.recive_buffer2 == NULL))
+                    if (unlikely(recv_data.receive_buffer1 == NULL || recv_data.receive_buffer2 == NULL))
                     {
                         boost::format formatter("Invalid pointer. thread id : %d.");
                         formatter % boost::this_thread::get_id();
@@ -4651,15 +4642,15 @@ namespace l7vs
                         throw -1;
                     }
                     //using buffer is buffer1
-                    if (recv_data.recive_buffer == recv_data.recive_buffer1)
+                    if (recv_data.receive_buffer == recv_data.receive_buffer1)
                     {
                         //buffer2 initialization
-                        memset(recv_data.recive_buffer2, 0, recv_data.recive_buffer_max_size);
+                        memset(recv_data.receive_buffer2, 0, recv_data.receive_buffer_max_size);
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
                             std::string datadump;
-                            dump_memory(recv_data.recive_buffer + data_remain_start, data_remain_size, datadump);
+                            dump_memory(recv_data.receive_buffer + data_remain_start, data_remain_size, datadump);
                             boost::format formatter(
                                 "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_realserver_recv() : before memcpy (data dump) : "
@@ -4669,12 +4660,12 @@ namespace l7vs
                         }
                         /*------DEBUG LOG END------*/
                         //copy data from buffer1 to buffer2
-                        memcpy(recv_data.recive_buffer2, recv_data.recive_buffer + data_remain_start, data_remain_size);
+                        memcpy(recv_data.receive_buffer2, recv_data.receive_buffer + data_remain_start, data_remain_size);
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
                             std::string datadump;
-                            dump_memory(recv_data.recive_buffer2, data_remain_size, datadump);
+                            dump_memory(recv_data.receive_buffer2, data_remain_size, datadump);
                             boost::format formatter(
                                 "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_realserver_recv() : after memcpy (data dump) : "
@@ -4696,12 +4687,12 @@ namespace l7vs
                             putLogDebug(100158, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
-                        memcpy(recv_data.recive_buffer2 + data_remain_size, recvbuffer.data(), recvlen);
+                        memcpy(recv_data.receive_buffer2 + data_remain_size, recvbuffer.data(), recvlen);
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
                             std::string datadump;
-                            dump_memory(recv_data.recive_buffer2 + data_remain_size, recvlen, datadump);
+                            dump_memory(recv_data.receive_buffer2 + data_remain_size, recvlen, datadump);
 
                             boost::format formatter(
                                 "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
@@ -4712,18 +4703,18 @@ namespace l7vs
                         }
                         /*------DEBUG LOG END------*/
                         //set buffer2 as using buffer
-                        recv_data.recive_buffer = recv_data.recive_buffer2;
+                        recv_data.receive_buffer = recv_data.receive_buffer2;
                     }
                     //using buffer is buffer2
                     else
                     {
                         //buffer1 initialization
-                        memset(recv_data.recive_buffer1, 0, recv_data.recive_buffer_max_size);
+                        memset(recv_data.receive_buffer1, 0, recv_data.receive_buffer_max_size);
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
                             std::string datadump;
-                            dump_memory(recv_data.recive_buffer + data_remain_start, data_remain_size, datadump);
+                            dump_memory(recv_data.receive_buffer + data_remain_start, data_remain_size, datadump);
 
                             boost::format formatter(
                                 "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
@@ -4734,12 +4725,12 @@ namespace l7vs
                         }
                         /*------DEBUG LOG END------*/
                         //copy data from buffer2 to buffer1
-                        memcpy(recv_data.recive_buffer1, recv_data.recive_buffer + data_remain_start, data_remain_size);
+                        memcpy(recv_data.receive_buffer1, recv_data.receive_buffer + data_remain_start, data_remain_size);
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
                             std::string datadump;
-                            dump_memory(recv_data.recive_buffer1, data_remain_size, datadump);
+                            dump_memory(recv_data.receive_buffer1, data_remain_size, datadump);
 
                             boost::format formatter(
                                 "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
@@ -4763,12 +4754,12 @@ namespace l7vs
                             putLogDebug(100162, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
-                        memcpy(recv_data.recive_buffer1 + data_remain_size, recvbuffer.data(), recvlen);
+                        memcpy(recv_data.receive_buffer1 + data_remain_size, recvbuffer.data(), recvlen);
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
                             std::string datadump;
-                            dump_memory(recv_data.recive_buffer1 + data_remain_size, recvlen, datadump);
+                            dump_memory(recv_data.receive_buffer1 + data_remain_size, recvlen, datadump);
 
                             boost::format formatter(
                                 "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
@@ -4779,12 +4770,12 @@ namespace l7vs
                         }
                         /*------DEBUG LOG END------*/
                         //set buffer1 as using buffer
-                        recv_data.recive_buffer = recv_data.recive_buffer1;
+                        recv_data.receive_buffer = recv_data.receive_buffer1;
                     }
                 }
 
                 //set buffer's rest size
-                recv_data.recive_buffer_rest_size = recv_data.recive_buffer_max_size - data_remain_size - recvlen;
+                recv_data.receive_buffer_rest_size = recv_data.receive_buffer_max_size - data_remain_size - recvlen;
 
                 //remain_size recalc
                 data_remain_size += recvlen;
@@ -4802,7 +4793,7 @@ namespace l7vs
             else
             {
                 //pointer valid check
-                if (unlikely(recv_data.recive_buffer == NULL))
+                if (unlikely(recv_data.receive_buffer == NULL))
                 {
                     boost::format formatter("Invalid pointer. thread id : %d.");
                     formatter % boost::this_thread::get_id();
@@ -4823,24 +4814,24 @@ namespace l7vs
                 /*------DEBUG LOG END------*/
 
                 //copy data from parameter to using buffer
-                memcpy(recv_data.recive_buffer + recv_data.recive_buffer_max_size - recv_data.recive_buffer_rest_size,
+                memcpy(recv_data.receive_buffer + recv_data.receive_buffer_max_size - recv_data.receive_buffer_rest_size,
                        recvbuffer.data(), recvlen);
                 /*-------- DEBUG LOG --------*/
                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
                 {
                     std::string datadump;
-                    dump_memory(recv_data.recive_buffer + recv_data.recive_buffer_max_size - recv_data.recive_buffer_rest_size,
+                    dump_memory(recv_data.receive_buffer + recv_data.receive_buffer_max_size - recv_data.receive_buffer_rest_size,
                                 recvlen, datadump);
                     boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                             "handle_realserver_recv() : before memcpy (data dump) : "
                                             "data begin = %d, data_size = %d, data = %s");
-                    formatter % (recv_data.recive_buffer_max_size - recv_data.recive_buffer_rest_size )
+                    formatter % (recv_data.receive_buffer_max_size - recv_data.receive_buffer_rest_size )
                     % recvlen % datadump;
                     putLogDebug(100165, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 //buffer's rest size recalc
-                recv_data.recive_buffer_rest_size -= recvlen;
+                recv_data.receive_buffer_rest_size -= recvlen;
                 //remain data size recalc
                 data_remain_size += recvlen;
             }
@@ -4885,56 +4876,41 @@ namespace l7vs
                 //status is SEND_NG
                 else if (it->status == SEND_NG)
                 {
-                    //check http method
-                    check_result = check_status_code(recv_data.recive_buffer + it->send_offset, data_remain_size);
-                    /*-------- DEBUG LOG --------*/
-                    if (unlikely(LOG_LV_DEBUG == getloglevel()))
-                    {
-                        boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                                "handle_realserver_recv() : call check_http_method : "
-                                                "return_value = %d. thread id : %d.");
-                        formatter % check_result % boost::this_thread::get_id();
-                        putLogDebug(100166, formatter.str(), __FILE__, __LINE__ );
-                    }
-                    /*------DEBUG LOG END------*/
-                    //check http method result is OK
-                    if (check_result == CHECK_OK)
-                    {
-                        //check http version
-                        check_result = check_http_version(recv_data.recive_buffer + it->send_offset, data_remain_size);
+                    if (forwarded_for == FORWARDED_FOR_ON) {
+                        //check http method
+                        check_result = check_status_code(recv_data.receive_buffer + it->send_offset, data_remain_size);
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                                    "handle_realserver_recv() : call check_http_version : "
+                                                    "handle_realserver_recv() : call check_http_method : "
                                                     "return_value = %d. thread id : %d.");
                             formatter % check_result % boost::this_thread::get_id();
-                            putLogDebug(100167, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100166, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
-                    }
-                    //check method and version result is OK
-                    if (check_result == CHECK_OK)
-                    {
-                        //search http header
-                        bret = find_http_header(recv_data.recive_buffer + it->send_offset, data_remain_size, http_header,
-                                                header_offset, header_offset_len);
-                        /*-------- DEBUG LOG --------*/
-                        if (unlikely(LOG_LV_DEBUG == getloglevel()))
+                        //check http method result is CHECK_OK
+                        if (check_result == CHECK_OK)
                         {
-                            boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                                    "handle_realserver_recv() : call find_http_header : "
-                                                    "return_value = %d. thread id : %d.");
-                            formatter % static_cast<int>(bret) % boost::this_thread::get_id();
-                            putLogDebug(100168, formatter.str(), __FILE__, __LINE__ );
+                            //check http version
+                            check_result = check_http_version(recv_data.receive_buffer + it->send_offset, data_remain_size);
+                            /*-------- DEBUG LOG --------*/
+                            if (unlikely(LOG_LV_DEBUG == getloglevel()))
+                            {
+                                boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                                                        "handle_realserver_recv() : call check_http_version : "
+                                                        "return_value = %d. thread id : %d.");
+                                formatter % check_result % boost::this_thread::get_id();
+                                putLogDebug(100167, formatter.str(), __FILE__, __LINE__ );
+                            }
+                            /*------DEBUG LOG END------*/
                         }
-                        /*------DEBUG LOG END------*/
-                        //search http header result is OK
-                        if (bret)
+                        //check method and version result is CHECK_OK
+                        if (check_result == CHECK_OK)
                         {
-                            //search Content_Length header
-                            bret = find_http_header(recv_data.recive_buffer + it->send_offset, data_remain_size,
-                                                    content_header, content_length_header_offset, content_length_header_len);
+                            //search http header
+                            bret = find_http_header(recv_data.receive_buffer + it->send_offset, data_remain_size, http_header,
+                                                    header_offset, header_offset_len);
                             /*-------- DEBUG LOG --------*/
                             if (unlikely(LOG_LV_DEBUG == getloglevel()))
                             {
@@ -4942,64 +4918,94 @@ namespace l7vs
                                                         "handle_realserver_recv() : call find_http_header : "
                                                         "return_value = %d. thread id : %d.");
                                 formatter % static_cast<int>(bret) % boost::this_thread::get_id();
-                                putLogDebug(100169, formatter.str(), __FILE__, __LINE__ );
+                                putLogDebug(100168, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
-                            //search Content_Length result is OK
+                            //search http header result is OK
                             if (bret)
                             {
-                                //Get Content_Length header's numeric value
-                                for (pos = 0; recv_data.recive_buffer[it->send_offset + content_length_header_offset + pos] != ':' && pos
-                                        < content_length_header_len; ++pos)
-                                    ;
-                                if (pos == content_length_header_len)
+                                //search Content_Length header
+                                bret = find_http_header(recv_data.receive_buffer + it->send_offset, data_remain_size,
+                                                        content_header, content_length_header_offset, content_length_header_len);
+                                /*-------- DEBUG LOG --------*/
+                                if (unlikely(LOG_LV_DEBUG == getloglevel()))
                                 {
-                                    throw std::string("Content_Length field's value is invalid.");
+                                    boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                                                            "handle_realserver_recv() : call find_http_header : "
+                                                            "return_value = %d. thread id : %d.");
+                                    formatter % static_cast<int>(bret) % boost::this_thread::get_id();
+                                    putLogDebug(100169, formatter.str(), __FILE__, __LINE__ );
                                 }
-
-                                ++pos;
-
-                                str_value.assign(recv_data.recive_buffer + it->send_offset + content_length_header_offset + pos,
-                                                 content_length_header_len - pos);
-
-                                size_t pos_end = str_value.find_last_of('\r');
-                                if (pos_end != std::string::npos)
+                                /*------DEBUG LOG END------*/
+                                //search Content_Length result is OK
+                                if (bret)
                                 {
-                                    str_value = str_value.erase(pos_end);
+                                    //Get Content_Length header's numeric value
+                                    for (pos = 0; recv_data.receive_buffer[it->send_offset + content_length_header_offset + pos] != ':' && pos
+                                            < content_length_header_len; ++pos)
+                                        ;
+                                    if (pos == content_length_header_len)
+                                    {
+                                        throw std::string("Content_Length field's value is invalid.");
+                                    }
+    
+                                    ++pos;
+    
+                                    str_value.assign(recv_data.receive_buffer + it->send_offset + content_length_header_offset + pos,
+                                                     content_length_header_len - pos);
+    
+                                    size_t pos_end = str_value.find_last_of('\r');
+                                    if (pos_end != std::string::npos)
+                                    {
+                                        str_value = str_value.erase(pos_end);
+                                    }
+    
+                                    for (pos = 0; !isgraph(str_value[pos]) && str_value[pos] != '\0'; ++pos)
+                                        ;
+    
+                                    str_value = str_value.substr(pos);
+    
+                                    try
+                                    {
+                                        content_len_value = boost::lexical_cast<size_t>(str_value.c_str());
+                                    }
+                                    catch (const boost::bad_lexical_cast& ex)
+                                    {
+                                        throw std::string("Content_Length field's value is invalid.");
+                                    }
+                                    //send_rest_size recalc
+                                    //set whole http header's length + Content_Length's value
+                                    it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len + content_len_value;
                                 }
-
-                                for (pos = 0; !isgraph(str_value[pos]) && str_value[pos] != '\0'; ++pos)
-                                    ;
-
-                                str_value = str_value.substr(pos);
-
-                                try
+                                //search Content_Length result is NG
+                                else
                                 {
-                                    content_len_value = boost::lexical_cast<size_t>(str_value.c_str());
+                                    //send_rest_size recalc
+                                    //set whole http header's length
+                                    if (header_offset_len == 0)
+                                    {
+                                        it->send_rest_size = header_offset + header_offset_len + cr_lf_len;
+                                    } else
+                                    {
+                                        it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len;
+                                    }
                                 }
-                                catch (const boost::bad_lexical_cast& ex)
-                                {
-                                    throw std::string("Content_Length field's value is invalid.");
-                                }
-                                //send_rest_size recalc
-                                //set whole http header's length + Content_Length's value
-                                it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len + content_len_value;
                             }
-                            //search Content_Length result is NG
+                            //search http header result is CHECK_NG
                             else
                             {
-                                //send_rest_size recalc
-                                //set whole http header's length
-                                if (header_offset_len == 0)
-                                {
-                                    it->send_rest_size = header_offset + header_offset_len + cr_lf_len;
-                                } else
-                                {
-                                    it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len;
-                                }
+                                it->unsend_size += request_data_remain_size;
+                                request_data_remain_size = 0;
+                                break;
                             }
                         }
-                        //search http header result is NG
+                        //check method and version result is CHECK_NG
+                        else if (check_result == CHECK_NG)
+                        {
+                            //send_rest_size recalc
+                            it->send_rest_size = it->unsend_size + request_data_remain_size;
+                        }
+                        //check method and version result is CHECK_IMPOSSIBLE
                         else
                         {
                             it->unsend_size += request_data_remain_size;
@@ -5007,18 +5013,10 @@ namespace l7vs
                             break;
                         }
                     }
-                    //check method and version result is NG
-                    else if (check_result == CHECK_NG)
+                    else
                     {
                         //send_rest_size recalc
                         it->send_rest_size = it->unsend_size + request_data_remain_size;
-                    }
-                    //check method and version result is CHECK_INPOSSIBLE
-                    else
-                    {
-                        it->unsend_size += request_data_remain_size;
-                        request_data_remain_size = 0;
-                        break;
                     }
 
                     //recalc fields value according to send_rest_size and request rest size
@@ -5092,61 +5090,46 @@ namespace l7vs
                 recv_data.send_status_list.push_back(new_send_state);
                 std::list<send_status>::reverse_iterator new_send_it = recv_data.send_status_list.rbegin();
                 //calc offset
-                new_send_it->send_offset = recv_data.recive_buffer_max_size - recv_data.recive_buffer_rest_size
+                new_send_it->send_offset = recv_data.receive_buffer_max_size - recv_data.receive_buffer_rest_size
                                            - request_data_remain_size;
 
-                //check http method
-                check_result = check_status_code(recv_data.recive_buffer + new_send_it->send_offset,
-                                                 request_data_remain_size);
-                /*-------- DEBUG LOG --------*/
-                if (unlikely(LOG_LV_DEBUG == getloglevel()))
-                {
-                    boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                            "handle_realserver_recv() : call check_http_method : "
-                                            "return_value = %d. thread id : %d.");
-                    formatter % check_result % boost::this_thread::get_id();
-                    putLogDebug(100171, formatter.str(), __FILE__, __LINE__ );
-                }
-                /*------DEBUG LOG END------*/
-                //check http method result is OK
-                if (check_result == CHECK_OK)
-                {
-                    //check http version
-                    check_result = check_http_version(recv_data.recive_buffer + new_send_it->send_offset,
-                                                      request_data_remain_size);
+                if (forwarded_for == FORWARDED_FOR_ON) {
+                    //check http method
+                    check_result = check_status_code(recv_data.receive_buffer + new_send_it->send_offset,
+                                                     request_data_remain_size);
                     /*-------- DEBUG LOG --------*/
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
                     {
                         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                                "handle_realserver_recv() : call check_http_version : "
+                                                "handle_realserver_recv() : call check_http_method : "
                                                 "return_value = %d. thread id : %d.");
                         formatter % check_result % boost::this_thread::get_id();
-                        putLogDebug(100172, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100171, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
-                }
-                //check http method and version result is OK
-                if (check_result == CHECK_OK)
-                {
-                    //search whole http header, get whole http header's offset and length
-                    bret = find_http_header(recv_data.recive_buffer + new_send_it->send_offset, request_data_remain_size,
-                                            http_header, header_offset, header_offset_len);
-                    /*-------- DEBUG LOG --------*/
-                    if (unlikely(LOG_LV_DEBUG == getloglevel()))
+                    //check http method result is CHECK_OK
+                    if (check_result == CHECK_OK)
                     {
-                        boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                                "handle_realserver_recv() : call find_http_header : "
-                                                "return_value = %d. thread id : %d.");
-                        formatter % static_cast<int>(bret) % boost::this_thread::get_id();
-                        putLogDebug(100173, formatter.str(), __FILE__, __LINE__ );
+                        //check http version
+                        check_result = check_http_version(recv_data.receive_buffer + new_send_it->send_offset,
+                                                          request_data_remain_size);
+                        /*-------- DEBUG LOG --------*/
+                        if (unlikely(LOG_LV_DEBUG == getloglevel()))
+                        {
+                            boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                                                    "handle_realserver_recv() : call check_http_version : "
+                                                    "return_value = %d. thread id : %d.");
+                            formatter % check_result % boost::this_thread::get_id();
+                            putLogDebug(100172, formatter.str(), __FILE__, __LINE__ );
+                        }
+                        /*------DEBUG LOG END------*/
                     }
-                    /*------DEBUG LOG END------*/
-                    //searched whole http header
-                    if (bret)
+                    //check http method and version result is CHECK_OK
+                    if (check_result == CHECK_OK)
                     {
-                        //search ContentLength http header, get ContentLength header's offset and length
-                        bret = find_http_header(recv_data.recive_buffer + new_send_it->send_offset,
-                                                request_data_remain_size, content_header, content_length_header_offset, content_length_header_len);
+                        //search whole http header, get whole http header's offset and length
+                        bret = find_http_header(recv_data.receive_buffer + new_send_it->send_offset, request_data_remain_size,
+                                                http_header, header_offset, header_offset_len);
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
@@ -5154,66 +5137,95 @@ namespace l7vs
                                                     "handle_realserver_recv() : call find_http_header : "
                                                     "return_value = %d. thread id : %d.");
                             formatter % static_cast<int>(bret) % boost::this_thread::get_id();
-                            putLogDebug(100174, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100173, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
-
-                        //searched ContentLength http header
+                        //searched whole http header
                         if (bret)
                         {
-                            //Get Content_Length header's numeric value
-                            for (pos = 0; recv_data.recive_buffer[new_send_it->send_offset + content_length_header_offset + pos] != ':'
-                                    && pos < content_length_header_len; ++pos)
-                                ;
-                            if (pos == content_length_header_len)
+                            //search ContentLength http header, get ContentLength header's offset and length
+                            bret = find_http_header(recv_data.receive_buffer + new_send_it->send_offset,
+                                                    request_data_remain_size, content_header, content_length_header_offset, content_length_header_len);
+                            /*-------- DEBUG LOG --------*/
+                            if (unlikely(LOG_LV_DEBUG == getloglevel()))
                             {
-                                throw std::string("Content_Length field's value is invalid.");
+                                boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                                                        "handle_realserver_recv() : call find_http_header : "
+                                                        "return_value = %d. thread id : %d.");
+                                formatter % static_cast<int>(bret) % boost::this_thread::get_id();
+                                putLogDebug(100174, formatter.str(), __FILE__, __LINE__ );
                             }
-
-                            ++pos;
-
-                            str_value.assign(recv_data.recive_buffer + new_send_it->send_offset + content_length_header_offset + pos,
-                                             content_length_header_len - pos);
-
-                            size_t pos_end = str_value.find_last_of('\r');
-                            if (pos_end != std::string::npos)
+                            /*------DEBUG LOG END------*/
+    
+                            //searched ContentLength http header
+                            if (bret)
                             {
-                                str_value = str_value.erase(pos_end);
+                                //Get Content_Length header's numeric value
+                                for (pos = 0; recv_data.receive_buffer[new_send_it->send_offset + content_length_header_offset + pos] != ':'
+                                        && pos < content_length_header_len; ++pos)
+                                    ;
+                                if (pos == content_length_header_len)
+                                {
+                                    throw std::string("Content_Length field's value is invalid.");
+                                }
+    
+                                ++pos;
+    
+                                str_value.assign(recv_data.receive_buffer + new_send_it->send_offset + content_length_header_offset + pos,
+                                                 content_length_header_len - pos);
+    
+                                size_t pos_end = str_value.find_last_of('\r');
+                                if (pos_end != std::string::npos)
+                                {
+                                    str_value = str_value.erase(pos_end);
+                                }
+    
+                                for (pos = 0; !isgraph(str_value[pos]) && str_value[pos] != '\0'; ++pos)
+                                    ;
+    
+                                str_value = str_value.substr(pos);
+                                try
+                                {
+                                    content_len_value = boost::lexical_cast<size_t>(str_value.c_str());
+                                }
+                                catch (const boost::bad_lexical_cast& ex)
+                                {
+                                    throw std::string("Content_Length field's value is invalid.");
+                                }
+                                //send_rest_size recalc
+                                //set whole http header's  + whole http header's length + Content_Length's value
+                                new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len + content_len_value;
                             }
-
-                            for (pos = 0; !isgraph(str_value[pos]) && str_value[pos] != '\0'; ++pos)
-                                ;
-
-                            str_value = str_value.substr(pos);
-                            try
-                            {
-                                content_len_value = boost::lexical_cast<size_t>(str_value.c_str());
-                            }
-                            catch (const boost::bad_lexical_cast& ex)
-                            {
-                                throw std::string("Content_Length field's value is invalid.");
-                            }
-                            //send_rest_size recalc
-                            //set whole http header's  + whole http header's length + Content_Length's value
-                            new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len + content_len_value;
-                        }
-                        //not searched ContentLength http header
-                        else
-                        {
-                            //send_rest_size recalc
-                            //set whole http header's  + whole http header's length
-                            if (header_offset_len == 0)
-                            {
-                                new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_len;
-                            }
+                            //not searched ContentLength http header
                             else
                             {
-                                new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len;
+                                //send_rest_size recalc
+                                //set whole http header's  + whole http header's length
+                                if (header_offset_len == 0)
+                                {
+                                    new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_len;
+                                }
+                                else
+                                {
+                                    new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len;
+                                }
+    
                             }
-
+                        }
+                        //not searched whole http header
+                        else
+                        {
+                            new_send_it->unsend_size = request_data_remain_size;
+                            request_data_remain_size = 0;
+                            break;
                         }
                     }
-                    //not searched whole http header
+                    //check http method or version result is CHECK_NG
+                    else if (check_result == CHECK_NG)
+                    {
+                        new_send_it->send_rest_size = request_data_remain_size;
+                    }
+                    //check http method or version result is CHECK_IMPOSSIBLE
                     else
                     {
                         new_send_it->unsend_size = request_data_remain_size;
@@ -5221,17 +5233,9 @@ namespace l7vs
                         break;
                     }
                 }
-                //check http method or version result is NG
-                else if (check_result == CHECK_NG)
-                {
-                    new_send_it->send_rest_size = request_data_remain_size;
-                }
-                //check http method or version result is impossible
                 else
                 {
-                    new_send_it->unsend_size = request_data_remain_size;
-                    request_data_remain_size = 0;
-                    break;
+                    new_send_it->send_rest_size = request_data_remain_size;
                 }
 
                 //recalc fields value according to send_rest_size and request rest size
@@ -5362,10 +5366,10 @@ namespace l7vs
 
 
 
-    //! called from after sorryserver recive
+    //! called from after sorryserver receive
     //! @param[in]    downstream thread id
     //! @param[in]    sorryserver endpoint reference
-    //! @param[in]    recive from realserver buffer reference.
+    //! @param[in]    receive from realserver buffer reference.
     //! @param[in]    recv data length
     //! @return     session use EVENT mode
     protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_recv(
@@ -5411,7 +5415,7 @@ namespace l7vs
         bool bret = false;
         CHECK_RESULT_TAG check_result;
         session_thread_data_map_it session_thread_it;
-        recive_data_map_it recive_data_it;
+        receive_data_map_it receive_data_it;
 
         //parameter check
         if (recvlen > recvbuffer.size())
@@ -5453,16 +5457,16 @@ namespace l7vs
                 session_data = session_thread_it->second;
             }
 
-            recive_data_it = session_data->recive_data_map.find(sorry_endpoint);
-            if (unlikely(recive_data_it == session_data->recive_data_map.end()))
+            receive_data_it = session_data->receive_data_map.find(sorry_endpoint);
+            if (unlikely(receive_data_it == session_data->receive_data_map.end()))
             {
-                recive_data recv_data;
-                session_data->recive_data_map[sorry_endpoint] = recv_data;
+                receive_data recv_data;
+                session_data->receive_data_map[sorry_endpoint] = recv_data;
             }
 
             session_data->target_endpoint = sorry_endpoint;
 
-            recive_data& recv_data = session_data->recive_data_map[sorry_endpoint];
+            receive_data& recv_data = session_data->receive_data_map[sorry_endpoint];
 
             //status list check
             send_status_it it = recv_data.send_status_list.begin();
@@ -5566,13 +5570,13 @@ namespace l7vs
                 putLogDebug(100181, formatter.str(), __FILE__, __LINE__ );
             }
             /*------DEBUG LOG END------*/
-            //recive buffer process
+            //receive buffer process
             //buffer rest size < request size
-            if (recv_data.recive_buffer_rest_size < recvlen)
+            if (recv_data.receive_buffer_rest_size < recvlen)
             {
                 //buffer max size < remain size + request size
                 //buffer is need reallocate
-                if (recv_data.recive_buffer_max_size < data_remain_size + recvlen)
+                if (recv_data.receive_buffer_max_size < data_remain_size + recvlen)
                 {
                     //the buffer's size that will be allocated is exceed the upper limit value
                     if (MAX_SESSIONLESS_MODULE_BUFFER_SIZE < data_remain_size + recvlen)
@@ -5595,7 +5599,7 @@ namespace l7vs
                         /*------DEBUG LOG END------*/
                         return FINALIZE;
                     }
-                    //recive_buffer1's memory allocate and initialization
+                    //receive_buffer1's memory allocate and initialization
                     buffer_size = (data_remain_size + recvlen) > MAX_BUFFER_SIZE ? (data_remain_size + recvlen) : MAX_BUFFER_SIZE;
                     buffer1 = new char[buffer_size];
                     /*-------- DEBUG LOG --------*/
@@ -5607,7 +5611,7 @@ namespace l7vs
                     }
                     /*-------- DEBUG LOG END--------*/
                     memset(buffer1, 0, buffer_size);
-                    //recive_buffer2's memory allocate and initialization
+                    //receive_buffer2's memory allocate and initialization
                     buffer2 = new char[buffer_size];
                     /*-------- DEBUG LOG --------*/
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -5623,7 +5627,7 @@ namespace l7vs
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
                     {
                         std::string datadump;
-                        dump_memory(recv_data.recive_buffer + data_remain_start, data_remain_size, datadump);
+                        dump_memory(recv_data.receive_buffer + data_remain_start, data_remain_size, datadump);
                         boost::format formatter(
                             "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                             "handle_sorryserver_recv() : before memcpy (data dump) : "
@@ -5633,7 +5637,7 @@ namespace l7vs
                     }
                     /*------DEBUG LOG END------*/
                     //copy data from old buffer to new buffer
-                    memcpy(buffer1, recv_data.recive_buffer + data_remain_start, data_remain_size);
+                    memcpy(buffer1, recv_data.receive_buffer + data_remain_start, data_remain_size);
                     /*-------- DEBUG LOG --------*/
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
                     {
@@ -5676,49 +5680,49 @@ namespace l7vs
                     }
                     /*------DEBUG LOG END------*/
                     //free old buffer1 and old buffer2
-                    if (recv_data.recive_buffer1 != NULL)
+                    if (recv_data.receive_buffer1 != NULL)
                     {
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
                             boost::format formatter("delete : address = &(%d).");
-                            formatter % static_cast<void*>(recv_data.recive_buffer1);
+                            formatter % static_cast<void*>(recv_data.receive_buffer1);
                             putLogDebug(100189, formatter.str(), __FILE__,
                                         __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
-                        delete[] recv_data.recive_buffer1;
-                        recv_data.recive_buffer1 = NULL;
+                        delete[] recv_data.receive_buffer1;
+                        recv_data.receive_buffer1 = NULL;
                     }
 
-                    if (recv_data.recive_buffer2 != NULL)
+                    if (recv_data.receive_buffer2 != NULL)
                     {
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
                             boost::format formatter("delete : address = &(%d).");
-                            formatter % static_cast<void*>(recv_data.recive_buffer2);
+                            formatter % static_cast<void*>(recv_data.receive_buffer2);
                             putLogDebug(100190, formatter.str(), __FILE__,
                                         __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
-                        delete[] recv_data.recive_buffer2;
-                        recv_data.recive_buffer2 = NULL;
+                        delete[] recv_data.receive_buffer2;
+                        recv_data.receive_buffer2 = NULL;
                     }
 
                     //set new buffer pointer
-                    recv_data.recive_buffer1 = buffer1;
-                    recv_data.recive_buffer2 = buffer2;
-                    recv_data.recive_buffer = recv_data.recive_buffer1;
+                    recv_data.receive_buffer1 = buffer1;
+                    recv_data.receive_buffer2 = buffer2;
+                    recv_data.receive_buffer = recv_data.receive_buffer1;
                     //set new buffer's max size
-                    recv_data.recive_buffer_max_size = buffer_size;
+                    recv_data.receive_buffer_max_size = buffer_size;
                 }
                 //buffer's max size >= remain data size + requst size
                 //buffer isn't need reallocate, but switch
                 else
                 {
                     //pointer valid check
-                    if (unlikely(recv_data.recive_buffer1 == NULL || recv_data.recive_buffer2 == NULL))
+                    if (unlikely(recv_data.receive_buffer1 == NULL || recv_data.receive_buffer2 == NULL))
                     {
                         boost::format formatter("Invalid pointer. thread id : %d.");
                         formatter % boost::this_thread::get_id();
@@ -5726,15 +5730,15 @@ namespace l7vs
                         throw -1;
                     }
                     //using buffer is buffer1
-                    if (recv_data.recive_buffer == recv_data.recive_buffer1)
+                    if (recv_data.receive_buffer == recv_data.receive_buffer1)
                     {
                         //buffer2 initialization
-                        memset(recv_data.recive_buffer2, 0, recv_data.recive_buffer_max_size);
+                        memset(recv_data.receive_buffer2, 0, recv_data.receive_buffer_max_size);
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
                             std::string datadump;
-                            dump_memory(recv_data.recive_buffer + data_remain_start, data_remain_size, datadump);
+                            dump_memory(recv_data.receive_buffer + data_remain_start, data_remain_size, datadump);
                             boost::format formatter(
                                 "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_sorryserver_recv() : before memcpy (data dump) : "
@@ -5744,12 +5748,12 @@ namespace l7vs
                         }
                         /*------DEBUG LOG END------*/
                         //copy data from buffer1 to buffer2
-                        memcpy(recv_data.recive_buffer2, recv_data.recive_buffer + data_remain_start, data_remain_size);
+                        memcpy(recv_data.receive_buffer2, recv_data.receive_buffer + data_remain_start, data_remain_size);
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
                             std::string datadump;
-                            dump_memory(recv_data.recive_buffer2, data_remain_size, datadump);
+                            dump_memory(recv_data.receive_buffer2, data_remain_size, datadump);
                             boost::format formatter(
                                 "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_sorryserver_recv() : after memcpy (data dump) : "
@@ -5771,12 +5775,12 @@ namespace l7vs
                             putLogDebug(100193, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
-                        memcpy(recv_data.recive_buffer2 + data_remain_size, recvbuffer.data(), recvlen);
+                        memcpy(recv_data.receive_buffer2 + data_remain_size, recvbuffer.data(), recvlen);
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
                             std::string datadump;
-                            dump_memory(recv_data.recive_buffer2 + data_remain_size, recvlen, datadump);
+                            dump_memory(recv_data.receive_buffer2 + data_remain_size, recvlen, datadump);
                             boost::format formatter(
                                 "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_sorryserver_recv() : after memcpy (data dump) : "
@@ -5786,18 +5790,18 @@ namespace l7vs
                         }
                         /*------DEBUG LOG END------*/
                         //set buffer2 as using buffer
-                        recv_data.recive_buffer = recv_data.recive_buffer2;
+                        recv_data.receive_buffer = recv_data.receive_buffer2;
                     }
                     //using buffer is buffer2
                     else
                     {
                         //buffer1 initializtion
-                        memset(recv_data.recive_buffer1, 0, recv_data.recive_buffer_max_size);
+                        memset(recv_data.receive_buffer1, 0, recv_data.receive_buffer_max_size);
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
                             std::string datadump;
-                            dump_memory(recv_data.recive_buffer + data_remain_start, data_remain_size, datadump);
+                            dump_memory(recv_data.receive_buffer + data_remain_start, data_remain_size, datadump);
                             boost::format formatter(
                                 "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_sorryserver_recv() : before memcpy (data dump) : "
@@ -5807,12 +5811,12 @@ namespace l7vs
                         }
                         /*------DEBUG LOG END------*/
                         //copy data from buffer2 to buffer1
-                        memcpy(recv_data.recive_buffer1, recv_data.recive_buffer + data_remain_start, data_remain_size);
+                        memcpy(recv_data.receive_buffer1, recv_data.receive_buffer + data_remain_start, data_remain_size);
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
                             std::string datadump;
-                            dump_memory(recv_data.recive_buffer1, data_remain_size, datadump);
+                            dump_memory(recv_data.receive_buffer1, data_remain_size, datadump);
                             boost::format formatter(
                                 "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_sorryserver_recv() : after memcpy (data dump) : "
@@ -5835,12 +5839,12 @@ namespace l7vs
                             putLogDebug(100197, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
-                        memcpy(recv_data.recive_buffer1 + data_remain_size, recvbuffer.data(), recvlen);
+                        memcpy(recv_data.receive_buffer1 + data_remain_size, recvbuffer.data(), recvlen);
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
                             std::string datadump;
-                            dump_memory(recv_data.recive_buffer1 + data_remain_size, recvlen, datadump);
+                            dump_memory(recv_data.receive_buffer1 + data_remain_size, recvlen, datadump);
                             boost::format formatter(
                                 "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                 "handle_sorryserver_recv() : after memcpy (data dump) : "
@@ -5850,12 +5854,12 @@ namespace l7vs
                         }
                         /*------DEBUG LOG END------*/
                         //set buffer1 as using buffer
-                        recv_data.recive_buffer = recv_data.recive_buffer1;
+                        recv_data.receive_buffer = recv_data.receive_buffer1;
                     }
                 }
 
                 //set buffer's rest size
-                recv_data.recive_buffer_rest_size = recv_data.recive_buffer_max_size - data_remain_size - recvlen;
+                recv_data.receive_buffer_rest_size = recv_data.receive_buffer_max_size - data_remain_size - recvlen;
 
                 //remain_size recalc
                 data_remain_size += recvlen;
@@ -5873,7 +5877,7 @@ namespace l7vs
             else
             {
                 //pointer valid check
-                if (unlikely(recv_data.recive_buffer == NULL))
+                if (unlikely(recv_data.receive_buffer == NULL))
                 {
                     boost::format formatter("Invalid pointer. thread id : %d");
                     formatter % boost::this_thread::get_id();
@@ -5895,23 +5899,23 @@ namespace l7vs
                 /*------DEBUG LOG END------*/
 
                 //copy data from parameter to using buffer
-                memcpy(recv_data.recive_buffer + recv_data.recive_buffer_max_size - recv_data.recive_buffer_rest_size,
+                memcpy(recv_data.receive_buffer + recv_data.receive_buffer_max_size - recv_data.receive_buffer_rest_size,
                        recvbuffer.data(), recvlen);
                 /*-------- DEBUG LOG --------*/
                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
                 {
                     std::string datadump;
-                    dump_memory(recv_data.recive_buffer + recv_data.recive_buffer_max_size - recv_data.recive_buffer_rest_size, recvlen, datadump);
+                    dump_memory(recv_data.receive_buffer + recv_data.receive_buffer_max_size - recv_data.receive_buffer_rest_size, recvlen, datadump);
                     boost::format formatter(
                         "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                         "handle_sorryserver_recv() : after memcpy (data dump) : "
                         "data begin = %d, data_size = %d, data = %s");
-                    formatter % (recv_data.recive_buffer_max_size - recv_data.recive_buffer_rest_size) % recvlen % datadump;
+                    formatter % (recv_data.receive_buffer_max_size - recv_data.receive_buffer_rest_size) % recvlen % datadump;
                     putLogDebug(100200, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
                 //buffer's rest size recalc
-                recv_data.recive_buffer_rest_size -= recvlen;
+                recv_data.receive_buffer_rest_size -= recvlen;
                 //remain data size recalc
                 data_remain_size += recvlen;
             }
@@ -5948,122 +5952,136 @@ namespace l7vs
                 //status is SEND_NG
                 else if (it->status == SEND_NG)
                 {
-                    //check http method
-                    check_result = check_status_code(recv_data.recive_buffer + it->send_offset, data_remain_size);
-                    /*-------- DEBUG LOG --------*/
-                    if (unlikely(LOG_LV_DEBUG == getloglevel()))
-                    {
-                        boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                                "handle_sorryserver_recv() : call check_status_code : "
-                                                "return_value = %d. thread id : %d.");
-                        formatter % check_result % boost::this_thread::get_id();
-                        putLogDebug(100201, formatter.str(), __FILE__, __LINE__ );
-                    }
-                    /*------DEBUG LOG END------*/
-                    //check http method result is OK
-                    if (check_result == CHECK_OK)
-                    {
-                        //check http version
-                        check_result = check_http_version(recv_data.recive_buffer + it->send_offset, data_remain_size);
+                    if (forwarded_for == FORWARDED_FOR_ON) {
+                        //check http method
+                        check_result = check_status_code(recv_data.receive_buffer + it->send_offset, data_remain_size);
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
                             boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                                    "handle_sorryserver_recv() : call check_http_version : "
+                                                    "handle_sorryserver_recv() : call check_status_code : "
                                                     "return_value = %d. thread id : %d.");
                             formatter % check_result % boost::this_thread::get_id();
-                            putLogDebug(100202, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100201, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
-                    }
-                    //check method and version result is OK
-                    if (check_result == CHECK_OK)
-                    {
-                        //search http header
-                        bret = find_http_header(recv_data.recive_buffer + it->send_offset, data_remain_size, http_header,
-                                                header_offset, header_offset_len);
-                        /*-------- DEBUG LOG --------*/
-                        if (unlikely(LOG_LV_DEBUG == getloglevel()))
+                        //check http method result is CHECK_OK
+                        if (check_result == CHECK_OK)
                         {
-                            boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                                    "handle_sorryserver_recv() : call find_http_header : "
-                                                    "return_value = %d. thread id : %d.");
-                            formatter % static_cast<int>(bret) % boost::this_thread::get_id();
-                            putLogDebug(100203, formatter.str(), __FILE__, __LINE__ );
+                            //check http version
+                            check_result = check_http_version(recv_data.receive_buffer + it->send_offset, data_remain_size);
+                            /*-------- DEBUG LOG --------*/
+                            if (unlikely(LOG_LV_DEBUG == getloglevel()))
+                            {
+                                boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                                                        "handle_sorryserver_recv() : call check_http_version : "
+                                                        "return_value = %d. thread id : %d.");
+                                formatter % check_result % boost::this_thread::get_id();
+                                putLogDebug(100202, formatter.str(), __FILE__, __LINE__ );
+                            }
+                            /*------DEBUG LOG END------*/
                         }
-                        /*------DEBUG LOG END------*/
-                        //search http header result is OK
-                        if (bret)
+                        //check method and version result is CHECK_OK
+                        if (check_result == CHECK_OK)
                         {
-                            //search Content_Length header
-                            bret = find_http_header(recv_data.recive_buffer + it->send_offset, data_remain_size,
-                                                    content_header, content_length_header_offset, content_length_header_len);
+                            //search http header
+                            bret = find_http_header(recv_data.receive_buffer + it->send_offset, data_remain_size, http_header,
+                                                    header_offset, header_offset_len);
                             /*-------- DEBUG LOG --------*/
                             if (unlikely(LOG_LV_DEBUG == getloglevel()))
                             {
                                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
                                                         "handle_sorryserver_recv() : call find_http_header : "
                                                         "return_value = %d. thread id : %d.");
-                                formatter % static_cast<int>(bret) %boost::this_thread::get_id();
-                                putLogDebug(100204, formatter.str(), __FILE__, __LINE__ );
+                                formatter % static_cast<int>(bret) % boost::this_thread::get_id();
+                                putLogDebug(100203, formatter.str(), __FILE__, __LINE__ );
                             }
                             /*------DEBUG LOG END------*/
-                            //search Content_Length result is OK
+                            //search http header result is OK
                             if (bret)
                             {
-                                //Get Content_Length header's numeric value
-                                for (pos = 0; recv_data.recive_buffer[it->send_offset + content_length_header_offset + pos] != ':' && pos
-                                        < content_length_header_len; ++pos)
-                                    ;
-                                if (pos == content_length_header_len)
+                                //search Content_Length header
+                                bret = find_http_header(recv_data.receive_buffer + it->send_offset, data_remain_size,
+                                                        content_header, content_length_header_offset, content_length_header_len);
+                                /*-------- DEBUG LOG --------*/
+                                if (unlikely(LOG_LV_DEBUG == getloglevel()))
                                 {
-                                    throw std::string("Content_Length field's value is invalid.");
+                                    boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                                                            "handle_sorryserver_recv() : call find_http_header : "
+                                                            "return_value = %d. thread id : %d.");
+                                    formatter % static_cast<int>(bret) %boost::this_thread::get_id();
+                                    putLogDebug(100204, formatter.str(), __FILE__, __LINE__ );
                                 }
-
-                                ++pos;
-
-                                str_value.assign(recv_data.recive_buffer + it->send_offset + content_length_header_offset + pos,
-                                                 content_length_header_len - pos);
-
-                                size_t pos_end = str_value.find_last_of('\r');
-                                if (pos_end != std::string::npos)
+                                /*------DEBUG LOG END------*/
+                                //search Content_Length result is OK
+                                if (bret)
                                 {
-                                    str_value = str_value.erase(pos_end);
+                                    //Get Content_Length header's numeric value
+                                    for (pos = 0; recv_data.receive_buffer[it->send_offset + content_length_header_offset + pos] != ':' && pos
+                                            < content_length_header_len; ++pos)
+                                        ;
+                                    if (pos == content_length_header_len)
+                                    {
+                                        throw std::string("Content_Length field's value is invalid.");
+                                    }
+    
+                                    ++pos;
+    
+                                    str_value.assign(recv_data.receive_buffer + it->send_offset + content_length_header_offset + pos,
+                                                     content_length_header_len - pos);
+    
+                                    size_t pos_end = str_value.find_last_of('\r');
+                                    if (pos_end != std::string::npos)
+                                    {
+                                        str_value = str_value.erase(pos_end);
+                                    }
+    
+                                    for (pos = 0; !isgraph(str_value[pos]) && str_value[pos] != '\0'; ++pos)
+                                        ;
+    
+                                    str_value = str_value.substr(pos);
+    
+                                    try
+                                    {
+                                        content_len_value = boost::lexical_cast<size_t>(str_value.c_str());
+                                    }
+                                    catch (const boost::bad_lexical_cast& ex)
+                                    {
+                                        throw std::string("Content_Length field's value is invalid.");
+                                    }
+                                    //send_rest_size recalc
+                                    //set whole http header's length + Content_Length's value
+                                    it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len + content_len_value;
                                 }
-
-                                for (pos = 0; !isgraph(str_value[pos]) && str_value[pos] != '\0'; ++pos)
-                                    ;
-
-                                str_value = str_value.substr(pos);
-
-                                try
-                                {
-                                    content_len_value = boost::lexical_cast<size_t>(str_value.c_str());
-                                }
-                                catch (const boost::bad_lexical_cast& ex)
-                                {
-                                    throw std::string("Content_Length field's value is invalid.");
-                                }
-                                //send_rest_size recalc
-                                //set whole http header's length + Content_Length's value
-                                it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len + content_len_value;
-                            }
-                            //search Content_Length result is NG
-                            else
-                            {
-                                //send_rest_size recalc
-                                //set whole http header's length
-                                if (header_offset_len == 0)
-                                {
-                                    it->send_rest_size = header_offset + header_offset_len + cr_lf_len;
-                                }
+                                //search Content_Length result is NG
                                 else
                                 {
-                                    it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len;
+                                    //send_rest_size recalc
+                                    //set whole http header's length
+                                    if (header_offset_len == 0)
+                                    {
+                                        it->send_rest_size = header_offset + header_offset_len + cr_lf_len;
+                                    }
+                                    else
+                                    {
+                                        it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len;
+                                    }
                                 }
                             }
+                            //search http header result is CHECK_NG
+                            else
+                            {
+                                it->unsend_size += request_data_remain_size;
+                                request_data_remain_size = 0;
+                                break;
+                            }
                         }
-                        //search http header result is NG
+                        //check method or version result is CHECK_NG
+                        else if (check_result == CHECK_NG)
+                        {
+                            it->send_rest_size = it->unsend_size+request_data_remain_size;
+                        }
+                        //check method and version result is CHECK_IMPOSSIBLE
                         else
                         {
                             it->unsend_size += request_data_remain_size;
@@ -6071,17 +6089,9 @@ namespace l7vs
                             break;
                         }
                     }
-                    //check method or version result is NG
-                    else if (check_result == CHECK_NG)
-                    {
-                        it->send_rest_size = it->unsend_size+request_data_remain_size;
-                    }
-                    //check method and version result is CHECK_INPOSSIBLE
                     else
                     {
-                        it->unsend_size += request_data_remain_size;
-                        request_data_remain_size = 0;
-                        break;
+                        it->send_rest_size = it->unsend_size+request_data_remain_size;
                     }
 
                     //recalc fields value according to send_rest_size and request rest size
@@ -6155,61 +6165,46 @@ namespace l7vs
                 recv_data.send_status_list.push_back(new_send_state);
                 std::list<send_status>::reverse_iterator new_send_it = recv_data.send_status_list.rbegin();
                 //cacl offset
-                new_send_it->send_offset = recv_data.recive_buffer_max_size - recv_data.recive_buffer_rest_size
+                new_send_it->send_offset = recv_data.receive_buffer_max_size - recv_data.receive_buffer_rest_size
                                            - request_data_remain_size;
 
-                //check http method
-                check_result = check_status_code(recv_data.recive_buffer + new_send_it->send_offset,
-                                                 request_data_remain_size);
-                /*-------- DEBUG LOG --------*/
-                if (unlikely(LOG_LV_DEBUG == getloglevel()))
-                {
-                    boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                            "handle_sorryserver_recv() : call check_status_code : "
-                                            "return_value = %d. thread id : %d.");
-                    formatter % check_result % boost::this_thread::get_id();
-                    putLogDebug(100206, formatter.str(), __FILE__, __LINE__ );
-                }
-                /*------DEBUG LOG END------*/
-                //check http method result is OK
-                if (check_result == CHECK_OK)
-                {
-                    //check http version
-                    check_result = check_http_version(recv_data.recive_buffer + new_send_it->send_offset,
-                                                      request_data_remain_size);
+                if (forwarded_for == FORWARDED_FOR_ON) {
+                    //check http method
+                    check_result = check_status_code(recv_data.receive_buffer + new_send_it->send_offset,
+                                                     request_data_remain_size);
                     /*-------- DEBUG LOG --------*/
                     if (unlikely(LOG_LV_DEBUG == getloglevel()))
                     {
                         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                                "handle_sorryserver_recv() : call check_http_version : "
+                                                "handle_sorryserver_recv() : call check_status_code : "
                                                 "return_value = %d. thread id : %d.");
                         formatter % check_result % boost::this_thread::get_id();
-                        putLogDebug(100207, formatter.str(), __FILE__, __LINE__ );
+                        putLogDebug(100206, formatter.str(), __FILE__, __LINE__ );
                     }
                     /*------DEBUG LOG END------*/
-                }
-                //check http method and version result is OK
-                if (check_result == CHECK_OK)
-                {
-                    //search whole http header, get whole http header's offset and length
-                    bret = find_http_header(recv_data.recive_buffer + new_send_it->send_offset, request_data_remain_size,
-                                            http_header, header_offset, header_offset_len);
-                    /*-------- DEBUG LOG --------*/
-                    if (unlikely(LOG_LV_DEBUG == getloglevel()))
+                    //check http method result is CHECK_OK
+                    if (check_result == CHECK_OK)
                     {
-                        boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
-                                                "handle_sorryserver_recv() : call find_http_header : "
-                                                "return_value = %d. thread id : %d.");
-                        formatter % static_cast<int>(bret) % boost::this_thread::get_id();
-                        putLogDebug(100208, formatter.str(), __FILE__, __LINE__ );
+                        //check http version
+                        check_result = check_http_version(recv_data.receive_buffer + new_send_it->send_offset,
+                                                          request_data_remain_size);
+                        /*-------- DEBUG LOG --------*/
+                        if (unlikely(LOG_LV_DEBUG == getloglevel()))
+                        {
+                            boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                                                    "handle_sorryserver_recv() : call check_http_version : "
+                                                    "return_value = %d. thread id : %d.");
+                            formatter % check_result % boost::this_thread::get_id();
+                            putLogDebug(100207, formatter.str(), __FILE__, __LINE__ );
+                        }
+                        /*------DEBUG LOG END------*/
                     }
-                    /*------DEBUG LOG END------*/
-                    //searched whole http header
-                    if (bret)
+                    //check http method and version result is CHECK_OK
+                    if (check_result == CHECK_OK)
                     {
-                        //search ContentLength http header, get ContentLength header's offset and length
-                        bret = find_http_header(recv_data.recive_buffer + new_send_it->send_offset,
-                                                request_data_remain_size, content_header, content_length_header_offset, content_length_header_len);
+                        //search whole http header, get whole http header's offset and length
+                        bret = find_http_header(recv_data.receive_buffer + new_send_it->send_offset, request_data_remain_size,
+                                                http_header, header_offset, header_offset_len);
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel()))
                         {
@@ -6217,66 +6212,95 @@ namespace l7vs
                                                     "handle_sorryserver_recv() : call find_http_header : "
                                                     "return_value = %d. thread id : %d.");
                             formatter % static_cast<int>(bret) % boost::this_thread::get_id();
-                            putLogDebug(100209, formatter.str(), __FILE__, __LINE__ );
+                            putLogDebug(100208, formatter.str(), __FILE__, __LINE__ );
                         }
                         /*------DEBUG LOG END------*/
-
-                        //searched ContentLength http header
+                        //searched whole http header
                         if (bret)
                         {
-                            //Get Content_Length header's numeric value
-                            for (pos = 0; recv_data.recive_buffer[new_send_it->send_offset + content_length_header_offset + pos] != ':'
-                                    && pos < content_length_header_len; ++pos)
-                                ;
-                            if (pos == content_length_header_len)
+                            //search ContentLength http header, get ContentLength header's offset and length
+                            bret = find_http_header(recv_data.receive_buffer + new_send_it->send_offset,
+                                                    request_data_remain_size, content_header, content_length_header_offset, content_length_header_len);
+                            /*-------- DEBUG LOG --------*/
+                            if (unlikely(LOG_LV_DEBUG == getloglevel()))
                             {
-                                throw std::string("Content_Length field's value is invalid.");
+                                boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                                                        "handle_sorryserver_recv() : call find_http_header : "
+                                                        "return_value = %d. thread id : %d.");
+                                formatter % static_cast<int>(bret) % boost::this_thread::get_id();
+                                putLogDebug(100209, formatter.str(), __FILE__, __LINE__ );
                             }
-                            ++pos;
-
-                            str_value.assign(recv_data.recive_buffer + new_send_it->send_offset + content_length_header_offset + pos,
-                                             content_length_header_len - pos);
-
-                            size_t pos_end = str_value.find_last_of('\r');
-                            if (pos_end != std::string::npos)
+                            /*------DEBUG LOG END------*/
+    
+                            //searched ContentLength http header
+                            if (bret)
                             {
-                                str_value = str_value.erase(pos_end);
+                                //Get Content_Length header's numeric value
+                                for (pos = 0; recv_data.receive_buffer[new_send_it->send_offset + content_length_header_offset + pos] != ':'
+                                        && pos < content_length_header_len; ++pos)
+                                    ;
+                                if (pos == content_length_header_len)
+                                {
+                                    throw std::string("Content_Length field's value is invalid.");
+                                }
+                                ++pos;
+    
+                                str_value.assign(recv_data.receive_buffer + new_send_it->send_offset + content_length_header_offset + pos,
+                                                 content_length_header_len - pos);
+    
+                                size_t pos_end = str_value.find_last_of('\r');
+                                if (pos_end != std::string::npos)
+                                {
+                                    str_value = str_value.erase(pos_end);
+                                }
+    
+                                for (pos = 0; !isgraph(str_value[pos]) && str_value[pos] != '\0'; ++pos)
+                                    ;
+    
+                                str_value = str_value.substr(pos);
+                                try
+                                {
+                                    content_len_value = boost::lexical_cast<size_t>(str_value.c_str());
+                                }
+                                catch (const boost::bad_lexical_cast& ex)
+                                {
+                                    throw std::string("Content_Length field's value is invalid.");
+                                }
+                                //send_rest_size recalc
+                                //set whole http header's  + whole http header's length + Content_Length's value
+                                new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len + content_len_value;
                             }
-
-                            for (pos = 0; !isgraph(str_value[pos]) && str_value[pos] != '\0'; ++pos)
-                                ;
-
-                            str_value = str_value.substr(pos);
-                            try
-                            {
-                                content_len_value = boost::lexical_cast<size_t>(str_value.c_str());
-                            }
-                            catch (const boost::bad_lexical_cast& ex)
-                            {
-                                throw std::string("Content_Length field's value is invalid.");
-                            }
-                            //send_rest_size recalc
-                            //set whole http header's  + whole http header's length + Content_Length's value
-                            new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len + content_len_value;
-                        }
-                        //not searched ContentLength http header
-                        else
-                        {
-                            //send_rest_size recalc
-                            //set whole http header's  + whole http header's length
-                            if (header_offset_len == 0)
-                            {
-                                new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_len;
-                            }
+                            //not searched ContentLength http header
                             else
                             {
-                                new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len;
+                                //send_rest_size recalc
+                                //set whole http header's  + whole http header's length
+                                if (header_offset_len == 0)
+                                {
+                                    new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_len;
+                                }
+                                else
+                                {
+                                    new_send_it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len;
+                                }
+    
+    
                             }
-
-
+                        }
+                        //not searched whole http header
+                        else
+                        {
+                            new_send_it->unsend_size = request_data_remain_size;
+                            request_data_remain_size = 0;
+                            break;
                         }
                     }
-                    //not searched whole http header
+                    //check http method or version result is CHECK_NG
+                    else if (check_result == CHECK_NG)
+                    {
+                        new_send_it->send_rest_size = request_data_remain_size;
+                    }
+                    //check http method or version result is CHECK_IMPOSSIBLE
                     else
                     {
                         new_send_it->unsend_size = request_data_remain_size;
@@ -6284,17 +6308,9 @@ namespace l7vs
                         break;
                     }
                 }
-                //check http method or version result is NG
-                else if (check_result == CHECK_NG)
-                {
-                    new_send_it->send_rest_size = request_data_remain_size;
-                }
-                //check http method or version result is impossible
                 else
                 {
-                    new_send_it->unsend_size = request_data_remain_size;
-                    request_data_remain_size = 0;
-                    break;
+                    new_send_it->send_rest_size = request_data_remain_size;
                 }
 
                 //recalc fields value according to send_rest_size and request rest size
@@ -6466,7 +6482,7 @@ namespace l7vs
         size_t send_buffer_size = sendbuffer.max_size();
         thread_data_ptr session_data;
         session_thread_data_map_it session_thread_it;
-        recive_data_map_it recive_data_it;
+        receive_data_map_it receive_data_it;
 
         try
         {
@@ -6485,8 +6501,8 @@ namespace l7vs
                 session_data = session_thread_it->second;
             }
 
-            recive_data_it = session_data->recive_data_map.find(session_data->target_endpoint);
-            if (unlikely(recive_data_it == session_data->recive_data_map.end()))
+            receive_data_it = session_data->receive_data_map.find(session_data->target_endpoint);
+            if (unlikely(receive_data_it == session_data->receive_data_map.end()))
             {
                 boost::format formatter("Invalid endpoint. thread id : %d.");
                 formatter % boost::this_thread::get_id();
@@ -6494,7 +6510,7 @@ namespace l7vs
                 throw -1;
             }
 
-            recive_data& recv_data = recive_data_it->second;
+            receive_data& recv_data = receive_data_it->second;
 
             //get the data that can be sent possible
             send_status_it it = find_if(recv_data.send_status_list.begin(), recv_data.send_status_list.end(),
@@ -6514,7 +6530,7 @@ namespace l7vs
                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
                 {
                     std::string datadump;
-                    dump_memory(recv_data.recive_buffer + it->send_offset, it->send_possible_size, datadump);
+                    dump_memory(recv_data.receive_buffer + it->send_offset, it->send_possible_size, datadump);
 
                     boost::format formatter(
                         "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
@@ -6524,8 +6540,8 @@ namespace l7vs
                     putLogDebug(100215, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
-                //copy data from recive_buffer to sendbuffer by sending_possible size
-                memcpy(sendbuffer.data(), recv_data.recive_buffer + it->send_offset, it->send_possible_size);
+                //copy data from receive_buffer to sendbuffer by sending_possible size
+                memcpy(sendbuffer.data(), recv_data.receive_buffer + it->send_offset, it->send_possible_size);
                 /*-------- DEBUG LOG --------*/
                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
                 {
@@ -6554,7 +6570,7 @@ namespace l7vs
                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
                 {
                     std::string datadump;
-                    dump_memory(recv_data.recive_buffer + it->send_offset, send_buffer_size, datadump);
+                    dump_memory(recv_data.receive_buffer + it->send_offset, send_buffer_size, datadump);
 
                     boost::format formatter(
                         "function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
@@ -6564,8 +6580,8 @@ namespace l7vs
                     putLogDebug(100217, formatter.str(), __FILE__, __LINE__ );
                 }
                 /*------DEBUG LOG END------*/
-                //copy data from recive_buffer to sendbuffer by buffer size
-                memcpy(sendbuffer.data(), recv_data.recive_buffer + it->send_offset, send_buffer_size);
+                //copy data from receive_buffer to sendbuffer by buffer size
+                memcpy(sendbuffer.data(), recv_data.receive_buffer + it->send_offset, send_buffer_size);
                 /*-------- DEBUG LOG --------*/
                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
                 {
@@ -6681,7 +6697,7 @@ namespace l7vs
         EVENT_TAG status = FINALIZE;
         thread_data_ptr session_data;
         session_thread_data_map_it session_thread_it;
-        recive_data_map_it recive_data_it;
+        receive_data_map_it receive_data_it;
 
         try
         {
@@ -6699,8 +6715,8 @@ namespace l7vs
                 session_data = session_thread_it->second;
             }
             //endpoint check
-            recive_data_it = session_data->recive_data_map.find(session_data->target_endpoint);
-            if (unlikely(recive_data_it == session_data->recive_data_map.end()))
+            receive_data_it = session_data->receive_data_map.find(session_data->target_endpoint);
+            if (unlikely(receive_data_it == session_data->receive_data_map.end()))
             {
                 boost::format formatter("Invalid endpoint. thread id : %d.");
                 formatter % boost::this_thread::get_id();
@@ -6708,7 +6724,7 @@ namespace l7vs
                 throw -1;
             }
 
-            recive_data& recv_data = recive_data_it->second;
+            receive_data& recv_data = receive_data_it->second;
 
             send_status_it it = recv_data.send_status_list.begin();
             send_status_it it_end = recv_data.send_status_list.end();
@@ -6746,13 +6762,13 @@ namespace l7vs
             //sending possible data is not exist
             else
             {
-                //can recive from clent continue
+                //can receive from clent continue
                 if (it->send_rest_size > 0)
                 {
                     //change status from SEND_OK to SEND_CONTINUE
                     it->status = SEND_CONTINUE;
                 }
-                //can not recive from clent continue
+                //can not receive from clent continue
                 else
                 {
                     //change status from SEND_OK to SEND_END
@@ -6878,7 +6894,7 @@ namespace l7vs
         bool send_disable = false;
         thread_data_ptr session_data;
         session_thread_data_map_it session_thread_it;
-        recive_data_map_it recive_data_it;
+        receive_data_map_it receive_data_it;
 
         try
         {
@@ -6899,8 +6915,8 @@ namespace l7vs
             //check endpoint
             endpoint = session_data->thread_division == THREAD_DIVISION_UP_STREAM ? session_data->client_endpoint_tcp
                        : session_data->target_endpoint;
-            recive_data_it = session_data->recive_data_map.find(endpoint);
-            if (unlikely(recive_data_it == session_data->recive_data_map.end()))
+            receive_data_it = session_data->receive_data_map.find(endpoint);
+            if (unlikely(receive_data_it == session_data->receive_data_map.end()))
             {
                 //must be down thread
                 if (unlikely(session_data->thread_division == THREAD_DIVISION_UP_STREAM))
@@ -6924,7 +6940,7 @@ namespace l7vs
             }
             else
             {
-                recive_data& recv_data = recive_data_it->second;
+                receive_data& recv_data = receive_data_it->second;
 
                 //get this thread sending possible data
                 send_status_it it = find_if(recv_data.send_status_list.begin(), recv_data.send_status_list.end(),
@@ -7193,8 +7209,8 @@ namespace l7vs
             //check endpoint
             endpoint = session_data->thread_division == THREAD_DIVISION_UP_STREAM ? session_data->client_endpoint_tcp
                        : session_data->target_endpoint;
-            recive_data_map_it recive_data_it = session_data->recive_data_map.find(endpoint);
-            if (unlikely(recive_data_it == session_data->recive_data_map.end()))
+            receive_data_map_it receive_data_it = session_data->receive_data_map.find(endpoint);
+            if (unlikely(receive_data_it == session_data->receive_data_map.end()))
             {
                 //must be down thread
                 if (unlikely(session_data->thread_division == THREAD_DIVISION_UP_STREAM))
@@ -7219,7 +7235,7 @@ namespace l7vs
             }
             else
             {
-                recive_data& recv_data = recive_data_it->second;
+                receive_data& recv_data = receive_data_it->second;
 
                 //get this thread sending possible data
                 send_status_it it = find_if(recv_data.send_status_list.begin(), recv_data.send_status_list.end(),
@@ -7490,8 +7506,8 @@ namespace l7vs
 
             endpoint = session_data->thread_division == THREAD_DIVISION_UP_STREAM ? session_data->client_endpoint_tcp
                        : session_data->target_endpoint;
-            recive_data_map_it recive_data_it = session_data->recive_data_map.find(endpoint);
-            if (unlikely(recive_data_it == session_data->recive_data_map.end()))
+            receive_data_map_it receive_data_it = session_data->receive_data_map.find(endpoint);
+            if (unlikely(receive_data_it == session_data->receive_data_map.end()))
             {
                 /*-------- DEBUG LOG --------*/
                 if (unlikely(LOG_LV_DEBUG == getloglevel()))
@@ -7507,7 +7523,7 @@ namespace l7vs
                 return FINALIZE;
             }
 
-            recive_data& recv_data = recive_data_it->second;
+            receive_data& recv_data = receive_data_it->second;
 
             //the data that can be sent possible is exist
             send_status_it it = find_if(recv_data.send_status_list.begin(), recv_data.send_status_list.end(),
@@ -7701,8 +7717,8 @@ namespace l7vs
 
             endpoint = session_data->thread_division == THREAD_DIVISION_UP_STREAM ? session_data->client_endpoint_tcp
                        : session_data->target_endpoint;
-            recive_data_map_it recive_data_it = session_data->recive_data_map.find(endpoint);
-            if (unlikely(recive_data_it == session_data->recive_data_map.end()))
+            receive_data_map_it receive_data_it = session_data->receive_data_map.find(endpoint);
+            if (unlikely(receive_data_it == session_data->receive_data_map.end()))
             {
                 boost::format formatter("Invalid endpoint. thread id : %d.");
                 formatter % boost::this_thread::get_id();
@@ -7710,7 +7726,7 @@ namespace l7vs
                 throw -1;
             }
 
-            recive_data& recv_data = recive_data_it->second;
+            receive_data& recv_data = receive_data_it->second;
 
             //the data that can be sent possible is exist
             send_status_it it = find_if(recv_data.send_status_list.begin(), recv_data.send_status_list.end(),

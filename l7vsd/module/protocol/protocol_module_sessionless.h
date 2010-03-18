@@ -63,38 +63,38 @@ public:
         std::list<edit_data> edit_data_list;
     };
 
-    struct recive_data {
-        char* recive_buffer;
-        char* recive_buffer1;
-        char* recive_buffer2;
-        size_t recive_buffer_max_size;
-        size_t recive_buffer_rest_size;
+    struct receive_data {
+        char* receive_buffer;
+        char* receive_buffer1;
+        char* receive_buffer2;
+        size_t receive_buffer_max_size;
+        size_t receive_buffer_rest_size;
         std::list<send_status>  send_status_list;
-        recive_data()
+        receive_data()
         {
-            recive_buffer1 = NULL;
-            recive_buffer2 = NULL;
-            recive_buffer = NULL;
-            recive_buffer_max_size = 0;
-            recive_buffer_rest_size = 0;
+            receive_buffer1 = NULL;
+            receive_buffer2 = NULL;
+            receive_buffer = NULL;
+            receive_buffer_max_size = 0;
+            receive_buffer_rest_size = 0;
         }
-        ~recive_data()
+        ~receive_data()
         {
-            if (recive_buffer1 != NULL)
+            if (receive_buffer1 != NULL)
             {
-                delete [] recive_buffer1;
-                recive_buffer1 = NULL;
+                delete [] receive_buffer1;
+                receive_buffer1 = NULL;
             }
 
-            if (recive_buffer2 != NULL)
+            if (receive_buffer2 != NULL)
             {
-                delete [] recive_buffer2;
-                recive_buffer2 = NULL;
+                delete [] receive_buffer2;
+                receive_buffer2 = NULL;
             }
 
-            recive_buffer = NULL;
-            recive_buffer_max_size = 0;
-            recive_buffer_rest_size = 0;
+            receive_buffer = NULL;
+            receive_buffer_max_size = 0;
+            receive_buffer_rest_size = 0;
         }
     };
 
@@ -103,7 +103,7 @@ public:
         boost::thread::id thread_id;
         int thread_division;
         boost::thread::id pair_thread_id;
-        std::map<boost::asio::ip::tcp::endpoint, recive_data> recive_data_map;
+        std::map<boost::asio::ip::tcp::endpoint, receive_data> receive_data_map;
         int end_flag;
         int accept_end_flag;
         int sorry_flag;
@@ -117,7 +117,7 @@ public:
    typedef std::list<send_status>::iterator send_status_it;
    typedef boost::shared_ptr<session_thread_data_sessionless> thread_data_ptr;
    typedef std::map<boost::thread::id, thread_data_ptr>::iterator session_thread_data_map_it;
-   typedef std::map<boost::asio::ip::tcp::endpoint, recive_data>::iterator recive_data_map_it;
+   typedef std::map<boost::asio::ip::tcp::endpoint, receive_data>::iterator receive_data_map_it;
 protected:
     int forwarded_for;
     boost:: array<char,MAX_OPTION_SIZE> sorry_uri ;
