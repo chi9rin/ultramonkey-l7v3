@@ -1747,6 +1747,9 @@ namespace l7vs
                 }
                 else
                 {
+                    if (forwarded_for == FORWARDED_FOR_OFF) {
+                        session_data_ptr->data_state = UNKNOWN;
+                    }
                     //data state is HTTP_START
                     if (session_data_ptr->data_state == HTTP_START)
                     {
@@ -2085,18 +2088,8 @@ namespace l7vs
                 //endpoint is matched in the list
                 if (is_match)
                 {
-                    //data state is HTTP_START
-                    if (session_data_ptr->data_state == HTTP_START)
-                    {
-                        //set return status
-                        status = CLIENT_RECV;
-                    }
-                    //data state is not HTTP_START
-                    else
-                    {
-                        //set return status
-                        status = REALSERVER_CONNECT;
-                    }
+                    //set return status
+                    status = REALSERVER_CONNECT;
                 }
                 //endpoint is not matched in the list
                 else
@@ -2140,18 +2133,8 @@ namespace l7vs
                             }
                             /*------DEBUG LOG END------*/
 
-                            //data state is HTTP_START
-                            if (session_data_ptr->data_state == HTTP_START)
-                            {
-                                //set return status
-                                status = CLIENT_RECV;
-                            }
-                            //data state is not HTTP_START
-                            else
-                            {
-                                //set return status
-                                status = REALSERVER_CONNECT;
-                            }
+                            //set return status
+                            status = REALSERVER_CONNECT;
                         }
                         //get the endpoint by schedule unsuccessfully
                         else
@@ -2221,18 +2204,8 @@ namespace l7vs
                     }
                     /*------DEBUG LOG END------*/
 
-                    //data state is HTTP_START
-                    if (session_data_ptr->data_state == HTTP_START)
-                    {
-                        //set return status
-                        status = CLIENT_RECV;
-                    }
-                    //data state is not HTTP_START
-                    else
-                    {
-                        //set return status
-                        status = REALSERVER_CONNECT;
-                    }
+                    //set return status
+                    status = REALSERVER_CONNECT;
                 }
                 //get the endpoint by schedule unsuccessfully
                 else
@@ -3817,6 +3790,9 @@ namespace l7vs
             }
             else
             {
+                if (forwarded_for == FORWARDED_FOR_OFF) {
+                    session_data_ptr->data_state = UNKNOWN;
+                }
                 //data state is HTTP_START
                 if (session_data_ptr->data_state == HTTP_START)
                 {
@@ -3941,7 +3917,6 @@ namespace l7vs
                                     //set current message rest size
                                     session_data_ptr->current_message_rest_size = http_header_offset + http_header_len + CR_LF_CR_LF_LEN;
                                 }
-
                             }
 
                             //set data state HTTP_HEADER
@@ -4159,6 +4134,9 @@ namespace l7vs
             }
             else
             {
+                if (forwarded_for == FORWARDED_FOR_OFF) {
+                    session_data_ptr->data_state = UNKNOWN;
+                }
                 //data state is HTTP_START
                 if (session_data_ptr->data_state == HTTP_START)
                 {
