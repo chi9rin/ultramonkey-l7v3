@@ -30,12 +30,6 @@
 #include "parameter.h"
 #include "utility.h"
 
-#define UP_THREAD_ALIVE        std::bitset<TCP_SESSION_THREAD_STATE_BIT>(0x0001)
-#define DOWN_THREAD_ALIVE    std::bitset<TCP_SESSION_THREAD_STATE_BIT>(0x0002)
-#define UP_THREAD_ACTIVE    std::bitset<TCP_SESSION_THREAD_STATE_BIT>(0x0004)
-#define DOWN_THREAD_ACTIVE    std::bitset<TCP_SESSION_THREAD_STATE_BIT>(0x0008)
-#define UP_THREAD_LOCK         std::bitset<TCP_SESSION_THREAD_STATE_BIT>(0x0010)
-#define DOWN_THREAD_LOCK     std::bitset<TCP_SESSION_THREAD_STATE_BIT>(0x0020)
 
 namespace l7vs{
 
@@ -68,9 +62,14 @@ namespace l7vs{
         io(session_io),
         parent_service(vs),
         exit_flag(false),
-        thread_state(0),
+
+
+
+
+		upthread_status(UPTHREAD_SLEEP),
+		downthread_status(DOWNTHREAD_SLEEP),
+		realserver_connect(false),
         protocol_module(NULL),
-        session_pause_flag(false),
         client_socket(session_io,set_option),
         upstream_buffer_size(-1),
         downstream_buffer_size(-1),
@@ -343,9 +342,9 @@ namespace l7vs{
         down_thread_id = boost::thread::id();
         ssl_handshake_timer_flag = false;
         ssl_handshake_time_out_flag = false;
-        thread_state.reset();
+		upthread_status = UPTHREAD_SLEEP;
+		downthread_status = DOWNTHREAD_SLEEP;
         protocol_module = NULL;
-        session_pause_flag = false;
         tcp_thread_message* tmp_msg;
         while(1){
             tmp_msg = up_thread_message_que.pop();
@@ -613,24 +612,16 @@ namespace l7vs{
     {
         return client_ssl_socket.get_socket();
     }
-    //! is thread wait
-    //! @return         true is wait
-    //! @return         false is not wait
-    bool tcp_session::is_thread_wait(){
-        bool res = false;
-        rd_scoped_lock scope_lock(thread_state_update_mutex);
-        if(thread_state.test(4) & thread_state.test(5))
-            res = true;
-        return res;
-    }
     //! message from parent virtualservice
     //! @param[in]        message is tcp virtualservice message type
     void tcp_session::set_virtual_service_message(const TCP_VIRTUAL_SERVICE_MESSAGE_TAG  message){
         switch(message){
             case SESSION_PAUSE_ON:
                 {
-                    rw_scoped_lock scope_lock(session_pause_flag_mutex);
-                    session_pause_flag = true;
+					boost::mutex::scoped_lock	lock( upthread_status_mutex );
+						upthread_status = UPTHREAD_LOCK;
+					boost::mutex::scoped_lock	lock2( downthread_status_mutex );
+						downthread_status = DOWNTHREAD_LOCK;
                 }
                 //----Debug log----------------------------------------------------------------------
                 if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
@@ -644,8 +635,12 @@ namespace l7vs{
                 return;
             case SESSION_PAUSE_OFF:
                 {
-                    rw_scoped_lock scope_lock(session_pause_flag_mutex);
-                    session_pause_flag = false;
+					boost::mutex::scoped_lock( upthread_status_mutex );
+					if( upthread_status == UPTHREAD_LOCK )
+						upthread_status_cond.notify_one();
+					boost::mutex::scoped_lock( downthread_status_mutex );
+					if( downthread_status == DOWNTHREAD_LOCK )
+						downthread_status_cond.notify_one();
                 }
                 //----Debug log----------------------------------------------------------------------
                 if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
@@ -754,7 +749,7 @@ namespace l7vs{
         }
     }
     //! up stream thread main function
-    void tcp_session::up_thread_run(void){
+    void tcp_session::up_thread_run(){
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
             std::stringstream buf;
@@ -764,8 +759,13 @@ namespace l7vs{
             Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 17, buf.str(), __FILE__, __LINE__ );
         }
         //----Debug log----------------------------------------------------------------------
-        up_thread_id = boost::this_thread::get_id(); 
-        thread_state_update(UP_THREAD_ALIVE,true);
+        up_thread_id = boost::this_thread::get_id();
+		{
+			boost::mutex::scoped_lock( upthread_status_mutex );
+			boost::mutex::scoped_lock( realserver_connect_mutex );
+			upthread_status = UPTHREAD_ALIVE;
+			realserver_connect = false;
+		}
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
             std::stringstream buf;
@@ -775,16 +775,11 @@ namespace l7vs{
             Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 18, buf.str(), __FILE__, __LINE__ );
         }
         //----Debug log----------------------------------------------------------------------
-        while(true){ 
-            //wait down thread get id
-            {
-                rd_scoped_lock scope_lock(thread_state_update_mutex);
-                if(unlikely( thread_state.test(1) )){// DOWN_THREAD_ALIVE
-                    break;
-                }
-            }
-            boost::this_thread::yield();
-        }
+		{
+			boost::mutex::scoped_lock	lock( downthread_status_mutex );
+			if( downthread_status < DOWNTHREAD_ALIVE )
+				downthread_status_cond.wait( lock );
+		}
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
             std::stringstream buf;
@@ -806,12 +801,7 @@ namespace l7vs{
                 exit_flag = true;
             }
         }
-        bool is_exit;
-        {
-            rd_scoped_lock scoped_lock(exit_flag_update_mutex);
-            is_exit = exit_flag;
-        }
-        if(likely( !is_exit )){
+        if(likely( !exit_flag )){
             bool bres;
             if (!ssl_flag) {
                 bres = client_socket.get_socket().lowest_layer().is_open();
@@ -839,11 +829,7 @@ namespace l7vs{
             client_ssl_socket.accept();
         }
         
-        {
-            rd_scoped_lock scoped_lock(exit_flag_update_mutex);
-            is_exit = exit_flag;
-        }
-        if(likely( !is_exit )){
+        if(likely( !exit_flag )){
             if (!ssl_flag) {
                 client_endpoint = client_socket.get_socket().lowest_layer().remote_endpoint(ec);
             } else {
@@ -863,11 +849,7 @@ namespace l7vs{
                 }
             }
         }
-        {
-            rd_scoped_lock scoped_lock(exit_flag_update_mutex);
-            is_exit = exit_flag;
-        }
-        if(likely( !is_exit )){
+        if(likely( !exit_flag )){
             bool bres;
             if (!ssl_flag) {
                 bres = client_socket.set_non_blocking_mode(ec);
@@ -889,11 +871,7 @@ namespace l7vs{
             }
         }
 
-        {
-            rd_scoped_lock scoped_lock(exit_flag_update_mutex);
-            is_exit = exit_flag;
-        }
-        if(likely( !is_exit )){
+        if(likely( !exit_flag )){
             //set client_socket options(recieve buffer size)
             if (upstream_buffer_size > 0) {
                 boost::asio::socket_base::receive_buffer_size opt1(upstream_buffer_size);
@@ -918,11 +896,7 @@ namespace l7vs{
             }
         }
 
-        {
-            rd_scoped_lock scoped_lock(exit_flag_update_mutex);
-            is_exit = exit_flag;
-        }
-        if(likely( !is_exit )){
+        if(likely( !exit_flag )){
             //set client_socket options(send buffer size)
             if (downstream_buffer_size > 0) {
                 boost::asio::socket_base::send_buffer_size opt2(downstream_buffer_size);
@@ -951,11 +925,7 @@ namespace l7vs{
         protocol_module_base::EVENT_TAG module_event;
         std::map< protocol_module_base::EVENT_TAG , UP_THREAD_FUNC_TYPE_TAG >::iterator func_type;
         up_thread_function_pair    func;
-        {
-            rd_scoped_lock scoped_lock(exit_flag_update_mutex);
-            is_exit = exit_flag;
-        }
-        if(likely(!is_exit)){
+        if(likely(!exit_flag)){
             module_event = protocol_module->handle_session_initialize(up_thread_id,down_thread_id,client_endpoint,dumy_end);
             func_type = up_thread_module_event_map.find(module_event);
             if(unlikely( func_type == up_thread_module_event_map.end() )){
@@ -989,7 +959,11 @@ namespace l7vs{
                 }
             }
         }
-        thread_state_update(UP_THREAD_ACTIVE,true);
+		{
+			boost::mutex::scoped_lock	lock( upthread_status_mutex );
+			upthread_status = UPTHREAD_ACTIVE;
+			upthread_status_cond.notify_one();
+		}
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
             std::stringstream buf;
@@ -999,35 +973,15 @@ namespace l7vs{
             Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 20, buf.str(), __FILE__, __LINE__ );
         }
         //----Debug log----------------------------------------------------------------------
-        bool is_pause;
         while(true){
-            {
-                rd_scoped_lock scoped_lock(exit_flag_update_mutex);
-                if(unlikely(exit_flag)) break;
-            }
-
-            {
-                rd_scoped_lock scope_lock(session_pause_flag_mutex);
-                is_pause = session_pause_flag;
-            }
-            if(unlikely(is_pause)){
-                thread_state_update(UP_THREAD_LOCK,true);
-                while(true){
-                    {
-                        rd_scoped_lock scope_lock(session_pause_flag_mutex);
-                        if(!session_pause_flag) break;
-                    }
-                    {
-                        rd_scoped_lock scoped_lock(exit_flag_update_mutex);
-                        if(exit_flag) break;
-                    }
-                }
-                thread_state_update(UP_THREAD_LOCK,false);
-                {
-                    rd_scoped_lock scoped_lock(exit_flag_update_mutex);
-                    if(exit_flag) break;
-                }
-            }
+			{
+				boost::mutex::scoped_lock lock( upthread_status_mutex );
+				if( upthread_status == UPTHREAD_LOCK )
+					upthread_status_cond.wait( lock );
+				upthread_status = UPTHREAD_ACTIVE;
+				upthread_status_cond.notify_one();
+				if(exit_flag) break;
+			}
 
             tcp_thread_message*    msg    = up_thread_message_que.pop();
             if(unlikely( msg )){
@@ -1042,8 +996,6 @@ namespace l7vs{
             }else{
                 up_thread_next_call_function.second(LOCAL_PROC);
             }
-
-            boost::this_thread::yield();
         }
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
@@ -1056,7 +1008,9 @@ namespace l7vs{
         //----Debug log----------------------------------------------------------------------
         
         up_thread_all_socket_close();
-        thread_state_update(UP_THREAD_ACTIVE,false);
+		upthread_status_mutex.lock();
+		upthread_status = UPTHREAD_ALIVE;
+		upthread_status_mutex.unlock();
 
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
@@ -1067,16 +1021,12 @@ namespace l7vs{
             Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 22, buf.str(), __FILE__, __LINE__ );
         }
         //----Debug log----------------------------------------------------------------------
-        while(true){ 
-            // wait down thread alive
-            {
-                rd_scoped_lock scope_lock(thread_state_update_mutex);
-                if(unlikely( !thread_state.test(1) )){// DOWN_THREAD_ALIVE
-                    break;
-                }
-            }
-            boost::this_thread::yield();
-        }
+		{
+			boost::mutex::scoped_lock	lock( downthread_status_mutex );
+			if( downthread_status > DOWNTHREAD_ALIVE )
+				downthread_status_cond.wait( lock );
+		}
+
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
             std::stringstream buf;
@@ -1097,8 +1047,9 @@ namespace l7vs{
             Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 24, buf.str(), __FILE__, __LINE__ );
         }
         //----Debug log----------------------------------------------------------------------
-        thread_state_update(UP_THREAD_ALIVE,false);
-        parent_service.release_session(this);
+		upthread_status_mutex.lock();
+		upthread_status = UPTHREAD_SLEEP;
+		upthread_status_mutex.unlock();        parent_service.release_session(this);
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
             std::stringstream buf;
@@ -1120,7 +1071,7 @@ namespace l7vs{
     }
     
     //! down stream thread main function
-    void tcp_session::down_thread_run(void){
+    void tcp_session::down_thread_run(){
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
             std::stringstream buf;
@@ -1131,7 +1082,11 @@ namespace l7vs{
         }
         //----Debug log----------------------------------------------------------------------
         down_thread_id = boost::this_thread::get_id(); 
-        thread_state_update(DOWN_THREAD_ALIVE,true);
+		{
+			boost::mutex::scoped_lock	lock( downthread_status_mutex );
+			downthread_status = DOWNTHREAD_ALIVE;
+			downthread_status_cond.notify_one();
+		}
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
             std::stringstream buf;
@@ -1141,20 +1096,12 @@ namespace l7vs{
             Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 28, buf.str(), __FILE__, __LINE__ );
         }
         //----Debug log----------------------------------------------------------------------
-        while(true){ // UP_THREAD_ACTIVE
-            // wait up thread active
-            {
-                rd_scoped_lock scope_lock(thread_state_update_mutex);
-                if(unlikely( thread_state.test(2) )){
-                    break;
-                }
-            }
-            {
-                rd_scoped_lock scoped_lock(exit_flag_update_mutex);
-                if(unlikely(  exit_flag )) break;
-            }
-            boost::this_thread::yield();
-        }
+		{
+			boost::mutex::scoped_lock	lock( upthread_status_mutex );
+			if( upthread_status != UPTHREAD_ACTIVE )
+				upthread_status_cond.wait( upthread_status_mutex );
+		}
+
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
             std::stringstream buf;
@@ -1164,7 +1111,11 @@ namespace l7vs{
             Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 29, buf.str(), __FILE__, __LINE__ );
         }
         //----Debug log----------------------------------------------------------------------
-        thread_state_update(DOWN_THREAD_ACTIVE,true);
+		{
+			boost::mutex::scoped_lock	lock( downthread_status_mutex );
+			downthread_status = DOWNTHREAD_ACTIVE;
+		}
+
         down_thread_function_pair    func    = down_thread_function_array[DOWN_FUNC_REALSERVER_RECEIVE];
         if(unlikely( !func.second )){
             //Error not find function map
@@ -1202,39 +1153,27 @@ namespace l7vs{
                 exit_flag = true;
             }
         }
-        bool is_pause;
-        while(true){
-            {
-                rd_scoped_lock scoped_lock(exit_flag_update_mutex);
-                if(unlikely(exit_flag)) break;
+        while(!exit_flag){
+			{
+				boost::mutex::scoped_lock	lock( downthread_status_mutex );
+				if( downthread_status == DOWNTHREAD_LOCK )
+					downthread_status_cond.wait( lock );
             }
-
-            {
-                rd_scoped_lock scope_lock(session_pause_flag_mutex);
-                is_pause = session_pause_flag;
-            }
-            if(unlikely(is_pause)){
-                thread_state_update(DOWN_THREAD_LOCK,true);
-                while(true){
-                    {
-                        rd_scoped_lock scope_lock(session_pause_flag_mutex);
-                        if(!session_pause_flag) break;
-                    }
-                    {
-                        rd_scoped_lock scoped_lock(exit_flag_update_mutex);
-                        if(exit_flag) break;
-                    }
-                }
-                thread_state_update(DOWN_THREAD_LOCK,false);
-                {
-                    rd_scoped_lock scoped_lock(exit_flag_update_mutex);
-                    if(exit_flag) break;
-                }
-            }
+			{
+				boost::mutex::scoped_lock	lock( downthread_status_mutex );
+				downthread_status = DOWNTHREAD_ACTIVE;
+			}
+			{
+				boost::mutex::scoped_lock	lock( realserver_connect_mutex );
+				if( !realserver_connect )
+					realserver_connect_cond.wait( lock );
+			}
             while(unlikely( !down_thread_connect_socket_list.empty() )){
                 std::pair<endpoint,tcp_socket_ptr > push_rs_socket = down_thread_connect_socket_list.get_socket();
                 down_thread_receive_realserver_socket_list.push_back(push_rs_socket);
                 down_thread_current_receive_realserver_socket = down_thread_receive_realserver_socket_list.begin();
+                boost::mutex::scoped_lock lokc( upthread_status_mutex );
+                if( upthread_status < UPTHREAD_ALIVE ) break;
             }
 
             tcp_thread_message*    msg    = down_thread_message_que.pop();
@@ -1250,7 +1189,6 @@ namespace l7vs{
             }else{
                 down_thread_next_call_function.second(LOCAL_PROC);
             }
-            boost::this_thread::yield();
         }
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
@@ -1262,9 +1200,11 @@ namespace l7vs{
         }
         //----Debug log----------------------------------------------------------------------
         down_thread_all_socket_close();
-        thread_state_update(DOWN_THREAD_ACTIVE,false);
-        thread_state_update(DOWN_THREAD_ALIVE,false);
-        //----Debug log----------------------------------------------------------------------
+		{
+			boost::mutex::scoped_lock	lock( downthread_status_mutex );
+			downthread_status = DOWNTHREAD_ALIVE;
+			downthread_status_cond.notify_one(); 
+		}        //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
             std::stringstream buf;
             buf << "Thread ID[";
@@ -1273,48 +1213,8 @@ namespace l7vs{
             Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 32, buf.str(), __FILE__, __LINE__ );
         }
         //----Debug log----------------------------------------------------------------------
-    }
-
-    //! up and down thread state update
-    //! @param[in]        thread_flag is regist or unregist bitset
-    //! @param[in]        regist is regist or unregist flag
-    void tcp_session::thread_state_update(const std::bitset<TCP_SESSION_THREAD_STATE_BIT> thread_flag,const bool regist){
-        rw_scoped_lock scope_lock(thread_state_update_mutex);
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] thread_state_update";
-            buf << " thread_flag[";
-            buf << thread_flag;
-            buf << "] regist[";
-            buf << regist;
-            buf << "] thread_state[";
-            buf << thread_state;
-            buf << "]";
-            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 33, buf.str(), __FILE__, __LINE__ );
-        }
-        //----Debug log----------------------------------------------------------------------
-        if(regist){
-            thread_state |= thread_flag;
-        }else{
-            std::bitset<TCP_SESSION_THREAD_STATE_BIT> ret_flag = thread_flag;
-            ret_flag.flip();
-            thread_state &= ret_flag;
-        }
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] thread_state_update";
-            buf << " update thread_state[";
-            buf << thread_state;
-            buf << "]";
-            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 34, buf.str(), __FILE__, __LINE__ );
-        }
-        //----Debug log----------------------------------------------------------------------
+		boost::mutex::scoped_lock	lock( downthread_status_mutex );
+		downthread_status = DOWNTHREAD_SLEEP;
     }
 
     //! endpoint data to string infomation
@@ -2135,6 +2035,9 @@ namespace l7vs{
             up_thread_exit(process_type);
             return;
         }
+        boost::mutex::scoped_lock	lock( realserver_connect_mutex );
+        realserver_connect = true;
+        realserver_connect_cond.notify_one();
         up_thread_next_call_function = func;
     }
     //! up thread raise module event of handle_realserver_connect

@@ -25,7 +25,7 @@
 #ifndef TCP_SESSION_H
 #define TCP_SESSION_H
 
-#include <bitset>
+#include <boost/thread/condition.hpp>
 #include <boost/asio.hpp>
 //#include <boost/asio/ssl.hpp>
 #include <boost/thread/thread.hpp>
@@ -118,10 +118,6 @@ namespace l7vs{
             //! get reference client side ssl socket
             //! @return            reference client side ssl socket
             ssl_socket& get_client_ssl_socket();
-            //! is thread wait
-            //! @return         true is wait
-            //! @return         false is not wait
-            bool is_thread_wait();
             //! message from parent virtualservice
             //! @param[in]        message is tcp virtualservice message type
             void set_virtual_service_message(
@@ -184,6 +180,7 @@ namespace l7vs{
                 DOWN_FUNC_SORRY_DISABLE_EVENT,              //! down_thread_sorry_disable_event function
                 DOWN_FUNC_EXIT                              //! down_thread_exit function
             };
+
             typedef std::pair< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func > 
                 up_thread_function_pair;
             typedef std::pair< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func > 
@@ -196,20 +193,37 @@ namespace l7vs{
             bool exit_flag;
             //! thread main loop exit flag update mutex
             wr_mutex exit_flag_update_mutex;
-            //! up and down thread status bit frag
-            std::bitset<TCP_SESSION_THREAD_STATE_BIT> thread_state;
-            //! thread_state update mutex
-            wr_mutex thread_state_update_mutex;
+
+			//! upthread_status_tag
+			enum UPTHREAD_STATUS_TAG{
+			UPTHREAD_SLEEP = 0,
+			UPTHREAD_ALIVE,
+			UPTHREAD_ACTIVE,
+			UPTHREAD_LOCK
+			};
+			//! downthread_status tag
+			enum DOWNTHREAD_STATUS_TAG{
+			DOWNTHREAD_SLEEP = 0,
+			DOWNTHREAD_ALIVE,
+			DOWNTHREAD_ACTIVE,
+			DOWNTHREAD_LOCK
+			};
+			UPTHREAD_STATUS_TAG	upthread_status;
+			boost::mutex		upthread_status_mutex;
+			boost::condition	upthread_status_cond;
+			DOWNTHREAD_STATUS_TAG downthread_status;
+			boost::mutex		downthread_status_mutex;
+			boost::condition	downthread_status_cond;
+			bool				realserver_connect;
+			boost::mutex		realserver_connect_mutex;
+			boost::condition	realserver_connect_cond;
+
             //! up thread id
             boost::thread::id up_thread_id;
             //! down thread id
             boost::thread::id down_thread_id;
             //! pointer of protocol module
             protocol_module_base* protocol_module;
-            //! up and down thread wait flag
-            bool session_pause_flag;
-            //! wait flag mutex
-            wr_mutex session_pause_flag_mutex;
             //! client socket
             tcp_socket client_socket;
             //! sorryserver socket
@@ -347,12 +361,6 @@ namespace l7vs{
             //! reset ssl object for reuse
             //! @param[in/out]    clear_ssl is clear target SSL structure pointer
             virtual bool ssl_clear_keep_cache(SSL *clear_ssl);          
-            //! up and down thread state update
-            //! @param[in]        thread_flag is regist or unregist bitset
-            //! @param[in]        regist is regist or unregist flag
-            virtual void thread_state_update(
-                const std::bitset<TCP_SESSION_THREAD_STATE_BIT> thread_flag,
-                const bool regist);
             //! endpoint data to string infomation
             //! @param[in]        endpoint is target endpoint object
             virtual std::string endpoint_to_string( 
