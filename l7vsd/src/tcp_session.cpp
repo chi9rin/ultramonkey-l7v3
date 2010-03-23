@@ -1553,56 +1553,6 @@ namespace l7vs{
                 }
             }
 
-            if (is_epoll_edge_trigger && (!add_flag)) {
-                if (epoll_ctl( up_client_epollfd, EPOLL_CTL_MOD, event.data.fd, &event ) < 0) {
-                    std::stringstream buf;
-                    buf << "up_thread_client_receive : epoll_ctl EPOLL_CTL_MOD error : ";
-                    buf << strerror(errno);
-                    Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
-                    boost::this_thread::yield();
-                    return;
-                }
-            }
-
-            int ret_fds = epoll_wait( up_client_epollfd, up_client_events, EVENT_NUM, epoll_timeout );
-            if (ret_fds <= 0) {
-                if (ret_fds == 0) {
-                    std::stringstream buf;
-                    buf << "up_thread_client_receive : epoll_wait timeout ";
-                    buf << epoll_timeout;
-                    buf << "mS";
-                    Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
-                } else {
-                    std::stringstream buf;
-                    buf << "up_thread_client_receive : epoll_wait error : ";
-                    buf << strerror(errno);
-                    Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
-                }
-                boost::this_thread::yield();
-                return;
-            }
-
-            bool event_check = false;
-            for (int i = 0; i < ret_fds; ++i) {
-                if (up_client_events[i].data.fd == event.data.fd) {
-                    if (up_client_events[i].events & EPOLLIN) {
-                        event_check = true;
-                        break;
-                    } else if (up_client_events[i].events & EPOLLHUP) {
-                        std::stringstream buf;
-                        buf << "up_thread_client_receive : epoll_wait EPOLLHUP";
-                        Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
-                        down_thread_exit(process_type);
-                        return;
-                    }
-                }
-            }
-            if (!event_check) {
-                Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 999, "up_thread_client_receive : epoll_wait unknown fd", __FILE__, __LINE__ );
-                boost::this_thread::yield();
-                return;
-            }
-
             if (!ssl_flag) {
                 recv_size = client_socket.read_some(boost::asio::buffer(data_buff,MAX_BUFFER_SIZE), ec);
             } else {
@@ -1660,6 +1610,56 @@ namespace l7vs{
                     func_tag = UP_FUNC_CLIENT_DISCONNECT;
                     break;
                 }
+            }
+
+            if (is_epoll_edge_trigger && (!add_flag)) {
+                if (epoll_ctl( up_client_epollfd, EPOLL_CTL_MOD, event.data.fd, &event ) < 0) {
+                    std::stringstream buf;
+                    buf << "up_thread_client_receive : epoll_ctl EPOLL_CTL_MOD error : ";
+                    buf << strerror(errno);
+                    Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
+                    boost::this_thread::yield();
+                    return;
+                }
+            }
+
+            int ret_fds = epoll_wait( up_client_epollfd, up_client_events, EVENT_NUM, epoll_timeout );
+            if (ret_fds <= 0) {
+                if (ret_fds == 0) {
+                    std::stringstream buf;
+                    buf << "up_thread_client_receive : epoll_wait timeout ";
+                    buf << epoll_timeout;
+                    buf << "mS";
+                    Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
+                } else {
+                    std::stringstream buf;
+                    buf << "up_thread_client_receive : epoll_wait error : ";
+                    buf << strerror(errno);
+                    Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
+                }
+                boost::this_thread::yield();
+                return;
+            }
+
+            bool event_check = false;
+            for (int i = 0; i < ret_fds; ++i) {
+                if (up_client_events[i].data.fd == event.data.fd) {
+                    if (up_client_events[i].events & EPOLLIN) {
+                        event_check = true;
+                        break;
+                    } else if (up_client_events[i].events & EPOLLHUP) {
+                        std::stringstream buf;
+                        buf << "up_thread_client_receive : epoll_wait EPOLLHUP";
+                        Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
+                        down_thread_exit(process_type);
+                        return;
+                    }
+                }
+            }
+            if (!event_check) {
+                Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 999, "up_thread_client_receive : epoll_wait unknown fd", __FILE__, __LINE__ );
+                boost::this_thread::yield();
+                return;
             }
         }
 
