@@ -189,7 +189,7 @@ ip_replication_data_processor::ip_replication_data_processor(
                                        used);
                     strncpy(pick->virtualserver_ip, virtual_service_endpoint.address().to_string().c_str(),
                             sizeof(pick->virtualserver_ip)-1);
-                    pick->virtualserver_ip[sizeof(pick->virtualserver_ip)] = '\0';
+                    pick->virtualserver_ip[sizeof(pick->virtualserver_ip)-1] = '\0';
                     pick->virtualserver_port = virtual_service_endpoint.port();
                     pick->size = IP_REPLICATION_MAXLENGTH * sizeof(ip_replication_data);
                     pick->offset = sizeof(ip_replication_data_header) * IP_SERVICE_NUMBER +

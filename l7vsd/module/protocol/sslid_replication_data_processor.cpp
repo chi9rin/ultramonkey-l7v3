@@ -218,7 +218,7 @@ sslid_replication_data_processor::sslid_replication_data_processor(
                         memset(sslid_replication_area_begain + head->offset, 0, head->size);
                         strncpy(pick->virtualserver_ip, virtual_service_endpoint.address().to_string().c_str(),
                                 sizeof(pick->virtualserver_ip)-1);
-                        pick->virtualserver_ip[sizeof(pick->virtualserver_ip)] = '\0';
+                        pick->virtualserver_ip[sizeof(pick->virtualserver_ip)-1] = '\0';
                         pick->virtualserver_port = virtual_service_endpoint.port();
                         pick->size = maxlist * sizeof(sslid_replication_data);
                         pick->offset = sizeof(sslid_replication_data_header) * SSLID_SERVICE_NUMBER +
@@ -297,7 +297,7 @@ sslid_replication_data_processor::sslid_replication_data_processor(
                                        used);
                     strncpy(pick->virtualserver_ip, virtual_service_endpoint.address().to_string().c_str(),
                             sizeof(pick->virtualserver_ip)-1);
-                    pick->virtualserver_ip[sizeof(pick->virtualserver_ip)] = '\0';
+                    pick->virtualserver_ip[sizeof(pick->virtualserver_ip)-1] = '\0';
                     pick->virtualserver_port = virtual_service_endpoint.port();
                     pick->size = maxlist * sizeof(sslid_replication_data);
                     pick->offset = sizeof(sslid_replication_data_header) * SSLID_SERVICE_NUMBER +
