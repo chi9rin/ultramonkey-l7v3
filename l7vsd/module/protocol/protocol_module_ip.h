@@ -103,7 +103,7 @@ namespace l7vs
             hash= v4_address.to_ulong() * GOLDEN_RATIO_PRIME;
 
         }
-        return hash >> 32 - HASH_TABLE_BITS;
+        return hash >> (32 - HASH_TABLE_BITS);
         }
         class rs_list_scoped_lock {
             protected: 
