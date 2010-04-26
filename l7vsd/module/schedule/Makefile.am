@@ -1,31 +1,38 @@
-AUTOMAKE_OPTIONS	= foreign
-L7VS_MODDIR		= @l7vs_moddir@
-MAX_BUFFER_SIZE	= @l7vs_max_buffer_size@
-AM_CPPFLAGS		= \
-		-g -O2 -fno-strict-aliasing -Wall -Werror -fPIC -pthread \
-		-I../../include \
-		-I../../logger \
-		-I../../parameter \
-		-DMAX_BUFFER_SIZE=$(MAX_BUFFER_SIZE)
+AUTOMAKE_OPTIONS = foreign
+L7VS_MODDIR      = @l7vs_moddir@
+MAX_BUFFER_SIZE  = @l7vs_max_buffer_size@
+AM_CPPFLAGS = \
+	-g -O2 -fno-strict-aliasing -Wall -Werror -fPIC -pthread \
+	-I../../include \
+	-I../../logger \
+	-I../../parameter \
+	-DMAX_BUFFER_SIZE=$(MAX_BUFFER_SIZE)
 
-lib_LTLIBRARIES	=	libsched_lc.la \
-					libsched_rr.la \
-					libsched_wrr.la
+lib_LTLIBRARIES = \
+	libsched_lc.la \
+	libsched_rr.la \
+	libsched_wrr.la
 
-libsched_lc_la_SOURCES	=	schedule_module_base.h \
-							schedule_module_lc.h \
-							schedule_module_lc.cpp
-libsched_lc_la_LIBADD	=	-lrt -lboost_thread-mt
+libsched_lc_la_SOURCES = \
+	schedule_module_base.h \
+	schedule_module_lc.h \
+	schedule_module_lc.cpp
 
-libsched_rr_la_SOURCES	=	schedule_module_base.h \
-							schedule_module_rr.h \
-							schedule_module_rr.cpp
-libsched_rr_la_LIBADD	=	-lrt -lboost_thread-mt
+libsched_lc_la_LIBADD = -lrt -lboost_thread-mt
 
-libsched_wrr_la_SOURCES	=	schedule_module_base.h \
-							schedule_module_wrr.h \
-							schedule_module_wrr.cpp
-libsched_wrr_la_LIBADD	=	-lrt -lboost_thread-mt
+libsched_rr_la_SOURCES = \
+	schedule_module_base.h \
+	schedule_module_rr.h \
+	schedule_module_rr.cpp
+
+libsched_rr_la_LIBADD = -lrt -lboost_thread-mt
+
+libsched_wrr_la_SOURCES = \
+	schedule_module_base.h \
+	schedule_module_wrr.h \
+	schedule_module_wrr.cpp
+
+libsched_wrr_la_LIBADD = -lrt -lboost_thread-mt
 
 install:
 	cp ./.libs/libsched_lc.so ./.libs/sched_lc.so && \

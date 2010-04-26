@@ -21,6 +21,5 @@
 #
 ######################################################################
 
-SUBDIRS = doc l7directord l7vsd
 AUTOMAKE_OPTIONS = foreign
-
+SUBDIRS = doc l7directord l7vsd

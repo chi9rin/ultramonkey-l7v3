@@ -1,2 +1,2 @@
-SUBDIRS = protocol schedule
 AUTOMAKE_OPTIONS = foreign
+SUBDIRS = protocol schedule

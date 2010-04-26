@@ -1,7 +1,7 @@
-AUTOMAKE_OPTIONS 	= foreign
+AUTOMAKE_OPTIONS = foreign
 
-SBINDIR                 = @sbindir@
-RCDIR                   = /etc/init.d
+SBINDIR = @sbindir@
+RCDIR   = /etc/init.d
 
 install:
 	$(INSTALL) -m 755 -D ./l7directord $(SBINDIR)/l7directord

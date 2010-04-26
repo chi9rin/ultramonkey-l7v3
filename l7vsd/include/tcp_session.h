@@ -190,7 +190,7 @@ namespace l7vs{
             //! parent virtualservice
             virtualservice_tcp& parent_service;
             //! thread main loop exit flag
-            bool exit_flag;
+            volatile bool exit_flag;
             //! thread main loop exit flag update mutex
             wr_mutex exit_flag_update_mutex;
 
@@ -214,7 +214,7 @@ namespace l7vs{
 			DOWNTHREAD_STATUS_TAG downthread_status;
 			boost::mutex		downthread_status_mutex;
 			boost::condition	downthread_status_cond;
-			bool				realserver_connect;
+			bool				realserver_connect_status;
 			boost::mutex		realserver_connect_mutex;
 			boost::condition	realserver_connect_cond;
 
@@ -539,6 +539,65 @@ namespace l7vs{
                 const TCP_PROCESS_TYPE_TAG process_type);
             //! down thread close all socket
             virtual void down_thread_all_socket_close(void);
+
+			//! millisecond to boost::xtime converter
+			virtual	void	to_time( int in, boost::xtime& xt );
+			//! using xtime
+			boost::xtime	xt;
+			static const int	LOCKTIMEOUT = 50;
+			//! functag to string
+			std::string		func_tag_to_string(UP_THREAD_FUNC_TYPE_TAG in ){
+				std::string ret;
+                in == UP_FUNC_CLIENT_ACCEPT 					? ret = "UP_FUNC_CLIENT_ACCEPT" :
+                in == UP_FUNC_CLIENT_ACCEPT_EVENT				? ret = "UP_FUNC_CLIENT_ACCEPT_EVENT" :
+                in == UP_FUNC_CLIENT_DISCONNECT					? ret = "UP_FUNC_CLIENT_DISCONNECT" :
+                in == UP_FUNC_CLIENT_DISCONNECT_EVENT			? ret = "UP_FUNC_CLIENT_DISCONNECT_EVENT" :
+                in == UP_FUNC_CLIENT_RECEIVE					? ret = "UP_FUNC_CLIENT_RECEIVE" :
+                in == UP_FUNC_CLIENT_RESPOND_SEND				? ret = "UP_FUNC_CLIENT_RESPOND_SEND" :
+                in == UP_FUNC_CLIENT_RESPOND_SEND_EVENT			? ret = "UP_FUNC_CLIENT_RESPOND_SEND_EVENT" :
+                in == UP_FUNC_REALSERVER_GET_DEST_EVENT			? ret = "UP_FUNC_REALSERVER_GET_DEST_EVENT" :
+                in == UP_FUNC_REALSERVER_CONNECT				? ret = "UP_FUNC_REALSERVER_CONNECT" :
+                in == UP_FUNC_REALSERVER_CONNECT_EVENT			? ret = "UP_FUNC_REALSERVER_CONNECT_EVENT" :
+                in == UP_FUNC_REALSERVER_CONNECT_FAIL_EVENT		? ret = "UP_FUNC_REALSERVER_CONNECT_FAIL_EVENT" :
+                in == UP_FUNC_REALSERVER_SEND					? ret = "UP_FUNC_REALSERVER_SEND" :
+                in == UP_FUNC_REALSERVER_DISCONNECT				? ret = "UP_FUNC_REALSERVER_DISCONNECT" :
+                in == UP_FUNC_REALSERVER_DISCONNECT_EVENT		? ret = "UP_FUNC_REALSERVER_DISCONNECT_EVENT" :
+                in == UP_FUNC_REALSERVER_ALL_DISCONNECT			? ret = "UP_FUNC_REALSERVER_ALL_DISCONNECT" :
+                in == UP_FUNC_SORRYSERVER_GET_DEST				? ret = "UP_FUNC_SORRYSERVER_GET_DEST" :
+                in == UP_FUNC_SORRYSERVER_CONNECT				? ret = "UP_FUNC_SORRYSERVER_CONNECT" :
+                in == UP_FUNC_SORRYSERVER_CONNECT_EVENT			? ret = "UP_FUNC_SORRYSERVER_CONNECT_EVENT" :
+                in == UP_FUNC_SORRYSERVER_CONNECT_FAIL_EVENT	? ret = "UP_FUNC_SORRYSERVER_CONNECT_FAIL_EVENT" :
+                in == UP_FUNC_SORRYSERVER_SEND					? ret = "UP_FUNC_SORRYSERVER_SEND" :
+                in == UP_FUNC_SORRYSERVER_DISCONNECT			? ret = "UP_FUNC_SORRYSERVER_DISCONNECT" :
+                in == UP_FUNC_SORRYSERVER_MOD_DISCONNECT		? ret = "UP_FUNC_SORRYSERVER_MOD_DISCONNECT" :
+                in == UP_FUNC_SORRYSERVER_DISCONNECT_EVENT		? ret = "UP_FUNC_SORRYSERVER_DISCONNECT_EVENT" :
+                in == UP_FUNC_SORRY_ENABLE_EVENT				? ret = "UP_FUNC_SORRY_ENABLE_EVENT" :
+                in == UP_FUNC_SORRY_DISABLE_EVENT				? ret =  "UP_FUNC_SORRY_DISABLE_EVENT" :
+                in == UP_FUNC_EXIT								? ret = "UP_FUNC_EXIT" :
+																  ret = "NOT_FOUND";
+				return ret;
+			}
+			std::string		func_tag_to_string(DOWN_THREAD_FUNC_TYPE_TAG in ){
+				std::string	ret;
+                in == DOWN_FUNC_CLIENT_DISCONNECT				? ret = "DOWN_FUNC_CLIENT_DISCONNECT" :
+                in == DOWN_FUNC_CLIENT_DISCONNECT_EVENT			? ret = "DOWN_FUNC_CLIENT_DISCONNECT_EVENT" :
+                in == DOWN_FUNC_CLIENT_CONNECTION_CHK			? ret = "DOWN_FUNC_CLIENT_CONNECTION_CHK" :
+                in == DOWN_FUNC_CLIENT_SEND						? ret = "DOWN_FUNC_CLIENT_SEND" :
+                in == DOWN_FUNC_CLIENT_RESPOND_SEND_EVENT		? ret = "DOWN_FUNC_CLIENT_RESPOND_SEND_EVENT" :
+                in == DOWN_FUNC_REALSERVER_RECEIVE				? ret = "DOWN_FUNC_REALSERVER_RECEIVE" :
+                in == DOWN_FUNC_REALSERVER_DISCONNECT			? ret = "DOWN_FUNC_REALSERVER_DISCONNECT" :
+                in == DOWN_FUNC_REALSERVER_DISCONNECT_EVENT		? ret = "DOWN_FUNC_REALSERVER_DISCONNECT_EVENT" :
+                in == DOWN_FUNC_REALSERVER_ALL_DISCONNECT		? ret = "DOWN_FUNC_REALSERVER_ALL_DISCONNECT" :
+                in == DOWN_FUNC_SORRYSERVER_RECEIVE				? ret = "DOWN_FUNC_SORRYSERVER_RECEIVE" :
+                in == DOWN_FUNC_SORRYSERVER_DISCONNECT			? ret = "DOWN_FUNC_SORRYSERVER_DISCONNECT" :
+                in == DOWN_FUNC_SORRYSERVER_MOD_DISCONNECT		? ret = "DOWN_FUNC_SORRYSERVER_MOD_DISCONNECT" :
+                in == DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT	? ret = "DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT" :
+                in == DOWN_FUNC_SORRY_ENABLE_EVENT				? ret = "DOWN_FUNC_SORRY_ENABLE_EVENT" :
+                in == DOWN_FUNC_SORRY_DISABLE_EVENT				? ret = "DOWN_FUNC_SORRY_DISABLE_EVENT" :
+                in == DOWN_FUNC_EXIT							? ret = "DOWN_FUNC_EXIT" :
+																  ret = "NOT_FOUND";
+				return ret;
+			}
 
     };// class tcp_session
 }// namespace l7vs

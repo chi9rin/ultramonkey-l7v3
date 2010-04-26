@@ -21,7 +21,7 @@
  * 02110-1301 USA
  *
  **********************************************************************/
-
+#include <boost/format.hpp>
 #include "tcp_session.h"
 #include "tcp_thread_message.h"
 #include "virtualservice.h"
@@ -68,7 +68,7 @@ namespace l7vs{
 
 		upthread_status(UPTHREAD_SLEEP),
 		downthread_status(DOWNTHREAD_SLEEP),
-		realserver_connect(false),
+		realserver_connect_status(false),
         protocol_module(NULL),
         client_socket(session_io,set_option),
         upstream_buffer_size(-1),
@@ -298,6 +298,12 @@ namespace l7vs{
     }
     //! destructor
     tcp_session::~tcp_session(){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN ~tcp_session" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         // up_thread_module_event_map
         up_thread_module_event_map.clear();
         // up_thread_message_down_thread_function_map
@@ -344,6 +350,7 @@ namespace l7vs{
         ssl_handshake_time_out_flag = false;
 		upthread_status = UPTHREAD_SLEEP;
 		downthread_status = DOWNTHREAD_SLEEP;
+		realserver_connect_status = false;
         protocol_module = NULL;
         tcp_thread_message* tmp_msg;
         while(1){
@@ -466,6 +473,12 @@ namespace l7vs{
         down_realserver_epollfd_registered = false;
         down_sorryserver_epollfd_registered = false;
 
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT ~tcp_session" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         return msg;
     }
 
@@ -474,6 +487,11 @@ namespace l7vs{
     //! @return         true is clear OK.
     //! @return         false is not clear
     bool tcp_session::ssl_clear_keep_cache(SSL *clear_ssl){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN ssl_clear_keep_cache" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
 
         if (clear_ssl->method == NULL) {
             //----Debug log----------------------------------------------------------------------
@@ -597,24 +615,47 @@ namespace l7vs{
         } else {
             clear_ssl->method->ssl_clear( clear_ssl );
         }
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT ssl_clear_keep_cache" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         return (true);
     }
 
     //! get reference client side socket
     //! @return            reference client side socket
-    boost::asio::ip::tcp::socket& tcp_session::get_client_socket()
-    {
+    boost::asio::ip::tcp::socket& tcp_session::get_client_socket(){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN/OUT get_client_socket" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         return client_socket.get_socket();
     }
     //! get reference client side ssl socket
     //! @return            reference client side ssl socket
-    ssl_socket& tcp_session::get_client_ssl_socket()
-    {
+    ssl_socket& tcp_session::get_client_ssl_socket(){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN/OUT get_client_ssl_socket" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         return client_ssl_socket.get_socket();
     }
     //! message from parent virtualservice
     //! @param[in]        message is tcp virtualservice message type
     void tcp_session::set_virtual_service_message(const TCP_VIRTUAL_SERVICE_MESSAGE_TAG  message){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN set_virtual_service_message" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         switch(message){
             case SESSION_PAUSE_ON:
                 {
@@ -628,7 +669,7 @@ namespace l7vs{
                     std::stringstream buf;
                     buf << "Thread ID[";
                     buf << boost::this_thread::get_id();
-                    buf << "] set_virtual_service_message message:[SESSION_PAUSE_ON]";
+                    buf << "] FUNC OUT set_virtual_service_message message:[SESSION_PAUSE_ON]";
                     Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 12, buf.str(), __FILE__, __LINE__ );
                 }
                 //----Debug log----------------------------------------------------------------------
@@ -647,7 +688,7 @@ namespace l7vs{
                     std::stringstream buf;
                     buf << "Thread ID[";
                     buf << boost::this_thread::get_id();
-                    buf << "] set_virtual_service_message message:[SESSION_PAUSE_OFF]";
+                    buf << "] FUNC OUT set_virtual_service_message message:[SESSION_PAUSE_OFF]";
                     Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 13, buf.str(), __FILE__, __LINE__ );
                 }
                 //----Debug log----------------------------------------------------------------------
@@ -662,7 +703,7 @@ namespace l7vs{
                     std::stringstream buf;
                     buf << "Thread ID[";
                     buf << boost::this_thread::get_id();
-                    buf << "] set_virtual_service_message message:[ACCESS_LOG_ON]";
+                    buf << "] FUNC OUT set_virtual_service_message message:[ACCESS_LOG_ON]";
                     Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 49, buf.str(), __FILE__, __LINE__ );
                 }
                 //----Debug log----------------------------------------------------------------------
@@ -677,7 +718,7 @@ namespace l7vs{
                     std::stringstream buf;
                     buf << "Thread ID[";
                     buf << boost::this_thread::get_id();
-                    buf << "] set_virtual_service_message message:[ACCESS_LOG_OFF]";
+                    buf << "] FUNC OUT set_virtual_service_message message:[ACCESS_LOG_OFF]";
                     Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 68, buf.str(), __FILE__, __LINE__ );
                 }
                 //----Debug log----------------------------------------------------------------------
@@ -720,51 +761,37 @@ namespace l7vs{
         tcp_thread_message*    up_msg    = new tcp_thread_message;
         std::map< TCP_VIRTUAL_SERVICE_MESSAGE_TAG, tcp_session_func>::iterator up_func;
         up_func = virtual_service_message_up_thread_function_map.find(message);
-        if(up_func != virtual_service_message_up_thread_function_map.end()){
-            up_msg->message = up_func->second;
-            while(!up_thread_message_que.push(up_msg)){}
-        }else{
-            //Error illegal virtualservice message type
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] up thread illegal virtualservice message type : ";
-            buf << message;    
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 6, buf.str(), __FILE__, __LINE__ );
-        }
+
+		up_msg->message = up_func->second;
+		while(!up_thread_message_que.push(up_msg)){}
+
         tcp_thread_message*    down_msg    = new tcp_thread_message;
         std::map< TCP_VIRTUAL_SERVICE_MESSAGE_TAG, tcp_session_func>::iterator down_func;
         down_func = virtual_service_message_down_thread_function_map.find(message);
-        if(down_func != virtual_service_message_down_thread_function_map.end()){
-            down_msg->message = down_func->second;
-            while(!down_thread_message_que.push(down_msg)){}
-        }else{
-            //Error illegal virtualservice message type
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] down thread illegal virtualservice message type : ";
-            buf << message;    
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 7, buf.str(), __FILE__, __LINE__ );
-        }
+		down_msg->message = down_func->second;
+		while(!down_thread_message_que.push(down_msg)){}
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT set_virtual_service_message" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! up stream thread main function
     void tcp_session::up_thread_run(){
         //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] up_thread_run start";
-            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 17, buf.str(), __FILE__, __LINE__ );
-        }
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_run" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 17, formatter.str(), __FILE__, __LINE__ );
+		}
         //----Debug log----------------------------------------------------------------------
         up_thread_id = boost::this_thread::get_id();
 		{
 			boost::mutex::scoped_lock( upthread_status_mutex );
 			boost::mutex::scoped_lock( realserver_connect_mutex );
 			upthread_status = UPTHREAD_ALIVE;
-			realserver_connect = false;
+			realserver_connect_status = false;
 		}
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
@@ -789,25 +816,11 @@ namespace l7vs{
             Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 19, buf.str(), __FILE__, __LINE__ );
         }
         //----Debug log----------------------------------------------------------------------
-        if(unlikely( protocol_module == NULL )){
-            //Error!
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module is NULL!";
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 8, buf.str(), __FILE__, __LINE__ );
-            {
-                rw_scoped_lock scoped_lock(exit_flag_update_mutex);
-                exit_flag = true;
-            }
-        }
         if(likely( !exit_flag )){
             bool bres;
-            if (!ssl_flag) {
-                bres = client_socket.get_socket().lowest_layer().is_open();
-            } else {
-                bres = client_ssl_socket.get_socket().lowest_layer().is_open();
-            }
+			(!ssl_flag)	?	bres = client_socket.get_socket().lowest_layer().is_open()
+						:	bres = client_ssl_socket.get_socket().lowest_layer().is_open();
+
             if(unlikely( !bres )){
                 //client socket not open Error!
                 std::stringstream buf;
@@ -823,18 +836,13 @@ namespace l7vs{
         }
         
         boost::system::error_code ec;
-        if (!ssl_flag) {
-            client_socket.accept();
-        } else {
-            client_ssl_socket.accept();
-        }
+		(!ssl_flag)	?	client_socket.accept()
+					:	client_ssl_socket.accept();
         
         if(likely( !exit_flag )){
-            if (!ssl_flag) {
-                client_endpoint = client_socket.get_socket().lowest_layer().remote_endpoint(ec);
-            } else {
-                client_endpoint = client_ssl_socket.get_socket().lowest_layer().remote_endpoint(ec);
-            }
+			(!ssl_flag)	?	client_endpoint = client_socket.get_socket().lowest_layer().remote_endpoint(ec)
+						:	client_endpoint = client_ssl_socket.get_socket().lowest_layer().remote_endpoint(ec);
+
             if(unlikely( ec )){
                 //client endpoint get Error!
                 std::stringstream buf;
@@ -851,11 +859,9 @@ namespace l7vs{
         }
         if(likely( !exit_flag )){
             bool bres;
-            if (!ssl_flag) {
-                bres = client_socket.set_non_blocking_mode(ec);
-            } else {
-                bres = client_ssl_socket.set_non_blocking_mode(ec);
-            }
+			(!ssl_flag)	?	bres = client_socket.set_non_blocking_mode(ec)
+						:	bres = client_ssl_socket.set_non_blocking_mode(ec);
+
             if(unlikely( !bres )){
                 // socket set nonblocking mode error
                 std::stringstream buf;
@@ -875,11 +881,8 @@ namespace l7vs{
             //set client_socket options(recieve buffer size)
             if (upstream_buffer_size > 0) {
                 boost::asio::socket_base::receive_buffer_size opt1(upstream_buffer_size);
-                if (!ssl_flag) {
-                    client_socket.get_socket().lowest_layer().set_option(opt1, ec);
-                } else {
-                    client_ssl_socket.get_socket().lowest_layer().set_option(opt1, ec);
-                }
+				(!ssl_flag)	?	client_socket.get_socket().lowest_layer().set_option(opt1, ec)
+							:	client_ssl_socket.get_socket().lowest_layer().set_option(opt1, ec);
                 if(unlikely( ec )){
                     //client socket Error!
                     std::stringstream buf;
@@ -900,11 +903,10 @@ namespace l7vs{
             //set client_socket options(send buffer size)
             if (downstream_buffer_size > 0) {
                 boost::asio::socket_base::send_buffer_size opt2(downstream_buffer_size);
-                if (!ssl_flag) {
-                    client_socket.get_socket().lowest_layer().set_option(opt2, ec);
-                } else {
-                    client_ssl_socket.get_socket().lowest_layer().set_option(opt2, ec);
-                }
+
+				(!ssl_flag)	?	client_socket.get_socket().lowest_layer().set_option(opt2, ec)
+							:	client_ssl_socket.get_socket().lowest_layer().set_option(opt2, ec);
+
                 if(unlikely( ec )){
                     //client socket Error!
                     std::stringstream buf;
@@ -925,39 +927,12 @@ namespace l7vs{
         protocol_module_base::EVENT_TAG module_event;
         std::map< protocol_module_base::EVENT_TAG , UP_THREAD_FUNC_TYPE_TAG >::iterator func_type;
         up_thread_function_pair    func;
+
         if(likely(!exit_flag)){
             module_event = protocol_module->handle_session_initialize(up_thread_id,down_thread_id,client_endpoint,dumy_end);
             func_type = up_thread_module_event_map.find(module_event);
-            if(unlikely( func_type == up_thread_module_event_map.end() )){
-                //Error unknown protocol_module_base::EVENT_TAG return
-                std::stringstream buf;
-                buf << "Thread ID[";
-                buf << boost::this_thread::get_id();
-                buf << "] protocol_module returnd illegal EVENT_TAG : ";
-                buf << module_event;    
-                Logger::putLogError( LOG_CAT_L7VSD_SESSION, 14, buf.str(), __FILE__, __LINE__ );
-                {
-                    rw_scoped_lock scoped_lock(exit_flag_update_mutex);
-                    exit_flag = true;
-                }
-            }else{
-                func = up_thread_function_array[func_type->second];
-                if(unlikely( !func.second )){
-                    //Error not find function map
-                    std::stringstream buf;
-                    buf << "Thread ID[";
-                    buf << boost::this_thread::get_id();
-                    buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
-                    buf << func_type->second;
-                    Logger::putLogError( LOG_CAT_L7VSD_SESSION, 15, buf.str(), __FILE__, __LINE__ );
-                    {
-                        rw_scoped_lock scoped_lock(exit_flag_update_mutex);
-                        exit_flag = true;
-                    }
-                }else{
-                    up_thread_next_call_function = func;
-                }
-            }
+			func = up_thread_function_array[func_type->second];
+			up_thread_next_call_function = func;
         }
 		{
 			boost::mutex::scoped_lock	lock( upthread_status_mutex );
@@ -973,14 +948,13 @@ namespace l7vs{
             Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 20, buf.str(), __FILE__, __LINE__ );
         }
         //----Debug log----------------------------------------------------------------------
-        while(true){
+        while(!exit_flag){
 			{
 				boost::mutex::scoped_lock lock( upthread_status_mutex );
 				if( upthread_status == UPTHREAD_LOCK )
 					upthread_status_cond.wait( lock );
 				upthread_status = UPTHREAD_ACTIVE;
 				upthread_status_cond.notify_one();
-				if(exit_flag) break;
 			}
 
             tcp_thread_message*    msg    = up_thread_message_que.pop();
@@ -1023,8 +997,15 @@ namespace l7vs{
         //----Debug log----------------------------------------------------------------------
 		{
 			boost::mutex::scoped_lock	lock( downthread_status_mutex );
-			if( downthread_status > DOWNTHREAD_ALIVE )
+			if( downthread_status != DOWNTHREAD_SLEEP ){
+				if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
+					boost::format formatter( "Thread ID[%s] down thread finalize wait" );
+					formatter % boost::this_thread::get_id();
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+				}
+				to_time( LOCKTIMEOUT, xt );
 				downthread_status_cond.wait( lock );
+			}
 		}
 
         //----Debug log----------------------------------------------------------------------
@@ -1049,37 +1030,25 @@ namespace l7vs{
         //----Debug log----------------------------------------------------------------------
 		upthread_status_mutex.lock();
 		upthread_status = UPTHREAD_SLEEP;
-		upthread_status_mutex.unlock();        parent_service.release_session(this);
+		upthread_status_mutex.unlock();
+        parent_service.release_session(this);
+
         //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] up thread call parent service release_session() return";
-            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 25, buf.str(), __FILE__, __LINE__ );
-        }
-        //----Debug log----------------------------------------------------------------------
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] up_thread_run end";
-            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 26, buf.str(), __FILE__, __LINE__ );
-        }
-        //----Debug log----------------------------------------------------------------------
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_run" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 18, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     
     //! down stream thread main function
     void tcp_session::down_thread_run(){
         //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] down_thread_run start";
-            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 27, buf.str(), __FILE__, __LINE__ );
-        }
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN down_thread_run" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 27, formatter.str(), __FILE__, __LINE__ );
+		}
         //----Debug log----------------------------------------------------------------------
         down_thread_id = boost::this_thread::get_id(); 
 		{
@@ -1098,8 +1067,10 @@ namespace l7vs{
         //----Debug log----------------------------------------------------------------------
 		{
 			boost::mutex::scoped_lock	lock( upthread_status_mutex );
-			if( upthread_status != UPTHREAD_ACTIVE )
-				upthread_status_cond.wait( upthread_status_mutex );
+			if( upthread_status != UPTHREAD_ACTIVE ){
+				to_time( LOCKTIMEOUT, xt );
+				upthread_status_cond.timed_wait( upthread_status_mutex, xt );
+			}
 		}
 
         //----Debug log----------------------------------------------------------------------
@@ -1114,23 +1085,11 @@ namespace l7vs{
 		{
 			boost::mutex::scoped_lock	lock( downthread_status_mutex );
 			downthread_status = DOWNTHREAD_ACTIVE;
+			downthread_status_cond.notify_one();
 		}
 
-        down_thread_function_pair    func    = down_thread_function_array[DOWN_FUNC_REALSERVER_RECEIVE];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : DOWN_FUNC_REALSERVER_RECV";
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 16, buf.str(), __FILE__, __LINE__ );
-            {
-                rw_scoped_lock scoped_lock(exit_flag_update_mutex);
-                exit_flag = true;
-            }
-        }else{
-            down_thread_next_call_function = func;
-        }
+        down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_REALSERVER_RECEIVE];
+
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
             std::stringstream buf;
@@ -1141,32 +1100,12 @@ namespace l7vs{
         }
         //----Debug log----------------------------------------------------------------------
 
-        if(unlikely( protocol_module == NULL )){
-            //Error!
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module is NULL!";
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 17, buf.str(), __FILE__, __LINE__ );
-            {
-                rw_scoped_lock scoped_lock(exit_flag_update_mutex);
-                exit_flag = true;
-            }
-        }
         while(!exit_flag){
-			{
-				boost::mutex::scoped_lock	lock( downthread_status_mutex );
-				if( downthread_status == DOWNTHREAD_LOCK )
-					downthread_status_cond.wait( lock );
-            }
-			{
-				boost::mutex::scoped_lock	lock( downthread_status_mutex );
-				downthread_status = DOWNTHREAD_ACTIVE;
-			}
-			{
-				boost::mutex::scoped_lock	lock( realserver_connect_mutex );
-				if( !realserver_connect )
-					realserver_connect_cond.wait( lock );
+			if( downthread_status == DOWNTHREAD_LOCK ){
+					boost::mutex::scoped_lock	lock( downthread_status_mutex );
+					to_time( LOCKTIMEOUT, xt );
+					downthread_status_cond.timed_wait( lock, xt );
+					downthread_status = DOWNTHREAD_ACTIVE;
 			}
             while(unlikely( !down_thread_connect_socket_list.empty() )){
                 std::pair<endpoint,tcp_socket_ptr > push_rs_socket = down_thread_connect_socket_list.get_socket();
@@ -1205,34 +1144,55 @@ namespace l7vs{
 			downthread_status = DOWNTHREAD_ALIVE;
 			downthread_status_cond.notify_one(); 
 		}        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] down_thread_run end";
-            Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 32, buf.str(), __FILE__, __LINE__ );
-        }
         //----Debug log----------------------------------------------------------------------
 		boost::mutex::scoped_lock	lock( downthread_status_mutex );
 		downthread_status = DOWNTHREAD_SLEEP;
+		upthread_status_cond.notify_one();
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT down_thread_run" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 32, formatter.str(), __FILE__, __LINE__ );
+		}
     }
 
     //! endpoint data to string infomation
     //! @param[in]        endpoint is target endpoint object
     std::string tcp_session::endpoint_to_string(
                 const boost::asio::ip::tcp::endpoint& target_endpoint){
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN endpoint_to_string" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
+
         std::stringstream ret;
         if( target_endpoint.address().is_v6() ){
             ret << "[" << target_endpoint.address().to_string() << "]:" << target_endpoint.port();
         }else{
             ret << target_endpoint.address().to_string() << ":" << target_endpoint.port();
         }
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT endpoint_to_string" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         return ret.str();
     }
 
     //! up thread accept client side
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_client_accept(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_client_accept" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
 
         UP_THREAD_FUNC_TYPE_TAG func_tag;
 
@@ -1308,40 +1268,35 @@ namespace l7vs{
             func_tag = UP_FUNC_CLIENT_ACCEPT_EVENT;
         }
         up_thread_next_call_function = up_thread_function_array[func_tag];
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_client_accept : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_tag );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
 
     //! up thread raise module event of handle_accept and do handshake
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_client_accept_event(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_client_accept_event" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
         
         protocol_module_base::EVENT_TAG module_event;
         module_event = protocol_module->handle_accept(up_thread_id);
         std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-        if(unlikely(func_type == up_thread_module_event_map.end())){
-            //Error unknown protocol_module_base::EVENT_TAG return
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module returnd illegal EVENT_TAG : ";
-            buf << module_event;    
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 18, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
 
         up_thread_function_pair    func    = up_thread_function_array[func_type->second];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_type->second;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 19, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
         up_thread_next_call_function = func;
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_client_accept_event : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_type->second );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
 
     //! handshake timer handler
@@ -1349,13 +1304,11 @@ namespace l7vs{
     void tcp_session::handle_ssl_handshake_timer(
         const boost::system::error_code& error) {
         //----Debug log--------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == 
-            Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-            Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 72, 
-                "in_function : tcp_session::handle_ssl_handshake_timer", 
-                __FILE__, __LINE__ );
-        }
-        //----Debug log--------------------------------------------------------
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN handle_ssl_handshake_timer" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 72, formatter.str(), __FILE__, __LINE__ );
+		}
 
         if(!error){
 
@@ -1388,19 +1341,23 @@ namespace l7vs{
         }
 
         //----Debug log--------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == 
-            Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-            Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 73, 
-                "out_function : tcp_session::handle_ssl_handshake_timer", 
-                __FILE__, __LINE__ );
-        }
-        //----Debug log--------------------------------------------------------
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT handle_ssl_handshake_timer" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 73, formatter.str(), __FILE__, __LINE__ );
+		}
     }
 
     //! up thread receive client side and raise module event of handle_client_recv
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_client_receive(const TCP_PROCESS_TYPE_TAG process_type){
-        
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_client_receive" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
+
         if(unlikely(0 < parent_service.get_wait_upstream())){
             //----Debug log----------------------------------------------------------------------
             if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
@@ -1420,11 +1377,11 @@ namespace l7vs{
         UP_THREAD_FUNC_TYPE_TAG func_tag;
 
         struct epoll_event event;
-        if ( !ssl_flag ) {
-            event.data.fd = client_socket.get_socket().native();
-        } else {
-            event.data.fd = client_ssl_socket.get_socket().lowest_layer().native();
-        }
+        ( !ssl_flag )	?	event.data.fd = client_socket.get_socket().native()
+						:	event.data.fd = client_ssl_socket.get_socket().lowest_layer().native();
+
+		//
+		// epoll wailt codes
         if (is_epoll_edge_trigger) {
             event.events = EPOLLET | EPOLLIN | EPOLLHUP;
         } else {
@@ -1444,283 +1401,222 @@ namespace l7vs{
             add_flag = true;
         }
 
-        while( true ){
-            {
-                rd_scoped_lock scoped_lock(exit_flag_update_mutex);
-                if(unlikely(exit_flag)){
-                    func_tag = UP_FUNC_EXIT;
-                    break;
-                }
-            }
+		if (is_epoll_edge_trigger && (!add_flag)) {
+			if (epoll_ctl( up_client_epollfd, EPOLL_CTL_MOD, event.data.fd, &event ) < 0) {
+				std::stringstream buf;
+				buf << "up_thread_client_receive : epoll_ctl EPOLL_CTL_MOD error : ";
+				buf << strerror(errno);
+				Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
+				up_thread_next_call_function = up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT];
+				return;
+			}
+		}
+		int ret_fds = epoll_wait( up_client_epollfd, up_client_events, EVENT_NUM, epoll_timeout );
+		if (ret_fds <= 0) {
+			if (ret_fds == 0) {
+				boost::format	formatter( "up_thread_client_receive : epoll_wait timeout %d mS" );
+				formatter % epoll_timeout;
+				Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+				up_thread_next_call_function = up_thread_function_array[UP_FUNC_CLIENT_RECEIVE];
+				return;
+			}
+			else {
+				boost::format	formatter( "up_thread_client_receive : epoll_wait error : %d" );
+				formatter % strerror(errno);
+				Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+				up_thread_next_call_function = up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT];
+				return;
+			}
+		}
 
-            if (!ssl_flag) {
-                recv_size = client_socket.read_some(boost::asio::buffer(data_buff,MAX_BUFFER_SIZE), ec);
-            } else {
-                recv_size = client_ssl_socket.read_some(boost::asio::buffer(data_buff,MAX_BUFFER_SIZE), ec);
-            }
+		for (int i = 0; i < ret_fds; ++i) {
+			if (up_client_events[i].data.fd == event.data.fd) {
+				if (up_client_events[i].events & EPOLLIN) {
+					break;
+				}
+				else if (up_client_events[i].events & EPOLLHUP) {
+					up_thread_next_call_function = up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT];
+					if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+						boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_client_receive EPOLLHUP : NEXT_FUNC[%s]" );
+						formatter % boost::this_thread::get_id() % func_tag_to_string( UP_FUNC_CLIENT_DISCONNECT );
+						Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+					}
+					return;
+				}
+			}
+		}
+//
+//	epoll_wait codes end
 
-            if(!ec){
-                if(recv_size > 0){
-                    //----Debug log----------------------------------------------------------------------
-                    if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
-                        boost::asio::ip::tcp::endpoint client_endpoint;
-                        if (!ssl_flag) {
-                            client_endpoint = client_socket.get_socket().lowest_layer().remote_endpoint(ec);
-                        } else {
-                            client_endpoint = client_ssl_socket.get_socket().lowest_layer().remote_endpoint(ec);
-                        }
-                        std::stringstream buf;
-                        buf << "Thread ID[";
-                        buf << boost::this_thread::get_id();
-                        buf << "] up_thread_client_receive";
-                        buf << " receive data size[";
-                        buf << recv_size;
-                        buf << "] from [";
-                        buf << client_endpoint;
-                        buf << "]";
-                        Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 36, buf.str(), __FILE__, __LINE__ );
-                    }
-                    //----Debug log----------------------------------------------------------------------
-                    up_thread_data_client_side.set_size(recv_size);
-                    parent_service.update_up_recv_size(recv_size);
-                    protocol_module_base::EVENT_TAG module_event = protocol_module->handle_client_recv(up_thread_id,data_buff,recv_size);
-                    std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-                    if(unlikely( func_type == up_thread_module_event_map.end() )){
-                        //Error unknown protocol_module_base::EVENT_TAG return
-                        std::stringstream buf;
-                        buf << "Thread ID[";
-                        buf << boost::this_thread::get_id();
-                        buf << "] protocol_module returnd illegal EVENT_TAG : ";
-                        buf << module_event;
-                        Logger::putLogError( LOG_CAT_L7VSD_SESSION, 20, buf.str(), __FILE__, __LINE__ );
-                        up_thread_exit(process_type);
-                        return;
-                    }
-                    func_tag = func_type->second;
-                    break;
-                }else{
-                    //func_tag = UP_FUNC_CLIENT_RECEIVE;
-                    //boost::this_thread::yield();
-                }
-            }else{
-                if(ec == boost::asio::error::try_again){
-                    //func_tag = UP_FUNC_CLIENT_RECEIVE;
-                    //boost::this_thread::yield();
-                }else{
-                    func_tag = UP_FUNC_CLIENT_DISCONNECT;
-                    break;
-                }
-            }
+		( !ssl_flag )	?	recv_size = client_socket.read_some(boost::asio::buffer(data_buff,MAX_BUFFER_SIZE), ec)
+						:	recv_size = client_ssl_socket.read_some(boost::asio::buffer(data_buff,MAX_BUFFER_SIZE), ec);
 
-            if (is_epoll_edge_trigger && (!add_flag)) {
-                if (epoll_ctl( up_client_epollfd, EPOLL_CTL_MOD, event.data.fd, &event ) < 0) {
-                    std::stringstream buf;
-                    buf << "up_thread_client_receive : epoll_ctl EPOLL_CTL_MOD error : ";
-                    buf << strerror(errno);
-                    Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
-                    boost::this_thread::yield();
-                    return;
-                }
-            }
+		if(!ec){
+			if(recv_size > 0){
+				//----Debug log----------------------------------------------------------------------
+				if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
+					boost::asio::ip::tcp::endpoint client_endpoint;
+					(!ssl_flag) ?	client_endpoint = client_socket.get_socket().lowest_layer().remote_endpoint(ec)
+								:	client_endpoint = client_ssl_socket.get_socket().lowest_layer().remote_endpoint(ec);
+					boost::format	formatter( "Thread ID[%d] up_thread_client_receive receive data size[%d] from [%d]" );
+					formatter % boost::this_thread::get_id() % recv_size % client_endpoint;
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 36, formatter.str(), __FILE__, __LINE__ );
+				}
+				//----Debug log----------------------------------------------------------------------
+				up_thread_data_client_side.set_size(recv_size);
+				parent_service.update_up_recv_size(recv_size);
+				protocol_module_base::EVENT_TAG module_event = protocol_module->handle_client_recv(up_thread_id,data_buff,recv_size);
+				std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
+				if(unlikely( func_type == up_thread_module_event_map.end() )){
+					//Error unknown protocol_module_base::EVENT_TAG return
+					boost::format	formatter( "Thread ID[%d] protocol_module returnd illegal EVENT_TAG : %d" );
+					formatter % boost::this_thread::get_id() % module_event;
+					Logger::putLogError( LOG_CAT_L7VSD_SESSION, 20, formatter.str(), __FILE__, __LINE__ );
+					up_thread_exit(process_type);
+					return;
+				}
+				func_tag = func_type->second;
+			}
+			else{
+				func_tag = UP_FUNC_CLIENT_RECEIVE;
+				//boost::this_thread::yield();
+			}
+		}
+		else{
+			if(ec == boost::asio::error::try_again){
+				func_tag = UP_FUNC_CLIENT_RECEIVE;
+				//boost::this_thread::yield();
+			}
+			else{
+				func_tag = UP_FUNC_CLIENT_DISCONNECT;
+			}
+		}
+		up_thread_next_call_function  = up_thread_function_array[func_tag];
 
-            int ret_fds = epoll_wait( up_client_epollfd, up_client_events, EVENT_NUM, epoll_timeout );
-            if (ret_fds <= 0) {
-                if (ret_fds == 0) {
-                    std::stringstream buf;
-                    buf << "up_thread_client_receive : epoll_wait timeout ";
-                    buf << epoll_timeout;
-                    buf << "mS";
-                    Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
-                } else {
-                    std::stringstream buf;
-                    buf << "up_thread_client_receive : epoll_wait error : ";
-                    buf << strerror(errno);
-                    Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
-                }
-                boost::this_thread::yield();
-                return;
-            }
-
-            bool event_check = false;
-            for (int i = 0; i < ret_fds; ++i) {
-                if (up_client_events[i].data.fd == event.data.fd) {
-                    if (up_client_events[i].events & EPOLLIN) {
-                        event_check = true;
-                        break;
-                    } else if (up_client_events[i].events & EPOLLHUP) {
-                        std::stringstream buf;
-                        buf << "up_thread_client_receive : epoll_wait EPOLLHUP";
-                        Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
-                        down_thread_exit(process_type);
-                        return;
-                    }
-                }
-            }
-            if (!event_check) {
-                Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 999, "up_thread_client_receive : epoll_wait unknown fd", __FILE__, __LINE__ );
-                boost::this_thread::yield();
-                return;
-            }
-        }
-
-        up_thread_function_pair    func    = up_thread_function_array[func_tag];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_tag;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 21, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_next_call_function = func;
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_client_receive : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_tag );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! up thread raise client respond send event message for up and down thread
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_client_respond(const TCP_PROCESS_TYPE_TAG process_type){
-        tcp_thread_message*        up_msg        = new tcp_thread_message;
-        tcp_thread_message*        down_msg    = new tcp_thread_message;
-        up_thread_function_pair    up_func    = up_thread_function_array[UP_FUNC_CLIENT_RESPOND_SEND_EVENT];
-        if(unlikely( !up_func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : UP_FUNC_CLIENT_RESPOND_SEND_EVENT";
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 22, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_client_respond" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
+        tcp_thread_message*        up_msg	= new tcp_thread_message;
+        tcp_thread_message*        down_msg	= new tcp_thread_message;
+        up_thread_function_pair    up_func	= up_thread_function_array[UP_FUNC_CLIENT_RESPOND_SEND_EVENT];
+
         up_msg->message = up_func.second;
         std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator down_func = up_thread_message_down_thread_function_map.find(DOWN_FUNC_CLIENT_RESPOND_SEND_EVENT);
-        if(unlikely( down_func == up_thread_message_down_thread_function_map.end() )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : DOWN_FUNC_CLIENT_RESPOND_SEND_EVENT";
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 23, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
         down_msg->message = down_func->second;
         while(!up_thread_message_que.push(up_msg)){}
         while(!down_thread_message_que.push(down_msg)){}
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_client_respond" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! up thread raise module event of handle_response_send_inform
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_client_respond_event(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_client_respond_event" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         protocol_module_base::EVENT_TAG module_event;
         {
             rw_scoped_lock scope_lock(module_function_response_send_inform_mutex);
             module_event = protocol_module->handle_response_send_inform(up_thread_id);
         }
         std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-        if(unlikely( func_type == up_thread_module_event_map.end() )){
-            //Error unknown protocol_module_base::EVENT_TAG return
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module returnd illegal EVENT_TAG : ";
-            buf << module_event;    
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 24, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
         up_thread_function_pair    func    = up_thread_function_array[func_type->second];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_type->second;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 25, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
         up_thread_next_call_function = func;
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_client_respond_event : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_type->second );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! up thread close client socket and raise client disconnect event message for up and down thread
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_client_disconnect(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN func up_thread_client_disconnect" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         boost::system::error_code ec;
         bool bres;
-        if (!ssl_flag) {
-            bres = client_socket.close(ec);
-        } else {
-            bres = client_ssl_socket.close(ec);
-        }
+
+		(!ssl_flag)	?	bres = client_socket.close(ec)
+					:	bres = client_ssl_socket.close(ec);
+
         if(bres){
-            tcp_thread_message*        up_msg        = new tcp_thread_message;
-            tcp_thread_message*        down_msg    = new tcp_thread_message;
-            up_thread_function_pair    up_func    = up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT_EVENT];
-            if(unlikely( !up_func.second )){
-                //Error not find function map
-                std::stringstream buf;
-                buf << "Thread ID[";
-                buf << boost::this_thread::get_id();
-                buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : UP_FUNC_CLIENT_DISCONNECT_EVENT";
-                Logger::putLogError( LOG_CAT_L7VSD_SESSION, 26, buf.str(), __FILE__, __LINE__ );
-                up_thread_exit(process_type);
-                return;
-            }
+            tcp_thread_message*        up_msg	= new tcp_thread_message;
+            tcp_thread_message*        down_msg	= new tcp_thread_message;
+            up_thread_function_pair    up_func	= up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT_EVENT];
             up_msg->message = up_func.second;
-            std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator down_func = up_thread_message_down_thread_function_map.find(DOWN_FUNC_CLIENT_DISCONNECT_EVENT);
-            if(unlikely( down_func == up_thread_message_down_thread_function_map.end() )){
-                //Error not find function map
-                std::stringstream buf;
-                buf << "Thread ID[";
-                buf << boost::this_thread::get_id();
-                buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : DOWN_FUNC_CLIENT_DISCONNECT_EVENT";
-                Logger::putLogError( LOG_CAT_L7VSD_SESSION, 27, buf.str(), __FILE__, __LINE__ );
-                up_thread_exit(process_type);
-                return;
-            }
+/*            std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator down_func = up_thread_message_down_thread_function_map.find(DOWN_FUNC_CLIENT_DISCONNECT_EVENT);
             down_msg->message = down_func->second;
+*/
+			down_thread_function_pair	down_func	= down_thread_function_array[DOWN_FUNC_CLIENT_DISCONNECT_EVENT];
+			down_msg->message = down_func.second;
+
             while(!up_thread_message_que.push(up_msg)){}
             while(!down_thread_message_que.push(down_msg)){}
         }
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC_OUT up_thread_client_disconnect up_func[%s] donw_func[%s]" );
+			formatter % boost::this_thread::get_id()
+					  % func_tag_to_string( UP_FUNC_CLIENT_DISCONNECT_EVENT )
+					  % func_tag_to_string( DOWN_FUNC_CLIENT_DISCONNECT_EVENT );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! up thread raise module event of handle_client_disconnect
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_client_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_client_disconnect_event" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
         protocol_module_base::EVENT_TAG module_event;
         {
             rw_scoped_lock scope_lock(module_function_client_disconnect_mutex);
             module_event = protocol_module->handle_client_disconnect(up_thread_id);
         }
         std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-        if( unlikely( func_type == up_thread_module_event_map.end() ) ){
-            //Error unknown protocol_module_base::EVENT_TAG return
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module returnd illegal EVENT_TAG : ";
-            buf << module_event;    
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 28, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
         up_thread_function_pair    func    = up_thread_function_array[func_type->second];
-        if( unlikely( !func.second ) ){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_type->second;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 29, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
         up_thread_next_call_function = func;
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_client_disconnect_event : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_type->second );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! up thread send realserver and raise module event of handle_client_recv
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_realserver_send(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_realserver_send" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         boost::system::error_code ec;
         boost::asio::ip::tcp::endpoint server_endpoint = up_thread_data_dest_side.get_endpoint();
         std::map<endpoint,tcp_socket_ptr>::iterator send_socket =  up_thread_send_realserver_socket_map.find(server_endpoint);
@@ -1785,29 +1681,19 @@ namespace l7vs{
                     buf << strerror(errno);
                     Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
                 }
-                boost::this_thread::yield();
+				up_thread_next_call_function = up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT];
                 return;
             }
 
-            bool event_check = false;
             for (int i = 0; i < ret_fds; ++i) {
                 if (up_realserver_events[i].data.fd == event.data.fd) {
                     if (up_realserver_events[i].events & EPOLLOUT) {
-                        event_check = true;
                         break;
                     } else if (up_realserver_events[i].events & EPOLLHUP) {
-                        std::stringstream buf;
-                        buf << "up_thread_realserver_send : epoll_wait EPOLLHUP";
-                        Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
-                        down_thread_exit(process_type);
-                        return;
+						up_thread_next_call_function = up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT];
+						return;
                     }
                 }
-            }
-            if (!event_check) {
-                Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 999, "up_thread_realserver_send : epoll_wait unknown fd", __FILE__, __LINE__ );
-                boost::this_thread::yield();
-                return;
             }
 
             send_size = send_socket->second->write_some(boost::asio::buffer(data_buff.data()+send_data_size,data_size-send_data_size),ec);
@@ -1818,16 +1704,9 @@ namespace l7vs{
                 parent_service.update_up_send_size(send_size);
                 //----Debug log----------------------------------------------------------------------
                 if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
-                    std::stringstream buf;
-                    buf << "Thread ID[";
-                    buf << boost::this_thread::get_id();
-                    buf << "] up_thread_realserver_send";
-                    buf << " send data size[";
-                    buf << send_size;
-                    buf << "] for [";
-                    buf << server_endpoint;
-                    buf << "]";
-                    Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 37, buf.str(), __FILE__, __LINE__ );
+					boost::format	formatter( "Thread ID[%d] up_thread_realserver_send send data size[%d] for [%d]" );
+					formatter % boost::this_thread::get_id() % send_size % server_endpoint;
+                    Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 37, formatter.str(), __FILE__, __LINE__ );
                 }
                 //----Debug log----------------------------------------------------------------------
                 if(data_size > send_data_size){
@@ -1835,17 +1714,6 @@ namespace l7vs{
                 }else{
                     protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_send(up_thread_id);
                     std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-                    if( unlikely( func_type == up_thread_module_event_map.end() )){
-                        //Error unknown protocol_module_base::EVENT_TAG return
-                        std::stringstream buf;
-                        buf << "Thread ID[";
-                        buf << boost::this_thread::get_id();
-                        buf << "] protocol_module returnd illegal EVENT_TAG : ";
-                        buf << module_event;    
-                        Logger::putLogError( LOG_CAT_L7VSD_SESSION, 30, buf.str(), __FILE__, __LINE__ );
-                        up_thread_exit(process_type);
-                        return;
-                    }
                     func_tag = func_type->second;
                 }
                 break;
@@ -1860,52 +1728,31 @@ namespace l7vs{
             }
         }
 
-        up_thread_function_pair    func    = up_thread_function_array[func_tag];
-        if( unlikely( !func.second ) ){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_tag;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 31, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_next_call_function = func;
+		up_thread_next_call_function = up_thread_function_array[func_tag];
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_realserver_send : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_tag );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
     }
     //! up thread raise module event of handle_realserver_select
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_realserver_get_destination_event(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_realserver_get_destination_event" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         boost::asio::ip::tcp::endpoint server_endpoint;
 
         protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_select(up_thread_id,server_endpoint);
         up_thread_data_dest_side.set_endpoint(server_endpoint);
 
         std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-        if( unlikely( func_type == up_thread_module_event_map.end() ) ){
-            //Error unknown protocol_module_base::EVENT_TAG return
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module returnd illegal EVENT_TAG : ";
-            buf << module_event;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 32, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
         up_thread_function_pair    func    = up_thread_function_array[func_type->second];
-        if( unlikely( !func.second ) ){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_type->second;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 33, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
         if(module_event == protocol_module_base::SORRYSERVER_SELECT){
             // protocol module sorry mode change 
             tcp_thread_message*    down_msg    = new tcp_thread_message;
@@ -1914,25 +1761,27 @@ namespace l7vs{
                 down_func = up_thread_message_down_thread_function_map.find(
                     DOWN_FUNC_SORRY_ENABLE_EVENT);
 
-            if(unlikely( down_func == up_thread_message_down_thread_function_map.end() )){
-                //Error not find function map
-                std::stringstream buf;
-                buf << "Thread ID[";
-                buf << boost::this_thread::get_id();
-                buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : DOWN_FUNC_SORRY_ENABLE_EVENT";
-                Logger::putLogError( LOG_CAT_L7VSD_SESSION, 115, buf.str(), __FILE__, __LINE__ );
-                up_thread_exit(process_type);
-                return;
-            }
             down_msg->message = down_func->second;
             while(!down_thread_message_que.push(down_msg)){}
         }
 
         up_thread_next_call_function = func;
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_realserver_get_destination_event" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! up thread connect realserver
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_realserver_connect(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_realserver_connect" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         boost::asio::ip::tcp::endpoint server_endpoint = up_thread_data_dest_side.get_endpoint();
         std::map<endpoint,tcp_socket_ptr>::iterator get_socket =  up_thread_send_realserver_socket_map.find(server_endpoint);
         std::map<endpoint,tcp_socket_ptr>::iterator map_end =  up_thread_send_realserver_socket_map.end();
@@ -2024,25 +1873,26 @@ namespace l7vs{
             }
         }
         up_thread_function_pair    func    = up_thread_function_array[func_tag];
-        if( unlikely( !func.second ) ){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_tag;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 38, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
         boost::mutex::scoped_lock	lock( realserver_connect_mutex );
-        realserver_connect = true;
+        realserver_connect_status = true;
         realserver_connect_cond.notify_one();
         up_thread_next_call_function = func;
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_realserver_connect : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_tag );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! up thread raise module event of handle_realserver_connect
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_realserver_connect_event(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_realserver_connect_event" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         endpoint server_endpoint = up_thread_data_dest_side.get_endpoint();
         up_thread_data_dest_side.initialize();
         boost::array< char , MAX_BUFFER_SIZE >& data_buff = up_thread_data_dest_side.get_data();
@@ -2051,65 +1901,43 @@ namespace l7vs{
         up_thread_data_dest_side.set_endpoint(server_endpoint);
         up_thread_data_dest_side.set_size(data_size);
         std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-        if(unlikely( func_type == up_thread_module_event_map.end() )){
-            //Error unknown protocol_module_base::EVENT_TAG return
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module returnd illegal EVENT_TAG : ";
-            buf << module_event;    
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 39, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_function_pair    func    = up_thread_function_array[func_type->second];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_type->second;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 40, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_next_call_function = func;
+		up_thread_next_call_function = up_thread_function_array[func_type->second];
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_realserver_connect_event : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_type->second );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! up thread raise module event of handle_realserver_connection_fail
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_realserver_connection_fail_event(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_realserver_connection_fail_event" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         endpoint server_endpoint = up_thread_data_dest_side.get_endpoint();
         protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_connection_fail(up_thread_id,server_endpoint);
         std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-        if(unlikely(func_type == up_thread_module_event_map.end())){
-            //Error unknown protocol_module_base::EVENT_TAG return
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module returnd illegal EVENT_TAG : ";
-            buf << module_event;    
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 41, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_function_pair    func    = up_thread_function_array[func_type->second];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_type->second;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 42, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_next_call_function = func;
+		up_thread_next_call_function = up_thread_function_array[func_type->second];
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_realserver_connection_fail_event : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_type->second );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! up thread close realserver socket and raise realserver disconnect event message for up and down thread
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_realserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_realserver_disconnect" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         boost::asio::ip::tcp::endpoint server_endpoint = up_thread_data_dest_side.get_endpoint();
         std::map<endpoint,tcp_socket_ptr>::iterator close_socket = up_thread_send_realserver_socket_map.find(server_endpoint);
         boost::system::error_code ec;
@@ -2119,38 +1947,30 @@ namespace l7vs{
             tcp_thread_message*        up_msg        = new tcp_thread_message;
             tcp_thread_message*        down_msg    = new tcp_thread_message;
             up_thread_function_pair    up_func    = up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT_EVENT];
-            if(unlikely( !up_func.second )){
-                //Error not find function map
-                std::stringstream buf;
-                buf << "Thread ID[";
-                buf << boost::this_thread::get_id();
-                buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : UP_FUNC_REALSERVER_DISCONNECT_EVENT";
-                Logger::putLogError( LOG_CAT_L7VSD_SESSION, 43, buf.str(), __FILE__, __LINE__ );
-                up_thread_exit(process_type);
-                return;
-            }
             up_msg->endpoint_info = server_endpoint;
             up_msg->message = up_func.second;
             std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator down_func = up_thread_message_down_thread_function_map.find(DOWN_FUNC_REALSERVER_DISCONNECT_EVENT);
-            if(unlikely( down_func == up_thread_message_down_thread_function_map.end() )){
-                //Error not find function map
-                std::stringstream buf;
-                buf << "Thread ID[";
-                buf << boost::this_thread::get_id();
-                buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : DOWN_FUNC_REALSERVER_DISCONNECT_EVENT";
-                Logger::putLogError( LOG_CAT_L7VSD_SESSION, 44, buf.str(), __FILE__, __LINE__ );
-                up_thread_exit(process_type);
-                return;
-            }
             down_msg->endpoint_info = server_endpoint;
             down_msg->message = down_func->second;
             while(!up_thread_message_que.push(up_msg)){}
             while(!down_thread_message_que.push(down_msg)){}
         }
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_realserver_disconnect" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! up thread raise module event of handle_client_disconnect
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_realserver_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_realserver_disconnect_event" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         protocol_module_base::EVENT_TAG module_event;
         boost::asio::ip::tcp::endpoint server_endpoint = up_thread_message_data.get_endpoint();
         {
@@ -2160,34 +1980,23 @@ namespace l7vs{
         up_thread_send_realserver_socket_map.erase(server_endpoint);
         
         std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-        if(unlikely( func_type == up_thread_module_event_map.end() )){
-            //Error unknown protocol_module_base::EVENT_TAG return
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module returnd illegal EVENT_TAG : ";
-            buf << module_event;    
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 45, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_function_pair    func    = up_thread_function_array[func_type->second];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_type->second;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 46, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_next_call_function = func;
+		up_thread_next_call_function = up_thread_function_array[func_type->second];
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_realserver_disconnect_event : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_type->second );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! up thread close all realserver socket and raise module event of handle_realserver_disconnect
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_all_realserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_all_realserver_disconnect" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         std::map<endpoint,tcp_socket_ptr>::iterator close_socket = up_thread_send_realserver_socket_map.begin();
         std::map<endpoint,tcp_socket_ptr>::iterator list_end = up_thread_send_realserver_socket_map.end();
         
@@ -2224,34 +2033,28 @@ namespace l7vs{
         }
         up_thread_send_realserver_socket_map.clear();
         std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-        if(unlikely( func_type == up_thread_module_event_map.end() )){
-            //Error unknown protocol_module_base::EVENT_TAG return
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module returnd illegal EVENT_TAG : ";
-            buf << module_event;    
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 47, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_function_pair    func    = up_thread_function_array[func_type->second];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_type->second;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 48, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_next_call_function = func;
+		up_thread_next_call_function = up_thread_function_array[func_type->second];
+
+		//allrealserver_disconnect.
+		boost::mutex::scoped_lock	lock( realserver_connect_mutex );
+		realserver_connect_status = true;
+		realserver_connect_cond.notify_all();
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_all_realserver_disconnect : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_type->second );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! up thread send sorryserver and raise module event of handle_sorryserver_send
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_sorryserver_send(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_sorryserver_send" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         boost::system::error_code ec;
         boost::asio::ip::tcp::endpoint sorry_endpoint = up_thread_data_dest_side.get_endpoint();
         boost::array<char,MAX_BUFFER_SIZE>& data_buff = up_thread_data_dest_side.get_data();
@@ -2315,29 +2118,19 @@ namespace l7vs{
                     buf << strerror(errno);
                     Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
                 }
-                boost::this_thread::yield();
+				up_thread_next_call_function = up_thread_function_array[UP_FUNC_SORRYSERVER_DISCONNECT];
                 return;
             }
 
-            bool event_check = false;
             for (int i = 0; i < ret_fds; ++i) {
                 if (up_sorryserver_events[i].data.fd == event.data.fd) {
                     if (up_sorryserver_events[i].events & EPOLLOUT) {
-                        event_check = true;
                         break;
                     } else if (up_sorryserver_events[i].events & EPOLLHUP) {
-                        std::stringstream buf;
-                        buf << "up_thread_sorryserver_send : epoll_wait EPOLLHUP";
-                        Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
-                        down_thread_exit(process_type);
-                        return;
+						up_thread_next_call_function = up_thread_function_array[UP_FUNC_SORRYSERVER_DISCONNECT];
+						return;
                     }
                 }
-            }
-            if (!event_check) {
-                Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 999, "up_thread_sorryserver_send : epoll_wait unknown fd", __FILE__, __LINE__ );
-                boost::this_thread::yield();
-                return;
             }
 
             send_size = sorryserver_socket.second->write_some(boost::asio::buffer(data_buff.data()+send_data_size,data_size-send_data_size),ec);
@@ -2389,23 +2182,23 @@ namespace l7vs{
             }
         }
 
-        up_thread_function_pair    func    = up_thread_function_array[func_tag];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_tag;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 50, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_next_call_function = func;
+		up_thread_next_call_function = up_thread_function_array[func_tag];
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_sorryserver_send : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_tag );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! up thread raise module event of handle_sorryserver_select
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_sorryserver_get_destination_event(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_sorryserver_get_destination_event" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         boost::asio::ip::tcp::endpoint server_endpoint;
         virtualservice_element& vs_element = parent_service.get_element();
         server_endpoint = vs_element.sorry_endpoint;
@@ -2413,34 +2206,23 @@ namespace l7vs{
         up_thread_data_dest_side.set_endpoint(server_endpoint);
         
         std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-        if(unlikely(func_type == up_thread_module_event_map.end())){
-            //Error unknown protocol_module_base::EVENT_TAG return
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module returnd illegal EVENT_TAG : ";
-            buf << module_event;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 51, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_function_pair    func    = up_thread_function_array[func_type->second];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_type->second;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 52, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_next_call_function = func;
+		up_thread_next_call_function = up_thread_function_array[func_type->second];
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_sorryserver_get_destination_event : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_type->second );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! up thread connect sorryserver
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_sorryserver_connect(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_sorryserver_connect" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         boost::asio::ip::tcp::endpoint sorry_endpoint = up_thread_data_dest_side.get_endpoint();
         boost::system::error_code ec;
         bool bres = sorryserver_socket.second->connect(sorry_endpoint,ec);
@@ -2468,23 +2250,23 @@ namespace l7vs{
             buf << ec.message();
             Logger::putLogError( LOG_CAT_L7VSD_SESSION, 54, buf.str(), __FILE__, __LINE__ );
         }
-        up_thread_function_pair    func    = up_thread_function_array[func_tag];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_tag;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 55, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_next_call_function = func;
+		up_thread_next_call_function = up_thread_function_array[func_tag];
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_sorryserver_connect : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_tag );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! up thread raise module event of handle_sorryserver_connect
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_sorryserver_connect_event(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_sorryserver_connect_event" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         endpoint sorry_endpoint = up_thread_data_dest_side.get_endpoint();
         up_thread_data_dest_side.initialize();
         boost::array< char , MAX_BUFFER_SIZE >& data_buff = up_thread_data_dest_side.get_data();
@@ -2493,103 +2275,73 @@ namespace l7vs{
         up_thread_data_dest_side.set_endpoint(sorry_endpoint);
         up_thread_data_dest_side.set_size(data_size);
         std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-        if(unlikely( func_type == up_thread_module_event_map.end() )){
-            //Error unknown protocol_module_base::EVENT_TAG return
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module returnd illegal EVENT_TAG : ";
-            buf << module_event;    
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 56, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_function_pair    func    = up_thread_function_array[func_type->second];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_type->second;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 57, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_next_call_function = func;
+        up_thread_next_call_function = up_thread_function_array[func_type->second];
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_sorryserver_connect_event : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_type->second );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! up thread raise module event of handle_sorryserver_connection_fail
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_sorryserver_connection_fail_event(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_sorryserver_connection_fail_event" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         endpoint server_endpoint = up_thread_data_dest_side.get_endpoint();
         protocol_module_base::EVENT_TAG module_event = protocol_module->handle_sorryserver_connection_fail(up_thread_id,server_endpoint);
         std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-        if(unlikely( func_type == up_thread_module_event_map.end() )){
-            //Error unknown protocol_module_base::EVENT_TAG return
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module returnd illegal EVENT_TAG : ";
-            buf << module_event;    
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 58, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_function_pair    func    = up_thread_function_array[func_type->second];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_type->second;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 59, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_next_call_function = func;
+		up_thread_next_call_function = up_thread_function_array[func_type->second];
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_sorryserver_connection_fail_event : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_type->second );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! up thread close sorryserver socket and raise sorryserver disconnect event message for up and down thread
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_sorryserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_sorryserver_disconnect" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         boost::system::error_code ec;
         bool bres = sorryserver_socket.second->close(ec);
         if(bres){
             tcp_thread_message*        up_msg        = new tcp_thread_message;
             tcp_thread_message*        down_msg    = new tcp_thread_message;
             up_thread_function_pair    up_func    = up_thread_function_array[UP_FUNC_SORRYSERVER_DISCONNECT_EVENT];
-            if(unlikely( !up_func.second )){
-                //Error not find function map
-                std::stringstream buf;
-                buf << "Thread ID[";
-                buf << boost::this_thread::get_id();
-                buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : UP_FUNC_SORRYSERVER_DISCONNECT_EVENT";
-                Logger::putLogError( LOG_CAT_L7VSD_SESSION, 60, buf.str(), __FILE__, __LINE__ );
-                up_thread_exit(process_type);
-                return;
-            }
             up_msg->message = up_func.second;
             up_msg->endpoint_info = sorryserver_socket.first;
             std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator down_func = up_thread_message_down_thread_function_map.find(DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT);
-            if(unlikely( down_func == up_thread_message_down_thread_function_map.end() )){
-                //Error not find function map
-                std::stringstream buf;
-                buf << "Thread ID[";
-                buf << boost::this_thread::get_id();
-                buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT";
-                Logger::putLogError( LOG_CAT_L7VSD_SESSION, 61, buf.str(), __FILE__, __LINE__ );
-                up_thread_exit(process_type);
-                return;
-            }
             down_msg->message = down_func->second;
             down_msg->endpoint_info = sorryserver_socket.first;
             while(!up_thread_message_que.push(up_msg)){}
             while(!down_thread_message_que.push(down_msg)){}
         }
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_sorryserver_disconnect" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! up thread close sorryserver socket and raise module sorryserver disconnect event
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_sorryserver_mod_disconnect(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_sorryserver_mod_disconnect" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         protocol_module_base::EVENT_TAG module_event;
         
         boost::system::error_code ec;
@@ -2603,34 +2355,24 @@ namespace l7vs{
             module_event = protocol_module->handle_sorryserver_disconnect(up_thread_id,sorry_endpoint);
         }
         std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-        if(unlikely( func_type == up_thread_module_event_map.end() )){
-            //Error unknown protocol_module_base::EVENT_TAG return
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module returnd illegal EVENT_TAG : ";
-            buf << module_event;    
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 62, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_function_pair    func    = up_thread_function_array[func_type->second];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_type->second;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 63, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_next_call_function = func;
+		up_thread_next_call_function = up_thread_function_array[func_type->second];
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_sorryserver_mod_disconnect : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_type->second );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
+
     //! up thread raise module event of handle_sorryserver_disconnect
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_sorryserver_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_sorryserver_disconnect_event" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         protocol_module_base::EVENT_TAG module_event;
         boost::asio::ip::tcp::endpoint sorry_endpoint = up_thread_message_data.get_endpoint();
         {
@@ -2638,34 +2380,23 @@ namespace l7vs{
             module_event = protocol_module->handle_sorryserver_disconnect(up_thread_id,sorry_endpoint);
         }
         std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-        if(unlikely( func_type == up_thread_module_event_map.end() )){
-            //Error unknown protocol_module_base::EVENT_TAG return
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module returnd illegal EVENT_TAG : ";
-            buf << module_event;    
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 64, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_function_pair    func    = up_thread_function_array[func_type->second];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_type->second;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 65, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_next_call_function = func;
+		up_thread_next_call_function = up_thread_function_array[func_type->second];
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_sorryserver_disconnect_event NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_type->second );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! up thread raise module event of handle_sorry_enable
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_sorry_enable_event(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_sorry_enable_event" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         protocol_module_base::EVENT_TAG module_event;
         {
             rw_scoped_lock scope_lock(module_function_sorry_enable_mutex);
@@ -2681,34 +2412,23 @@ namespace l7vs{
             module_event = protocol_module->handle_sorry_enable(up_thread_id);
         }
         std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-        if(unlikely( func_type == up_thread_module_event_map.end() )){
-            //Error unknown protocol_module_base::EVENT_TAG return
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module returnd illegal EVENT_TAG : ";
-            buf << module_event;    
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 66, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_function_pair    func    = up_thread_function_array[func_type->second];
-        if( unlikely( !func.second ) ){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_type->second;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 67, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_next_call_function = func;
+		up_thread_next_call_function = up_thread_function_array[func_type->second];
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_sorry_enable_event : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_type->second );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! up thread raise module event of handle_sorry_disable
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_sorry_disable_event(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_sorry_disable_event" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         protocol_module_base::EVENT_TAG module_event;
         {
             rw_scoped_lock scope_lock(module_function_sorry_disable_mutex);
@@ -2724,40 +2444,45 @@ namespace l7vs{
             module_event = protocol_module->handle_sorry_disable(up_thread_id);
         }
         std::map< protocol_module_base::EVENT_TAG ,UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-        if( unlikely( func_type == up_thread_module_event_map.end() ) ){
-            //Error unknown protocol_module_base::EVENT_TAG return
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module returnd illegal EVENT_TAG : ";
-            buf << module_event;    
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 68, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_function_pair    func    = up_thread_function_array[func_type->second];
-        if( unlikely( !func.second ) ){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_type->second;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 69, buf.str(), __FILE__, __LINE__ );
-            up_thread_exit(process_type);
-            return;
-        }
-        up_thread_next_call_function = func;
+		up_thread_next_call_function = up_thread_function_array[func_type->second];
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_sorry_disable_event : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_type->second );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     
     //! up thread exit main loop
     //! @param[in]        process_type is prosecess type
     void tcp_session::up_thread_exit(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN func up_thread_exit" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
         rw_scoped_lock scoped_lock(exit_flag_update_mutex);
+		boost::mutex::scoped_lock	down_thread_cond_lock( downthread_status_mutex );
+		boost::mutex::scoped_lock	realserver_status_lock( realserver_connect_mutex );
+		downthread_status_cond.notify_all();
+		realserver_connect_cond.notify_all();
+		realserver_connect_status = true;
         exit_flag = true;
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT func up_thread_client_disconnect" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! up thread close all socket
     void tcp_session::up_thread_all_socket_close(void){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN up_thread_all_socket_close" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         std::map<endpoint,tcp_socket_ptr>::iterator close_socket = up_thread_send_realserver_socket_map.begin();
         std::map<endpoint,tcp_socket_ptr>::iterator list_end = up_thread_send_realserver_socket_map.end();
         boost::system::error_code ec;
@@ -2769,22 +2494,41 @@ namespace l7vs{
         }
         up_thread_send_realserver_socket_map.clear();
         down_thread_connect_socket_list.clear();
-        if (!ssl_flag) {
-            client_socket.close(ec);
-        } else {
-            client_ssl_socket.close(ec);
-        }
+ 		(!ssl_flag)	?	client_socket.close(ec)
+					:	client_ssl_socket.close(ec);
         sorryserver_socket.second->close(ec);
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT up_thread_all_socket_close" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
 
-    //! down thread receive from realserver and raise module event of handle_realserver_recv
+    //! down thread receive from realserver and raise module event of handle_
+
     //! @param[in]        process_type is prosecess type
     void tcp_session::down_thread_realserver_receive(const TCP_PROCESS_TYPE_TAG process_type){
-        bool is_emp = down_thread_receive_realserver_socket_list.empty();
-        if(is_emp){
-            boost::this_thread::yield();
-            return;
-        }
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN down_thread_realserver_receive" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
+        if( down_thread_receive_realserver_socket_list.empty() ){
+			if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+				boost::format	formatter( "Thread ID[%d] FUNC OUT down_thread_realserver_receive" );
+				formatter % boost::this_thread::get_id();
+				Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+			}
+			boost::mutex::scoped_lock	lock( realserver_connect_mutex );
+			if( !realserver_connect_status ){
+					to_time( LOCKTIMEOUT, xt );
+					realserver_connect_cond.timed_wait( lock, xt );
+			}
+			down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_REALSERVER_RECEIVE];
+			return;
+		}
 
         if(unlikely( 0 < parent_service.get_wait_downstream() ) ){
             //----Debug log----------------------------------------------------------------------
@@ -2825,138 +2569,115 @@ namespace l7vs{
             add_flag = true;
         }
 
-        while( true ){
-            {
-                rd_scoped_lock scoped_lock(exit_flag_update_mutex);
-                if(unlikely(exit_flag)){
-                    func_tag = DOWN_FUNC_EXIT;
-                    break;
-                }
-            }
+		if (is_epoll_edge_trigger && (!add_flag)) {
+			if (epoll_ctl( down_realserver_epollfd, EPOLL_CTL_MOD, event.data.fd, &event ) < 0) {
+				std::stringstream buf;
+				buf << "down_thread_realserver_receive : epoll_ctl EPOLL_CTL_MOD error : ";
+				buf << strerror(errno);
+				Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
+				boost::this_thread::yield();
+				return;
+			}
+		}
 
-            if (is_epoll_edge_trigger && (!add_flag)) {
-                if (epoll_ctl( down_realserver_epollfd, EPOLL_CTL_MOD, event.data.fd, &event ) < 0) {
-                    std::stringstream buf;
-                    buf << "down_thread_realserver_receive : epoll_ctl EPOLL_CTL_MOD error : ";
-                    buf << strerror(errno);
-                    Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
-                    boost::this_thread::yield();
-                    return;
-                }
-            }
+		int ret_fds = epoll_wait( down_realserver_epollfd, down_realserver_events, EVENT_NUM, epoll_timeout );
+		if (ret_fds <= 0) {
+			if (ret_fds == 0) {
+				boost::format	formatter( "down_thread_realserver_receive : epoll_wait timeout %d mS" );
+				formatter % epoll_timeout;
+				Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+				down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_REALSERVER_RECEIVE];
+				return;	
+			} else {
+				boost::format	formatter( "down_thread_realserver_receive : epoll_wait error : %d " );
+				formatter % strerror(errno);
+				Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+				down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_REALSERVER_DISCONNECT];
+				return;
+			}
+		}
 
-            int ret_fds = epoll_wait( down_realserver_epollfd, down_realserver_events, EVENT_NUM, epoll_timeout );
-            if (ret_fds <= 0) {
-                if (ret_fds == 0) {
-                    std::stringstream buf;
-                    buf << "down_thread_realserver_receive : epoll_wait timeout ";
-                    buf << epoll_timeout;
-                    buf << "mS";
-                    Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
-                } else {
-                    std::stringstream buf;
-                    buf << "down_thread_realserver_receive : epoll_wait error : ";
-                    buf << strerror(errno);
-                    Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
-                }
-                boost::this_thread::yield();
-                return;
-            }
+		for (int i = 0; i < ret_fds; ++i) {
+			if (down_realserver_events[i].data.fd == event.data.fd) {
+				if (down_realserver_events[i].events & EPOLLIN) {
+					break;
+				}
+				else if (down_realserver_events[i].events & EPOLLHUP) {
+					down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_REALSERVER_DISCONNECT];
+					if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+						boost::format	formatter( "Thread ID[%d] FUNC OUT down_thread_realserver_receive: EPOLL_HUP" );
+						formatter % boost::this_thread::get_id();
+					}
+					return;
+				}
+			}
+		}
 
-            bool event_check = false;
-            for (int i = 0; i < ret_fds; ++i) {
-                if (down_realserver_events[i].data.fd == event.data.fd) {
-                    if (down_realserver_events[i].events & EPOLLIN) {
-                        event_check = true;
-                        break;
-                    } else if (down_realserver_events[i].events & EPOLLHUP) {
-                        std::stringstream buf;
-                        buf << "down_thread_realserver_receive : epoll_wait EPOLLHUP";
-                        Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
-                        down_thread_exit(process_type);
-                        return;
-                    }
-                }
-            }
-            if (!event_check) {
-                Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 999, "down_thread_realserver_receive : epoll_wait unknown fd", __FILE__, __LINE__ );
-                boost::this_thread::yield();
-                return;
-            }
+		recv_size = down_thread_current_receive_realserver_socket->second->read_some(boost::asio::buffer(data_buff,MAX_BUFFER_SIZE),ec);
 
-            recv_size = down_thread_current_receive_realserver_socket->second->read_some(boost::asio::buffer(data_buff,MAX_BUFFER_SIZE),ec);
+		boost::asio::ip::tcp::endpoint server_endpoint = down_thread_current_receive_realserver_socket->first;
+		down_thread_data_dest_side.set_endpoint(server_endpoint);
+		if(!ec){
+			if(recv_size > 0){
+				//----Debug log----------------------------------------------------------------------
+				if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
+				std::stringstream buf;
+					buf << "Thread ID[";
+					buf << boost::this_thread::get_id();
+					buf << "] down_thread_realserver_receive";
+					buf << " receive data size[";
+					buf << recv_size;
+					buf << "] from [";
+					buf << server_endpoint;
+					buf << "]";
+					Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 43, buf.str(), __FILE__, __LINE__ );
+				}
+				//----Debug log----------------------------------------------------------------------
+				down_thread_data_dest_side.set_size(recv_size);
+				parent_service.update_down_recv_size(recv_size);
 
-            boost::asio::ip::tcp::endpoint server_endpoint = down_thread_current_receive_realserver_socket->first;
-            down_thread_data_dest_side.set_endpoint(server_endpoint);
-            if(!ec){
-                if(recv_size > 0){
-                    //----Debug log----------------------------------------------------------------------
-                    if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
-                        std::stringstream buf;
-                        buf << "Thread ID[";
-                        buf << boost::this_thread::get_id();
-                        buf << "] down_thread_realserver_receive";
-                        buf << " receive data size[";
-                        buf << recv_size;
-                        buf << "] from [";
-                        buf << server_endpoint;
-                        buf << "]";
-                        Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 43, buf.str(), __FILE__, __LINE__ );
-                   }
-                    //----Debug log----------------------------------------------------------------------
-                    down_thread_data_dest_side.set_size(recv_size);
-                    parent_service.update_down_recv_size(recv_size);
-                    protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_recv(down_thread_id,server_endpoint,data_buff,recv_size);
-                    std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
-                    if(unlikely( func_type == down_thread_module_event_map.end() )){
-                        //Error unknown protocol_module_base::EVENT_TAG return
-                        std::stringstream buf;
-                        buf << "Thread ID[";
-                        buf << boost::this_thread::get_id();
-                        buf << "] protocol_module returnd illegal EVENT_TAG : ";
-                        buf << module_event;    
-                        Logger::putLogError( LOG_CAT_L7VSD_SESSION, 70, buf.str(), __FILE__, __LINE__ );
-                        down_thread_exit(process_type);
-                        return;
-                    }
-                    func_tag = func_type->second;
-                    break;
-                }else{
-                    //func_tag = DOWN_FUNC_REALSERVER_RECEIVE;
-                    //boost::this_thread::yield();
-                }
-            }else{
-                if(ec == boost::asio::error::try_again){
-                    //func_tag = DOWN_FUNC_REALSERVER_RECEIVE;
-                    //boost::this_thread::yield();
-                }else{
-                    func_tag = DOWN_FUNC_REALSERVER_DISCONNECT;
-                    break;
-                }
-            }
-        }
+				protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_recv(down_thread_id,server_endpoint,data_buff,recv_size);
+
+				std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
+				func_tag = func_type->second;
+			}
+			else{
+				func_tag = DOWN_FUNC_REALSERVER_RECEIVE;
+				//boost::this_thread::yield();
+			}
+		}
+		else{
+			if(ec == boost::asio::error::try_again){
+				func_tag = DOWN_FUNC_REALSERVER_RECEIVE;
+				//boost::this_thread::yield();
+			}
+			else{
+				func_tag = DOWN_FUNC_REALSERVER_DISCONNECT;
+			}
+		}
 
         down_thread_function_pair    func    = down_thread_function_array[func_tag];
-        if(unlikely( !func.second ) ){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_tag;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 71, buf.str(), __FILE__, __LINE__ );
-            down_thread_exit(process_type);
-            return;
-        }
         down_thread_current_receive_realserver_socket++;
         std::list<socket_element>::iterator list_end = down_thread_receive_realserver_socket_list.end();
         if(down_thread_current_receive_realserver_socket == list_end)
             down_thread_current_receive_realserver_socket = down_thread_receive_realserver_socket_list.begin();
         down_thread_next_call_function = func;
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT down_thread_realserver_receive : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_tag );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! down thread close realserver socket and raise realserver disconnect event message for up and down thread
     //! @param[in]        process_type is prosecess type
     void tcp_session::down_thread_realserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN down_thread_realserver_disconnect" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         boost::asio::ip::tcp::endpoint server_endpoint = down_thread_data_dest_side.get_endpoint();
         std::list<socket_element>::iterator list_end = down_thread_receive_realserver_socket_list.end();
         std::list<socket_element>::iterator close_socket = down_thread_receive_realserver_socket_list.begin();
@@ -2970,29 +2691,9 @@ namespace l7vs{
                     tcp_thread_message*        up_msg        = new tcp_thread_message;
                     tcp_thread_message*        down_msg    = new tcp_thread_message;
                     down_thread_function_pair    down_func    = down_thread_function_array[DOWN_FUNC_REALSERVER_DISCONNECT_EVENT];
-                    if( unlikely( !down_func.second ) ){
-                        //Error not find function map
-                        std::stringstream buf;
-                        buf << "Thread ID[";
-                        buf << boost::this_thread::get_id();
-                        buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : DOWN_FUNC_REALSERVER_DISCONNECT_EVENT";
-                        Logger::putLogError( LOG_CAT_L7VSD_SESSION, 72, buf.str(), __FILE__, __LINE__ );
-                        down_thread_exit(process_type);
-                        return;
-                    }
                     down_msg->endpoint_info = server_endpoint;
                     down_msg->message = down_func.second;
                     std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator up_func = down_thread_message_up_thread_function_map.find(UP_FUNC_REALSERVER_DISCONNECT_EVENT);
-                    if( unlikely( up_func == down_thread_message_up_thread_function_map.end() ) ){
-                        //Error not find function map
-                        std::stringstream buf;
-                        buf << "Thread ID[";
-                        buf << boost::this_thread::get_id();
-                        buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : UP_FUNC_REALSERVER_DISCONNECT_EVENT";
-                        Logger::putLogError( LOG_CAT_L7VSD_SESSION, 73, buf.str(), __FILE__, __LINE__ );
-                        down_thread_exit(process_type);
-                        return;
-                    }
                     up_msg->endpoint_info = server_endpoint;
                     up_msg->message = up_func->second;
                     while(!up_thread_message_que.push(up_msg)){}
@@ -3002,11 +2703,23 @@ namespace l7vs{
             }
             close_socket++;
         }
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT down_thread_realserver_disconnect" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     
     //! down thread raise module event of handle_realserver_disconnect
     //! @param[in]        process_type is prosecess type
     void tcp_session::down_thread_realserver_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN down_thread_realserver_disconnect_event" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         protocol_module_base::EVENT_TAG module_event;
         boost::asio::ip::tcp::endpoint server_endpoint = down_thread_message_data.get_endpoint();
         {
@@ -3026,34 +2739,23 @@ namespace l7vs{
         }
         
         std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
-        if(unlikely( func_type == down_thread_module_event_map.end() ) ){
-            //Error unknown protocol_module_base::EVENT_TAG return
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module returnd illegal EVENT_TAG : ";
-            buf << module_event;    
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 74, buf.str(), __FILE__, __LINE__ );
-            down_thread_exit(process_type);
-            return;
-        }
-        down_thread_function_pair    func    = down_thread_function_array[func_type->second];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_type->second;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 75, buf.str(), __FILE__, __LINE__ );
-            down_thread_exit(process_type);
-            return;
-        }
-        down_thread_next_call_function = func;
+		down_thread_next_call_function = down_thread_function_array[func_type->second];
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT down_thread_realserver_disconnect_event : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_type->second );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! down thread close realserver socket and raise realserver disconnect event message for up and down thread
     //! @param[in]        process_type is prosecess type
     void tcp_session::down_thread_all_realserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN down_thread_all_realserver_disconnect" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         std::list<socket_element>::iterator close_socket = down_thread_receive_realserver_socket_list.begin();
         std::list<socket_element>::iterator list_end = down_thread_receive_realserver_socket_list.end();
         
@@ -3090,103 +2792,70 @@ namespace l7vs{
         }
         down_thread_receive_realserver_socket_list.clear();
         std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
-        if(unlikely( func_type == down_thread_module_event_map.end() )){
-            //Error unknown protocol_module_base::EVENT_TAG return
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module returnd illegal EVENT_TAG : ";
-            buf << module_event;    
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 76, buf.str(), __FILE__, __LINE__ );
-            down_thread_exit(process_type);
-            return;
-        }
-        down_thread_function_pair    func    = down_thread_function_array[func_type->second];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_type->second;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 77, buf.str(), __FILE__, __LINE__ );
-            down_thread_exit(process_type);
-            return;
-        }
-        down_thread_next_call_function = func;
+		down_thread_next_call_function = down_thread_function_array[func_type->second];
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT down_thread_all_realserver_disconnect : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_type->second;
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! down thread raise module event of handle_client_connection_check
     //! @param[in]        process_type is prosecess type
     void tcp_session::down_thread_client_connection_chk_event(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN down_thread_client_connection_chk_event" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         down_thread_data_client_side.initialize();
         boost::array<char,MAX_BUFFER_SIZE>& data_buff = down_thread_data_client_side.get_data();
         std::size_t data_size;
         protocol_module_base::EVENT_TAG module_event = protocol_module->handle_client_connection_check(down_thread_id,data_buff,data_size);
         down_thread_data_client_side.set_size(data_size);
         std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
-        if(unlikely( func_type == down_thread_module_event_map.end() ) ){
-            //Error unknown protocol_module_base::EVENT_TAG return
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module returnd illegal EVENT_TAG : ";
-            buf << module_event;    
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 78, buf.str(), __FILE__, __LINE__ );
-            down_thread_exit(process_type);
-            return;
-        }
-        down_thread_function_pair    func    = down_thread_function_array[func_type->second];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_type->second;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 79, buf.str(), __FILE__, __LINE__ );
-            down_thread_exit(process_type);
-            return;
-        }
-        down_thread_next_call_function = func;
+		down_thread_next_call_function = down_thread_function_array[func_type->second];
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT down_thread_client_connection_chk_event : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_type->second );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     
     //! down thread raise module event of handle_response_send_inform
     //! @param[in]        process_type is prosecess type
     void tcp_session::down_thread_client_respond_event(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN down_thread_client_respond_event" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         protocol_module_base::EVENT_TAG module_event;
         {
             rw_scoped_lock scope_lock(module_function_response_send_inform_mutex);
             module_event = protocol_module->handle_response_send_inform(down_thread_id);
         }
         std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
-        if(unlikely( func_type == down_thread_module_event_map.end() )){
-            //Error unknown protocol_module_base::EVENT_TAG return
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module returnd illegal EVENT_TAG : ";
-            buf << module_event;    
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 80, buf.str(), __FILE__, __LINE__ );
-            down_thread_exit(process_type);
-            return;
-        }
-        down_thread_function_pair    func    = down_thread_function_array[func_type->second];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_type->second;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 81, buf.str(), __FILE__, __LINE__ );
-            down_thread_exit(process_type);
-            return;
-        }
-        down_thread_next_call_function = func;
+		down_thread_next_call_function = down_thread_function_array[func_type->second];
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT down_thread_client_respond_event : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_type->second );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! down thread send for client and raise module event of handle_client_send
     //! @param[in]        process_type is prosecess type
     void tcp_session::down_thread_client_send(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN down_thread_client_send" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         boost::system::error_code ec;
         boost::array<char,MAX_BUFFER_SIZE>& data_buff = down_thread_data_client_side.get_data();
         std::size_t data_size = down_thread_data_client_side.get_size();
@@ -3195,11 +2864,9 @@ namespace l7vs{
         DOWN_THREAD_FUNC_TYPE_TAG func_tag;
 
         struct epoll_event event;
-        if ( !ssl_flag ) {
-            event.data.fd = client_socket.get_socket().native();
-        } else {
-            event.data.fd = client_ssl_socket.get_socket().lowest_layer().native();
-        }
+		( !ssl_flag )	?	event.data.fd = client_socket.get_socket().native()
+						:	event.data.fd = client_ssl_socket.get_socket().lowest_layer().native();
+
         if (is_epoll_edge_trigger) {
             event.events = EPOLLET | EPOLLOUT | EPOLLHUP;
         } else {
@@ -3253,36 +2920,23 @@ namespace l7vs{
                     buf << strerror(errno);
                     Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
                 }
-                boost::this_thread::yield();
+				down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_CLIENT_DISCONNECT];
                 return;
             }
 
-            bool event_check = false;
             for (int i = 0; i < ret_fds; ++i) {
                 if (down_client_events[i].data.fd == event.data.fd) {
                     if (down_client_events[i].events & EPOLLOUT) {
-                        event_check = true;
                         break;
                     } else if (down_client_events[i].events & EPOLLHUP) {
-                        std::stringstream buf;
-                        buf << "down_thread_client_send : epoll_wait EPOLLHUP";
-                        Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
-                        down_thread_exit(process_type);
-                        return;
+						down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_CLIENT_DISCONNECT];
+						return;
                     }
                 }
             }
-            if (!event_check) {
-                Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 999, "down_thread_client_send : epoll_wait unknown fd", __FILE__, __LINE__ );
-                boost::this_thread::yield();
-                return;
-            }
 
-            if (!ssl_flag) {
-                send_size = client_socket.write_some(boost::asio::buffer(data_buff.data()+send_data_size,data_size-send_data_size),ec);
-            } else {
-                send_size = client_ssl_socket.write_some(boost::asio::buffer(data_buff.data()+send_data_size,data_size-send_data_size),ec);
-            }
+			(!ssl_flag)	?	send_size = client_socket.write_some(boost::asio::buffer(data_buff.data()+send_data_size,data_size-send_data_size),ec)
+						:	send_size = client_ssl_socket.write_some(boost::asio::buffer(data_buff.data()+send_data_size,data_size-send_data_size),ec);
 
             if(!ec){
                 send_data_size += send_size;
@@ -3291,21 +2945,11 @@ namespace l7vs{
                 //----Debug log----------------------------------------------------------------------
                 if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
                     boost::asio::ip::tcp::endpoint client_endpoint;
-                    if (!ssl_flag) {
-                        client_endpoint = client_socket.get_socket().lowest_layer().remote_endpoint(ec);
-                    } else {
-                        client_endpoint = client_ssl_socket.get_socket().lowest_layer().remote_endpoint(ec);
-                    }
-                    std::stringstream buf;
-                    buf << "Thread ID[";
-                    buf << boost::this_thread::get_id();
-                    buf << "] down_thread_client_send";
-                    buf << " send data size[";
-                    buf << send_size;
-                    buf << "] for [";
-                    buf << client_endpoint;
-                    buf << "]";
-                    Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 45, buf.str(), __FILE__, __LINE__ );
+                    (!ssl_flag)	?	client_endpoint = client_socket.get_socket().lowest_layer().remote_endpoint(ec)
+								:	client_endpoint = client_ssl_socket.get_socket().lowest_layer().remote_endpoint(ec);
+					boost::format	formatter( "Thread ID[%d] down_thread_client_send send data size[%d] for [%d]" );
+					formatter % boost::this_thread::get_id() % send_size % client_endpoint;
+                    Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 45, formatter.str(), __FILE__, __LINE__ );
                 }
                 //----Debug log----------------------------------------------------------------------
                 if(data_size > send_data_size){
@@ -3314,17 +2958,6 @@ namespace l7vs{
                 }else{
                     protocol_module_base::EVENT_TAG module_event = protocol_module->handle_client_send(down_thread_id);
                     std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
-                    if(unlikely( func_type == down_thread_module_event_map.end() ) ){
-                        //Error unknown protocol_module_base::EVENT_TAG return
-                        std::stringstream buf;
-                        buf << "Thread ID[";
-                        buf << boost::this_thread::get_id();
-                        buf << "] protocol_module returnd illegal EVENT_TAG : ";
-                        buf << module_event;
-                        Logger::putLogError( LOG_CAT_L7VSD_SESSION, 82, buf.str(), __FILE__, __LINE__ );
-                        down_thread_exit(process_type);
-                        return;
-                    }
                     func_tag = func_type->second;
                 }
                 break;
@@ -3339,99 +2972,78 @@ namespace l7vs{
             }
         }
 
-        down_thread_function_pair    func    = down_thread_function_array[func_tag];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_tag;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 83, buf.str(), __FILE__, __LINE__ );
-            down_thread_exit(process_type);
-            return;
-        }
-        down_thread_next_call_function = func;
+        down_thread_next_call_function = down_thread_function_array[func_tag];
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT down_thread_client_send : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_tag );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! down thread close client socket and raise client disconnect event message for up and down thread 
     //! @param[in]        process_type is prosecess type
     void tcp_session::down_thread_client_disconnect(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN down_thread_client_disconnect" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
         boost::system::error_code ec;
         bool bres;
-        if (!ssl_flag) {
-            bres = client_socket.close(ec);
-        } else {
-            bres = client_ssl_socket.close(ec);
-        }
+		(!ssl_flag)	?	bres = client_socket.close(ec)
+					:	bres = client_ssl_socket.close(ec);
         if(bres){
             tcp_thread_message*        up_msg        = new tcp_thread_message;
             tcp_thread_message*        down_msg    = new tcp_thread_message;
             down_thread_function_pair    down_func    = down_thread_function_array[DOWN_FUNC_CLIENT_DISCONNECT_EVENT];
-            if(unlikely( !down_func.second )){
-                //Error not find function map
-                std::stringstream buf;
-                buf << "Thread ID[";
-                buf << boost::this_thread::get_id();
-                buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : DOWN_FUNC_CLIENT_DISCONNECT_EVENT";
-                Logger::putLogError( LOG_CAT_L7VSD_SESSION, 84, buf.str(), __FILE__, __LINE__ );
-                down_thread_exit(process_type);
-                return;
-            }
             down_msg->message = down_func.second;
             std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator up_func = down_thread_message_up_thread_function_map.find(UP_FUNC_CLIENT_DISCONNECT_EVENT);
-            if(unlikely( up_func == down_thread_message_up_thread_function_map.end() )){
-                //Error not find function map
-                std::stringstream buf;
-                buf << "Thread ID[";
-                buf << boost::this_thread::get_id();
-                buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : UP_FUNC_CLIENT_DISCONNECT_EVENT";
-                Logger::putLogError( LOG_CAT_L7VSD_SESSION, 85, buf.str(), __FILE__, __LINE__ );
-                down_thread_exit(process_type);
-                return;
-            }
             up_msg->message = up_func->second;
             while(!down_thread_message_que.push(down_msg)){}
             while(!up_thread_message_que.push(up_msg)){}
         }
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT down_thread_client_disconnect" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     
     //! down thread raise module event of handle_client_disconnect
     //! @param[in]        process_type is prosecess type
     void tcp_session::down_thread_client_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN down_thread_disconnect_event" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         protocol_module_base::EVENT_TAG module_event;
         {
             rw_scoped_lock scope_lock(module_function_client_disconnect_mutex);
             module_event = protocol_module->handle_client_disconnect(down_thread_id);
         }
-        std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
-        if(unlikely( func_type == down_thread_module_event_map.end())){
-            //Error unknown protocol_module_base::EVENT_TAG return
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module returnd illegal EVENT_TAG : ";
-            buf << module_event;    
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 86, buf.str(), __FILE__, __LINE__ );
-            down_thread_exit(process_type);
-            return;
-        }
-        down_thread_function_pair    func    = down_thread_function_array[func_type->second];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_type->second;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 87, buf.str(), __FILE__, __LINE__ );
-            down_thread_exit(process_type);
-            return;
-        }
+        std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type =
+			 down_thread_module_event_map.find(module_event);
+        down_thread_function_pair	func    = down_thread_function_array[func_type->second];
         down_thread_next_call_function = func;
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT down_thread_exit : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_type->second );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! down thread receive from sorryserver and raise module event of handle_sorryserver_recv
     //! @param[in]        process_type is prosecess type
     void tcp_session::down_thread_sorryserver_receive(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN down_thread_sorryserver_receive" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         down_thread_data_dest_side.initialize();
         boost::array<char,MAX_BUFFER_SIZE>& data_buff = down_thread_data_dest_side.get_data();
         boost::system::error_code ec;
@@ -3493,29 +3105,19 @@ namespace l7vs{
                     buf << strerror(errno);
                     Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
                 }
-                boost::this_thread::yield();
+				down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_SORRYSERVER_DISCONNECT];
                 return;
             }
 
-            bool event_check = false;
             for (int i = 0; i < ret_fds; ++i) {
                 if (down_sorryserver_events[i].data.fd == event.data.fd) {
                     if (down_sorryserver_events[i].events & EPOLLIN) {
-                        event_check = true;
                         break;
                     } else if (down_sorryserver_events[i].events & EPOLLHUP) {
-                        std::stringstream buf;
-                        buf << "down_thread_sorryserver_receive : epoll_wait EPOLLHUP";
-                        Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__ );
-                        down_thread_exit(process_type);
-                        return;
+						down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_SORRYSERVER_DISCONNECT];
+						return;
                     }
                 }
-            }
-            if (!event_check) {
-                Logger::putLogWarn( LOG_CAT_L7VSD_SESSION, 999, "down_thread_sorryserver_receive : epoll_wait unknown fd", __FILE__, __LINE__ );
-                boost::this_thread::yield();
-                return;
             }
 
             recv_size = sorryserver_socket.second->read_some(boost::asio::buffer(data_buff,MAX_BUFFER_SIZE),ec);
@@ -3541,87 +3143,66 @@ namespace l7vs{
                     down_thread_data_dest_side.set_size(recv_size);
                     protocol_module_base::EVENT_TAG module_event = protocol_module->handle_sorryserver_recv(down_thread_id,sorry_endpoint,data_buff,recv_size);
                     std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
-                    if(unlikely( func_type == down_thread_module_event_map.end() )){
-                        //Error unknown protocol_module_base::EVENT_TAG return
-                        std::stringstream buf;
-                        buf << "Thread ID[";
-                        buf << boost::this_thread::get_id();
-                        buf << "] protocol_module returnd illegal EVENT_TAG : ";
-                        buf << module_event;    
-                        Logger::putLogError( LOG_CAT_L7VSD_SESSION, 88, buf.str(), __FILE__, __LINE__ );
-                        down_thread_exit(process_type);
-                        return;
-                    }
                     func_tag = func_type->second;
                 }else{
-                    //func_tag = DOWN_FUNC_SORRYSERVER_RECEIVE;
-                    //boost::this_thread::yield();
+					func_tag = DOWN_FUNC_SORRYSERVER_RECEIVE;
                 }
             }else{
                 if(ec == boost::asio::error::try_again){
-                    //func_tag = DOWN_FUNC_SORRYSERVER_RECEIVE;
-                    //boost::this_thread::yield();
+					func_tag = DOWN_FUNC_SORRYSERVER_RECEIVE;
                 }else{
                     func_tag = DOWN_FUNC_SORRYSERVER_DISCONNECT;
                 }
             }
         }
 
-        down_thread_function_pair    func    = down_thread_function_array[func_tag];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_tag;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 89, buf.str(), __FILE__, __LINE__ );
-            down_thread_exit(process_type);
-            return;
-        }
-        down_thread_next_call_function = func;
+		down_thread_next_call_function = down_thread_function_array[func_tag];
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT down_thread_sorryserver_receive : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_tag );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! down thread raise module event of handle_sorryserver_disconnect
     //! @param[in]        process_type is prosecess type
     void tcp_session::down_thread_sorryserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN down_thread_sorryserver_disconnect" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         boost::system::error_code ec;
         bool bres = sorryserver_socket.second->close(ec);
         if(bres){
             tcp_thread_message*        up_msg        = new tcp_thread_message;
             tcp_thread_message*        down_msg    = new tcp_thread_message;
             down_thread_function_pair    down_func    = down_thread_function_array[DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT];
-            if(unlikely( !down_func.second )){
-                //Error not find function map
-                std::stringstream buf;
-                buf << "Thread ID[";
-                buf << boost::this_thread::get_id();
-                buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT";
-                Logger::putLogError( LOG_CAT_L7VSD_SESSION, 90, buf.str(), __FILE__, __LINE__ );
-                down_thread_exit(process_type);
-                return;
-            }
             down_msg->message = down_func.second;
             down_msg->endpoint_info = sorryserver_socket.first;
             std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator up_func = down_thread_message_up_thread_function_map.find(UP_FUNC_SORRYSERVER_DISCONNECT_EVENT);
-            if(unlikely( up_func == down_thread_message_up_thread_function_map.end() )){
-                //Error not find function map
-                std::stringstream buf;
-                buf << "Thread ID[";
-                buf << boost::this_thread::get_id();
-                buf << "] not find function map UP_THREAD_FUNC_TYPE_TAG : UP_FUNC_SORRYSERVER_DISCONNECT_EVENT";
-                Logger::putLogError( LOG_CAT_L7VSD_SESSION, 91, buf.str(), __FILE__, __LINE__ );
-                down_thread_exit(process_type);
-                return;
-            }
             up_msg->message = up_func->second;
             up_msg->endpoint_info = sorryserver_socket.first;
             while(!up_thread_message_que.push(up_msg)){}
             while(!down_thread_message_que.push(down_msg)){}
         }
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT down_thread_sorryserver_disconnect" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! down thread close sorryserver socket and raise module sorryserver disconnect event
     //! @param[in]        process_type is prosecess type
     void tcp_session::down_thread_sorryserver_mod_disconnect(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN down_thread_sorryserver_mod_disconnect" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         protocol_module_base::EVENT_TAG module_event;
 
         boost::system::error_code ec;
@@ -3636,34 +3217,24 @@ namespace l7vs{
         }
 
         std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
-        if(unlikely( func_type == down_thread_module_event_map.end() )){
-            //Error unknown protocol_module_base::EVENT_TAG return
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module returnd illegal EVENT_TAG : ";
-            buf << module_event;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 92, buf.str(), __FILE__, __LINE__ );
-            down_thread_exit(process_type);
-            return;
-        }
         down_thread_function_pair    func    = down_thread_function_array[func_type->second];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_type->second;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 93, buf.str(), __FILE__, __LINE__ );
-            down_thread_exit(process_type);
-            return;
-        }
         down_thread_next_call_function = func;
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT down_thread_sorryserver_mod_disconnect : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_type->second );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! down thread raise module event of handle_sorryserver_disconnect
     //! @param[in]        process_type is prosecess type
     void tcp_session::down_thread_sorryserver_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN down_thread_sorryserver_disconnect_event" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         protocol_module_base::EVENT_TAG module_event;
         boost::asio::ip::tcp::endpoint sorry_endpoint = down_thread_message_data.get_endpoint();
         {
@@ -3671,34 +3242,24 @@ namespace l7vs{
             module_event = protocol_module->handle_sorryserver_disconnect(down_thread_id,sorry_endpoint);
         }
         std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
-        if(unlikely( func_type == down_thread_module_event_map.end() ) ){
-            //Error unknown protocol_module_base::EVENT_TAG return
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module returnd illegal EVENT_TAG : ";
-            buf << module_event;    
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 94, buf.str(), __FILE__, __LINE__ );
-            down_thread_exit(process_type);
-            return;
-        }
         down_thread_function_pair    func    = down_thread_function_array[func_type->second];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_type->second;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 95, buf.str(), __FILE__, __LINE__ );
-            down_thread_exit(process_type);
-            return;
-        }
         down_thread_next_call_function = func;
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT down_thread_sorryserver_disconnect_event : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_type->second );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! down thread raise module event of handle_sorry_enable
     //! @param[in]        process_type is prosecess type
     void tcp_session::down_thread_sorry_enable_event(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN down_thread_sorry_enable_event" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         protocol_module_base::EVENT_TAG module_event;
         {
             rw_scoped_lock scope_lock(module_function_sorry_enable_mutex);
@@ -3714,34 +3275,24 @@ namespace l7vs{
             module_event = protocol_module->handle_sorry_enable(down_thread_id);
         }
         std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
-        if(unlikely( func_type == down_thread_module_event_map.end() )){
-            //Error unknown protocol_module_base::EVENT_TAG return
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module returnd illegal EVENT_TAG : ";
-            buf << module_event;    
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 96, buf.str(), __FILE__, __LINE__ );
-            down_thread_exit(process_type);
-            return;
-        }
         down_thread_function_pair    func    = down_thread_function_array[func_type->second];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_type->second;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 97, buf.str(), __FILE__, __LINE__ );
-            down_thread_exit(process_type);
-            return;
-        }
         down_thread_next_call_function = func;
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT down_thread_sorry_enable_event : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_type->second );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! down thread raise module event of handle_sorry_disable
     //! @param[in]        process_type is prosecess type
     void tcp_session::down_thread_sorry_disable_event(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN down_thread_sorry_disable_event" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         protocol_module_base::EVENT_TAG module_event;
         {
             rw_scoped_lock scope_lock(module_function_sorry_disable_mutex);
@@ -3757,39 +3308,42 @@ namespace l7vs{
             module_event = protocol_module->handle_sorry_disable(down_thread_id);
         }
         std::map< protocol_module_base::EVENT_TAG ,DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
-        if(unlikely( func_type == down_thread_module_event_map.end() )){
-            //Error unknown protocol_module_base::EVENT_TAG return
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] protocol_module returnd illegal EVENT_TAG : ";
-            buf << module_event;    
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 98, buf.str(), __FILE__, __LINE__ );
-            down_thread_exit(process_type);
-            return;
-        }
         down_thread_function_pair    func    = down_thread_function_array[func_type->second];
-        if(unlikely( !func.second )){
-            //Error not find function map
-            std::stringstream buf;
-            buf << "Thread ID[";
-            buf << boost::this_thread::get_id();
-            buf << "] not find function map DOWN_THREAD_FUNC_TYPE_TAG : ";
-            buf << func_type->second;
-            Logger::putLogError( LOG_CAT_L7VSD_SESSION, 99, buf.str(), __FILE__, __LINE__ );
-            down_thread_exit(process_type);
-            return;
-        }
         down_thread_next_call_function = func;
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT down_thread_sorry_disable_event : NEXT_FUNC[%s]" );
+			formatter % boost::this_thread::get_id() % func_tag_to_string( func_type->second );
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! down thread exit main loop
     //! @param[in]        process_type is prosecess type
     void tcp_session::down_thread_exit(const TCP_PROCESS_TYPE_TAG process_type){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN down_thread_exit" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
         rw_scoped_lock scoped_lock(exit_flag_update_mutex);
+		boost::mutex::scoped_lock	status_scoped_lock( downthread_status_mutex );
+		downthread_status_cond.notify_all();
         exit_flag = true;
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT down_thread_exit" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
     //! down thread close all socket
     void tcp_session::down_thread_all_socket_close(void){
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC IN down_thread_all_socket_close" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
+
         std::list<socket_element>::iterator close_socket = down_thread_receive_realserver_socket_list.begin();
         std::list<socket_element>::iterator list_end = down_thread_receive_realserver_socket_list.end();
         boost::system::error_code ec;
@@ -3800,12 +3354,26 @@ namespace l7vs{
             close_socket++;
         }
         down_thread_receive_realserver_socket_list.clear();
-        if (!ssl_flag) {
-            client_socket.close(ec);
-        } else {
-            client_ssl_socket.close(ec);
-        }
+		(!ssl_flag) ?	client_socket.close(ec)
+					:	client_ssl_socket.close(ec);
         sorryserver_socket.second->close(ec);
+
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+			boost::format	formatter( "Thread ID[%d] FUNC OUT down_thread_all_socket_close" );
+			formatter % boost::this_thread::get_id();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__ );
+		}
     }
+
+	//! milliseconds to boost::xtime converter
+	void tcp_session::to_time( int in, boost::xtime& xt ){
+		boost::xtime_get( &xt, boost::TIME_UTC );
+		xt.sec += ( in / 1000 );
+		xt.nsec += ( in % 1000 ) * 1000000;
+		if( xt.nsec >= 1000000000 ){
+			xt.sec++;
+			xt.nsec -= 1000000000;
+		}
+	}
     
 }// namespace l7vs
