@@ -2,7 +2,7 @@ AUTOMAKE_OPTIONS	= foreign
 L7VS_MODDIR		= @l7vs_moddir@
 MAX_BUFFER_SIZE	= @l7vs_max_buffer_size@
 AM_CPPFLAGS		= \
-		-g -O2 -Wall -Werror -fPIC -pthread \
+		-g -O2 -fno-strict-aliasing -Wall -Werror -fPIC -pthread \
 		-I../../include \
 		-I../../logger \
 		-I../../parameter \
@@ -20,13 +20,13 @@ libprotomod_sslid_la_SOURCES	=	protocol_module_base.h \
 									sslid_replication_data_processor.cpp \
 									sslid_session_data_processor.h \
 									sslid_session_data_processor.cpp
-libprotomod_sslid_la_LIBADD		=	-lrt -lboost_thread-gcc41-mt
+libprotomod_sslid_la_LIBADD		=	-lrt -lboost_thread-mt
 
 libprotomod_sessionless_la_SOURCES	=	protocol_module_base.h \
 									http_protocol_module_base.h \
 									http_protocol_module_base.cpp \
 									protocol_module_sessionless.cpp
-libprotomod_sessionless_la_LIBADD	= -lrt -lboost_thread-gcc41-mt
+libprotomod_sessionless_la_LIBADD	= -lrt -lboost_thread-mt
 
 libprotomod_ip_la_SOURCES	=	protocol_module_base.h \
 									ip_protocol_module_base.h \
@@ -37,7 +37,7 @@ libprotomod_ip_la_SOURCES	=	protocol_module_base.h \
 									ip_session_data_processor.cpp \
 									http_utility.h \
 									http_utility.cpp
-libprotomod_ip_la_LIBADD		=	-lrt -lboost_thread-gcc41-mt
+libprotomod_ip_la_LIBADD		=	-lrt -lboost_thread-mt
 
 
 

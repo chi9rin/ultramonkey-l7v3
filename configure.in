@@ -21,9 +21,9 @@ AC_CHECK_LIB(log4cxx, main, :,
 	[AC_MSG_ERROR( l7vsd require log4cxx library. )] )
 AC_CHECK_LIB(rt, main, :,
 	[AC_MSG_ERROR( l7vsd require rt library. )] )
-AC_CHECK_LIB(boost_thread-gcc41-mt, main, :,
+AC_CHECK_LIB(boost_thread-mt, main, :,
 	[AC_MSG_ERROR( l7vsd require boost library. )] )
-AC_CHECK_LIB(boost_system-gcc41-mt, main, :,
+AC_CHECK_LIB(boost_system-mt, main, :,
 	[AC_MSG_ERROR( l7vsd require boost library. )] )
 
 # Checks for header files.

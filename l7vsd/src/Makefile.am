@@ -13,7 +13,7 @@ libl7vsd_parameter_a_SOURCES	= \
 				parameter_impl.cpp
 
 libl7vsd_parameter_a_CPPFLAGS	= \
-				-O2 -g -Wall -Werror \
+				-O2 -fno-strict-aliasing -g -Wall -Werror \
 				-I../include \
 				-DPARAMETER_FILE="\"$(PARAMETER_FILE)\"" \
 				-DVERSION=\"$(VERSION)\" \
@@ -27,7 +27,7 @@ libl7vsadm_parameter_a_SOURCES	= \
 				parameter_impl.cpp
 
 libl7vsadm_parameter_a_CPPFLAGS	= \
-				-O2 -g -Wall -Werror \
+				-O2 -fno-strict-aliasing -g -Wall -Werror \
 				-I../include \
 				-DPARAMETER_FILE="\"$(PARAMETER_FILE)\"" \
 				-DVERSION=\"$(VERSION)\" \
@@ -41,7 +41,7 @@ libsnmpagent_parameter_a_SOURCES	= \
 				parameter_impl.cpp
 
 libsnmpagent_parameter_a_CPPFLAGS	= \
-				-O2 -g -Wall -Werror \
+				-O2 -fno-strict-aliasing -g -Wall -Werror \
 				-I../include \
 				-DPARAMETER_FILE="\"$(PARAMETER_FILE)\"" \
 				-DVERSION=\"$(VERSION)\" \
@@ -67,7 +67,7 @@ libl7vsd_logger_a_SOURCES	= \
 			time_and_size_based_rolling_policy.cpp
 
 libl7vsd_logger_a_CPPFLAGS	= \
-			-fno-strict-aliasing -O2 -g -Wall -Werror -pthread -I../include \
+			-fno-strict-aliasing -O2 -fno-strict-aliasing -g -Wall -Werror -pthread -I../include \
 			-DLOGGER_PROCESS_VSD \
 			-DVERSION=\"$(VERSION)\"
 
@@ -91,7 +91,7 @@ libl7vsadm_logger_a_SOURCES	= \
 			time_and_size_based_rolling_policy.cpp
 
 libl7vsadm_logger_a_CPPFLAGS	= \
-			-fno-strict-aliasing -O2 -g -Wall -Werror -pthread -I../include \
+			-fno-strict-aliasing -O2 -fno-strict-aliasing -g -Wall -Werror -pthread -I../include \
 			-DLOGGER_PROCESS_ADM \
 			-DVERSION=\"$(VERSION)\"
 
@@ -115,7 +115,7 @@ libsnmpagent_logger_a_SOURCES	= \
 			time_and_size_based_rolling_policy.cpp
 
 libsnmpagent_logger_a_CPPFLAGS	= \
-			-fno-strict-aliasing -O2 -g -Wall -Werror -pthread -I../include \
+			-fno-strict-aliasing -O2 -fno-strict-aliasing -g -Wall -Werror -pthread -I../include \
 			-DLOGGER_PROCESS_SNM \
 			-DVERSION=\"$(VERSION)\"
 
@@ -126,7 +126,7 @@ MAX_BUFFER_SIZE		= @l7vs_max_buffer_size@
 L7VS_SBINDIR		= @sbindir@
 
 l7vsd_CPPFLAGS		= \
-			-O2 -g -Wall -Werror -pthread \
+			-O2 -fno-strict-aliasing -g -Wall -Werror -pthread \
 			-I../include \
 			-I../../snmpagent \
 			-DL7VS_MODULE_PATH="\"$(PKGLIBDIR)\"" \
@@ -198,12 +198,12 @@ l7vsd_LDADD	= \
 			-llog4cxx \
 			-lrt \
 			-lssl \
-			-lboost_thread-gcc41-mt \
-			-lboost_system-gcc41-mt \
-			-lboost_serialization-gcc41-mt
+			-lboost_thread-mt \
+			-lboost_system-mt \
+			-lboost_serialization-mt
 
 l7vsadm_CPPFLAGS	= \
-			-O2 -g -Wall -Werror \
+			-O2 -fno-strict-aliasing -g -Wall -Werror \
 			-I../include \
 			-I../../snmpagent \
 			-DL7VS_MODULE_PATH="\"$(PKGLIBDIR)\"" \
@@ -225,10 +225,10 @@ l7vsadm_LDADD	=	\
 			libl7vsadm_parameter.a \
 			-llog4cxx \
 			-lrt \
-			-lboost_thread-gcc41-mt \
-			-lboost_system-gcc41-mt \
-			-lboost_serialization-gcc41-mt \
-			-lboost_regex-gcc41-mt
+			-lboost_thread-mt \
+			-lboost_system-mt \
+			-lboost_serialization-mt \
+			-lboost_regex-mt
 
 install:
 	$(INSTALL) -m 755 -d $(CONFIG_SOCK_PATH)
