@@ -15,1949 +15,1950 @@ static netsnmp_table_data_set *rs_table_set = NULL;
 
 /** Initializes the ultramonkey-l7 module */
 void
-init_netsnmp_bridge(void* clientarg)
+init_netsnmp_bridge(void *clientarg)
 {
-    static oid      um7LogVsdNetwork_oid[] =
+        static oid      um7LogVsdNetwork_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 1, 1 };
-    static oid      um7LogVsdNetworkBandwidth_oid[] =
+        static oid      um7LogVsdNetworkBandwidth_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 1, 2 };
-    static oid      um7LogVsdNetworkNumConnection_oid[] =
+        static oid      um7LogVsdNetworkNumConnection_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 1, 3 };
-    static oid      um7LogVsdNetworkQoS_oid[] =
+        static oid      um7LogVsdNetworkQoS_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 1, 4 };
-    static oid      um7LogVsdVirtualService_oid[] =
+        static oid      um7LogVsdVirtualService_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 1, 5 };
-    static oid      um7LogVsdRealServer_oid[] =
+        static oid      um7LogVsdRealServer_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 1, 6 };
-    static oid      um7LogVsdRealServerBalancing_oid[] =
+        static oid      um7LogVsdRealServerBalancing_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 1, 7 };
-    static oid      um7LogVsdSorryServer_oid[] =
+        static oid      um7LogVsdSorryServer_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 1, 8 };
-    static oid      um7LogVsdReplication_oid[] =
+        static oid      um7LogVsdReplication_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 1, 9 };
-    static oid      um7LogVsdStartStop_oid[] =
+        static oid      um7LogVsdStartStop_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 1, 10 };
-    static oid      um7LogVsdSystem_oid[] =
+        static oid      um7LogVsdSystem_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 1, 11 };
-    static oid      um7LogVsdSystemMemory_oid[] =
+        static oid      um7LogVsdSystemMemory_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 1, 12 };
-    static oid      um7LogVsdSystemSocket_oid[] =
+        static oid      um7LogVsdSystemSocket_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 1, 13 };
-    static oid      um7LogVsdSystemSignal_oid[] =
+        static oid      um7LogVsdSystemSignal_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 1, 14 };
-    static oid      um7LogVsdEnvironment_oid[] =
+        static oid      um7LogVsdEnvironment_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 1, 15 };
-    static oid      um7LogVsdEnvironmentParameter_oid[] =
+        static oid      um7LogVsdEnvironmentParameter_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 1, 16 };
-    static oid      um7LogVsdLogger_oid[] =
+        static oid      um7LogVsdLogger_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 1, 17 };
-    static oid      um7LogVsdParameter_oid[] =
+        static oid      um7LogVsdParameter_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 1, 18 };
-    static oid      um7LogVsdEvent_oid[] =
+        static oid      um7LogVsdEvent_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 1, 19 };
-    static oid      um7LogVsdSchedule_oid[] =
+        static oid      um7LogVsdSchedule_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 1, 20 };
-    static oid      um7LogVsdProgram_oid[] =
+        static oid      um7LogVsdProgram_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 1, 21 };
-    static oid      um7LogVsdProtocol_oid[] =
+        static oid      um7LogVsdProtocol_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 1, 22 };
-    static oid      um7LogVsdModule_oid[] =
+        static oid      um7LogVsdModule_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 1, 23 };
-    static oid      um7LogVsadmParse_oid[] =
+        static oid      um7LogVsadmParse_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 2, 1 };
-    static oid      um7LogVsadmOperate_oid[] =
+        static oid      um7LogVsadmOperate_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 2, 2 };
-    static oid      um7LogVsadmCommunicate_oid[] =
+        static oid      um7LogVsadmCommunicate_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 2, 3 };
-    static oid      um7LogVsadmConfigResult_oid[] =
+        static oid      um7LogVsadmConfigResult_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 2, 4 };
-    static oid      um7LogVsadmCommon_oid[] =
+        static oid      um7LogVsadmCommon_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 2, 5 };
-    static oid      um7LogVsadmLogger_oid[] =
+        static oid      um7LogVsadmLogger_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 2, 6 };
-    static oid      um7LogVsadmParameter_oid[] =
+        static oid      um7LogVsadmParameter_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 2, 7 };
-    static oid      um7LogVsadmProtocol_oid[] =
+        static oid      um7LogVsadmProtocol_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 2, 8 };
-    static oid      um7LogVsadmModule_oid[] =
+        static oid      um7LogVsadmModule_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 2, 9 };
-    static oid      um7LogSnmpStartStop_oid[] =
+        static oid      um7LogSnmpStartStop_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 3, 1 };
-    static oid      um7LogSnmpManagerReceive_oid[] =
+        static oid      um7LogSnmpManagerReceive_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 3, 2 };
-    static oid      um7LogSnmpManagerSend_oid[] =
+        static oid      um7LogSnmpManagerSend_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 3, 3 };
-    static oid      um7LogSnmpL7vsdReceive_oid[] =
+        static oid      um7LogSnmpL7vsdReceive_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 3, 4 };
-    static oid      um7LogSnmpL7vsdSend_oid[] =
+        static oid      um7LogSnmpL7vsdSend_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 3, 5 };
-    static oid      um7LogSnmpLogger_oid[] =
+        static oid      um7LogSnmpLogger_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 3, 6 };
-    static oid      um7LogSnmpParameter_oid[] =
+        static oid      um7LogSnmpParameter_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, 3, 7 };
-    static oid      um7StatMessage_oid[] =
+        static oid      um7StatMessage_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 4, 1 };
-    static oid      um7StatReplication_oid[] =
+        static oid      um7StatReplication_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 4, 2 };
-    static oid      um7StatSnmpAgent_oid[] =
+        static oid      um7StatSnmpAgent_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 4, 3 };
 
-    DEBUGMSGTL(("ultramonkey-l7", "Initializing\n"));
+        DEBUGMSGTL(("ultramonkey-l7", "Initializing\n"));
 
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsdNetwork", handle_um7LogVsdNetwork,
-                             um7LogVsdNetwork_oid,
-                             OID_LENGTH(um7LogVsdNetwork_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsdNetworkBandwidth",
-                             handle_um7LogVsdNetworkBandwidth,
-                             um7LogVsdNetworkBandwidth_oid,
-                             OID_LENGTH(um7LogVsdNetworkBandwidth_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsdNetworkNumConnection",
-                             handle_um7LogVsdNetworkNumConnection,
-                             um7LogVsdNetworkNumConnection_oid,
-                             OID_LENGTH(um7LogVsdNetworkNumConnection_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsdNetworkQoS",
-                             handle_um7LogVsdNetworkQoS,
-                             um7LogVsdNetworkQoS_oid,
-                             OID_LENGTH(um7LogVsdNetworkQoS_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsdVirtualService",
-                             handle_um7LogVsdVirtualService,
-                             um7LogVsdVirtualService_oid,
-                             OID_LENGTH(um7LogVsdVirtualService_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsdRealServer",
-                             handle_um7LogVsdRealServer,
-                             um7LogVsdRealServer_oid,
-                             OID_LENGTH(um7LogVsdRealServer_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsdRealServerBalancing",
-                             handle_um7LogVsdRealServerBalancing,
-                             um7LogVsdRealServerBalancing_oid,
-                             OID_LENGTH(um7LogVsdRealServerBalancing_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsdSorryServer",
-                             handle_um7LogVsdSorryServer,
-                             um7LogVsdSorryServer_oid,
-                             OID_LENGTH(um7LogVsdSorryServer_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsdReplication",
-                             handle_um7LogVsdReplication,
-                             um7LogVsdReplication_oid,
-                             OID_LENGTH(um7LogVsdReplication_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsdStartStop",
-                             handle_um7LogVsdStartStop,
-                             um7LogVsdStartStop_oid,
-                             OID_LENGTH(um7LogVsdStartStop_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsdSystem", handle_um7LogVsdSystem,
-                             um7LogVsdSystem_oid,
-                             OID_LENGTH(um7LogVsdSystem_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsdSystemMemory",
-                             handle_um7LogVsdSystemMemory,
-                             um7LogVsdSystemMemory_oid,
-                             OID_LENGTH(um7LogVsdSystemMemory_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsdSystemSocket",
-                             handle_um7LogVsdSystemSocket,
-                             um7LogVsdSystemSocket_oid,
-                             OID_LENGTH(um7LogVsdSystemSocket_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsdSystemSignal",
-                             handle_um7LogVsdSystemSignal,
-                             um7LogVsdSystemSignal_oid,
-                             OID_LENGTH(um7LogVsdSystemSignal_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsdEnvironment",
-                             handle_um7LogVsdEnvironment,
-                             um7LogVsdEnvironment_oid,
-                             OID_LENGTH(um7LogVsdEnvironment_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsdEnvironmentParameter",
-                             handle_um7LogVsdEnvironmentParameter,
-                             um7LogVsdEnvironmentParameter_oid,
-                             OID_LENGTH(um7LogVsdEnvironmentParameter_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsdLogger", handle_um7LogVsdLogger,
-                             um7LogVsdLogger_oid,
-                             OID_LENGTH(um7LogVsdLogger_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsdParameter",
-                             handle_um7LogVsdParameter,
-                             um7LogVsdParameter_oid,
-                             OID_LENGTH(um7LogVsdParameter_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsdEvent", handle_um7LogVsdEvent,
-                             um7LogVsdEvent_oid,
-                             OID_LENGTH(um7LogVsdEvent_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsdSchedule", handle_um7LogVsdSchedule,
-                             um7LogVsdSchedule_oid,
-                             OID_LENGTH(um7LogVsdSchedule_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsdProgram", handle_um7LogVsdProgram,
-                             um7LogVsdProgram_oid,
-                             OID_LENGTH(um7LogVsdProgram_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsdProtocol", handle_um7LogVsdProtocol,
-                             um7LogVsdProtocol_oid,
-                             OID_LENGTH(um7LogVsdProtocol_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsdModule", handle_um7LogVsdModule,
-                             um7LogVsdModule_oid,
-                             OID_LENGTH(um7LogVsdModule_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsadmParse", handle_um7LogVsadmParse,
-                             um7LogVsadmParse_oid,
-                             OID_LENGTH(um7LogVsadmParse_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsadmOperate",
-                             handle_um7LogVsadmOperate,
-                             um7LogVsadmOperate_oid,
-                             OID_LENGTH(um7LogVsadmOperate_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsadmCommunicate",
-                             handle_um7LogVsadmCommunicate,
-                             um7LogVsadmCommunicate_oid,
-                             OID_LENGTH(um7LogVsadmCommunicate_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsadmConfigResult",
-                             handle_um7LogVsadmConfigResult,
-                             um7LogVsadmConfigResult_oid,
-                             OID_LENGTH(um7LogVsadmConfigResult_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsadmCommon", handle_um7LogVsadmCommon,
-                             um7LogVsadmCommon_oid,
-                             OID_LENGTH(um7LogVsadmCommon_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsadmLogger", handle_um7LogVsadmLogger,
-                             um7LogVsadmLogger_oid,
-                             OID_LENGTH(um7LogVsadmLogger_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsadmParameter",
-                             handle_um7LogVsadmParameter,
-                             um7LogVsadmParameter_oid,
-                             OID_LENGTH(um7LogVsadmParameter_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsadmProtocol",
-                             handle_um7LogVsadmProtocol,
-                             um7LogVsadmProtocol_oid,
-                             OID_LENGTH(um7LogVsadmProtocol_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogVsadmModule", handle_um7LogVsadmModule,
-                             um7LogVsadmModule_oid,
-                             OID_LENGTH(um7LogVsadmModule_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogSnmpStartStop",
-                             handle_um7LogSnmpStartStop,
-                             um7LogSnmpStartStop_oid,
-                             OID_LENGTH(um7LogSnmpStartStop_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogSnmpManagerReceive",
-                             handle_um7LogSnmpManagerReceive,
-                             um7LogSnmpManagerReceive_oid,
-                             OID_LENGTH(um7LogSnmpManagerReceive_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogSnmpManagerSend",
-                             handle_um7LogSnmpManagerSend,
-                             um7LogSnmpManagerSend_oid,
-                             OID_LENGTH(um7LogSnmpManagerSend_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogSnmpL7vsdReceive",
-                             handle_um7LogSnmpL7vsdReceive,
-                             um7LogSnmpL7vsdReceive_oid,
-                             OID_LENGTH(um7LogSnmpL7vsdReceive_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogSnmpL7vsdSend",
-                             handle_um7LogSnmpL7vsdSend,
-                             um7LogSnmpL7vsdSend_oid,
-                             OID_LENGTH(um7LogSnmpL7vsdSend_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogSnmpLogger", handle_um7LogSnmpLogger,
-                             um7LogSnmpLogger_oid,
-                             OID_LENGTH(um7LogSnmpLogger_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7LogSnmpParameter",
-                             handle_um7LogSnmpParameter,
-                             um7LogSnmpParameter_oid,
-                             OID_LENGTH(um7LogSnmpParameter_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7StatMessage", handle_um7StatMessage,
-                             um7StatMessage_oid,
-                             OID_LENGTH(um7StatMessage_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7StatReplication",
-                             handle_um7StatReplication,
-                             um7StatReplication_oid,
-                             OID_LENGTH(um7StatReplication_oid),
-                             HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("um7StatSnmpAgent", handle_um7StatSnmpAgent,
-                             um7StatSnmpAgent_oid,
-                             OID_LENGTH(um7StatSnmpAgent_oid),
-                             HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsdNetwork", handle_um7LogVsdNetwork,
+        um7LogVsdNetwork_oid,
+        OID_LENGTH(um7LogVsdNetwork_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsdNetworkBandwidth",
+        handle_um7LogVsdNetworkBandwidth,
+        um7LogVsdNetworkBandwidth_oid,
+        OID_LENGTH(um7LogVsdNetworkBandwidth_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsdNetworkNumConnection",
+        handle_um7LogVsdNetworkNumConnection,
+        um7LogVsdNetworkNumConnection_oid,
+        OID_LENGTH(um7LogVsdNetworkNumConnection_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsdNetworkQoS",
+        handle_um7LogVsdNetworkQoS,
+        um7LogVsdNetworkQoS_oid,
+        OID_LENGTH(um7LogVsdNetworkQoS_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsdVirtualService",
+        handle_um7LogVsdVirtualService,
+        um7LogVsdVirtualService_oid,
+        OID_LENGTH(um7LogVsdVirtualService_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsdRealServer",
+        handle_um7LogVsdRealServer,
+        um7LogVsdRealServer_oid,
+        OID_LENGTH(um7LogVsdRealServer_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsdRealServerBalancing",
+        handle_um7LogVsdRealServerBalancing,
+        um7LogVsdRealServerBalancing_oid,
+        OID_LENGTH(um7LogVsdRealServerBalancing_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsdSorryServer",
+        handle_um7LogVsdSorryServer,
+        um7LogVsdSorryServer_oid,
+        OID_LENGTH(um7LogVsdSorryServer_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsdReplication",
+        handle_um7LogVsdReplication,
+        um7LogVsdReplication_oid,
+        OID_LENGTH(um7LogVsdReplication_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsdStartStop",
+        handle_um7LogVsdStartStop,
+        um7LogVsdStartStop_oid,
+        OID_LENGTH(um7LogVsdStartStop_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsdSystem", handle_um7LogVsdSystem,
+        um7LogVsdSystem_oid,
+        OID_LENGTH(um7LogVsdSystem_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsdSystemMemory",
+        handle_um7LogVsdSystemMemory,
+        um7LogVsdSystemMemory_oid,
+        OID_LENGTH(um7LogVsdSystemMemory_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsdSystemSocket",
+        handle_um7LogVsdSystemSocket,
+        um7LogVsdSystemSocket_oid,
+        OID_LENGTH(um7LogVsdSystemSocket_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsdSystemSignal",
+        handle_um7LogVsdSystemSignal,
+        um7LogVsdSystemSignal_oid,
+        OID_LENGTH(um7LogVsdSystemSignal_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsdEnvironment",
+        handle_um7LogVsdEnvironment,
+        um7LogVsdEnvironment_oid,
+        OID_LENGTH(um7LogVsdEnvironment_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsdEnvironmentParameter",
+        handle_um7LogVsdEnvironmentParameter,
+        um7LogVsdEnvironmentParameter_oid,
+        OID_LENGTH(um7LogVsdEnvironmentParameter_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsdLogger", handle_um7LogVsdLogger,
+        um7LogVsdLogger_oid,
+        OID_LENGTH(um7LogVsdLogger_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsdParameter",
+        handle_um7LogVsdParameter,
+        um7LogVsdParameter_oid,
+        OID_LENGTH(um7LogVsdParameter_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsdEvent", handle_um7LogVsdEvent,
+        um7LogVsdEvent_oid,
+        OID_LENGTH(um7LogVsdEvent_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsdSchedule", handle_um7LogVsdSchedule,
+        um7LogVsdSchedule_oid,
+        OID_LENGTH(um7LogVsdSchedule_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsdProgram", handle_um7LogVsdProgram,
+        um7LogVsdProgram_oid,
+        OID_LENGTH(um7LogVsdProgram_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsdProtocol", handle_um7LogVsdProtocol,
+        um7LogVsdProtocol_oid,
+        OID_LENGTH(um7LogVsdProtocol_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsdModule", handle_um7LogVsdModule,
+        um7LogVsdModule_oid,
+        OID_LENGTH(um7LogVsdModule_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsadmParse", handle_um7LogVsadmParse,
+        um7LogVsadmParse_oid,
+        OID_LENGTH(um7LogVsadmParse_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsadmOperate",
+        handle_um7LogVsadmOperate,
+        um7LogVsadmOperate_oid,
+        OID_LENGTH(um7LogVsadmOperate_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsadmCommunicate",
+        handle_um7LogVsadmCommunicate,
+        um7LogVsadmCommunicate_oid,
+        OID_LENGTH(um7LogVsadmCommunicate_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsadmConfigResult",
+        handle_um7LogVsadmConfigResult,
+        um7LogVsadmConfigResult_oid,
+        OID_LENGTH(um7LogVsadmConfigResult_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsadmCommon", handle_um7LogVsadmCommon,
+        um7LogVsadmCommon_oid,
+        OID_LENGTH(um7LogVsadmCommon_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsadmLogger", handle_um7LogVsadmLogger,
+        um7LogVsadmLogger_oid,
+        OID_LENGTH(um7LogVsadmLogger_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsadmParameter",
+        handle_um7LogVsadmParameter,
+        um7LogVsadmParameter_oid,
+        OID_LENGTH(um7LogVsadmParameter_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsadmProtocol",
+        handle_um7LogVsadmProtocol,
+        um7LogVsadmProtocol_oid,
+        OID_LENGTH(um7LogVsadmProtocol_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogVsadmModule", handle_um7LogVsadmModule,
+        um7LogVsadmModule_oid,
+        OID_LENGTH(um7LogVsadmModule_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogSnmpStartStop",
+        handle_um7LogSnmpStartStop,
+        um7LogSnmpStartStop_oid,
+        OID_LENGTH(um7LogSnmpStartStop_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogSnmpManagerReceive",
+        handle_um7LogSnmpManagerReceive,
+        um7LogSnmpManagerReceive_oid,
+        OID_LENGTH(um7LogSnmpManagerReceive_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogSnmpManagerSend",
+        handle_um7LogSnmpManagerSend,
+        um7LogSnmpManagerSend_oid,
+        OID_LENGTH(um7LogSnmpManagerSend_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogSnmpL7vsdReceive",
+        handle_um7LogSnmpL7vsdReceive,
+        um7LogSnmpL7vsdReceive_oid,
+        OID_LENGTH(um7LogSnmpL7vsdReceive_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogSnmpL7vsdSend",
+        handle_um7LogSnmpL7vsdSend,
+        um7LogSnmpL7vsdSend_oid,
+        OID_LENGTH(um7LogSnmpL7vsdSend_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogSnmpLogger", handle_um7LogSnmpLogger,
+        um7LogSnmpLogger_oid,
+        OID_LENGTH(um7LogSnmpLogger_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7LogSnmpParameter",
+        handle_um7LogSnmpParameter,
+        um7LogSnmpParameter_oid,
+        OID_LENGTH(um7LogSnmpParameter_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7StatMessage", handle_um7StatMessage,
+        um7StatMessage_oid,
+        OID_LENGTH(um7StatMessage_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7StatReplication",
+        handle_um7StatReplication,
+        um7StatReplication_oid,
+        OID_LENGTH(um7StatReplication_oid),
+        HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+        ("um7StatSnmpAgent", handle_um7StatSnmpAgent,
+        um7StatSnmpAgent_oid,
+        OID_LENGTH(um7StatSnmpAgent_oid),
+        HANDLER_CAN_RONLY));
 
-    /*
-     * here we initialize all the tables we're planning on supporting 
-     */
-    initialize_table_um7VirtualServiceTable();
-    initialize_table_um7RealServerTable();
+        /*
+         * here we initialize all the tables we're planning on supporting
+         */
+        initialize_table_um7VirtualServiceTable();
+        initialize_table_um7RealServerTable();
 
-    // request mib collection every 1 sec.
-    callback_id = snmp_alarm_register(REPEAT_SEC, SA_REPEAT, getL7vsdData, clientarg);
-    if (callback_id == 0) {
-        // TODO error
-    }
+        // request mib collection every 1 sec.
+        callback_id = snmp_alarm_register(REPEAT_SEC, SA_REPEAT, getL7vsdData, clientarg);
+        if (callback_id == 0) {
+                // TODO error
+        }
 }
 
 int
 handle_um7LogVsdNetwork(netsnmp_mib_handler *handler,
-                        netsnmp_handler_registration *reginfo,
-                        netsnmp_agent_request_info *reqinfo,
-                        netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsd_log_level* log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
+        struct l7vsd_log_level *log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->network,
-                                 sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->network,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR, "unknown mode (%d) in handle_um7LogVsdNetwork\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR, "unknown mode (%d) in handle_um7LogVsdNetwork\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsdNetworkBandwidth(netsnmp_mib_handler *handler,
-                                 netsnmp_handler_registration *reginfo,
-                                 netsnmp_agent_request_info *reqinfo,
-                                 netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsd_log_level* log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
+        struct l7vsd_log_level *log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->networkBandwidth,
-                                 sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->networkBandwidth,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogVsdNetworkBandwidth\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogVsdNetworkBandwidth\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsdNetworkNumConnection(netsnmp_mib_handler *handler,
-                                     netsnmp_handler_registration *reginfo,
-                                     netsnmp_agent_request_info *reqinfo,
-                                     netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsd_log_level* log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
+        struct l7vsd_log_level *log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->networkNumConnection,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->networkNumConnection,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogVsdNetworkNumConnection\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogVsdNetworkNumConnection\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsdNetworkQoS(netsnmp_mib_handler *handler,
-                           netsnmp_handler_registration *reginfo,
-                           netsnmp_agent_request_info *reqinfo,
-                           netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsd_log_level* log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
+        struct l7vsd_log_level *log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->networkQoS,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->networkQoS,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogVsdNetworkQoS\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogVsdNetworkQoS\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsdVirtualService(netsnmp_mib_handler *handler,
-                               netsnmp_handler_registration *reginfo,
-                               netsnmp_agent_request_info *reqinfo,
-                               netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsd_log_level* log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
+        struct l7vsd_log_level *log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->virtualService,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->virtualService,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogVsdVirtualService\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogVsdVirtualService\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsdRealServer(netsnmp_mib_handler *handler,
-                           netsnmp_handler_registration *reginfo,
-                           netsnmp_agent_request_info *reqinfo,
-                           netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsd_log_level* log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
+        struct l7vsd_log_level *log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->realServer,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->realServer,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogVsdRealServer\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogVsdRealServer\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsdRealServerBalancing(netsnmp_mib_handler *handler,
-                                    netsnmp_handler_registration *reginfo,
-                                    netsnmp_agent_request_info *reqinfo,
-                                    netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsd_log_level* log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
+        struct l7vsd_log_level *log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->realServerBalancing,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->realServerBalancing,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogVsdRealServerBalancing\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogVsdRealServerBalancing\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsdSorryServer(netsnmp_mib_handler *handler,
-                            netsnmp_handler_registration *reginfo,
-                            netsnmp_agent_request_info *reqinfo,
-                            netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsd_log_level* log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
+        struct l7vsd_log_level *log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->sorryServer,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->sorryServer,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogVsdSorryServer\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogVsdSorryServer\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsdReplication(netsnmp_mib_handler *handler,
-                            netsnmp_handler_registration *reginfo,
-                            netsnmp_agent_request_info *reqinfo,
-                            netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsd_log_level* log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
+        struct l7vsd_log_level *log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->replication,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->replication,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogVsdReplication\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogVsdReplication\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsdStartStop(netsnmp_mib_handler *handler,
-                          netsnmp_handler_registration *reginfo,
-                          netsnmp_agent_request_info *reqinfo,
-                          netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsd_log_level* log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
+        struct l7vsd_log_level *log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->startStop,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->startStop,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogVsdStartStop\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogVsdStartStop\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsdSystem(netsnmp_mib_handler *handler,
-                       netsnmp_handler_registration *reginfo,
-                       netsnmp_agent_request_info *reqinfo,
-                       netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsd_log_level* log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
+        struct l7vsd_log_level *log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->system,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->system,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR, "unknown mode (%d) in handle_um7LogVsdSystem\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR, "unknown mode (%d) in handle_um7LogVsdSystem\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsdSystemMemory(netsnmp_mib_handler *handler,
-                             netsnmp_handler_registration *reginfo,
-                             netsnmp_agent_request_info *reqinfo,
-                             netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsd_log_level* log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
+        struct l7vsd_log_level *log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->systemMemory,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->systemMemory,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogVsdSystemMemory\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogVsdSystemMemory\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsdSystemSocket(netsnmp_mib_handler *handler,
-                             netsnmp_handler_registration *reginfo,
-                             netsnmp_agent_request_info *reqinfo,
-                             netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsd_log_level* log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
+        struct l7vsd_log_level *log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->systemSocket,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->systemSocket,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogVsdSystemSocket\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogVsdSystemSocket\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsdSystemSignal(netsnmp_mib_handler *handler,
-                             netsnmp_handler_registration *reginfo,
-                             netsnmp_agent_request_info *reqinfo,
-                             netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsd_log_level* log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
+        struct l7vsd_log_level *log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->systemSignal,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->systemSignal,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogVsdSystemSignal\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogVsdSystemSignal\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsdEnvironment(netsnmp_mib_handler *handler,
-                            netsnmp_handler_registration *reginfo,
-                            netsnmp_agent_request_info *reqinfo,
-                            netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsd_log_level* log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
+        struct l7vsd_log_level *log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->environment,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->environment,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogVsdEnvironment\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogVsdEnvironment\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsdEnvironmentParameter(netsnmp_mib_handler *handler,
-                                     netsnmp_handler_registration *reginfo,
-                                     netsnmp_agent_request_info *reqinfo,
-                                     netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsd_log_level* log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
+        struct l7vsd_log_level *log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->environmentParameter,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->environmentParameter,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogVsdEnvironmentParameter\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogVsdEnvironmentParameter\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsdLogger(netsnmp_mib_handler *handler,
-                       netsnmp_handler_registration *reginfo,
-                       netsnmp_agent_request_info *reqinfo,
-                       netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsd_log_level* log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
+        struct l7vsd_log_level *log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->logger,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->logger,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR, "unknown mode (%d) in handle_um7LogVsdLogger\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR, "unknown mode (%d) in handle_um7LogVsdLogger\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsdParameter(netsnmp_mib_handler *handler,
-                          netsnmp_handler_registration *reginfo,
-                          netsnmp_agent_request_info *reqinfo,
-                          netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsd_log_level* log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
+        struct l7vsd_log_level *log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->parameter,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->parameter,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogVsdParameter\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogVsdParameter\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsdEvent(netsnmp_mib_handler *handler,
-                      netsnmp_handler_registration *reginfo,
-                      netsnmp_agent_request_info *reqinfo,
-                      netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsd_log_level* log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
+        struct l7vsd_log_level *log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->event,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->event,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR, "unknown mode (%d) in handle_um7LogVsdEvent\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR, "unknown mode (%d) in handle_um7LogVsdEvent\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsdSchedule(netsnmp_mib_handler *handler,
-                         netsnmp_handler_registration *reginfo,
-                         netsnmp_agent_request_info *reqinfo,
-                         netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsd_log_level* log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
+        struct l7vsd_log_level *log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->schedule,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->schedule,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogVsdSchedule\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogVsdSchedule\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsdProgram(netsnmp_mib_handler *handler,
-                        netsnmp_handler_registration *reginfo,
-                        netsnmp_agent_request_info *reqinfo,
-                        netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsd_log_level* log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
+        struct l7vsd_log_level *log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->program,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->program,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR, "unknown mode (%d) in handle_um7LogVsdProgram\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR, "unknown mode (%d) in handle_um7LogVsdProgram\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsdProtocol(netsnmp_mib_handler *handler,
-                         netsnmp_handler_registration *reginfo,
-                         netsnmp_agent_request_info *reqinfo,
-                         netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsd_log_level* log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
+        struct l7vsd_log_level *log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->protocol,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->protocol,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogVsdProtocol\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogVsdProtocol\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsdModule(netsnmp_mib_handler *handler,
-                       netsnmp_handler_registration *reginfo,
-                       netsnmp_agent_request_info *reqinfo,
-                       netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsd_log_level* log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
+        struct l7vsd_log_level *log = l7ag_store_mibdata::getInstance().getVsdLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->module,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->module,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR, "unknown mode (%d) in handle_um7LogVsdModule\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR, "unknown mode (%d) in handle_um7LogVsdModule\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsadmParse(netsnmp_mib_handler *handler,
-                        netsnmp_handler_registration *reginfo,
-                        netsnmp_agent_request_info *reqinfo,
-                        netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsadm_log_level* log = l7ag_store_mibdata::getInstance().getVsadmLogmibdata();
+        struct l7vsadm_log_level *log = l7ag_store_mibdata::getInstance().getVsadmLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->parse,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->parse,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR, "unknown mode (%d) in handle_um7LogVsadmParse\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR, "unknown mode (%d) in handle_um7LogVsadmParse\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsadmOperate(netsnmp_mib_handler *handler,
-                          netsnmp_handler_registration *reginfo,
-                          netsnmp_agent_request_info *reqinfo,
-                          netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsadm_log_level* log = l7ag_store_mibdata::getInstance().getVsadmLogmibdata();
+        struct l7vsadm_log_level *log = l7ag_store_mibdata::getInstance().getVsadmLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->operate,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->operate,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogVsadmOperate\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogVsadmOperate\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsadmCommunicate(netsnmp_mib_handler *handler,
-                              netsnmp_handler_registration *reginfo,
-                              netsnmp_agent_request_info *reqinfo,
-                              netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsadm_log_level* log = l7ag_store_mibdata::getInstance().getVsadmLogmibdata();
+        struct l7vsadm_log_level *log = l7ag_store_mibdata::getInstance().getVsadmLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->communicate,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->communicate,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogVsadmCommunicate\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogVsadmCommunicate\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsadmConfigResult(netsnmp_mib_handler *handler,
-                               netsnmp_handler_registration *reginfo,
-                               netsnmp_agent_request_info *reqinfo,
-                               netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsadm_log_level* log = l7ag_store_mibdata::getInstance().getVsadmLogmibdata();
+        struct l7vsadm_log_level *log = l7ag_store_mibdata::getInstance().getVsadmLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->configResult,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->configResult,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogVsadmConfigResult\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogVsadmConfigResult\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsadmCommon(netsnmp_mib_handler *handler,
-                         netsnmp_handler_registration *reginfo,
-                         netsnmp_agent_request_info *reqinfo,
-                         netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsadm_log_level* log = l7ag_store_mibdata::getInstance().getVsadmLogmibdata();
+        struct l7vsadm_log_level *log = l7ag_store_mibdata::getInstance().getVsadmLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->common,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->common,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogVsadmCommon\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogVsadmCommon\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsadmLogger(netsnmp_mib_handler *handler,
-                         netsnmp_handler_registration *reginfo,
-                         netsnmp_agent_request_info *reqinfo,
-                         netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsadm_log_level* log = l7ag_store_mibdata::getInstance().getVsadmLogmibdata();
+        struct l7vsadm_log_level *log = l7ag_store_mibdata::getInstance().getVsadmLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->logger,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->logger,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogVsadmLogger\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogVsadmLogger\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsadmParameter(netsnmp_mib_handler *handler,
-                            netsnmp_handler_registration *reginfo,
-                            netsnmp_agent_request_info *reqinfo,
-                            netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsadm_log_level* log = l7ag_store_mibdata::getInstance().getVsadmLogmibdata();
+        struct l7vsadm_log_level *log = l7ag_store_mibdata::getInstance().getVsadmLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->parameter,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->parameter,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogVsadmParameter\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogVsadmParameter\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsadmProtocol(netsnmp_mib_handler *handler,
-                           netsnmp_handler_registration *reginfo,
-                           netsnmp_agent_request_info *reqinfo,
-                           netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsadm_log_level* log = l7ag_store_mibdata::getInstance().getVsadmLogmibdata();
+        struct l7vsadm_log_level *log = l7ag_store_mibdata::getInstance().getVsadmLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->protocol,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->protocol,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogVsadmProtocol\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogVsadmProtocol\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogVsadmModule(netsnmp_mib_handler *handler,
-                         netsnmp_handler_registration *reginfo,
-                         netsnmp_agent_request_info *reqinfo,
-                         netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7vsadm_log_level* log = l7ag_store_mibdata::getInstance().getVsadmLogmibdata();
+        struct l7vsadm_log_level *log = l7ag_store_mibdata::getInstance().getVsadmLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->module,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->module,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogVsadmModule\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogVsadmModule\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogSnmpStartStop(netsnmp_mib_handler *handler,
-                           netsnmp_handler_registration *reginfo,
-                           netsnmp_agent_request_info *reqinfo,
-                           netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7snmpagent_log_level* log = l7ag_store_mibdata::getInstance().getAgentLogmibdata();
+        struct l7snmpagent_log_level *log = l7ag_store_mibdata::getInstance().getAgentLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->startStop,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->startStop,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogSnmpStartStop\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogSnmpStartStop\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogSnmpManagerReceive(netsnmp_mib_handler *handler,
-                                netsnmp_handler_registration *reginfo,
-                                netsnmp_agent_request_info *reqinfo,
-                                netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7snmpagent_log_level* log = l7ag_store_mibdata::getInstance().getAgentLogmibdata();
+        struct l7snmpagent_log_level *log = l7ag_store_mibdata::getInstance().getAgentLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->managerReceive,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->managerReceive,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogSnmpManagerReceive\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogSnmpManagerReceive\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogSnmpManagerSend(netsnmp_mib_handler *handler,
-                             netsnmp_handler_registration *reginfo,
-                             netsnmp_agent_request_info *reqinfo,
-                             netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7snmpagent_log_level* log = l7ag_store_mibdata::getInstance().getAgentLogmibdata();
+        struct l7snmpagent_log_level *log = l7ag_store_mibdata::getInstance().getAgentLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->managerSend,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->managerSend,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogSnmpManagerSend\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogSnmpManagerSend\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogSnmpL7vsdReceive(netsnmp_mib_handler *handler,
-                              netsnmp_handler_registration *reginfo,
-                              netsnmp_agent_request_info *reqinfo,
-                              netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7snmpagent_log_level* log = l7ag_store_mibdata::getInstance().getAgentLogmibdata();
+        struct l7snmpagent_log_level *log = l7ag_store_mibdata::getInstance().getAgentLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->l7vsdReceive,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->l7vsdReceive,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogSnmpL7vsdReceive\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogSnmpL7vsdReceive\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogSnmpL7vsdSend(netsnmp_mib_handler *handler,
-                           netsnmp_handler_registration *reginfo,
-                           netsnmp_agent_request_info *reqinfo,
-                           netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7snmpagent_log_level* log = l7ag_store_mibdata::getInstance().getAgentLogmibdata();
+        struct l7snmpagent_log_level *log = l7ag_store_mibdata::getInstance().getAgentLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->l7vsdSend,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->l7vsdSend,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogSnmpL7vsdSend\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogSnmpL7vsdSend\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogSnmpLogger(netsnmp_mib_handler *handler,
-                        netsnmp_handler_registration *reginfo,
-                        netsnmp_agent_request_info *reqinfo,
-                        netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7snmpagent_log_level* log = l7ag_store_mibdata::getInstance().getAgentLogmibdata();
+        struct l7snmpagent_log_level *log = l7ag_store_mibdata::getInstance().getAgentLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->logger,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->logger,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR, "unknown mode (%d) in handle_um7LogSnmpLogger\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR, "unknown mode (%d) in handle_um7LogSnmpLogger\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7LogSnmpParameter(netsnmp_mib_handler *handler,
-                           netsnmp_handler_registration *reginfo,
-                           netsnmp_agent_request_info *reqinfo,
-                           netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7snmpagent_log_level* log = l7ag_store_mibdata::getInstance().getAgentLogmibdata();
+        struct l7snmpagent_log_level *log = l7ag_store_mibdata::getInstance().getAgentLogmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &log->parameter,
-                                  sizeof(l7vs::LOG_LEVEL_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &log->parameter,
+                sizeof(l7vs::LOG_LEVEL_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7LogSnmpParameter\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7LogSnmpParameter\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7StatMessage(netsnmp_mib_handler *handler,
-                      netsnmp_handler_registration *reginfo,
-                      netsnmp_agent_request_info *reqinfo,
-                      netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7_status* stat = l7ag_store_mibdata::getInstance().getStatmibdata();
+        struct l7_status *stat = l7ag_store_mibdata::getInstance().getStatmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-                                 (u_char *) &stat->message,
-                                  strnlen(stat->message, DISPLAYSTRING_LEN)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
+                (u_char *) &stat->message,
+                strnlen(stat->message, DISPLAYSTRING_LEN));
+                break;
 
-    default:
-        snmp_log(LOG_ERR, "unknown mode (%d) in handle_um7StatMessage\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR, "unknown mode (%d) in handle_um7StatMessage\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7StatReplication(netsnmp_mib_handler *handler,
-                          netsnmp_handler_registration *reginfo,
-                          netsnmp_agent_request_info *reqinfo,
-                          netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
 //     struct l7_status* stat = l7ag_store_mibdata::getInstance().getStatmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-/*        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &stat->replication,
-                                  sizeof(REPLICATION_MODE_TAG)  );*/
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                /*        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                                                 (u_char *) &stat->replication,
+                                                  sizeof(REPLICATION_MODE_TAG)  );*/
+                break;
 
-    default:
-        snmp_log(LOG_ERR,
-                 "unknown mode (%d) in handle_um7StatReplication\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR,
+                "unknown mode (%d) in handle_um7StatReplication\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 handle_um7StatSnmpAgent(netsnmp_mib_handler *handler,
-                        netsnmp_handler_registration *reginfo,
-                        netsnmp_agent_request_info *reqinfo,
-                        netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    struct l7_status* stat = l7ag_store_mibdata::getInstance().getStatmibdata();
+        struct l7_status *stat = l7ag_store_mibdata::getInstance().getStatmibdata();
 
-    switch (reqinfo->mode) {
-    case MODE_GET:
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &stat->snmpAgent,
-                                  sizeof(IPC_STATUS_TAG)  );
-        break;
+        switch (reqinfo->mode) {
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                (u_char *) &stat->snmpAgent,
+                sizeof(IPC_STATUS_TAG));
+                break;
 
-    default:
-        snmp_log(LOG_ERR, "unknown mode (%d) in handle_um7StatSnmpAgent\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        default:
+                snmp_log(LOG_ERR, "unknown mode (%d) in handle_um7StatSnmpAgent\n",
+                reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 /** Initialize the um7VirtualServiceTable table by defining its contents and how it's structured */
 void
 initialize_table_um7VirtualServiceTable()
 {
-    static oid      um7VirtualServiceTable_oid[] =
+        static oid      um7VirtualServiceTable_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 1 };
-    size_t          um7VirtualServiceTable_oid_len =
+        size_t          um7VirtualServiceTable_oid_len =
         OID_LENGTH(um7VirtualServiceTable_oid);
 
-    /*
-     * create the table structure itself 
-     */
-    vs_table_set = netsnmp_create_table_data_set("um7VirtualServiceTable");
-    l7ag_store_mibdata::getInstance().setVsTableSet(vs_table_set);
+        /*
+         * create the table structure itself
+         */
+        vs_table_set = netsnmp_create_table_data_set("um7VirtualServiceTable");
+        l7ag_store_mibdata::getInstance().setVsTableSet(vs_table_set);
 
-    /*
-     * comment this out or delete if you don't support creation of new rows 
-     */
+        /*
+         * comment this out or delete if you don't support creation of new rows
+         */
 //    vs_table_set->allow_creation = 1;
 
-    /***************************************************
-     * Adding indexes
-     */
-    DEBUGMSGTL(("initialize_table_um7VirtualServiceTable",
-                "adding indexes to table um7VirtualServiceTable\n"));
-    netsnmp_table_set_add_indexes(vs_table_set, ASN_INTEGER,       /* index: um7VSIndex */
-                                  0);
+        /***************************************************
+         * Adding indexes
+         */
+        DEBUGMSGTL(("initialize_table_um7VirtualServiceTable",
+        "adding indexes to table um7VirtualServiceTable\n"));
+        netsnmp_table_set_add_indexes(vs_table_set, ASN_INTEGER,       /* index: um7VSIndex */
+        0);
 
-    DEBUGMSGTL(("initialize_table_um7VirtualServiceTable",
-                "adding column types to table um7VirtualServiceTable\n"));
-    netsnmp_table_set_multi_add_default_row(vs_table_set,
-                                            COLUMN_UM7VSINDEX, ASN_INTEGER,
-                                            0, NULL, 0,
-                                            COLUMN_UM7VSPROTOCOL,
-                                            ASN_INTEGER, 0, NULL, 0,
-                                            COLUMN_UM7VSIPADDRESS,
-                                            ASN_OCTET_STR, 0, NULL, 0,
-                                            COLUMN_UM7VSPORTNUMBER,
-                                            ASN_UNSIGNED, 0, NULL, 0,
-                                            COLUMN_UM7VSSCHEDULEMODULE,
-                                            ASN_OCTET_STR, 0, NULL, 0,
-                                            COLUMN_UM7VSPROTOCOLMODULE,
-                                            ASN_OCTET_STR, 0, NULL, 0,
-                                            COLUMN_UM7VSPROTOCOLMODULEOPTION,
-                                            ASN_OCTET_STR, 0, NULL, 0,
-                                            COLUMN_UM7VSRESCHEDULE,
-                                            ASN_INTEGER, 0, NULL, 0,
-                                            COLUMN_UM7VSSORRYIPADDRESS,
-                                            ASN_OCTET_STR, 0, NULL, 0,
-                                            COLUMN_UM7VSSORRYPORTNUMBER,
-                                            ASN_UNSIGNED, 0, NULL, 0,
-                                            COLUMN_UM7VSSORRYTHRESHOLD,
-                                            ASN_INTEGER, 0, NULL, 0,
-                                            COLUMN_UM7VSSORRYFORCEFLAG,
-                                            ASN_INTEGER, 0, NULL, 0,
-                                            COLUMN_UM7VSQOSTHRESHOLDUP,
-                                            ASN_INTEGER, 0, NULL, 0,
-                                            COLUMN_UM7VSQOSTHRESHOLDDOWN,
-                                            ASN_INTEGER, 0, NULL, 0,
-                                            COLUMN_UM7VSTHROUGHPUTUP,
-                                            ASN_INTEGER, 0, NULL, 0,
-                                            COLUMN_UM7VSTHROUGHPUTDOWN,
-                                            ASN_INTEGER, 0, NULL, 0, 0);
+        DEBUGMSGTL(("initialize_table_um7VirtualServiceTable",
+        "adding column types to table um7VirtualServiceTable\n"));
+        netsnmp_table_set_multi_add_default_row(vs_table_set,
+        COLUMN_UM7VSINDEX, ASN_INTEGER,
+        0, NULL, 0,
+        COLUMN_UM7VSPROTOCOL,
+        ASN_INTEGER, 0, NULL, 0,
+        COLUMN_UM7VSIPADDRESS,
+        ASN_OCTET_STR, 0, NULL, 0,
+        COLUMN_UM7VSPORTNUMBER,
+        ASN_UNSIGNED, 0, NULL, 0,
+        COLUMN_UM7VSSCHEDULEMODULE,
+        ASN_OCTET_STR, 0, NULL, 0,
+        COLUMN_UM7VSPROTOCOLMODULE,
+        ASN_OCTET_STR, 0, NULL, 0,
+        COLUMN_UM7VSPROTOCOLMODULEOPTION,
+        ASN_OCTET_STR, 0, NULL, 0,
+        COLUMN_UM7VSRESCHEDULE,
+        ASN_INTEGER, 0, NULL, 0,
+        COLUMN_UM7VSSORRYIPADDRESS,
+        ASN_OCTET_STR, 0, NULL, 0,
+        COLUMN_UM7VSSORRYPORTNUMBER,
+        ASN_UNSIGNED, 0, NULL, 0,
+        COLUMN_UM7VSSORRYTHRESHOLD,
+        ASN_INTEGER, 0, NULL, 0,
+        COLUMN_UM7VSSORRYFORCEFLAG,
+        ASN_INTEGER, 0, NULL, 0,
+        COLUMN_UM7VSQOSTHRESHOLDUP,
+        ASN_INTEGER, 0, NULL, 0,
+        COLUMN_UM7VSQOSTHRESHOLDDOWN,
+        ASN_INTEGER, 0, NULL, 0,
+        COLUMN_UM7VSTHROUGHPUTUP,
+        ASN_INTEGER, 0, NULL, 0,
+        COLUMN_UM7VSTHROUGHPUTDOWN,
+        ASN_INTEGER, 0, NULL, 0, 0);
 
-    /*
-     * registering the table with the master agent 
-     */
-    /*
-     * note: if you don't need a subhandler to deal with any aspects
-     * of the request, change um7VirtualServiceTable_handler to "NULL" 
-     */
-    netsnmp_register_table_data_set(netsnmp_create_handler_registration
-                                    ("um7VirtualServiceTable",
-                                     um7VirtualServiceTable_handler,
-                                     um7VirtualServiceTable_oid,
-                                     um7VirtualServiceTable_oid_len,
-                                     HANDLER_CAN_RWRITE), vs_table_set, NULL);
+        /*
+         * registering the table with the master agent
+         */
+        /*
+         * note: if you don't need a subhandler to deal with any aspects
+         * of the request, change um7VirtualServiceTable_handler to "NULL"
+         */
+        netsnmp_register_table_data_set(netsnmp_create_handler_registration
+        ("um7VirtualServiceTable",
+        um7VirtualServiceTable_handler,
+        um7VirtualServiceTable_oid,
+        um7VirtualServiceTable_oid_len,
+        HANDLER_CAN_RWRITE), vs_table_set, NULL);
 }
 
 /** Initialize the um7RealServerTable table by defining its contents and how it's structured */
 void
 initialize_table_um7RealServerTable()
 {
-    static oid      um7RealServerTable_oid[] =
+        static oid      um7RealServerTable_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 2 };
-    size_t          um7RealServerTable_oid_len =
+        size_t          um7RealServerTable_oid_len =
         OID_LENGTH(um7RealServerTable_oid);
 
-    /*
-     * create the table structure itself 
-     */
-    rs_table_set = netsnmp_create_table_data_set("um7RealServerTable");
-    l7ag_store_mibdata::getInstance().setRsTableSet(rs_table_set);
+        /*
+         * create the table structure itself
+         */
+        rs_table_set = netsnmp_create_table_data_set("um7RealServerTable");
+        l7ag_store_mibdata::getInstance().setRsTableSet(rs_table_set);
 
-    /*
-     * comment this out or delete if you don't support creation of new rows 
-     */
+        /*
+         * comment this out or delete if you don't support creation of new rows
+         */
 //    rs_table_set->allow_creation = 1;
 
-    /***************************************************
-     * Adding indexes
-     */
-    DEBUGMSGTL(("initialize_table_um7RealServerTable",
-                "adding indexes to table um7RealServerTable\n"));
-    netsnmp_table_set_add_indexes(rs_table_set, ASN_INTEGER,       /* index: um7RSIndex */
-                                  0);
+        /***************************************************
+         * Adding indexes
+         */
+        DEBUGMSGTL(("initialize_table_um7RealServerTable",
+        "adding indexes to table um7RealServerTable\n"));
+        netsnmp_table_set_add_indexes(rs_table_set, ASN_INTEGER,       /* index: um7RSIndex */
+        0);
 
-    DEBUGMSGTL(("initialize_table_um7RealServerTable",
-                "adding column types to table um7RealServerTable\n"));
-    netsnmp_table_set_multi_add_default_row(rs_table_set,
-                                            COLUMN_UM7RSINDEX, ASN_INTEGER,
-                                            0, NULL, 0,
-                                            COLUMN_UM7RSVIRTUALSERVICEINDEX,
-                                            ASN_INTEGER, 0, NULL, 0,
-                                            COLUMN_UM7RSIPADDRESS,
-                                            ASN_OCTET_STR, 0, NULL, 0,
-                                            COLUMN_UM7RSPORTNUMBER,
-                                            ASN_UNSIGNED, 0, NULL, 0,
-                                            COLUMN_UM7RSFORWARDMODE,
-                                            ASN_INTEGER, 0, NULL, 0,
-                                            COLUMN_UM7RSWEIGHT,
-                                            ASN_INTEGER, 0, NULL, 0,
-                                            COLUMN_UM7RSACTIVECONN,
-                                            ASN_INTEGER, 0, NULL, 0,
-                                            COLUMN_UM7RSINACTIVECONN,
-                                            ASN_INTEGER, 0, NULL, 0, 0);
+        DEBUGMSGTL(("initialize_table_um7RealServerTable",
+        "adding column types to table um7RealServerTable\n"));
+        netsnmp_table_set_multi_add_default_row(rs_table_set,
+        COLUMN_UM7RSINDEX, ASN_INTEGER,
+        0, NULL, 0,
+        COLUMN_UM7RSVIRTUALSERVICEINDEX,
+        ASN_INTEGER, 0, NULL, 0,
+        COLUMN_UM7RSIPADDRESS,
+        ASN_OCTET_STR, 0, NULL, 0,
+        COLUMN_UM7RSPORTNUMBER,
+        ASN_UNSIGNED, 0, NULL, 0,
+        COLUMN_UM7RSFORWARDMODE,
+        ASN_INTEGER, 0, NULL, 0,
+        COLUMN_UM7RSWEIGHT,
+        ASN_INTEGER, 0, NULL, 0,
+        COLUMN_UM7RSACTIVECONN,
+        ASN_INTEGER, 0, NULL, 0,
+        COLUMN_UM7RSINACTIVECONN,
+        ASN_INTEGER, 0, NULL, 0, 0);
 
-    /*
-     * registering the table with the master agent 
-     */
-    /*
-     * note: if you don't need a subhandler to deal with any aspects
-     * of the request, change um7RealServerTable_handler to "NULL" 
-     */
-    netsnmp_register_table_data_set(netsnmp_create_handler_registration
-                                    ("um7RealServerTable",
-                                     um7RealServerTable_handler,
-                                     um7RealServerTable_oid,
-                                     um7RealServerTable_oid_len,
-                                     HANDLER_CAN_RWRITE), rs_table_set, NULL);
+        /*
+         * registering the table with the master agent
+         */
+        /*
+         * note: if you don't need a subhandler to deal with any aspects
+         * of the request, change um7RealServerTable_handler to "NULL"
+         */
+        netsnmp_register_table_data_set(netsnmp_create_handler_registration
+        ("um7RealServerTable",
+        um7RealServerTable_handler,
+        um7RealServerTable_oid,
+        um7RealServerTable_oid_len,
+        HANDLER_CAN_RWRITE), rs_table_set, NULL);
 }
 
 /** handles requests for the um7VirtualServiceTable table, if anything else needs to be done */
 int
 um7VirtualServiceTable_handler(netsnmp_mib_handler *handler,
-                               netsnmp_handler_registration *reginfo,
-                               netsnmp_agent_request_info *reqinfo,
-                               netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    /*
-     * perform anything here that you need to do.  The requests have
-     * already been processed by the master table_dataset handler, but
-     * this gives you chance to act on the request in some other way
-     * if need be. 
-     */
-    return SNMP_ERR_NOERROR;
+        /*
+         * perform anything here that you need to do.  The requests have
+         * already been processed by the master table_dataset handler, but
+         * this gives you chance to act on the request in some other way
+         * if need be.
+         */
+        return SNMP_ERR_NOERROR;
 }
 
 /** handles requests for the um7RealServerTable table, if anything else needs to be done */
 int
 um7RealServerTable_handler(netsnmp_mib_handler *handler,
-                           netsnmp_handler_registration *reginfo,
-                           netsnmp_agent_request_info *reqinfo,
-                           netsnmp_request_info *requests)
+netsnmp_handler_registration *reginfo,
+netsnmp_agent_request_info *reqinfo,
+netsnmp_request_info *requests)
 {
-    /*
-     * perform anything here that you need to do.  The requests have
-     * already been processed by the master table_dataset handler, but
-     * this gives you chance to act on the request in some other way
-     * if need be. 
-     */
-    return SNMP_ERR_NOERROR;
+        /*
+         * perform anything here that you need to do.  The requests have
+         * already been processed by the master table_dataset handler, but
+         * this gives you chance to act on the request in some other way
+         * if need be.
+         */
+        return SNMP_ERR_NOERROR;
 }
 
 int
 send_um7StateAlert_trap()
 {
-    netsnmp_variable_list *var_list = NULL;
-    oid             um7StateAlert_oid[] =
+        netsnmp_variable_list *var_list = NULL;
+        oid             um7StateAlert_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 0, 1 };
-/*    oid             um7StatReplication_oid[] =
-        { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 4, 2, 0 };*/
-    oid             um7StatSnmpAgent_oid[] =
+        /*    oid             um7StatReplication_oid[] =
+                { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 4, 2, 0 };*/
+        oid             um7StatSnmpAgent_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 4, 3, 0 };
 
-    /*
-     * Set the snmpTrapOid.0 value
-     */
-    snmp_varlist_add_variable(&var_list,
-                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
-                              ASN_OBJECT_ID,
-                              (u_char*) um7StateAlert_oid,
-                              sizeof(um7StateAlert_oid));
+        /*
+         * Set the snmpTrapOid.0 value
+         */
+        snmp_varlist_add_variable(&var_list,
+        snmptrap_oid, OID_LENGTH(snmptrap_oid),
+        ASN_OBJECT_ID,
+        (u_char *) um7StateAlert_oid,
+        sizeof(um7StateAlert_oid));
 
-    struct l7_status* stat = l7ag_store_mibdata::getInstance().getStatmibdata();
-/*    snmp_varlist_add_variable(&var_list,
-                              um7StatReplication_oid,
-                              OID_LENGTH(um7StatReplication_oid),
-                              ASN_INTEGER, (u_char*) &stat->replication,
-                              sizeof(REPLICATION_MODE_TAG));*/
-    snmp_varlist_add_variable(&var_list,
-                              um7StatSnmpAgent_oid,
-                              OID_LENGTH(um7StatSnmpAgent_oid),
-                              ASN_INTEGER, (u_char*) &stat->snmpAgent,
-                              sizeof(IPC_STATUS_TAG));
+        struct l7_status *stat = l7ag_store_mibdata::getInstance().getStatmibdata();
+        /*    snmp_varlist_add_variable(&var_list,
+                                      um7StatReplication_oid,
+                                      OID_LENGTH(um7StatReplication_oid),
+                                      ASN_INTEGER, (u_char*) &stat->replication,
+                                      sizeof(REPLICATION_MODE_TAG));*/
+        snmp_varlist_add_variable(&var_list,
+        um7StatSnmpAgent_oid,
+        OID_LENGTH(um7StatSnmpAgent_oid),
+        ASN_INTEGER, (u_char *) &stat->snmpAgent,
+        sizeof(IPC_STATUS_TAG));
 
-    /*
-     * Add any extra (optional) objects here
-     */
+        /*
+         * Add any extra (optional) objects here
+         */
 
-    /*
-     * Send the trap to the list of configured destinations
-     *  and clean up
-     */
-    send_v2trap(var_list);
-    snmp_free_varbind(var_list);
+        /*
+         * Send the trap to the list of configured destinations
+         *  and clean up
+         */
+        send_v2trap(var_list);
+        snmp_free_varbind(var_list);
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 send_um7VirtualServiceAlert_trap()
 {
-    netsnmp_variable_list *var_list = NULL;
-    oid             um7VirtualServiceAlert_oid[] =
+        netsnmp_variable_list *var_list = NULL;
+        oid             um7VirtualServiceAlert_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 0, 2 };
 //     oid             um7VirtualServiceTable_oid[] =
 //         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 1, 0 };
 //     oid             um7RealServerTable_oid[] =
 //         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 2, 0 };
 
-    /*
-     * Set the snmpTrapOid.0 value
-     */
-    snmp_varlist_add_variable(&var_list,
-                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
-                              ASN_OBJECT_ID,
-                              (u_char*) um7VirtualServiceAlert_oid,
-                              sizeof(um7VirtualServiceAlert_oid));
+        /*
+         * Set the snmpTrapOid.0 value
+         */
+        snmp_varlist_add_variable(&var_list,
+        snmptrap_oid, OID_LENGTH(snmptrap_oid),
+        ASN_OBJECT_ID,
+        (u_char *) um7VirtualServiceAlert_oid,
+        sizeof(um7VirtualServiceAlert_oid));
 
-    /*
-     * Add any objects from the trap definition
-     */
-/*
-    snmp_varlist_add_variable(&var_list,
-                              um7VirtualServiceTable_oid,
-                              OID_LENGTH(um7VirtualServiceTable_oid),,
-                              // Set an appropriate value for um7VirtualServiceTable 
-                              NULL, 0);
-    snmp_varlist_add_variable(&var_list,
-                              um7RealServerTable_oid,
-                              OID_LENGTH(um7RealServerTable_oid),,
-                              // Set an appropriate value for um7RealServerTable 
-                              NULL, 0);
-*/
+        /*
+         * Add any objects from the trap definition
+         */
+        /*
+            snmp_varlist_add_variable(&var_list,
+                                      um7VirtualServiceTable_oid,
+                                      OID_LENGTH(um7VirtualServiceTable_oid),,
+                                      // Set an appropriate value for um7VirtualServiceTable
+                                      NULL, 0);
+            snmp_varlist_add_variable(&var_list,
+                                      um7RealServerTable_oid,
+                                      OID_LENGTH(um7RealServerTable_oid),,
+                                      // Set an appropriate value for um7RealServerTable
+                                      NULL, 0);
+        */
 
-    /*
-     * Add any extra (optional) objects here
-     */
+        /*
+         * Add any extra (optional) objects here
+         */
 
-    /*
-     * Send the trap to the list of configured destinations
-     *  and clean up
-     */
-    send_v2trap(var_list);
-    snmp_free_varbind(var_list);
+        /*
+         * Send the trap to the list of configured destinations
+         *  and clean up
+         */
+        send_v2trap(var_list);
+        snmp_free_varbind(var_list);
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 send_um7ReplicationAlert_trap()
 {
-    netsnmp_variable_list *var_list = NULL;
-    oid             um7ReplicationAlert_oid[] =
+        netsnmp_variable_list *var_list = NULL;
+        oid             um7ReplicationAlert_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 0, 3 };
-    oid             um7StatMessage_oid[] =
+        oid             um7StatMessage_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 4, 1, 0 };
 
-    /*
-     * Set the snmpTrapOid.0 value
-     */
-    snmp_varlist_add_variable(&var_list,
-                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
-                              ASN_OBJECT_ID,
-                              (u_char*) um7ReplicationAlert_oid,
-                              sizeof(um7ReplicationAlert_oid));
+        /*
+         * Set the snmpTrapOid.0 value
+         */
+        snmp_varlist_add_variable(&var_list,
+        snmptrap_oid, OID_LENGTH(snmptrap_oid),
+        ASN_OBJECT_ID,
+        (u_char *) um7ReplicationAlert_oid,
+        sizeof(um7ReplicationAlert_oid));
 
-    struct l7_status* stat = l7ag_store_mibdata::getInstance().getStatmibdata();
-    snmp_varlist_add_variable(&var_list,
-                              um7StatMessage_oid,
-                              OID_LENGTH(um7StatMessage_oid),
-                              ASN_OCTET_STR,
-                              (u_char *) &stat->message,
-                              strnlen(stat->message, DISPLAYSTRING_LEN)  );
+        struct l7_status *stat = l7ag_store_mibdata::getInstance().getStatmibdata();
+        snmp_varlist_add_variable(&var_list,
+        um7StatMessage_oid,
+        OID_LENGTH(um7StatMessage_oid),
+        ASN_OCTET_STR,
+        (u_char *) &stat->message,
+        strnlen(stat->message, DISPLAYSTRING_LEN));
 
-    /*
-     * Add any extra (optional) objects here
-     */
+        /*
+         * Add any extra (optional) objects here
+         */
 
-    /*
-     * Send the trap to the list of configured destinations
-     *  and clean up
-     */
-    send_v2trap(var_list);
-    snmp_free_varbind(var_list);
+        /*
+         * Send the trap to the list of configured destinations
+         *  and clean up
+         */
+        send_v2trap(var_list);
+        snmp_free_varbind(var_list);
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 send_um7LogLevelAlert_trap()
 {
-    netsnmp_variable_list *var_list = NULL;
-    oid             um7LogLevelAlert_oid[] =
+        netsnmp_variable_list *var_list = NULL;
+        oid             um7LogLevelAlert_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 0, 4 };
 //     oid             um7LogLevel_oid[] =
 //         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3, /* insert index here */  };
 
-    /*
-     * Set the snmpTrapOid.0 value
-     */
-    snmp_varlist_add_variable(&var_list,
-                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
-                              ASN_OBJECT_ID,
-                              (u_char*) um7LogLevelAlert_oid,
-                              sizeof(um7LogLevelAlert_oid));
+        /*
+         * Set the snmpTrapOid.0 value
+         */
+        snmp_varlist_add_variable(&var_list,
+        snmptrap_oid, OID_LENGTH(snmptrap_oid),
+        ASN_OBJECT_ID,
+        (u_char *) um7LogLevelAlert_oid,
+        sizeof(um7LogLevelAlert_oid));
 
-    /*
-     * Add any objects from the trap definition
-     */
-/*
-    snmp_varlist_add_variable(&var_list,
-                              um7LogLevel_oid,
-                              OID_LENGTH(um7LogLevel_oid),,
-                              // Set an appropriate value for um7LogLevel 
-                              NULL, 0);
-*/
+        /*
+         * Add any objects from the trap definition
+         */
+        /*
+            snmp_varlist_add_variable(&var_list,
+                                      um7LogLevel_oid,
+                                      OID_LENGTH(um7LogLevel_oid),,
+                                      // Set an appropriate value for um7LogLevel
+                                      NULL, 0);
+        */
 
-    /*
-     * Add any extra (optional) objects here
-     */
+        /*
+         * Add any extra (optional) objects here
+         */
 
-    /*
-     * Send the trap to the list of configured destinations
-     *  and clean up
-     */
-    send_v2trap(var_list);
-    snmp_free_varbind(var_list);
+        /*
+         * Send the trap to the list of configured destinations
+         *  and clean up
+         */
+        send_v2trap(var_list);
+        snmp_free_varbind(var_list);
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
 send_um7QoSAlarmOn_trap(size_t index)
 {
-    netsnmp_variable_list *var_list = NULL;
-    oid             um7QoSAlarmOn_oid[] =
+        netsnmp_variable_list *var_list = NULL;
+        oid             um7QoSAlarmOn_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 0, 5 };
-    oid             um7VSQoSThresholdUp_oid[] =
+        oid             um7VSQoSThresholdUp_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 1, 1, 13, index };
-    oid             um7VSQoSThresholdDown_oid[] =
+        oid             um7VSQoSThresholdDown_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 1, 1, 14, index };
-    oid             um7VSThroughputUp_oid[] =
+        oid             um7VSThroughputUp_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 1, 1, 15, index };
-    oid             um7VSThroughputDown_oid[] =
+        oid             um7VSThroughputDown_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 1, 1, 16, index };
 
-    /*
-     * Set the snmpTrapOid.0 value
-     */
-    snmp_varlist_add_variable(&var_list,
-                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
-                              ASN_OBJECT_ID,
-                              (u_char*) um7QoSAlarmOn_oid,
-                              sizeof(um7QoSAlarmOn_oid));
+        /*
+         * Set the snmpTrapOid.0 value
+         */
+        snmp_varlist_add_variable(&var_list,
+        snmptrap_oid, OID_LENGTH(snmptrap_oid),
+        ASN_OBJECT_ID,
+        (u_char *) um7QoSAlarmOn_oid,
+        sizeof(um7QoSAlarmOn_oid));
 
-    vsdata* vs = l7ag_store_mibdata::getInstance().getVSmibdata(index);
-    if (vs) {
-        snmp_varlist_add_variable(&var_list,
-                                  um7VSQoSThresholdUp_oid,
-                                  OID_LENGTH(um7VSQoSThresholdUp_oid),
-                                  ASN_INTEGER,
-                                  (u_char*) &vs->QoSThresholdUp,
-                                  sizeof(unsigned long long));
-        snmp_varlist_add_variable(&var_list,
-                                  um7VSQoSThresholdDown_oid,
-                                  OID_LENGTH(um7VSQoSThresholdDown_oid),
-                                  ASN_INTEGER,
-                                  (u_char*) &vs->QoSThresholdDown,
-                                  sizeof(unsigned long long));
-        snmp_varlist_add_variable(&var_list,
-                                  um7VSThroughputUp_oid,
-                                  OID_LENGTH(um7VSThroughputUp_oid),
-                                  ASN_INTEGER,
-                                  (u_char*) &vs->throughputUp,
-                                  sizeof(unsigned long long));
-        snmp_varlist_add_variable(&var_list,
-                                  um7VSThroughputDown_oid,
-                                  OID_LENGTH(um7VSThroughputDown_oid),
-                                  ASN_INTEGER,
-                                  (u_char*) &vs->throughputDown,
-                                  sizeof(unsigned long long));
-    }
-    
-    /*
-     * Add any extra (optional) objects here
-     */
+        vsdata *vs = l7ag_store_mibdata::getInstance().getVSmibdata(index);
+        if (vs) {
+                snmp_varlist_add_variable(&var_list,
+                um7VSQoSThresholdUp_oid,
+                OID_LENGTH(um7VSQoSThresholdUp_oid),
+                ASN_INTEGER,
+                (u_char *) &vs->QoSThresholdUp,
+                sizeof(unsigned long long));
+                snmp_varlist_add_variable(&var_list,
+                um7VSQoSThresholdDown_oid,
+                OID_LENGTH(um7VSQoSThresholdDown_oid),
+                ASN_INTEGER,
+                (u_char *) &vs->QoSThresholdDown,
+                sizeof(unsigned long long));
+                snmp_varlist_add_variable(&var_list,
+                um7VSThroughputUp_oid,
+                OID_LENGTH(um7VSThroughputUp_oid),
+                ASN_INTEGER,
+                (u_char *) &vs->throughputUp,
+                sizeof(unsigned long long));
+                snmp_varlist_add_variable(&var_list,
+                um7VSThroughputDown_oid,
+                OID_LENGTH(um7VSThroughputDown_oid),
+                ASN_INTEGER,
+                (u_char *) &vs->throughputDown,
+                sizeof(unsigned long long));
+        }
 
-    /*
-     * Send the trap to the list of configured destinations
-     *  and clean up
-     */
-    send_v2trap(var_list);
-    snmp_free_varbind(var_list);
+        /*
+         * Add any extra (optional) objects here
+         */
 
-    return SNMP_ERR_NOERROR;
+        /*
+         * Send the trap to the list of configured destinations
+         *  and clean up
+         */
+        send_v2trap(var_list);
+        snmp_free_varbind(var_list);
+
+        return SNMP_ERR_NOERROR;
 }
 
 int
 send_um7QoSAlarmOff_trap(size_t index)
 {
-    netsnmp_variable_list *var_list = NULL;
-    oid             um7QoSAlarmOff_oid[] =
+        netsnmp_variable_list *var_list = NULL;
+        oid             um7QoSAlarmOff_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 0, 6 };
-    oid             um7VSQoSThresholdUp_oid[] =
+        oid             um7VSQoSThresholdUp_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 1, 1, 13, index };
-    oid             um7VSQoSThresholdDown_oid[] =
+        oid             um7VSQoSThresholdDown_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 1, 1, 14, index };
-    oid             um7VSThroughputUp_oid[] =
+        oid             um7VSThroughputUp_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 1, 1, 15, index };
-    oid             um7VSThroughputDown_oid[] =
+        oid             um7VSThroughputDown_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 1, 1, 16, index };
 
-    /*
-     * Set the snmpTrapOid.0 value
-     */
-    snmp_varlist_add_variable(&var_list,
-                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
-                              ASN_OBJECT_ID,
-                              (u_char*) um7QoSAlarmOff_oid,
-                              sizeof(um7QoSAlarmOff_oid));
-
-    vsdata* vs = l7ag_store_mibdata::getInstance().getVSmibdata(index);
-    if (vs) {
+        /*
+         * Set the snmpTrapOid.0 value
+         */
         snmp_varlist_add_variable(&var_list,
-                                  um7VSQoSThresholdUp_oid,
-                                  OID_LENGTH(um7VSQoSThresholdUp_oid),
-                                  ASN_INTEGER,
-                                  (u_char*) &vs->QoSThresholdUp,
-                                  sizeof(unsigned long long));
-        snmp_varlist_add_variable(&var_list,
-                                  um7VSQoSThresholdDown_oid,
-                                  OID_LENGTH(um7VSQoSThresholdDown_oid),
-                                  ASN_INTEGER,
-                                  (u_char*) &vs->QoSThresholdDown,
-                                  sizeof(unsigned long long));
-        snmp_varlist_add_variable(&var_list,
-                                  um7VSThroughputUp_oid,
-                                  OID_LENGTH(um7VSThroughputUp_oid),
-                                  ASN_INTEGER,
-                                  (u_char*) &vs->throughputUp,
-                                  sizeof(unsigned long long));
-        snmp_varlist_add_variable(&var_list,
-                                  um7VSThroughputDown_oid,
-                                  OID_LENGTH(um7VSThroughputDown_oid),
-                                  ASN_INTEGER,
-                                  (u_char*) &vs->throughputDown,
-                                  sizeof(unsigned long long));
-    }
+        snmptrap_oid, OID_LENGTH(snmptrap_oid),
+        ASN_OBJECT_ID,
+        (u_char *) um7QoSAlarmOff_oid,
+        sizeof(um7QoSAlarmOff_oid));
 
-    /*
-     * Add any extra (optional) objects here
-     */
+        vsdata *vs = l7ag_store_mibdata::getInstance().getVSmibdata(index);
+        if (vs) {
+                snmp_varlist_add_variable(&var_list,
+                um7VSQoSThresholdUp_oid,
+                OID_LENGTH(um7VSQoSThresholdUp_oid),
+                ASN_INTEGER,
+                (u_char *) &vs->QoSThresholdUp,
+                sizeof(unsigned long long));
+                snmp_varlist_add_variable(&var_list,
+                um7VSQoSThresholdDown_oid,
+                OID_LENGTH(um7VSQoSThresholdDown_oid),
+                ASN_INTEGER,
+                (u_char *) &vs->QoSThresholdDown,
+                sizeof(unsigned long long));
+                snmp_varlist_add_variable(&var_list,
+                um7VSThroughputUp_oid,
+                OID_LENGTH(um7VSThroughputUp_oid),
+                ASN_INTEGER,
+                (u_char *) &vs->throughputUp,
+                sizeof(unsigned long long));
+                snmp_varlist_add_variable(&var_list,
+                um7VSThroughputDown_oid,
+                OID_LENGTH(um7VSThroughputDown_oid),
+                ASN_INTEGER,
+                (u_char *) &vs->throughputDown,
+                sizeof(unsigned long long));
+        }
 
-    /*
-     * Send the trap to the list of configured destinations
-     *  and clean up
-     */
-    send_v2trap(var_list);
-    snmp_free_varbind(var_list);
+        /*
+         * Add any extra (optional) objects here
+         */
 
-    return SNMP_ERR_NOERROR;
+        /*
+         * Send the trap to the list of configured destinations
+         *  and clean up
+         */
+        send_v2trap(var_list);
+        snmp_free_varbind(var_list);
+
+        return SNMP_ERR_NOERROR;
 }
 
 int
 send_um7MessageAlert_trap()
 {
-    netsnmp_variable_list *var_list = NULL;
-    oid             um7MessageAlert_oid[] =
+        netsnmp_variable_list *var_list = NULL;
+        oid             um7MessageAlert_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 0, 7 };
-    oid             um7StatMessage_oid[] =
+        oid             um7StatMessage_oid[] =
         { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 4, 1, 0 };
 
-    /*
-     * Set the snmpTrapOid.0 value
-     */
-    snmp_varlist_add_variable(&var_list,
-                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
-                              ASN_OBJECT_ID,
-                              (u_char*) um7MessageAlert_oid,
-                              sizeof(um7MessageAlert_oid));
+        /*
+         * Set the snmpTrapOid.0 value
+         */
+        snmp_varlist_add_variable(&var_list,
+        snmptrap_oid, OID_LENGTH(snmptrap_oid),
+        ASN_OBJECT_ID,
+        (u_char *) um7MessageAlert_oid,
+        sizeof(um7MessageAlert_oid));
 
-    struct l7_status* stat = l7ag_store_mibdata::getInstance().getStatmibdata();
-    snmp_varlist_add_variable(&var_list,
-                              um7StatMessage_oid,
-                              OID_LENGTH(um7StatMessage_oid),
-                              ASN_OCTET_STR,
-                              (u_char *) &stat->message,
-                              strnlen(stat->message, DISPLAYSTRING_LEN)  );
+        struct l7_status *stat = l7ag_store_mibdata::getInstance().getStatmibdata();
+        snmp_varlist_add_variable(&var_list,
+        um7StatMessage_oid,
+        OID_LENGTH(um7StatMessage_oid),
+        ASN_OCTET_STR,
+        (u_char *) &stat->message,
+        strnlen(stat->message, DISPLAYSTRING_LEN));
 
-    /*
-     * Add any extra (optional) objects here
-     */
+        /*
+         * Add any extra (optional) objects here
+         */
 
-    /*
-     * Send the trap to the list of configured destinations
-     *  and clean up
-     */
-    send_v2trap(var_list);
-    snmp_free_varbind(var_list);
+        /*
+         * Send the trap to the list of configured destinations
+         *  and clean up
+         */
+        send_v2trap(var_list);
+        snmp_free_varbind(var_list);
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 // get all mib data from l7vsd
 // called every REPEAT_SEC sec.
 void
-getL7vsdData(unsigned int clientreg, void *clientarg) {
-    if (!clientarg) return;
-    MessengerClient* message = (MessengerClient*) clientarg;
+getL7vsdData(unsigned int clientreg, void *clientarg)
+{
+        if (!clientarg) return;
+        MessengerClient *message = (MessengerClient *) clientarg;
 
-    long long buf_size = sizeof(struct l7ag_message_header)
-                                + sizeof(struct l7ag_payload_header)
-                                + sizeof(struct l7ag_mibrequest_message);
-    char* sendbuf = (char*) calloc(1, buf_size);
+        long long buf_size = sizeof(struct l7ag_message_header)
+        + sizeof(struct l7ag_payload_header)
+        + sizeof(struct l7ag_mibrequest_message);
+        char *sendbuf = (char *) calloc(1, buf_size);
 
-    struct l7ag_message_header* msg_head = (struct l7ag_message_header*) sendbuf;
-    msg_head->magic[0]      = 0x4d; // M
-    msg_head->magic[1]      = 0x47; // G
-    msg_head->version       = 1;
-    msg_head->size          = buf_size;
-    msg_head->payload_count = 1;
+        struct l7ag_message_header *msg_head = (struct l7ag_message_header *) sendbuf;
+        msg_head->magic[0]      = 0x4d; // M
+        msg_head->magic[1]      = 0x47; // G
+        msg_head->version       = 1;
+        msg_head->size          = buf_size;
+        msg_head->payload_count = 1;
 // TODO set time    msg_head->time          = 1;
 
-    struct l7ag_payload_header* payload  = (struct l7ag_payload_header*) (msg_head + 1);
-    payload->magic[0]         = 0x50; // P
-    payload->magic[1]         = 0x59; // Y
-    payload->message_id       = MESSAGE_ID_MIBCOLLECTREQUEST;
-    payload->payload_datasize = sizeof(struct l7ag_payload_header)
-                              + sizeof(struct l7ag_mibrequest_message);
+        struct l7ag_payload_header *payload  = (struct l7ag_payload_header *)(msg_head + 1);
+        payload->magic[0]         = 0x50; // P
+        payload->magic[1]         = 0x59; // Y
+        payload->message_id       = MESSAGE_ID_MIBCOLLECTREQUEST;
+        payload->payload_datasize = sizeof(struct l7ag_payload_header)
+        + sizeof(struct l7ag_mibrequest_message);
 
-    struct l7ag_mibrequest_message* request = (struct l7ag_mibrequest_message*) (payload + 1);
-    memset(request, 0, sizeof(struct l7ag_mibrequest_message));
-    request->magic[0] = 0x52; // R
-    request->magic[1] = 0x51; // Q
-    
-    if (message->connect()) {
-        int ret = message->send(buf_size, sendbuf);
-        if (ret != buf_size) {
-            // TODO error
-            message->close();
+        struct l7ag_mibrequest_message *request = (struct l7ag_mibrequest_message *)(payload + 1);
+        memset(request, 0, sizeof(struct l7ag_mibrequest_message));
+        request->magic[0] = 0x52; // R
+        request->magic[1] = 0x51; // Q
+
+        if (message->connect()) {
+                int ret = message->send(buf_size, sendbuf);
+                if (ret != buf_size) {
+                        // TODO error
+                        message->close();
+                }
         }
-    }
 }
 

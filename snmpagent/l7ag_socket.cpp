@@ -6,8 +6,8 @@
  */
 void    l7ag_socket::connect()
 {
-    //socket
-    //connect
+        //socket
+        //connect
 }
 
 /*!
@@ -15,7 +15,7 @@ void    l7ag_socket::connect()
  */
 void    l7ag_socket::disconnect()
 {
-    //close
+        //close
 }
 
 /*!
@@ -23,7 +23,7 @@ void    l7ag_socket::disconnect()
  */
 void    l7ag_socket::send()
 {
-    //send
+        //send
 }
 
 /*!
@@ -31,7 +31,7 @@ void    l7ag_socket::send()
  */
 void    l7ag_socket::recv()
 {
-    //recv
+        //recv
 }
 
 

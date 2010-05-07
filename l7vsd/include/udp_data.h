@@ -27,11 +27,12 @@
 
 #include "data_buff_base.h"
 
-namespace l7vs{
+namespace l7vs
+{
 
 //!    @class    udp_data
 //! @brief    this class is udp session object use data for processing.
-    typedef data_buff_base<boost::asio::ip::udp> udp_data;
+typedef data_buff_base<boost::asio::ip::udp> udp_data;
 
 }// namespace l7vs
 

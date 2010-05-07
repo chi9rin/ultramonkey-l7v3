@@ -63,111 +63,113 @@
 
 
 
-namespace l7vs{
+namespace l7vs
+{
 
 //! @class logger_logrotate_utility
 //! @brief Logger logrotate utility class.
 //! @brief this class logrotation common logic implementation class.
-class logger_logrotate_utility {
+class logger_logrotate_utility
+{
 
-    
-    typedef std::map< std::string , std::string > 
-                            accesslog_rotate_map_type;
 
-    typedef std::map< std::string , std::string >::iterator 
-                            accesslog_rotate_map_type_iterator;
+        typedef std::map< std::string , std::string >
+        accesslog_rotate_map_type;
+
+        typedef std::map< std::string , std::string >::iterator
+        accesslog_rotate_map_type_iterator;
 
 public:
 
-    /*!
-     * rotate type check.
-     *
-     * @param   rotaton string("size" or "date" or "datesize")
-     * @return  LOG_ROTATION_TAG val
-     */
-    static LOG_ROTATION_TAG check_rotate_type(
-                                const std::string &rotation_type);
+        /*!
+         * rotate type check.
+         *
+         * @param   rotaton string("size" or "date" or "datesize")
+         * @return  LOG_ROTATION_TAG val
+         */
+        static LOG_ROTATION_TAG check_rotate_type(
+                const std::string &rotation_type);
 
-    /*!
-     * log file max backup check.
-     *
-     * @param   file backup val string
-     * @return  file backup val
-     */
-    static unsigned int check_max_backup_index(
-                                const std::string &max_backup_index);
+        /*!
+         * log file max backup check.
+         *
+         * @param   file backup val string
+         * @return  file backup val
+         */
+        static unsigned int check_max_backup_index(
+                const std::string &max_backup_index);
 
-    /*!
-     * log file max file size check.
-     *
-     * @param   file max size string
-     * @return  file max size val
-     */
-    static unsigned long long check_max_file_size(
-                                const std::string &max_file_size);
+        /*!
+         * log file max file size check.
+         *
+         * @param   file max size string
+         * @return  file max size val
+         */
+        static unsigned long long check_max_file_size(
+                const std::string &max_file_size);
 
-    /*!
-     * log file rotate timing check.
-     *
-     * @param   rotate timing string
-     * @return  LOG_ROTATION_TIMING_TAG val
-     */
-    static LOG_ROTATION_TIMING_TAG check_rotate_timing(
-                                const std::string &rotation_timing);
+        /*!
+         * log file rotate timing check.
+         *
+         * @param   rotate timing string
+         * @return  LOG_ROTATION_TIMING_TAG val
+         */
+        static LOG_ROTATION_TIMING_TAG check_rotate_timing(
+                const std::string &rotation_timing);
 
-    /*!
-     * rotate timing value check.
-     *
-     * @param   rotate timing val string
-     * @param   LOG_ROTATION_TIMING_TAG val
-     * @return rotate timing val
-     */
-    static std::string check_rotate_timing_value(
-                                const std::string rotation_timing_value_key,
-                                const LOG_ROTATION_TIMING_TAG rotation_timing);
+        /*!
+         * rotate timing value check.
+         *
+         * @param   rotate timing val string
+         * @param   LOG_ROTATION_TIMING_TAG val
+         * @return rotate timing val
+         */
+        static std::string check_rotate_timing_value(
+                const std::string rotation_timing_value_key,
+                const LOG_ROTATION_TIMING_TAG rotation_timing);
 
-    /*!
-     * Logger set appender.
-     *
-     * @param   appender property
-     * @param   logger layout
-     * @param   log category
-     * @return  void
-     */
-    static void set_appender(
-                                const appender_property& log_property,
-                                const char *logger_layout,
-                                const std::string &log_category);
+        /*!
+         * Logger set appender.
+         *
+         * @param   appender property
+         * @param   logger layout
+         * @param   log category
+         * @return  void
+         */
+        static void set_appender(
+                const appender_property &log_property,
+                const char *logger_layout,
+                const std::string &log_category);
 
-    /*!
-     * log rotate parameter check.
-     *
-     * @param   check object.
-     * @param   appender property
-     * @return  false faild
-     */
-    static bool acccess_log_LogrotateParamCheck(
-                                accesslog_rotate_map_type& rotatedata,
-                                appender_property &access_log_property);
+        /*!
+         * log rotate parameter check.
+         *
+         * @param   check object.
+         * @param   appender property
+         * @return  false faild
+         */
+        static bool acccess_log_LogrotateParamCheck(
+                accesslog_rotate_map_type &rotatedata,
+                appender_property &access_log_property);
 
-    /*!
-     * error log out put.
-     *
-     * @param   msg no.
-     * @param   err msg
-     * @param   file name
-     * @param   line no
-     * @return  void
-     */
-    static void loglotation_utility_logic_error(
-                                const unsigned int logno, 
-                                const std::string& str, 
-                                const char* file , 
-                                const unsigned int line);
+        /*!
+         * error log out put.
+         *
+         * @param   msg no.
+         * @param   err msg
+         * @param   file name
+         * @param   line no
+         * @return  void
+         */
+        static void loglotation_utility_logic_error(
+                const unsigned int logno,
+                const std::string &str,
+                const char *file ,
+                const unsigned int line);
 
-    
-};
 
 };
-    
+
+};
+
 #endif  // LOGGER_ROGROTATE_UTILITY

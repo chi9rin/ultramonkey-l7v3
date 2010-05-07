@@ -31,95 +31,97 @@
 #include <boost/format.hpp>
 #include "endpoint.h"
 
-namespace l7vs{
+namespace l7vs
+{
 
-class    realserver_element{
+class    realserver_element
+{
 protected:
-    int                                nactive;
-    int                                ninact;
+        int                                nactive;
+        int                                ninact;
 public:
-    boost::asio::ip::tcp::endpoint    tcp_endpoint;
-    boost::asio::ip::udp::endpoint    udp_endpoint;
-    int                                weight;
-    realserver_element() : nactive(0), ninact(0), weight(-1){}
-    realserver_element( const realserver_element& in ) :    nactive( in.nactive ), ninact( in.ninact ),
-                                                            tcp_endpoint( in.tcp_endpoint ) ,
-                                                            udp_endpoint( in.udp_endpoint ) ,
-                                                            weight( in.weight ){}
-    realserver_element& operator=( const realserver_element& elem ){
-        nactive = elem.nactive;
-        ninact = elem.ninact;
-        tcp_endpoint = elem.tcp_endpoint;
-        udp_endpoint = elem.udp_endpoint;
-        weight = elem.weight;
-        return *this;
-    }
-    friend    bool    operator==( const realserver_element& rselem1, const realserver_element& rselem2 ){
-        return rselem1.tcp_endpoint == rselem2.tcp_endpoint &&
-                rselem1.udp_endpoint == rselem2.udp_endpoint &&
-                rselem1.weight == rselem2.weight;
-    }
-    
-    friend bool    operator!=( const realserver_element& rselem1, const realserver_element& rselem2 ){
-        return rselem1.tcp_endpoint != rselem2.tcp_endpoint ||
-                rselem1.udp_endpoint != rselem2.udp_endpoint ||
-                rselem1.weight != rselem2.weight;
-    }
-    
-    friend bool    operator<( const realserver_element& rselem1, const realserver_element& rselem2 ){
-        if( rselem1.tcp_endpoint < rselem2.tcp_endpoint ) return true;
-        if( rselem1.tcp_endpoint != rselem2.tcp_endpoint ) return false;
-        return rselem1.weight < rselem2.weight;
-    }
+        boost::asio::ip::tcp::endpoint    tcp_endpoint;
+        boost::asio::ip::udp::endpoint    udp_endpoint;
+        int                                weight;
+        realserver_element() : nactive(0), ninact(0), weight(-1) {}
+        realserver_element(const realserver_element &in) :    nactive(in.nactive), ninact(in.ninact),
+                tcp_endpoint(in.tcp_endpoint) ,
+                udp_endpoint(in.udp_endpoint) ,
+                weight(in.weight) {}
+        realserver_element &operator=(const realserver_element &elem) {
+                nactive = elem.nactive;
+                ninact = elem.ninact;
+                tcp_endpoint = elem.tcp_endpoint;
+                udp_endpoint = elem.udp_endpoint;
+                weight = elem.weight;
+                return *this;
+        }
+        friend    bool    operator==(const realserver_element &rselem1, const realserver_element &rselem2) {
+                return rselem1.tcp_endpoint == rselem2.tcp_endpoint &&
+                       rselem1.udp_endpoint == rselem2.udp_endpoint &&
+                       rselem1.weight == rselem2.weight;
+        }
 
-    int        get_active(){
-        return nactive;
-    }
+        friend bool    operator!=(const realserver_element &rselem1, const realserver_element &rselem2) {
+                return rselem1.tcp_endpoint != rselem2.tcp_endpoint ||
+                       rselem1.udp_endpoint != rselem2.udp_endpoint ||
+                       rselem1.weight != rselem2.weight;
+        }
 
-    int        get_inact(){
-        return ninact;
-    }
+        friend bool    operator<(const realserver_element &rselem1, const realserver_element &rselem2) {
+                if (rselem1.tcp_endpoint < rselem2.tcp_endpoint) return true;
+                if (rselem1.tcp_endpoint != rselem2.tcp_endpoint) return false;
+                return rselem1.weight < rselem2.weight;
+        }
 
-    void    set_active( const int in_active ){ 
-        nactive = in_active ;
-    }
+        int        get_active() {
+                return nactive;
+        }
 
-    void    set_inact( const int in_inact ){
-        ninact = in_inact ;
-    }
+        int        get_inact() {
+                return ninact;
+        }
 
-    template <typename Elem, typename Traits>
-    friend std::basic_ostream<Elem, Traits>& operator<<(
-        std::basic_ostream<Elem, Traits>& os,
-        const realserver_element& elem ){
+        void    set_active(const int in_active) {
+                nactive = in_active ;
+        }
 
-        os << "realserver_element={";
-        os << boost::format(    "nactive=%d: "
-                                "ninact=%d: "
-                                "tcp_endpoint=%s: "
-                                "udp_endpoint=%s: "
-                                "weight=%d}" )
-                                % elem.nactive
-                                % elem.ninact
-                                % elem.tcp_endpoint
-                                % elem.udp_endpoint
-                                % elem.weight;
-        return os;
-    }
+        void    set_inact(const int in_inact) {
+                ninact = in_inact ;
+        }
+
+        template <typename Elem, typename Traits>
+        friend std::basic_ostream<Elem, Traits>& operator<<(
+                std::basic_ostream<Elem, Traits>& os,
+                const realserver_element &elem) {
+
+                os << "realserver_element={";
+                os << boost::format("nactive=%d: "
+                                    "ninact=%d: "
+                                    "tcp_endpoint=%s: "
+                                    "udp_endpoint=%s: "
+                                    "weight=%d}")
+                   % elem.nactive
+                   % elem.ninact
+                   % elem.tcp_endpoint
+                   % elem.udp_endpoint
+                   % elem.weight;
+                return os;
+        }
 
 private:
-    friend class    boost::serialization::access;        //! friend boost serializable class
-    //! serializable
-    //! @brief using boost serialiable. class serializable function.
-    //! @param[in]    archive
-    //! @param[in]    version
-    template <class Archive > void serialize( Archive& ar, const unsigned int version ){
-        ar & nactive;
-        ar & ninact;
-        ar & tcp_endpoint;
-        ar & udp_endpoint;
-        ar & weight;
-    }
+        friend class    boost::serialization::access;        //! friend boost serializable class
+        //! serializable
+        //! @brief using boost serialiable. class serializable function.
+        //! @param[in]    archive
+        //! @param[in]    version
+        template <class Archive > void serialize(Archive &ar, const unsigned int version) {
+                ar &nactive;
+                ar &ninact;
+                ar &tcp_endpoint;
+                ar &udp_endpoint;
+                ar &weight;
+        }
 };
 
 }    //namespace l7vsd

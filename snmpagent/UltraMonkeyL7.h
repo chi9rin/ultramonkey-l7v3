@@ -6,7 +6,7 @@
 #define ULTRAMONKEYL7_H
 
 /*
- * function declarations 
+ * function declarations
  */
 int             send_l7vsError_trap(void);
 

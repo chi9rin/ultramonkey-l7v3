@@ -6,12 +6,12 @@
 class    proc_mibcollectmessage : public    proc_message
 {
 private:
-    
+
 public:
-    proc_mibcollectmessage();
-    ~proc_mibcollectmessage();
-    
-    void    do_process();
+        proc_mibcollectmessage();
+        ~proc_mibcollectmessage();
+
+        void    do_process();
 };
 
 #endif //__PROC_MIBCOLLECTMESSAGE_H__

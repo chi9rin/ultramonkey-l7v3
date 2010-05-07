@@ -36,8 +36,7 @@
 namespace l7vs
 {
 
-struct session_thread_data_sslid
-{
+struct session_thread_data_sslid {
         int thread_division;
         boost::thread::id pair_thread_id;
         int end_flag;
@@ -54,7 +53,7 @@ struct session_thread_data_sslid
 
 class protocol_module_sslid : public ssl_protocol_module_base
 {
-    public:
+public:
         protocol_module_sslid();
 
         virtual ~protocol_module_sslid();
@@ -63,156 +62,158 @@ class protocol_module_sslid : public ssl_protocol_module_base
 
         bool is_udp();
 
-        void initialize( rs_list_itr_func_type    inlist_begin,
-                         rs_list_itr_func_type    inlist_end,
-                         rs_list_itr_next_func_type inlist_next,
-                         boost::function< void( void ) >    inlist_lock,
-                         boost::function< void( void ) >    inlist_unlock );
+        void initialize(rs_list_itr_func_type    inlist_begin,
+                        rs_list_itr_func_type    inlist_end,
+                        rs_list_itr_next_func_type inlist_next,
+                        boost::function< void(void) >    inlist_lock,
+                        boost::function< void(void) >    inlist_unlock);
 
         void finalize();
 
         bool is_use_sorry();
 
-        check_message_result check_parameter( const std::vector<std::string>& args );
+        check_message_result check_parameter(const std::vector<std::string>& args);
 
-        check_message_result set_parameter( const std::vector<std::string>& args );
+        check_message_result set_parameter(const std::vector<std::string>& args);
 
-        check_message_result add_parameter( const std::vector<std::string>& args );
+        check_message_result add_parameter(const std::vector<std::string>& args);
 
-    void get_option_info( std::string& option );
+        void get_option_info(std::string &option);
 
         void handle_rslist_update();
 
-        void register_schedule( tcp_schedule_func_type inschedule );
+        void register_schedule(tcp_schedule_func_type inschedule);
 
-        void register_schedule( udp_schedule_func_type inschedule );
+        void register_schedule(udp_schedule_func_type inschedule);
 
         EVENT_TAG handle_session_initialize(
-                                const boost::thread::id up_thread_id,
-                                const boost::thread::id down_thread_id,
-                                const boost::asio::ip::tcp::endpoint& client_endpoint_tcp,
-                                const boost::asio::ip::udp::endpoint& client_endpoint_udp );
+                const boost::thread::id up_thread_id,
+                const boost::thread::id down_thread_id,
+                const boost::asio::ip::tcp::endpoint &client_endpoint_tcp,
+                const boost::asio::ip::udp::endpoint &client_endpoint_udp);
 
         EVENT_TAG handle_session_finalize(
-                                const boost::thread::id up_thread_id,
-                                const boost::thread::id down_thread_id );
+                const boost::thread::id up_thread_id,
+                const boost::thread::id down_thread_id);
 
-        EVENT_TAG handle_accept( const boost::thread::id thread_id );
+        EVENT_TAG handle_accept(const boost::thread::id thread_id);
 
         EVENT_TAG handle_client_recv(
-                                const boost::thread::id thread_id,
-                                const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer,
-                                const size_t recvlen );
+                const boost::thread::id thread_id,
+                const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer,
+                const size_t recvlen);
 
         EVENT_TAG handle_realserver_select(
-                                const boost::thread::id thread_id,
-                                boost::asio::ip::tcp::endpoint& rs_endpoint );
+                const boost::thread::id thread_id,
+                boost::asio::ip::tcp::endpoint &rs_endpoint);
 
         EVENT_TAG handle_realserver_select(
-                                const boost::thread::id thread_id,
-                                boost::asio::ip::udp::endpoint& rs_endpoint,
-                                boost::array<char, MAX_BUFFER_SIZE>& sendbuffer,
-                                size_t& datalen );
+                const boost::thread::id thread_id,
+                boost::asio::ip::udp::endpoint &rs_endpoint,
+                boost::array<char, MAX_BUFFER_SIZE>& sendbuffer,
+                size_t &datalen);
 
         EVENT_TAG handle_realserver_connect(
-                                const boost::thread::id thread_id,
-                                boost::array<char, MAX_BUFFER_SIZE>& sendbuffer,
-                                size_t& datalen );
+                const boost::thread::id thread_id,
+                boost::array<char, MAX_BUFFER_SIZE>& sendbuffer,
+                size_t &datalen);
 
         EVENT_TAG handle_realserver_connection_fail(
-                                const boost::thread::id thread_id,
-                                const boost::asio::ip::tcp::endpoint& rs_endpoint );
+                const boost::thread::id thread_id,
+                const boost::asio::ip::tcp::endpoint &rs_endpoint);
 
-        EVENT_TAG handle_realserver_send( const boost::thread::id thread_id );
+        EVENT_TAG handle_realserver_send(const boost::thread::id thread_id);
 
         EVENT_TAG handle_sorryserver_select(
-                                const boost::thread::id thread_id,
-                                boost::asio::ip::tcp::endpoint& sorry_endpoint );
+                const boost::thread::id thread_id,
+                boost::asio::ip::tcp::endpoint &sorry_endpoint);
 
         EVENT_TAG handle_sorryserver_connect(
-                                const boost::thread::id thread_id,
-                                boost::array<char, MAX_BUFFER_SIZE>& sendbuffer,
-                                size_t& datalen );
+                const boost::thread::id thread_id,
+                boost::array<char, MAX_BUFFER_SIZE>& sendbuffer,
+                size_t &datalen);
 
         EVENT_TAG handle_sorryserver_connection_fail(
-                                const boost::thread::id thread_id,
-                                const boost::asio::ip::tcp::endpoint& sorry_endpoint );
+                const boost::thread::id thread_id,
+                const boost::asio::ip::tcp::endpoint &sorry_endpoint);
 
-        EVENT_TAG handle_sorryserver_send( const boost::thread::id thread_id );
-
-        EVENT_TAG handle_realserver_recv(
-                                const boost::thread::id thread_id,
-                                const boost::asio::ip::tcp::endpoint& rs_endpoint,
-                                const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer,
-                                const size_t recvlen );
+        EVENT_TAG handle_sorryserver_send(const boost::thread::id thread_id);
 
         EVENT_TAG handle_realserver_recv(
-                                const boost::thread::id thread_id,
-                                const boost::asio::ip::udp::endpoint& rs_endpoint,
-                                const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer,
-                                const size_t recvlen );
+                const boost::thread::id thread_id,
+                const boost::asio::ip::tcp::endpoint &rs_endpoint,
+                const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer,
+                const size_t recvlen);
+
+        EVENT_TAG handle_realserver_recv(
+                const boost::thread::id thread_id,
+                const boost::asio::ip::udp::endpoint &rs_endpoint,
+                const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer,
+                const size_t recvlen);
 
         EVENT_TAG handle_sorryserver_recv(
-                                const boost::thread::id thread_id,
-                                const boost::asio::ip::tcp::endpoint& sorry_endpoint,
-                                const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer,
-                                const size_t recvlen );
+                const boost::thread::id thread_id,
+                const boost::asio::ip::tcp::endpoint &sorry_endpoint,
+                const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer,
+                const size_t recvlen);
 
-        EVENT_TAG handle_response_send_inform( const boost::thread::id thread_id );
+        EVENT_TAG handle_response_send_inform(const boost::thread::id thread_id);
 
         EVENT_TAG handle_client_connection_check(
-                                const boost::thread::id thread_id,
-                                boost::array<char, MAX_BUFFER_SIZE>& sendbuffer,
-                                size_t& datalen );
+                const boost::thread::id thread_id,
+                boost::array<char, MAX_BUFFER_SIZE>& sendbuffer,
+                size_t &datalen);
 
         EVENT_TAG handle_client_select(
-                                const boost::thread::id thread_id,
-                                boost::asio::ip::udp::endpoint& cl_endpoint,
-                                boost::array<char, MAX_BUFFER_SIZE>& sendbuffer,
-                                size_t& datalen );
+                const boost::thread::id thread_id,
+                boost::asio::ip::udp::endpoint &cl_endpoint,
+                boost::array<char, MAX_BUFFER_SIZE>& sendbuffer,
+                size_t &datalen);
 
-        EVENT_TAG handle_client_send( const boost::thread::id thread_id );
+        EVENT_TAG handle_client_send(const boost::thread::id thread_id);
 
-        EVENT_TAG handle_client_disconnect( const boost::thread::id thread_id );
+        EVENT_TAG handle_client_disconnect(const boost::thread::id thread_id);
 
-        EVENT_TAG handle_sorry_enable( const boost::thread::id thread_id );
+        EVENT_TAG handle_sorry_enable(const boost::thread::id thread_id);
 
-        EVENT_TAG handle_sorry_disable( const boost::thread::id thread_id );
+        EVENT_TAG handle_sorry_disable(const boost::thread::id thread_id);
 
         EVENT_TAG handle_realserver_disconnect(
-                                const boost::thread::id thread_id,
-                                const boost::asio::ip::tcp::endpoint& rs_endpoint );
+                const boost::thread::id thread_id,
+                const boost::asio::ip::tcp::endpoint &rs_endpoint);
 
         EVENT_TAG handle_sorryserver_disconnect(
-                                const boost::thread::id thread_id,
-                                const boost::asio::ip::tcp::endpoint& sorry_endpoint );
+                const boost::thread::id thread_id,
+                const boost::asio::ip::tcp::endpoint &sorry_endpoint);
 
         EVENT_TAG handle_realserver_close(
-                                const boost::thread::id thread_id,
-                                const boost::asio::ip::udp::endpoint& rs_endpoint );
+                const boost::thread::id thread_id,
+                const boost::asio::ip::udp::endpoint &rs_endpoint);
 
         void replication_interrupt();
 
-        bool realserver_selected( const boost::asio::ip::tcp::endpoint& rs_endpoint );
+        bool realserver_selected(const boost::asio::ip::tcp::endpoint &rs_endpoint);
 
-    protected:
+protected:
         int put_data_to_sendbuffer(
-                                const boost::thread::id& thread_id,
-                                boost::array<char, MAX_BUFFER_SIZE>& sendbuffer,
-                                size_t& datalen);
-        class rs_list_scoped_lock {
-            protected: 
-                boost::function< void( void ) >    rs_list_unlock;
-            public:
-                rs_list_scoped_lock(boost::function< void( void ) >    inlist_lock,
-                                    boost::function< void( void ) >    inlist_unlock) 
-                {
-                    inlist_lock();
-                    rs_list_unlock = inlist_unlock; 
+                const boost::thread::id &thread_id,
+                boost::array<char, MAX_BUFFER_SIZE>& sendbuffer,
+                size_t &datalen);
+        class rs_list_scoped_lock
+        {
+        protected:
+                boost::function< void(void) >    rs_list_unlock;
+        public:
+                rs_list_scoped_lock(boost::function< void(void) >    inlist_lock,
+                                    boost::function< void(void) >    inlist_unlock) {
+                        inlist_lock();
+                        rs_list_unlock = inlist_unlock;
                 }
-                ~rs_list_scoped_lock() { rs_list_unlock(); }
+                ~rs_list_scoped_lock() {
+                        rs_list_unlock();
+                }
         };
-    protected:
+protected:
         int timeout;
         int maxlist;
         int reschedule;
@@ -221,9 +222,9 @@ class protocol_module_sslid : public ssl_protocol_module_base
         session_thread_data_map_type session_thread_data_map;
         boost::mutex session_thread_data_map_mutex;
         int realserver_connect_failed_max_count;
-        sslid_replication_data_processor* replication_data_processor;
-        sslid_session_data_processor* session_data_processor;
-    public:
+        sslid_replication_data_processor *replication_data_processor;
+        sslid_session_data_processor *session_data_processor;
+public:
         static const std::string MODULE_NAME;
         static const int REALSERVER_CONNECT_FAILED_MAX_COUNT;
         static const int THREAD_DIVISION_UP_STREAM;      // up thread

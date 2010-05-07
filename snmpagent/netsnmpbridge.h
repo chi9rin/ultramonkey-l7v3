@@ -12,30 +12,30 @@
 #include "MessengerClient.h"
 
 /*
- * function declarations 
+ * function declarations
  */
-void init_UltraMonkeyL7( MessengerClient* );
+void init_UltraMonkeyL7(MessengerClient *);
 Netsnmp_Node_Handler    handle_VSCount;
 Netsnmp_Node_Handler    handle_RSCount;
 
-void initialize_table_VSTable( void );
+void initialize_table_VSTable(void);
 Netsnmp_Node_Handler        VSTable_handler;
 Netsnmp_First_Data_Point    VSTable_get_first_data_point;
 Netsnmp_Next_Data_Point     VSTable_get_next_data_point;
 
-void initialize_table_RSTable( void );
+void initialize_table_RSTable(void);
 Netsnmp_Node_Handler        RSTable_handler;
 Netsnmp_First_Data_Point    RSTable_get_first_data_point;
 Netsnmp_Next_Data_Point     RSTable_get_next_data_point;
 
 // trap functions
-void    set_l7vsError_trap_value( const std::string& );
-int     send_l7vsError_trap( void );
+void    set_l7vsError_trap_value(const std::string &);
+int     send_l7vsError_trap(void);
 
 void    collect_mib(unsigned int, void *);
 
 /*
- * column number definitions for table VSTable 
+ * column number definitions for table VSTable
  */
 #define COLUMN_INDEXVS              1
 #define COLUMN_QOSTHREASHOLDUP      2
@@ -43,7 +43,7 @@ void    collect_mib(unsigned int, void *);
 #define COLUMN_RSCOUNTVS            4
 
 /*
- * column number definitions for table RSTable 
+ * column number definitions for table RSTable
  */
 #define COLUMN_INDEXRS              1
 #define COLUMN_VSINDEX              2

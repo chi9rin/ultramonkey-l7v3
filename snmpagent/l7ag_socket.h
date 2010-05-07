@@ -3,11 +3,11 @@
 
 class    l7ag_socket
 {
-    private:
+private:
         int    sockfd;
-    public:
-        l7ag_socket(){};
-        virtual ~l7ag_socket(){};
+public:
+        l7ag_socket() {};
+        virtual ~l7ag_socket() {};
 
         void    connect();
         void    disconnect();

@@ -26,16 +26,18 @@
 
 #include "protocol_module_base.h"
 
-namespace l7vs{
+namespace l7vs
+{
 
-class ip_protocol_module_base : public protocol_module_base {
+class ip_protocol_module_base : public protocol_module_base
+{
 public:
 
-    //! constractor
-    ip_protocol_module_base( std::string in_modulename ) : protocol_module_base( in_modulename ){};
+        //! constractor
+        ip_protocol_module_base(std::string in_modulename) : protocol_module_base(in_modulename) {};
 
-    //! destractor
-    virtual    ~ip_protocol_module_base(){};
+        //! destractor
+        virtual    ~ip_protocol_module_base() {};
 };
 
 } // namespace l7vsd

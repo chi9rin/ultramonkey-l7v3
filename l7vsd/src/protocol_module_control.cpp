@@ -29,7 +29,8 @@
 #define L7VS_MODULE_INITFN "create_module"
 #define L7VS_MODULE_FINIFN "destroy_module"
 
-namespace l7vs{
+namespace l7vs
+{
 
 #if defined(LOGGER_PROCESS_VSD)
 const LOG_CATEGORY_TAG loggerCategory = LOG_CAT_L7VSD_MODULE;
@@ -46,10 +47,11 @@ const LOG_CATEGORY_TAG loggerCategorySysMem = LOG_CAT_L7VSADM_COMMON;
  * @return  instance
  */
 protocol_module_control&
-protocol_module_control::getInstance(){
-    Logger logger( loggerCategory, 1, "protocol_module_control::getInstance", __FILE__, __LINE__ );
-    static    protocol_module_control    instance;
-    return    instance;
+protocol_module_control::getInstance()
+{
+        Logger logger(loggerCategory, 1, "protocol_module_control::getInstance", __FILE__, __LINE__);
+        static    protocol_module_control    instance;
+        return    instance;
 }
 
 /*!
@@ -59,11 +61,12 @@ protocol_module_control::getInstance(){
  * @return  void
  */
 void
-protocol_module_control::initialize( const std::string& infile_path ){
-    Logger logger( loggerCategory, 2, "protocol_module_control::initialize", __FILE__, __LINE__ );
-    if( &infile_path != NULL ){
-        module_control_base::modulefile_path    = infile_path;
-    }
+protocol_module_control::initialize(const std::string &infile_path)
+{
+        Logger logger(loggerCategory, 2, "protocol_module_control::initialize", __FILE__, __LINE__);
+        if (&infile_path != NULL) {
+                module_control_base::modulefile_path    = infile_path;
+        }
 }
 
 /*!
@@ -73,8 +76,9 @@ protocol_module_control::initialize( const std::string& infile_path ){
  * @return  void
  */
 void
-protocol_module_control::finalize(){
-    Logger logger( loggerCategory, 3, "protocol_module_control::finalize", __FILE__, __LINE__ );
+protocol_module_control::finalize()
+{
+        Logger logger(loggerCategory, 3, "protocol_module_control::finalize", __FILE__, __LINE__);
 }
 
 /*!
@@ -85,56 +89,56 @@ protocol_module_control::finalize(){
  * @return  pointer for protocol_module_base class instance
  */
 protocol_module_base*
-protocol_module_control::load_module( const    std::string& modulename ){
-    Logger logger( loggerCategory, 4, "protocol_module_control::load_module", __FILE__, __LINE__ );
-    protocol_module_base* return_value = NULL;
-    boost::mutex::scoped_lock lock( loadmodule_map_mutex );
-    name_module_info_map::iterator it = loadmodule_map.find( modulename );
-    if( it == loadmodule_map.end() ){
-        std::string load_module_name = modulefile_path + "/protomod_" + modulename + ".so";
-        void* h = dlopen( load_module_name.c_str(), RTLD_LAZY );
-        if( h == NULL ){
-            std::string msg = "Could not open " + load_module_name + " module: " + dlerror();
-            Logger::putLogError(loggerCategory, 1, msg, __FILE__, __LINE__);
-            return NULL;
-        }
+protocol_module_control::load_module(const    std::string &modulename)
+{
+        Logger logger(loggerCategory, 4, "protocol_module_control::load_module", __FILE__, __LINE__);
+        protocol_module_base *return_value = NULL;
+        boost::mutex::scoped_lock lock(loadmodule_map_mutex);
+        name_module_info_map::iterator it = loadmodule_map.find(modulename);
+        if (it == loadmodule_map.end()) {
+                std::string load_module_name = modulefile_path + "/protomod_" + modulename + ".so";
+                void *h = dlopen(load_module_name.c_str(), RTLD_LAZY);
+                if (h == NULL) {
+                        std::string msg = "Could not open " + load_module_name + " module: " + dlerror();
+                        Logger::putLogError(loggerCategory, 1, msg, __FILE__, __LINE__);
+                        return NULL;
+                }
 
-        protocol_module_base* (*create_func)(void);
-        create_func = ( protocol_module_base*(*)( void ) )dlsym( h, L7VS_MODULE_INITFN );
-        if( create_func == NULL ){
-            std::stringstream buf;
-            buf << "Could not find symbol " << L7VS_MODULE_INITFN << ": " << dlerror();
-            Logger::putLogError(loggerCategory, 2, buf.str(), __FILE__, __LINE__);
-            dlclose(h);
-            return NULL;
+                protocol_module_base*(*create_func)(void);
+                create_func = (protocol_module_base * ( *)(void))dlsym(h, L7VS_MODULE_INITFN);
+                if (create_func == NULL) {
+                        std::stringstream buf;
+                        buf << "Could not find symbol " << L7VS_MODULE_INITFN << ": " << dlerror();
+                        Logger::putLogError(loggerCategory, 2, buf.str(), __FILE__, __LINE__);
+                        dlclose(h);
+                        return NULL;
+                }
+                void (*destroy_func)(protocol_module_base *);
+                destroy_func = (void ( *)(protocol_module_base *))dlsym(h, L7VS_MODULE_FINIFN);
+                if (destroy_func == NULL) {
+                        std::stringstream buf;
+                        buf << "Could not find symbol " << L7VS_MODULE_FINIFN << ": " << dlerror();
+                        Logger::putLogError(loggerCategory, 3, buf.str(), __FILE__, __LINE__);
+                        dlclose(h);
+                        return NULL;
+                }
+                protocol_module_control::protocol_module_info module_info;
+                module_info.handle = h;
+                module_info.create_func = create_func;
+                module_info.destroy_func = destroy_func;
+                loadmodule_map.insert(std::pair< std::string, protocol_module_control::protocol_module_info >(modulename, module_info));
+                it = loadmodule_map.find(modulename);
         }
-        void (*destroy_func)(protocol_module_base*);
-        destroy_func = ( void (*)(protocol_module_base*) )dlsym( h, L7VS_MODULE_FINIFN );
-        if( destroy_func == NULL ){
-            std::stringstream buf;
-            buf << "Could not find symbol " << L7VS_MODULE_FINIFN << ": " << dlerror();
-            Logger::putLogError(loggerCategory, 3, buf.str(), __FILE__, __LINE__);
-            dlclose(h);
-            return NULL;
+        if (it != loadmodule_map.end()) {
+                return_value = it->second.create_func();
+                if (return_value != NULL) {
+                        it->second.ref_count++;
+                } else {
+                        std::string msg = "Module initialization failed.";
+                        Logger::putLogError(loggerCategory, 4, msg, __FILE__, __LINE__);
+                }
         }
-        protocol_module_control::protocol_module_info module_info;
-        module_info.handle = h;
-        module_info.create_func = create_func;
-        module_info.destroy_func = destroy_func;
-        loadmodule_map.insert( std::pair< std::string, protocol_module_control::protocol_module_info >( modulename, module_info ) );
-        it = loadmodule_map.find( modulename );
-    }
-    if( it != loadmodule_map.end() ){
-        return_value = it->second.create_func();
-        if(return_value != NULL){
-            it->second.ref_count++;
-        }
-        else{
-            std::string msg = "Module initialization failed.";
-            Logger::putLogError(loggerCategory, 4, msg, __FILE__, __LINE__);
-        }
-    }
-    return return_value;
+        return return_value;
 }
 
 /*!
@@ -145,27 +149,28 @@ protocol_module_control::load_module( const    std::string& modulename ){
  * @return  void
  */
 void
-protocol_module_control::unload_module( protocol_module_base* module_ptr ){
-    Logger logger( loggerCategory, 5, "protocol_module_control::unload_module", __FILE__, __LINE__ );
-    if( module_ptr == NULL ){
-        std::string msg = "Arg(module_ptr) is NULL pointer.";
-        Logger::putLogError(loggerCategory, 5, msg, __FILE__, __LINE__);
-        return;
-    }
+protocol_module_control::unload_module(protocol_module_base *module_ptr)
+{
+        Logger logger(loggerCategory, 5, "protocol_module_control::unload_module", __FILE__, __LINE__);
+        if (module_ptr == NULL) {
+                std::string msg = "Arg(module_ptr) is NULL pointer.";
+                Logger::putLogError(loggerCategory, 5, msg, __FILE__, __LINE__);
+                return;
+        }
 
-    boost::mutex::scoped_lock lock( loadmodule_map_mutex );
-    name_module_info_map::iterator it = loadmodule_map.find( module_ptr->get_name() );
-    if( it == loadmodule_map.end() ){
-        std::string msg = "module name is not found.";
-        Logger::putLogError(loggerCategory, 6, msg, __FILE__, __LINE__);
-        return;
-    }
-    it->second.destroy_func(module_ptr);
-    it->second.ref_count--;
-    if( it->second.ref_count == 0 ){
-        dlclose(it->second.handle);
-        loadmodule_map.erase( it );
-    }
+        boost::mutex::scoped_lock lock(loadmodule_map_mutex);
+        name_module_info_map::iterator it = loadmodule_map.find(module_ptr->get_name());
+        if (it == loadmodule_map.end()) {
+                std::string msg = "module name is not found.";
+                Logger::putLogError(loggerCategory, 6, msg, __FILE__, __LINE__);
+                return;
+        }
+        it->second.destroy_func(module_ptr);
+        it->second.ref_count--;
+        if (it->second.ref_count == 0) {
+                dlclose(it->second.handle);
+                loadmodule_map.erase(it);
+        }
 }
 
 }

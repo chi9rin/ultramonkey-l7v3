@@ -24,9 +24,10 @@
 
 #ifndef TCP_SOCKET_OPTION_H
 #define TCP_SOCKET_OPTION_H
-namespace l7vs{
-    //! tcp_socket_option
-    struct tcp_socket_option_info{
+namespace l7vs
+{
+//! tcp_socket_option
+struct tcp_socket_option_info {
         //! TCP_NODELAY   (false:not set,true:set option)
         bool nodelay_opt;
         //! TCP_NODELAY option value  (false:off,true:on)
@@ -39,7 +40,7 @@ namespace l7vs{
         bool quickack_opt;
         //! TCP_QUICKACK option value (false:off,true:on)
         bool quickack_val;
-    };
+};
 }
 #endif//TCP_SOCKET_OPTION_H
- 
+

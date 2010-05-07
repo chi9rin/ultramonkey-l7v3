@@ -24,66 +24,66 @@ std::string trap_message;
 static unsigned int reg_id = 0;
 
 void
-set_l7vsError_trap_value( const std::string& in_str )
+set_l7vsError_trap_value(const std::string &in_str)
 {
-    trap_message = in_str;
+        trap_message = in_str;
 }
 
 int
 send_l7vsError_trap(void)
 {
-    netsnmp_variable_list *var_list = NULL;
-    oid l7vsError_oid[] = { 1, 3, 6, 1, 4, 1, 60000, 1, 0, 1 };
-    /*
-     * Set the snmpTrapOid.0 value
-     */
-    snmp_varlist_add_variable(&var_list,
-        snmptrap_oid, OID_LENGTH(snmptrap_oid),
-        ASN_OBJECT_ID,
-        (u_char*)l7vsError_oid, sizeof(l7vsError_oid));
-    /*
-     * Add any extra (optional) objects here
-     */
-    snmp_varlist_add_variable(&var_list,
-        snmptrap_oid, OID_LENGTH(snmptrap_oid),
-        ASN_OCTET_STR,
-        (u_char*)trap_message.c_str(), trap_message.length());
-    /*
-     * Send the trap to the list of configured destinations
-     *  and clean up
-     */
-    send_v2trap(var_list);
-    snmp_free_varbind(var_list);
-    return SNMP_ERR_NOERROR;
+        netsnmp_variable_list *var_list = NULL;
+        oid l7vsError_oid[] = { 1, 3, 6, 1, 4, 1, 60000, 1, 0, 1 };
+        /*
+         * Set the snmpTrapOid.0 value
+         */
+        snmp_varlist_add_variable(&var_list,
+                                  snmptrap_oid, OID_LENGTH(snmptrap_oid),
+                                  ASN_OBJECT_ID,
+                                  (u_char *)l7vsError_oid, sizeof(l7vsError_oid));
+        /*
+         * Add any extra (optional) objects here
+         */
+        snmp_varlist_add_variable(&var_list,
+                                  snmptrap_oid, OID_LENGTH(snmptrap_oid),
+                                  ASN_OCTET_STR,
+                                  (u_char *)trap_message.c_str(), trap_message.length());
+        /*
+         * Send the trap to the list of configured destinations
+         *  and clean up
+         */
+        send_v2trap(var_list);
+        snmp_free_varbind(var_list);
+        return SNMP_ERR_NOERROR;
 }
 
 
 /** Initializes the UltraMonkeyL7 module */
 void
-init_UltraMonkeyL7(MessengerClient* message)
+init_UltraMonkeyL7(MessengerClient *message)
 {
-    static oid VSCount_oid[] = { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 1 };
-    static oid RSCount_oid[] = { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3 };
+        static oid VSCount_oid[] = { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 1 };
+        static oid RSCount_oid[] = { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 3 };
 
 //    DEBUGMSGTL(("UltraMonkeyL7", "Initializing\n"));
 
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("VSCount", handle_VSCount, VSCount_oid,
-                             OID_LENGTH(VSCount_oid), HANDLER_CAN_RONLY));
-    netsnmp_register_scalar(netsnmp_create_handler_registration
-                            ("RSCount", handle_RSCount, RSCount_oid,
-                             OID_LENGTH(RSCount_oid), HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+                                ("VSCount", handle_VSCount, VSCount_oid,
+                                 OID_LENGTH(VSCount_oid), HANDLER_CAN_RONLY));
+        netsnmp_register_scalar(netsnmp_create_handler_registration
+                                ("RSCount", handle_RSCount, RSCount_oid,
+                                 OID_LENGTH(RSCount_oid), HANDLER_CAN_RONLY));
 
-    /*
-     * here we initialize all the tables we're planning on supporting 
-     */
-    initialize_table_VSTable();
-    initialize_table_RSTable();
+        /*
+         * here we initialize all the tables we're planning on supporting
+         */
+        initialize_table_VSTable();
+        initialize_table_RSTable();
 
-    reg_id = snmp_alarm_register(REPEAT_TIME, SA_REPEAT, collect_mib, message);
-    if (reg_id == 0) {
-        // TODO error
-    }
+        reg_id = snmp_alarm_register(REPEAT_TIME, SA_REPEAT, collect_mib, message);
+        if (reg_id == 0) {
+                // TODO error
+        }
 }
 
 // scaler values
@@ -93,27 +93,26 @@ handle_VSCount(netsnmp_mib_handler *handler,
                netsnmp_agent_request_info *reqinfo,
                netsnmp_request_info *requests)
 {
-snmp_log(LOG_INFO, "handle_vscount\n"); // TODO remove
-    switch (reqinfo->mode) {
-    case MODE_GET:
-    {
-        std::size_t vs_count = l7ag_store_mibdata::getInstance().getVSdatacount();
-snmp_log(LOG_INFO, "vs_count %d\n", vs_count); // TODO remove
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &vs_count,
-                                 sizeof(std::size_t) );
-        break;
-    }
-    default:
-        /*
-         * we should never get here, so this is a really bad error 
-         */
-        snmp_log(LOG_ERR, "unknown mode (%d) in handle_VSCount\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        snmp_log(LOG_INFO, "handle_vscount\n"); // TODO remove
+        switch (reqinfo->mode) {
+        case MODE_GET: {
+                std::size_t vs_count = l7ag_store_mibdata::getInstance().getVSdatacount();
+                snmp_log(LOG_INFO, "vs_count %d\n", vs_count); // TODO remove
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                                         (u_char *) &vs_count,
+                                         sizeof(std::size_t));
+                break;
+        }
+        default:
+                /*
+                 * we should never get here, so this is a really bad error
+                 */
+                snmp_log(LOG_ERR, "unknown mode (%d) in handle_VSCount\n",
+                         reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 int
@@ -122,27 +121,26 @@ handle_RSCount(netsnmp_mib_handler *handler,
                netsnmp_agent_request_info *reqinfo,
                netsnmp_request_info *requests)
 {
-snmp_log(LOG_INFO, "handle_rscount\n");
-    switch (reqinfo->mode) {
-    case MODE_GET:
-    {
-        std::size_t rs_count = l7ag_store_mibdata::getInstance().getRSdatacount();
-        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                 (u_char *) &rs_count,
-                                 sizeof(std::size_t) );
-snmp_log(LOG_INFO, "rs_count %d\n", rs_count);
-        break;
-    }
-    default:
-        /*
-         * we should never get here, so this is a really bad error 
-         */
-        snmp_log(LOG_ERR, "unknown mode (%d) in handle_RSCount\n",
-                 reqinfo->mode);
-        return SNMP_ERR_GENERR;
-    }
+        snmp_log(LOG_INFO, "handle_rscount\n");
+        switch (reqinfo->mode) {
+        case MODE_GET: {
+                std::size_t rs_count = l7ag_store_mibdata::getInstance().getRSdatacount();
+                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                                         (u_char *) &rs_count,
+                                         sizeof(std::size_t));
+                snmp_log(LOG_INFO, "rs_count %d\n", rs_count);
+                break;
+        }
+        default:
+                /*
+                 * we should never get here, so this is a really bad error
+                 */
+                snmp_log(LOG_ERR, "unknown mode (%d) in handle_RSCount\n",
+                         reqinfo->mode);
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 // TODO what is this comment???
@@ -154,68 +152,68 @@ snmp_log(LOG_INFO, "rs_count %d\n", rs_count);
 void
 initialize_table_VSTable(void)
 {
-    static oid VSTable_oid[] = { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 2 };
-    size_t     VSTable_oid_len = OID_LENGTH(VSTable_oid);
-    netsnmp_handler_registration *reg;
-    netsnmp_iterator_info *iinfo;
-    netsnmp_table_registration_info *table_info;
+        static oid VSTable_oid[] = { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 2 };
+        size_t     VSTable_oid_len = OID_LENGTH(VSTable_oid);
+        netsnmp_handler_registration *reg;
+        netsnmp_iterator_info *iinfo;
+        netsnmp_table_registration_info *table_info;
 
-    reg = netsnmp_create_handler_registration("VSTable", VSTable_handler,
-                                              VSTable_oid, VSTable_oid_len,
-                                              HANDLER_CAN_RONLY);
+        reg = netsnmp_create_handler_registration("VSTable", VSTable_handler,
+                        VSTable_oid, VSTable_oid_len,
+                        HANDLER_CAN_RONLY);
 
-    table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
-    netsnmp_table_helper_add_indexes(table_info, ASN_INTEGER,   /* index: IndexVS */
-                                     0);
-    table_info->min_column = COLUMN_INDEXVS;
-    table_info->max_column = COLUMN_RSCOUNTVS;
+        table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
+        netsnmp_table_helper_add_indexes(table_info, ASN_INTEGER,   /* index: IndexVS */
+                                         0);
+        table_info->min_column = COLUMN_INDEXVS;
+        table_info->max_column = COLUMN_RSCOUNTVS;
 
-    iinfo = SNMP_MALLOC_TYPEDEF(netsnmp_iterator_info);
-    iinfo->get_first_data_point = VSTable_get_first_data_point;
-    iinfo->get_next_data_point  = VSTable_get_next_data_point;
-    iinfo->table_reginfo        = table_info;
+        iinfo = SNMP_MALLOC_TYPEDEF(netsnmp_iterator_info);
+        iinfo->get_first_data_point = VSTable_get_first_data_point;
+        iinfo->get_next_data_point  = VSTable_get_next_data_point;
+        iinfo->table_reginfo        = table_info;
 
-    netsnmp_register_table_iterator(reg, iinfo);
+        netsnmp_register_table_iterator(reg, iinfo);
 
-    /*
-     * Initialise the contents of the table here 
-     */
+        /*
+         * Initialise the contents of the table here
+         */
 }
 
 /*
- * Example iterator hook routines - using 'get_next' to do most of the work 
+ * Example iterator hook routines - using 'get_next' to do most of the work
  */
 netsnmp_variable_list*
-VSTable_get_first_data_point(void** my_loop_context,
-                             void** my_data_context,
-                             netsnmp_variable_list* put_index_data,
-                             netsnmp_iterator_info* mydata)
+VSTable_get_first_data_point(void **my_loop_context,
+                             void **my_data_context,
+                             netsnmp_variable_list *put_index_data,
+                             netsnmp_iterator_info *mydata)
 {
-    *my_loop_context = l7ag_store_mibdata::getInstance().getVS_first_data_point();      //store_mibdataのデータの先頭を取得
-    vs_iterator      = l7ag_store_mibdata::getInstance().getVS_first_data_iterator();
-    return VSTable_get_next_data_point(my_loop_context, my_data_context,
-                                       put_index_data, mydata);
+        *my_loop_context = l7ag_store_mibdata::getInstance().getVS_first_data_point();      //store_mibdataのデータの先頭を取得
+        vs_iterator      = l7ag_store_mibdata::getInstance().getVS_first_data_iterator();
+        return VSTable_get_next_data_point(my_loop_context, my_data_context,
+                                           put_index_data, mydata);
 }
 
 netsnmp_variable_list*
-VSTable_get_next_data_point(void** my_loop_context,
-                            void** my_data_context,
-                            netsnmp_variable_list* put_index_data,
-                            netsnmp_iterator_info* mydata)
+VSTable_get_next_data_point(void **my_loop_context,
+                            void **my_data_context,
+                            netsnmp_variable_list *put_index_data,
+                            netsnmp_iterator_info *mydata)
 {
-    struct vsdata* entry = (struct vsdata*) *my_loop_context;
-    netsnmp_variable_list *idx = put_index_data;
+        struct vsdata *entry = (struct vsdata *) * my_loop_context;
+        netsnmp_variable_list *idx = put_index_data;
 
-    if (entry) {
-        snmp_set_var_typed_integer(idx, ASN_INTEGER, entry->index);
-        idx = idx->next_variable;
-        *my_data_context = (void *) l7ag_store_mibdata::getInstance().getVS_data_point( vs_iterator );  //ここはstore_mibdataからvectorのiteratorからデータのポインタを取得
-        vs_iterator++;
-        *my_loop_context = (void *) l7ag_store_mibdata::getInstance().getVS_data_point( vs_iterator );  //vectorのiteratorから次のデータのポインタを取得
-        return put_index_data;
-    } else {
-        return NULL;
-    }
+        if (entry) {
+                snmp_set_var_typed_integer(idx, ASN_INTEGER, entry->index);
+                idx = idx->next_variable;
+                *my_data_context = (void *) l7ag_store_mibdata::getInstance().getVS_data_point(vs_iterator);    //ここはstore_mibdataからvectorのiteratorからデータのポインタを取得
+                vs_iterator++;
+                *my_loop_context = (void *) l7ag_store_mibdata::getInstance().getVS_data_point(vs_iterator);    //vectorのiteratorから次のデータのポインタを取得
+                return put_index_data;
+        } else {
+                return NULL;
+        }
 }
 
 
@@ -227,69 +225,69 @@ VSTable_handler(netsnmp_mib_handler *handler,
                 netsnmp_request_info *requests)
 {
 
-    netsnmp_request_info *request;
-    netsnmp_table_request_info *table_info;
-    struct vsdata *table_entry;
+        netsnmp_request_info *request;
+        netsnmp_table_request_info *table_info;
+        struct vsdata *table_entry;
 
-    switch (reqinfo->mode) {
-    /*
-     * Read-support (also covers GetNext requests)
-     */
-    case MODE_GET:
-        for (request = requests; request; request = request->next) {
-            table_entry = (struct vsdata *)
-                netsnmp_extract_iterator_context(request);
-            table_info = netsnmp_extract_table_info(request);
+        switch (reqinfo->mode) {
+                /*
+                 * Read-support (also covers GetNext requests)
+                 */
+        case MODE_GET:
+                for (request = requests; request; request = request->next) {
+                        table_entry = (struct vsdata *)
+                                      netsnmp_extract_iterator_context(request);
+                        table_info = netsnmp_extract_table_info(request);
 
-            switch (table_info->colnum) {
-            case COLUMN_INDEXVS:
-                if (!table_entry) {
-                    netsnmp_set_request_error(reqinfo, request,
-                                              SNMP_NOSUCHINSTANCE);
-                    continue;
+                        switch (table_info->colnum) {
+                        case COLUMN_INDEXVS:
+                                if (!table_entry) {
+                                        netsnmp_set_request_error(reqinfo, request,
+                                                                  SNMP_NOSUCHINSTANCE);
+                                        continue;
+                                }
+                                snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER,
+                                                           table_entry->index);
+                                break;
+                        case COLUMN_QOSTHREASHOLDUP:
+                                if (!table_entry) {
+                                        netsnmp_set_request_error(reqinfo, request,
+                                                                  SNMP_NOSUCHINSTANCE);
+                                        continue;
+                                }
+                                snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER,
+                                                           table_entry->QoSThreasholdUp);
+                                break;
+                        case COLUMN_QOSTHREASHOLDDOWN:
+                                if (!table_entry) {
+                                        netsnmp_set_request_error(reqinfo, request,
+                                                                  SNMP_NOSUCHINSTANCE);
+                                        continue;
+                                }
+                                snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER,
+                                                           table_entry->QoSThreasholdDown);
+                                break;
+                                /*
+                                            case COLUMN_RSCOUNTVS:
+                                                if (!table_entry) {
+                                                    netsnmp_set_request_error(reqinfo, request,
+                                                                              SNMP_NOSUCHINSTANCE);
+                                                    continue;
+                                                }
+                                                snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER,
+                                                                           table_entry->RSCountatVS);
+                                                break;
+                                */
+                        default:
+                                netsnmp_set_request_error(reqinfo, request,
+                                                          SNMP_NOSUCHOBJECT);
+                                break;
+                        }
                 }
-                snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER,
-                                           table_entry->index);
                 break;
-            case COLUMN_QOSTHREASHOLDUP:
-                if (!table_entry) {
-                    netsnmp_set_request_error(reqinfo, request,
-                                              SNMP_NOSUCHINSTANCE);
-                    continue;
-                }
-                snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER,
-                                           table_entry->QoSThreasholdUp);
-                break;
-            case COLUMN_QOSTHREASHOLDDOWN:
-                if (!table_entry) {
-                    netsnmp_set_request_error(reqinfo, request,
-                                              SNMP_NOSUCHINSTANCE);
-                    continue;
-                }
-                snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER,
-                                           table_entry->QoSThreasholdDown);
-                break;
-/*
-            case COLUMN_RSCOUNTVS:
-                if (!table_entry) {
-                    netsnmp_set_request_error(reqinfo, request,
-                                              SNMP_NOSUCHINSTANCE);
-                    continue;
-                }
-                snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER,
-                                           table_entry->RSCountatVS);
-                break;
-*/
-            default:
-                netsnmp_set_request_error(reqinfo, request,
-                                          SNMP_NOSUCHOBJECT);
-                break;
-            }
+
         }
-        break;
-
-    }
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 // Determine the first/last column names
@@ -298,67 +296,67 @@ VSTable_handler(netsnmp_mib_handler *handler,
 void
 initialize_table_RSTable(void)
 {
-    static oid      RSTable_oid[] = { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 4 };
-    size_t          RSTable_oid_len = OID_LENGTH(RSTable_oid);
-    netsnmp_handler_registration *reg;
-    netsnmp_iterator_info *iinfo;
-    netsnmp_table_registration_info *table_info;
+        static oid      RSTable_oid[] = { 1, 3, 6, 1, 4, 1, 60000, 1, 1, 4 };
+        size_t          RSTable_oid_len = OID_LENGTH(RSTable_oid);
+        netsnmp_handler_registration *reg;
+        netsnmp_iterator_info *iinfo;
+        netsnmp_table_registration_info *table_info;
 
-    reg = netsnmp_create_handler_registration("RSTable", RSTable_handler,
-                                              RSTable_oid, RSTable_oid_len,
-                                              HANDLER_CAN_RONLY);
+        reg = netsnmp_create_handler_registration("RSTable", RSTable_handler,
+                        RSTable_oid, RSTable_oid_len,
+                        HANDLER_CAN_RONLY);
 
-    table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
-    netsnmp_table_helper_add_indexes(table_info, ASN_INTEGER,   /* index: IndexRS */
-                                     0);
-    table_info->min_column = COLUMN_INDEXRS;
-    table_info->max_column = COLUMN_INACTIVECONN;
+        table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
+        netsnmp_table_helper_add_indexes(table_info, ASN_INTEGER,   /* index: IndexRS */
+                                         0);
+        table_info->min_column = COLUMN_INDEXRS;
+        table_info->max_column = COLUMN_INACTIVECONN;
 
-    iinfo = SNMP_MALLOC_TYPEDEF(netsnmp_iterator_info);
-    iinfo->get_first_data_point = RSTable_get_first_data_point;
-    iinfo->get_next_data_point = RSTable_get_next_data_point;
-    iinfo->table_reginfo = table_info;
+        iinfo = SNMP_MALLOC_TYPEDEF(netsnmp_iterator_info);
+        iinfo->get_first_data_point = RSTable_get_first_data_point;
+        iinfo->get_next_data_point = RSTable_get_next_data_point;
+        iinfo->table_reginfo = table_info;
 
-    netsnmp_register_table_iterator(reg, iinfo);
+        netsnmp_register_table_iterator(reg, iinfo);
 
-    /*
-     * Initialise the contents of the table here 
-     */
+        /*
+         * Initialise the contents of the table here
+         */
 }
 
 /*
- * Example iterator hook routines - using 'get_next' to do most of the work 
+ * Example iterator hook routines - using 'get_next' to do most of the work
  */
 netsnmp_variable_list *
 RSTable_get_first_data_point(void **my_loop_context,
                              void **my_data_context,
-                             netsnmp_variable_list * put_index_data,
+                             netsnmp_variable_list *put_index_data,
                              netsnmp_iterator_info *mydata)
 {
-    *my_loop_context = l7ag_store_mibdata::getInstance().getRS_first_data_point();
-    rs_iterator      = l7ag_store_mibdata::getInstance().getRS_first_data_iterator();
-    return RSTable_get_next_data_point(my_loop_context, my_data_context,
-                                       put_index_data, mydata);
+        *my_loop_context = l7ag_store_mibdata::getInstance().getRS_first_data_point();
+        rs_iterator      = l7ag_store_mibdata::getInstance().getRS_first_data_iterator();
+        return RSTable_get_next_data_point(my_loop_context, my_data_context,
+                                           put_index_data, mydata);
 }
 
 netsnmp_variable_list *
 RSTable_get_next_data_point(void **my_loop_context,
                             void **my_data_context,
-                            netsnmp_variable_list * put_index_data,
+                            netsnmp_variable_list *put_index_data,
                             netsnmp_iterator_info *mydata)
 {
-    struct rsdata* entry = (struct rsdata*)*my_loop_context;
-    netsnmp_variable_list *idx = put_index_data;
+        struct rsdata *entry = (struct rsdata *) * my_loop_context;
+        netsnmp_variable_list *idx = put_index_data;
 
-    if (entry) {
-        snmp_set_var_typed_integer(idx, ASN_INTEGER, entry->index);
-        idx = idx->next_variable;
-        *my_data_context = (void *) l7ag_store_mibdata::getInstance().getRS_data_point( rs_iterator );
-        *my_loop_context = (void *) l7ag_store_mibdata::getInstance().getRS_data_point( rs_iterator );
-        return put_index_data;
-    } else {
-        return NULL;
-    }
+        if (entry) {
+                snmp_set_var_typed_integer(idx, ASN_INTEGER, entry->index);
+                idx = idx->next_variable;
+                *my_data_context = (void *) l7ag_store_mibdata::getInstance().getRS_data_point(rs_iterator);
+                *my_loop_context = (void *) l7ag_store_mibdata::getInstance().getRS_data_point(rs_iterator);
+                return put_index_data;
+        } else {
+                return NULL;
+        }
 }
 
 
@@ -370,101 +368,102 @@ RSTable_handler(netsnmp_mib_handler *handler,
                 netsnmp_request_info *requests)
 {
 
-    netsnmp_request_info *request;
-    netsnmp_table_request_info *table_info;
-    struct rsdata *table_entry;
+        netsnmp_request_info *request;
+        netsnmp_table_request_info *table_info;
+        struct rsdata *table_entry;
 
-    switch (reqinfo->mode) {
-    /*
-     * Read-support (also covers GetNext requests)
-     */
-    case MODE_GET:
-        for (request = requests; request; request = request->next) {
-            table_entry = (struct rsdata *)
-                netsnmp_extract_iterator_context(request);
-            table_info = netsnmp_extract_table_info(request);
+        switch (reqinfo->mode) {
+                /*
+                 * Read-support (also covers GetNext requests)
+                 */
+        case MODE_GET:
+                for (request = requests; request; request = request->next) {
+                        table_entry = (struct rsdata *)
+                                      netsnmp_extract_iterator_context(request);
+                        table_info = netsnmp_extract_table_info(request);
 
-            switch (table_info->colnum) {
-            case COLUMN_INDEXRS:
-                if (!table_entry) {
-                    netsnmp_set_request_error(reqinfo, request,
-                                              SNMP_NOSUCHINSTANCE);
-                    continue;
+                        switch (table_info->colnum) {
+                        case COLUMN_INDEXRS:
+                                if (!table_entry) {
+                                        netsnmp_set_request_error(reqinfo, request,
+                                                                  SNMP_NOSUCHINSTANCE);
+                                        continue;
+                                }
+                                snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER,
+                                                           table_entry->index);
+                                break;
+                        case COLUMN_VSINDEX:
+                                if (!table_entry) {
+                                        netsnmp_set_request_error(reqinfo, request,
+                                                                  SNMP_NOSUCHINSTANCE);
+                                        continue;
+                                }
+                                snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER,
+                                                           table_entry->virtualServiceIndex);
+                                break;
+                        case COLUMN_WEIGHT:
+                                if (!table_entry) {
+                                        netsnmp_set_request_error(reqinfo, request,
+                                                                  SNMP_NOSUCHINSTANCE);
+                                        continue;
+                                }
+                                snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER,
+                                                           table_entry->weight);
+                                break;
+                        case COLUMN_ACTIVECONN:
+                                if (!table_entry) {
+                                        netsnmp_set_request_error(reqinfo, request,
+                                                                  SNMP_NOSUCHINSTANCE);
+                                        continue;
+                                }
+                                snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER,
+                                                           table_entry->activeConn);
+                                break;
+                        case COLUMN_INACTIVECONN:
+                                if (!table_entry) {
+                                        netsnmp_set_request_error(reqinfo, request,
+                                                                  SNMP_NOSUCHINSTANCE);
+                                        continue;
+                                }
+                                snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER,
+                                                           table_entry->inactiveConn);
+                                break;
+                        default:
+                                netsnmp_set_request_error(reqinfo, request,
+                                                          SNMP_NOSUCHOBJECT);
+                                break;
+                        }
                 }
-                snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER,
-                                           table_entry->index);
                 break;
-            case COLUMN_VSINDEX:
-                if (!table_entry) {
-                    netsnmp_set_request_error(reqinfo, request,
-                                              SNMP_NOSUCHINSTANCE);
-                    continue;
-                }
-                snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER,
-                                           table_entry->virtualServiceIndex);
-                break;
-            case COLUMN_WEIGHT:
-                if (!table_entry) {
-                    netsnmp_set_request_error(reqinfo, request,
-                                              SNMP_NOSUCHINSTANCE);
-                    continue;
-                }
-                snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER,
-                                           table_entry->weight);
-                break;
-            case COLUMN_ACTIVECONN:
-                if (!table_entry) {
-                    netsnmp_set_request_error(reqinfo, request,
-                                              SNMP_NOSUCHINSTANCE);
-                    continue;
-                }
-                snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER,
-                                           table_entry->activeConn);
-                break;
-            case COLUMN_INACTIVECONN:
-                if (!table_entry) {
-                    netsnmp_set_request_error(reqinfo, request,
-                                              SNMP_NOSUCHINSTANCE);
-                    continue;
-                }
-                snmp_set_var_typed_integer(request->requestvb, ASN_INTEGER,
-                                           table_entry->inactiveConn);
-                break;
-            default:
-                netsnmp_set_request_error(reqinfo, request,
-                                          SNMP_NOSUCHOBJECT);
-                break;
-            }
+
         }
-        break;
-
-    }
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 void
-collect_mib(unsigned int clientreg, void *clientarg) {
-snmp_log(LOG_INFO, "called\n"); // TODO remove
-    MessengerClient* message = (MessengerClient*) clientarg;
-snmp_log(LOG_INFO, "%d\n", message->socketfd); // TODO remove
-    unsigned long long int  buf_size = sizeof(struct l7ag_message_header)
-                                     + sizeof(struct l7ag_payload_header)
-                                     + sizeof(struct l7ag_mibrequest_message);
-    char* sendbuf = (char*) calloc(1, buf_size);
-    struct l7ag_message_header* msg_head = (struct l7ag_message_header*) sendbuf;
-    memcpy(msg_head->magic, "MSG", 4); // TODO remove
-    msg_head->version       = 1;
-    msg_head->size          = buf_size;
-    msg_head->payload_count = 1;
+collect_mib(unsigned int clientreg, void *clientarg)
+{
+        snmp_log(LOG_INFO, "called\n"); // TODO remove
+        MessengerClient *message = (MessengerClient *) clientarg;
+        snmp_log(LOG_INFO, "%d\n", message->socketfd); // TODO remove
+        unsigned long long int  buf_size = sizeof(struct l7ag_message_header)
+                                           + sizeof(struct l7ag_payload_header)
+                                           + sizeof(struct l7ag_mibrequest_message);
+        char *sendbuf = (char *) calloc(1, buf_size);
+        struct l7ag_message_header *msg_head = (struct l7ag_message_header *) sendbuf;
+        memcpy(msg_head->magic, "MSG", 4); // TODO remove
+        msg_head->version       = 1;
+        msg_head->size          = buf_size;
+        msg_head->payload_count = 1;
 // TODO set time    msg_head->time          = 1;
-    struct l7ag_payload_header* payload  = (struct l7ag_payload_header*) (msg_head + 1);
-    memcpy(payload->magic, "PAY", 4); // TODO remove
-    payload->message_id = MESSAGE_ID_MIBCOLLECTREQUEST;
-    payload->payload_datasize = sizeof(struct l7ag_payload_header) + sizeof(struct l7ag_mibrequest_message);
-    struct l7ag_mibrequest_message* request = (struct l7ag_mibrequest_message*) (payload + 1);
-    memset(request, 0, sizeof(struct l7ag_mibrequest_message));
-    memcpy(request->magic, "REQ", 4); // TODO remove
-    
-    int ret = message->send(buf_size, sendbuf);
-snmp_log(LOG_INFO, "ret %d\n", ret); // TODO remove
+        struct l7ag_payload_header *payload  = (struct l7ag_payload_header *)(msg_head + 1);
+        memcpy(payload->magic, "PAY", 4); // TODO remove
+        payload->message_id = MESSAGE_ID_MIBCOLLECTREQUEST;
+        payload->payload_datasize = sizeof(struct l7ag_payload_header) + sizeof(struct l7ag_mibrequest_message);
+        struct l7ag_mibrequest_message *request = (struct l7ag_mibrequest_message *)(payload + 1);
+        memset(request, 0, sizeof(struct l7ag_mibrequest_message));
+        memcpy(request->magic, "REQ", 4); // TODO remove
+
+        int ret = message->send(buf_size, sendbuf);
+        snmp_log(LOG_INFO, "ret %d\n", ret); // TODO remove
 }

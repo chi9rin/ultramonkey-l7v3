@@ -13,28 +13,28 @@ static oid      snmptrap_oid[] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };
 int
 send_l7vsError_trap(void)
 {
-    netsnmp_variable_list *var_list = NULL;
-    oid             l7vsError_oid[] = { 1, 3, 6, 1, 4, 1, 60000, 1, 0, 1 };
+        netsnmp_variable_list *var_list = NULL;
+        oid             l7vsError_oid[] = { 1, 3, 6, 1, 4, 1, 60000, 1, 0, 1 };
 
-    /*
-     * Set the snmpTrapOid.0 value
-     */
-    snmp_varlist_add_variable(&var_list,
-                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
-                              ASN_OBJECT_ID,
-                              l7vsError_oid, sizeof(l7vsError_oid));
+        /*
+         * Set the snmpTrapOid.0 value
+         */
+        snmp_varlist_add_variable(&var_list,
+                                  snmptrap_oid, OID_LENGTH(snmptrap_oid),
+                                  ASN_OBJECT_ID,
+                                  l7vsError_oid, sizeof(l7vsError_oid));
 
 
-    /*
-     * Add any extra (optional) objects here
-     */
+        /*
+         * Add any extra (optional) objects here
+         */
 
-    /*
-     * Send the trap to the list of configured destinations
-     *  and clean up
-     */
-    send_v2trap(var_list);
-    snmp_free_varbind(var_list);
+        /*
+         * Send the trap to the list of configured destinations
+         *  and clean up
+         */
+        send_v2trap(var_list);
+        snmp_free_varbind(var_list);
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }

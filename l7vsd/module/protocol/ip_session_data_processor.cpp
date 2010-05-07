@@ -32,77 +32,72 @@ namespace l7vs
 {
 //! constructor
 ip_session_data_processor::ip_session_data_processor(
-    int timeout,
-    ip_replication_data_processor* replication_data_processor,
-    getloglevel_func_type ingetloglevel, logger_func_type inputLogFatal,
-    logger_func_type inputLogError, logger_func_type inputLogWarn,
-    logger_func_type inputLogInfo, logger_func_type inputLogDebug)
-    :timeout(timeout),
-     replication_data_processor(replication_data_processor),
-     getloglevel(ingetloglevel), putLogFatal(inputLogFatal),
-     putLogError(inputLogError), putLogWarn(inputLogWarn),
-     putLogInfo(inputLogInfo), putLogDebug(inputLogDebug)
+        int timeout,
+        ip_replication_data_processor *replication_data_processor,
+        getloglevel_func_type ingetloglevel, logger_func_type inputLogFatal,
+        logger_func_type inputLogError, logger_func_type inputLogWarn,
+        logger_func_type inputLogInfo, logger_func_type inputLogDebug)
+        : timeout(timeout),
+          replication_data_processor(replication_data_processor),
+          getloglevel(ingetloglevel), putLogFatal(inputLogFatal),
+          putLogError(inputLogError), putLogWarn(inputLogWarn),
+          putLogInfo(inputLogInfo), putLogDebug(inputLogDebug)
 {
-    //ctor
-    /*-------- DEBUG LOG --------*/
-    if (unlikely(LOG_LV_DEBUG == getloglevel()))
-    {
-        boost::format formatter("in_function : Constructor ip_session_data_processor::"
-                                "ip_session_data_processor( "
-                                "int timeout, ip_replication_data_processor* replication_data_processor, "
-                                "getloglevel_func_type ingetloglevel, logger_func_type inputLogFatal, "
-                                "logger_func_type inputLogError, logger_func_type inputLogWarn, "
-                                "logger_func_type inputLogInfo, logger_func_type inputLogDebug) : "
-                                "timeout = %d, replication_data_processor = &(%d).");
-        formatter % timeout % static_cast<void*>(replication_data_processor);
-        putLogDebug(600189, formatter.str(), __FILE__, __LINE__);
-    }
-    /*------DEBUG LOG END------*/
-
-    // parameter check
-    if (unlikely(timeout < 0 || replication_data_processor == NULL))
-    {
+        //ctor
         /*-------- DEBUG LOG --------*/
-        if (unlikely(LOG_LV_DEBUG == getloglevel()))
-        {
-            putLogDebug(600190, "out_function : Constructor ip_session_data_processor::"
-                                "ip_session_data_processor(int timeout, "
-                                "ip_replication_data_processor* replication_data_processor, "
-                                "getloglevel_func_type ingetloglevel, logger_func_type inputLogFatal, "
-                                "logger_func_type inputLogError, logger_func_type inputLogWarn, "
-                                "logger_func_type inputLogInfo, logger_func_type inputLogDebug)."
-                            , __FILE__, __LINE__);
+        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+                boost::format formatter("in_function : Constructor ip_session_data_processor::"
+                                        "ip_session_data_processor( "
+                                        "int timeout, ip_replication_data_processor* replication_data_processor, "
+                                        "getloglevel_func_type ingetloglevel, logger_func_type inputLogFatal, "
+                                        "logger_func_type inputLogError, logger_func_type inputLogWarn, "
+                                        "logger_func_type inputLogInfo, logger_func_type inputLogDebug) : "
+                                        "timeout = %d, replication_data_processor = &(%d).");
+                formatter % timeout % static_cast<void *>(replication_data_processor);
+                putLogDebug(600189, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 
-        throw std::logic_error("invalid parameter value.");
-    }
+        // parameter check
+        if (unlikely(timeout < 0 || replication_data_processor == NULL)) {
+                /*-------- DEBUG LOG --------*/
+                if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+                        putLogDebug(600190, "out_function : Constructor ip_session_data_processor::"
+                                    "ip_session_data_processor(int timeout, "
+                                    "ip_replication_data_processor* replication_data_processor, "
+                                    "getloglevel_func_type ingetloglevel, logger_func_type inputLogFatal, "
+                                    "logger_func_type inputLogError, logger_func_type inputLogWarn, "
+                                    "logger_func_type inputLogInfo, logger_func_type inputLogDebug)."
+                                    , __FILE__, __LINE__);
+                }
+                /*------DEBUG LOG END------*/
 
-    /*-------- DEBUG LOG --------*/
-    if (unlikely(LOG_LV_DEBUG == getloglevel()))
-    {
-        putLogDebug(600191, "out_function : Constructor ip_session_data_processor::"
-                    "ip_session_data_processor(int timeout, "
-                    "ip_replication_data_processor* replication_data_processor, "
-                    "getloglevel_func_type ingetloglevel, logger_func_type inputLogFatal, "
-                    "logger_func_type inputLogError, logger_func_type inputLogWarn, "
-                    "logger_func_type inputLogInfo, logger_func_type inputLogDebug)."
-                    , __FILE__, __LINE__);
-    }
-    /*------DEBUG LOG END------*/
+                throw std::logic_error("invalid parameter value.");
+        }
+
+        /*-------- DEBUG LOG --------*/
+        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+                putLogDebug(600191, "out_function : Constructor ip_session_data_processor::"
+                            "ip_session_data_processor(int timeout, "
+                            "ip_replication_data_processor* replication_data_processor, "
+                            "getloglevel_func_type ingetloglevel, logger_func_type inputLogFatal, "
+                            "logger_func_type inputLogError, logger_func_type inputLogWarn, "
+                            "logger_func_type inputLogInfo, logger_func_type inputLogDebug)."
+                            , __FILE__, __LINE__);
+        }
+        /*------DEBUG LOG END------*/
 }
 
 //! destructor
 ip_session_data_processor::~ip_session_data_processor()
 {
-    //dtor
-    /*-------- DEBUG LOG --------*/
-    if (unlikely(LOG_LV_DEBUG == getloglevel()))
-    {
-        putLogDebug(600192, "in/out_function : Destructor ip_session_data_processor::"
-                    "~ip_session_data_processor().", __FILE__, __LINE__);
-    }
-    /*------DEBUG LOG END------*/
+        //dtor
+        /*-------- DEBUG LOG --------*/
+        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+                putLogDebug(600192, "in/out_function : Destructor ip_session_data_processor::"
+                            "~ip_session_data_processor().", __FILE__, __LINE__);
+        }
+        /*------DEBUG LOG END------*/
 }
 
 //! get endpoint from session data
@@ -112,91 +107,79 @@ ip_session_data_processor::~ip_session_data_processor()
 //! @return 1: failed
 //! @return -1:exception
 int ip_session_data_processor::get_endpoint_from_session_data(
-                                    int ip_hash, 
-                                    boost::asio::ip::tcp::endpoint& endpoint)
+        int ip_hash,
+        boost::asio::ip::tcp::endpoint &endpoint)
 {
-    /*-------- DEBUG LOG --------*/
-    if (unlikely(LOG_LV_DEBUG == getloglevel()))
-    {
-        boost::format formatter("in_function : int ip_session_data_processor::"
-                                 "get_endpoint_from_session_data(int ip_hash, "
-                                 "boost::asio::ip::tcp::endpoint& endpoint) : "
-                                 "ip_hash = %d.");
-        formatter % ip_hash;
-        putLogDebug(600193, formatter.str(), __FILE__, __LINE__);
-    }
-    /*------DEBUG LOG END------*/
+        /*-------- DEBUG LOG --------*/
+        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+                boost::format formatter("in_function : int ip_session_data_processor::"
+                                        "get_endpoint_from_session_data(int ip_hash, "
+                                        "boost::asio::ip::tcp::endpoint& endpoint) : "
+                                        "ip_hash = %d.");
+                formatter % ip_hash;
+                putLogDebug(600193, formatter.str(), __FILE__, __LINE__);
+        }
+        /*------DEBUG LOG END------*/
 
-    int ret = 0;
+        int ret = 0;
 
-    try
-    {
-        boost::asio::ip::tcp::endpoint init_endpoint;
+        try {
+                boost::asio::ip::tcp::endpoint init_endpoint;
 
-        // ip hash check
-        if (unlikely(ip_hash < 0 || ip_hash >= MAX_IP_SESSION_TBL_SIZE))
-        {
-        putLogError(600103, "invalid parameter value.", __FILE__, __LINE__);
-            /*-------- DEBUG LOG --------*/
-            if (unlikely(LOG_LV_DEBUG == getloglevel()))
-            {
-                 boost::format formatter("out_function : int ip_session_data_processor::"
-                                         "get_endpoint_from_ip_data(int ip_hash, "
-                                         "boost::asio::ip::tcp::endpoint& endpoint) : return_value = 1.");
-                putLogDebug(600194, formatter.str(), __FILE__, __LINE__);
-           }
-            /*------DEBUG LOG END------*/
-            return 1;
+                // ip hash check
+                if (unlikely(ip_hash < 0 || ip_hash >= MAX_IP_SESSION_TBL_SIZE)) {
+                        putLogError(600103, "invalid parameter value.", __FILE__, __LINE__);
+                        /*-------- DEBUG LOG --------*/
+                        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+                                boost::format formatter("out_function : int ip_session_data_processor::"
+                                                        "get_endpoint_from_ip_data(int ip_hash, "
+                                                        "boost::asio::ip::tcp::endpoint& endpoint) : return_value = 1.");
+                                putLogDebug(600194, formatter.str(), __FILE__, __LINE__);
+                        }
+                        /*------DEBUG LOG END------*/
+                        return 1;
+                }
+
+                // session is not exist
+                if (session_table[ip_hash].rs_endpoint == init_endpoint) {
+                        ret = 1;
+                }
+                // session is exist
+                else {
+                        // expired time check
+                        time_t now;
+                        time(&now);
+                        if (session_table[ip_hash].last_time == 0 ||
+                            timeout == 0 ||
+                            now - session_table[ip_hash].last_time <= timeout) {
+                                // time in
+                                endpoint = session_table[ip_hash].rs_endpoint;
+                        } else {
+                                // time out
+                                ret = 1;
+                        }
+                }
+        } catch (const std::exception &e) {
+                std::cerr << "ip_session_data_processor::get_endpoint_from_ip_data() : exception: error = " << e.what() << "." << std::endl;
+                boost::format formatter("function : int ip_session_data_processor::"
+                                        "get_endpoint_from_ip_data() : exception : error = %s.");
+                formatter % e.what();
+                putLogError(600104, formatter.str(), __FILE__, __LINE__);
+
+                ret = -1;
         }
 
-        // session is not exist
-        if (session_table[ip_hash].rs_endpoint == init_endpoint)
-        {
-            ret = 1;
+        /*-------- DEBUG LOG --------*/
+        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+                boost::format formatter("out_function : int ip_session_data_processor::"
+                                        "get_endpoint_from_ip_data(int ip_hash, "
+                                        "boost::asio::ip::tcp::endpoint& endpoint) : return_value = %d.");
+                formatter % ret;
+                putLogDebug(600195, formatter.str(), __FILE__, __LINE__);
         }
-        // session is exist
-        else
-        {
-            // expired time check
-            time_t now;
-            time(&now);
-            if (session_table[ip_hash].last_time == 0 ||
-                timeout == 0 ||
-                now - session_table[ip_hash].last_time <= timeout)
-            {
-                // time in
-                 endpoint = session_table[ip_hash].rs_endpoint;
-            }
-            else
-            {
-                // time out
-                ret = 1;
-            }
-        }
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << "ip_session_data_processor::get_endpoint_from_ip_data() : exception: error = " << e.what() << "." << std::endl;
-        boost::format formatter("function : int ip_session_data_processor::"
-                                "get_endpoint_from_ip_data() : exception : error = %s.");
-        formatter % e.what();
-        putLogError(600104, formatter.str(), __FILE__, __LINE__);
+        /*------DEBUG LOG END------*/
 
-        ret = -1;
-    }
-
-    /*-------- DEBUG LOG --------*/
-    if (unlikely(LOG_LV_DEBUG == getloglevel()))
-    {
-        boost::format formatter("out_function : int ip_session_data_processor::"
-                                "get_endpoint_from_ip_data(int ip_hash, "
-                                "boost::asio::ip::tcp::endpoint& endpoint) : return_value = %d.");
-        formatter % ret;
-        putLogDebug(600195, formatter.str(), __FILE__, __LINE__);
-    }
-    /*------DEBUG LOG END------*/
-
-    return ret;
+        return ret;
 }
 
 //! write session data to session table
@@ -207,107 +190,95 @@ int ip_session_data_processor::get_endpoint_from_session_data(
 //! @return 1: failed
 //! @return -1:exception
 int ip_session_data_processor::write_session_data(
-                                    int ip_hash,
-                                    const boost::asio::ip::tcp::endpoint& endpoint,
-                                    time_t now_time)
+        int ip_hash,
+        const boost::asio::ip::tcp::endpoint &endpoint,
+        time_t now_time)
 {
-    /*-------- DEBUG LOG --------*/
-    if (unlikely(LOG_LV_DEBUG == getloglevel()))
-    {
-         boost::format formatter("in_function : int ip_session_data_processor::"
-                                         "write_session_data(int ip_hash,"
-                                         "const boost::asio::ip::tcp::endpoint& endpoint, "
-                                         "time_t now_time) : ip_hash = %d, now_time = %d.");
-    formatter % ip_hash % now_time;
-        putLogDebug(600196, formatter.str(), __FILE__, __LINE__);
-    }
-    /*------DEBUG LOG END------*/
-
-    boost::asio::ip::tcp::endpoint init_endpoint;
-    ip_replication_temp_data temp_data;
-
-    try
-    {
-        // ip hash check
-        if (unlikely(ip_hash < 0 || ip_hash >= MAX_IP_SESSION_TBL_SIZE))
-        {
-        putLogError(600105, "invalid parameter value.", __FILE__, __LINE__);
-            /*-------- DEBUG LOG --------*/
-            if (unlikely(LOG_LV_DEBUG == getloglevel()))
-            {
-                 boost::format formatter("out_function : int ip_session_data_processor::"
-                                         "write_session_data(int ip_hash,"
-                                         "const boost::asio::ip::tcp::endpoint& endpoint, "
-                                         "time_t now_time) : return_value = 1.");
-                putLogDebug(600197, formatter.str(), __FILE__, __LINE__);
-           }
-            /*------DEBUG LOG END------*/
-            return 1;
-        }
-
-        // write session data to session table
-        session_table[ip_hash].last_time = now_time;
-
-        // set op_code
-        if (endpoint == init_endpoint)
-        {
-            temp_data.op_code = 'U';
-        }
-        else
-        {
-            session_table[ip_hash].rs_endpoint = endpoint;
-            temp_data.op_code = 'A';
-        }
-
-        // add the replication list
-        temp_data.ip_hash = ip_hash;
-        temp_data.last_time = now_time;
-        temp_data.rs_endpoint = endpoint;
-        replication_data_processor->put_into_temp_list(temp_data);
         /*-------- DEBUG LOG --------*/
-        if (unlikely(LOG_LV_DEBUG == getloglevel()))
-        {
-            std::string buffer;
-                boost::format formatter("function : int ip_session_data_processor::"
-                                         "write_session_data() : put_into_temp_list() "
-                                        "--add item ip_hash = %d -- end.");
-                formatter % ip_hash;
-                putLogDebug(600198, formatter.str(), __FILE__, __LINE__);
-            }
-            /*------DEBUG LOG END------*/
-    }
-    catch (const std::exception& e)
-    {
-        std::cerr << "write_session_data exception : error = " << e.what() << "." << std::endl;
-        boost::format formatter("function : int ip_session_data_processor::"
-                                "write_session_data() : exception : error = %s.");
-        formatter % e.what();
-        putLogError(600106, formatter.str(), __FILE__, __LINE__);
-
-        /*-------- DEBUG LOG --------*/
-        if (unlikely(LOG_LV_DEBUG == getloglevel()))
-        {
-            putLogDebug(600199, "out_function : int ip_session_data_processor::"
-                        "write_session_data(int hash, "
-                        "const boost::asio::ip::tcp::endpoint& endpoint, time_t now_time) : "
-                        "return_value = -1.", __FILE__, __LINE__);
+        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+                boost::format formatter("in_function : int ip_session_data_processor::"
+                                        "write_session_data(int ip_hash,"
+                                        "const boost::asio::ip::tcp::endpoint& endpoint, "
+                                        "time_t now_time) : ip_hash = %d, now_time = %d.");
+                formatter % ip_hash % now_time;
+                putLogDebug(600196, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 
-        return -1;
-    }
+        boost::asio::ip::tcp::endpoint init_endpoint;
+        ip_replication_temp_data temp_data;
 
-    /*-------- DEBUG LOG --------*/
-    if (unlikely(LOG_LV_DEBUG == getloglevel()))
-    {
-        putLogDebug(600200, "out_function : int ip_session_data_processor::"
-                    "write_ip_data(const std::string& ip, "
-                    "const boost::asio::ip::tcp::endpoint& endpoint, time_t now_time) : "
-                    "return_value = 0.", __FILE__, __LINE__);
-    }
-    /*------DEBUG LOG END------*/
+        try {
+                // ip hash check
+                if (unlikely(ip_hash < 0 || ip_hash >= MAX_IP_SESSION_TBL_SIZE)) {
+                        putLogError(600105, "invalid parameter value.", __FILE__, __LINE__);
+                        /*-------- DEBUG LOG --------*/
+                        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+                                boost::format formatter("out_function : int ip_session_data_processor::"
+                                                        "write_session_data(int ip_hash,"
+                                                        "const boost::asio::ip::tcp::endpoint& endpoint, "
+                                                        "time_t now_time) : return_value = 1.");
+                                putLogDebug(600197, formatter.str(), __FILE__, __LINE__);
+                        }
+                        /*------DEBUG LOG END------*/
+                        return 1;
+                }
 
-    return 0;
+                // write session data to session table
+                session_table[ip_hash].last_time = now_time;
+
+                // set op_code
+                if (endpoint == init_endpoint) {
+                        temp_data.op_code = 'U';
+                } else {
+                        session_table[ip_hash].rs_endpoint = endpoint;
+                        temp_data.op_code = 'A';
+                }
+
+                // add the replication list
+                temp_data.ip_hash = ip_hash;
+                temp_data.last_time = now_time;
+                temp_data.rs_endpoint = endpoint;
+                replication_data_processor->put_into_temp_list(temp_data);
+                /*-------- DEBUG LOG --------*/
+                if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+                        std::string buffer;
+                        boost::format formatter("function : int ip_session_data_processor::"
+                                                "write_session_data() : put_into_temp_list() "
+                                                "--add item ip_hash = %d -- end.");
+                        formatter % ip_hash;
+                        putLogDebug(600198, formatter.str(), __FILE__, __LINE__);
+                }
+                /*------DEBUG LOG END------*/
+        } catch (const std::exception &e) {
+                std::cerr << "write_session_data exception : error = " << e.what() << "." << std::endl;
+                boost::format formatter("function : int ip_session_data_processor::"
+                                        "write_session_data() : exception : error = %s.");
+                formatter % e.what();
+                putLogError(600106, formatter.str(), __FILE__, __LINE__);
+
+                /*-------- DEBUG LOG --------*/
+                if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+                        putLogDebug(600199, "out_function : int ip_session_data_processor::"
+                                    "write_session_data(int hash, "
+                                    "const boost::asio::ip::tcp::endpoint& endpoint, time_t now_time) : "
+                                    "return_value = -1.", __FILE__, __LINE__);
+                }
+                /*------DEBUG LOG END------*/
+
+                return -1;
+        }
+
+        /*-------- DEBUG LOG --------*/
+        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+                putLogDebug(600200, "out_function : int ip_session_data_processor::"
+                            "write_ip_data(const std::string& ip, "
+                            "const boost::asio::ip::tcp::endpoint& endpoint, time_t now_time) : "
+                            "return_value = 0.", __FILE__, __LINE__);
+        }
+        /*------DEBUG LOG END------*/
+
+        return 0;
 }
 
 //! read session data from replication area
@@ -315,74 +286,65 @@ int ip_session_data_processor::write_session_data(
 //! @return 0 : success
 //! @return -1:exception
 int ip_session_data_processor::read_session_data_from_replication_area(
-                                                    ip_replication_data* replication_area )
+        ip_replication_data *replication_area)
 {
-    /*-------- DEBUG LOG --------*/
-    if (unlikely(LOG_LV_DEBUG == getloglevel()))
-    {
-        boost::format formatter("in_function : int ip_session_data_processor::"
-                                "read_session_data_from_replication_area(ip_replication_data* replication_area) : "
-                                "replication_area = &(%d).");
-        formatter % static_cast<void*>(replication_area);
-        putLogDebug(600201, formatter.str(), __FILE__, __LINE__);
-    }
-    /*------DEBUG LOG END------*/
-
-    // null check
-    if (replication_area == NULL)
-    {
-        putLogInfo(600001, "Replication area is null.", __FILE__, __LINE__);
         /*-------- DEBUG LOG --------*/
-        if (unlikely(LOG_LV_DEBUG == getloglevel()))
-        {
-            putLogDebug(600202, "out_function : int ip_session_data_processor::"
-                                "read_session_data_from_replication_area("
-                                "ip_replication_data* replication_area) : return_value = -1.", __FILE__, __LINE__);
+        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+                boost::format formatter("in_function : int ip_session_data_processor::"
+                                        "read_session_data_from_replication_area(ip_replication_data* replication_area) : "
+                                        "replication_area = &(%d).");
+                formatter % static_cast<void *>(replication_area);
+                putLogDebug(600201, formatter.str(), __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
-        return -1;
-    }
 
-    int ret = 0;
-    try
-    {
-        // restore replication data to session table
-        for (int i = 0; i < MAX_IP_SESSION_TBL_SIZE; ++i)
-        {
-            if (replication_area[i].valid == 1)
-            {
-                boost::asio::ip::tcp::endpoint endpoint(
-                                            boost::asio::ip::address::from_string(replication_area[i].realserver_ip),
-                                            replication_area[i].realserver_port);
-                session_table[i].rs_endpoint = endpoint;
-                session_table[i].last_time = replication_area[i].last_time;
-            }
+        // null check
+        if (replication_area == NULL) {
+                putLogInfo(600001, "Replication area is null.", __FILE__, __LINE__);
+                /*-------- DEBUG LOG --------*/
+                if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+                        putLogDebug(600202, "out_function : int ip_session_data_processor::"
+                                    "read_session_data_from_replication_area("
+                                    "ip_replication_data* replication_area) : return_value = -1.", __FILE__, __LINE__);
+                }
+                /*------DEBUG LOG END------*/
+                return -1;
         }
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << "ip_session_data_processor::read_session_data_from_replication_area() : "
-                    "exception : error = " << e.what() << "." << std::endl;
-        boost::format formatter("function : int ip_session_data_processor::"
-                                "read_session_data_from_replication_area() : exception : error = %s.");
-        formatter % e.what();
-        putLogError(600107, formatter.str(), __FILE__, __LINE__);
 
-        ret = -1;
-    }
+        int ret = 0;
+        try {
+                // restore replication data to session table
+                for (int i = 0; i < MAX_IP_SESSION_TBL_SIZE; ++i) {
+                        if (replication_area[i].valid == 1) {
+                                boost::asio::ip::tcp::endpoint endpoint(
+                                        boost::asio::ip::address::from_string(replication_area[i].realserver_ip),
+                                        replication_area[i].realserver_port);
+                                session_table[i].rs_endpoint = endpoint;
+                                session_table[i].last_time = replication_area[i].last_time;
+                        }
+                }
+        } catch (const std::exception &e) {
+                std::cerr << "ip_session_data_processor::read_session_data_from_replication_area() : "
+                          "exception : error = " << e.what() << "." << std::endl;
+                boost::format formatter("function : int ip_session_data_processor::"
+                                        "read_session_data_from_replication_area() : exception : error = %s.");
+                formatter % e.what();
+                putLogError(600107, formatter.str(), __FILE__, __LINE__);
 
-    /*-------- DEBUG LOG --------*/
-    if (unlikely(LOG_LV_DEBUG == getloglevel()))
-    {
-        boost::format formatter("out_function : int ip_session_data_processor::"
-                                "read_session_data_from_replication_area(ip_replication_data* replication_area) : "
-                                "return_value = %d.");
-        formatter % ret;
-        putLogDebug(600203, formatter.str(), __FILE__, __LINE__);
-    }
-    /*------DEBUG LOG END------*/
+                ret = -1;
+        }
 
-    return ret;
+        /*-------- DEBUG LOG --------*/
+        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+                boost::format formatter("out_function : int ip_session_data_processor::"
+                                        "read_session_data_from_replication_area(ip_replication_data* replication_area) : "
+                                        "return_value = %d.");
+                formatter % ret;
+                putLogDebug(600203, formatter.str(), __FILE__, __LINE__);
+        }
+        /*------DEBUG LOG END------*/
+
+        return ret;
 }
 
 }

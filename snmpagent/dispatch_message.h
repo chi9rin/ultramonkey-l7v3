@@ -10,15 +10,15 @@
 
 class    l7ag_dispatch_message
 {
-    protected:
+protected:
 
-    private:
+private:
         std::string    message;
-    public:
+public:
         l7ag_dispatch_message();
         ~l7ag_dispatch_message();
 
-        void    add_message( std::string in_msg );
+        void    add_message(std::string in_msg);
         void    do_dispatch();
 };
 

@@ -5,12 +5,12 @@
 class    proc_message
 {
 private:
-    
+
 public:
-    proc_message(){};
-    virtual    ~proc_message(){};
-    
-    virtual    void    do_process() = 0;
+        proc_message() {};
+        virtual    ~proc_message() {};
+
+        virtual    void    do_process() = 0;
 };
 
 

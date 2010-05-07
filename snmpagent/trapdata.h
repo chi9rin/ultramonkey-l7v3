@@ -3,9 +3,9 @@
 
 #include <string>
 
-struct  trapdata{
-    std::string oid;
-    std::string message;
+struct  trapdata {
+        std::string oid;
+        std::string message;
 };
 
 #endif//__TRAPDATA_H__

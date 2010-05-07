@@ -27,11 +27,12 @@
 
 #include "data_buff_base.h"
 
-namespace l7vs{
+namespace l7vs
+{
 
 //!    @class    tcp_data
 //! @brief    this class is tcp session object use data for processing.
-    typedef data_buff_base<boost::asio::ip::tcp> tcp_data;
+typedef data_buff_base<boost::asio::ip::tcp> tcp_data;
 
 }// namespace l7vs
 

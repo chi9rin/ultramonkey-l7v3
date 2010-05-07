@@ -30,37 +30,39 @@
 #include "command_session.h"
 #include "l7vsd.h"
 
-namespace l7vs{
+namespace l7vs
+{
 class    l7vsd;
 class    command_session;
 
 //!    @class    command_receiver
 //!    @brief    l7vsadm message receiver class
-class    command_receiver : private boost::noncopyable{
+class    command_receiver : private boost::noncopyable
+{
 protected:
-    //! io dispatcher
-    boost::asio::io_service&                        dispatcher;
-    //! acceptor
-    boost::asio::local::stream_protocol::acceptor    acceptor_;
-    //! l7vsd refference
-    l7vsd&                                            vsd;
-    //! socketfile
-    std::string                                sockfile;
+        //! io dispatcher
+        boost::asio::io_service                        &dispatcher;
+        //! acceptor
+        boost::asio::local::stream_protocol::acceptor    acceptor_;
+        //! l7vsd refference
+        l7vsd                                            &vsd;
+        //! socketfile
+        std::string                                sockfile;
 
-    //!    @brief        accept handler
-    //!    @param[in]    command session
-    //!    @param[in]    error code
-    void    handle_accept( boost::shared_ptr<command_session>, const boost::system::error_code& );
+        //!    @brief        accept handler
+        //!    @param[in]    command session
+        //!    @param[in]    error code
+        void    handle_accept(boost::shared_ptr<command_session>, const boost::system::error_code &);
 
 public:
-    //!    @brief        constructor
-    //!    @param[in]    io_service
-    //!    @param[in]    socket file
-    //!    @param[in]    l7vsd refernce
-    command_receiver(    boost::asio::io_service&, const std::string&, l7vsd& );
+        //!    @brief        constructor
+        //!    @param[in]    io_service
+        //!    @param[in]    socket file
+        //!    @param[in]    l7vsd refernce
+        command_receiver(boost::asio::io_service &, const std::string &, l7vsd &);
 
-    //!    @brief        destructor
-    ~command_receiver();
+        //!    @brief        destructor
+        ~command_receiver();
 };
 
 };    //namespace l7vsd

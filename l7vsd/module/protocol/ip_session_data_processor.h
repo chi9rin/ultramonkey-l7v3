@@ -36,57 +36,57 @@
 namespace l7vs
 {
 
-struct  ip_session_table_entry{
-    time_t last_time;
-    boost::asio::ip::tcp::endpoint rs_endpoint;
+struct  ip_session_table_entry {
+        time_t last_time;
+        boost::asio::ip::tcp::endpoint rs_endpoint;
 };
 
 
 class ip_session_data_processor
 {
-    public:
+public:
         //! loglevel get function object type
         typedef    boost::function< LOG_LEVEL_TAG(void) >
-                                        getloglevel_func_type;
+        getloglevel_func_type;
         //! log output function object type
-        typedef    boost::function< void (const unsigned int, const std::string&, const char*, int) >
-                                        logger_func_type;
+        typedef    boost::function< void (const unsigned int, const std::string &, const char *, int) >
+        logger_func_type;
 
-    public:
+public:
         ip_session_data_processor(
-                            int timeout,
-                            ip_replication_data_processor* replication_data_processor,
-                            getloglevel_func_type    ingetloglevel,
-                            logger_func_type inputLogFatal,
-                            logger_func_type inputLogError,
-                            logger_func_type inputLogWarn,
-                            logger_func_type inputLogInfo,
-                            logger_func_type inputLogDebug);
+                int timeout,
+                ip_replication_data_processor *replication_data_processor,
+                getloglevel_func_type    ingetloglevel,
+                logger_func_type inputLogFatal,
+                logger_func_type inputLogError,
+                logger_func_type inputLogWarn,
+                logger_func_type inputLogInfo,
+                logger_func_type inputLogDebug);
 
         virtual ~ip_session_data_processor();
 
         int get_endpoint_from_session_data(
-                            int ip_hash,
-                            boost::asio::ip::tcp::endpoint& endpoint);
+                int ip_hash,
+                boost::asio::ip::tcp::endpoint &endpoint);
 
         int write_session_data(
-                            int ip_hash,
-                            const boost::asio::ip::tcp::endpoint& endpoint,
-                            time_t now_time);
+                int ip_hash,
+                const boost::asio::ip::tcp::endpoint &endpoint,
+                time_t now_time);
 
-        int read_session_data_from_replication_area(ip_replication_data* replication_area);
+        int read_session_data_from_replication_area(ip_replication_data *replication_area);
 
-    protected:
+protected:
         int timeout;
-        boost::array<ip_session_table_entry,MAX_IP_SESSION_TBL_SIZE> session_table;
-        ip_replication_data_processor* replication_data_processor;
+        boost::array<ip_session_table_entry, MAX_IP_SESSION_TBL_SIZE> session_table;
+        ip_replication_data_processor *replication_data_processor;
         getloglevel_func_type getloglevel;          //!< get loglevel function object
         logger_func_type putLogFatal;               //!< fatal log output function object
         logger_func_type putLogError;               //!< error log output function object
         logger_func_type putLogWarn;                //!< warn log output function object
         logger_func_type putLogInfo;                //!< info log output function object
         logger_func_type putLogDebug;               //!< debug log output function object
-    private:
+private:
 };
 
 }

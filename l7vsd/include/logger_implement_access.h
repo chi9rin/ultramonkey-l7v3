@@ -14,7 +14,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- *      
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
@@ -51,163 +51,164 @@
 
 namespace log4cxx
 {
-    typedef helpers::ObjectPtrT<RollingFileAppender> RollingFileAppenderPtr;
+typedef helpers::ObjectPtrT<RollingFileAppender> RollingFileAppenderPtr;
 }
 
-namespace l7vs{
+namespace l7vs
+{
 
 //! @class logger_implement_access
 //! @brief access logger implement class.
 //! @brief this class manage logger for access setting and access logging by log4cxx.
-class logger_implement_access {
+class logger_implement_access
+{
 public:
-    
-    typedef std::map< std::string , std::string > 
-                            accesslog_rotate_map_type;
 
-    typedef std::map< std::string , std::string >::iterator 
-                            accesslog_rotate_map_type_iterator;
+        typedef std::map< std::string , std::string >
+        accesslog_rotate_map_type;
 
-    /*!
-     * constructor initialize member variables.
-     *
-     * @param   access log file name
-     */
-    logger_implement_access(const std::string &access_log_file_name);
-    
-    /*!
-     * destructor.
-     */
-    virtual ~logger_implement_access(){};
+        typedef std::map< std::string , std::string >::iterator
+        accesslog_rotate_map_type_iterator;
 
-    /*!
-     * initialze function.
-     *
-     * @param   default logrotation info use flag
-     * @param   default logrotation info
-     * @param   logrotation designation contents
-     * @retrun  false failed
-     */
-    virtual bool init(
-        const bool rotate_default_flag,
-        const appender_property& access_log_default_property,
-        accesslog_rotate_map_type& rotatedata);
+        /*!
+         * constructor initialize member variables.
+         *
+         * @param   access log file name
+         */
+        logger_implement_access(const std::string &access_log_file_name);
 
-    /*!
-     * output access info log.
-     *
-     * @param   virtualservice endpoint info
-     * @param   client ip info
-     * @param   realserver connection origin info
-     * @param   realserver connection destination info
-     * @param   add msg
-     * @retrun  void
-     */
-    virtual inline void putLog(
-                                const std::string& vsinfo,
-                                const std::string& cl_con_org,
-                                const std::string& rs_con_org,
-                                const std::string& rs_con_dest,
-                                const std::string& msg = ""){
-        std::stringstream    buf;
-        buf << boost::format( "[ [AccessLog] (CL)%s --> %s --UM-- %s --> (RS-DST)%s %s]" )
-            % cl_con_org
-            % vsinfo
-            % rs_con_org
-            % rs_con_dest
-            % msg;
-    
-        try {
-            log4cxx::Logger::getLogger( access_log_file_name_ )
-                                        ->forcedLog(
-                                                log4cxx::Level::getInfo(),
-                                                buf.str(),
-                                                log4cxx::spi::LocationInfo("", "", 0));
+        /*!
+         * destructor.
+         */
+        virtual ~logger_implement_access() {};
+
+        /*!
+         * initialze function.
+         *
+         * @param   default logrotation info use flag
+         * @param   default logrotation info
+         * @param   logrotation designation contents
+         * @retrun  false failed
+         */
+        virtual bool init(
+                const bool rotate_default_flag,
+                const appender_property &access_log_default_property,
+                accesslog_rotate_map_type &rotatedata);
+
+        /*!
+         * output access info log.
+         *
+         * @param   virtualservice endpoint info
+         * @param   client ip info
+         * @param   realserver connection origin info
+         * @param   realserver connection destination info
+         * @param   add msg
+         * @retrun  void
+         */
+        virtual inline void putLog(
+                const std::string &vsinfo,
+                const std::string &cl_con_org,
+                const std::string &rs_con_org,
+                const std::string &rs_con_dest,
+                const std::string &msg = "") {
+                std::stringstream    buf;
+                buf << boost::format("[ [AccessLog] (CL)%s --> %s --UM-- %s --> (RS-DST)%s %s]")
+                    % cl_con_org
+                    % vsinfo
+                    % rs_con_org
+                    % rs_con_dest
+                    % msg;
+
+                try {
+                        log4cxx::Logger::getLogger(access_log_file_name_)
+                        ->forcedLog(
+                                log4cxx::Level::getInfo(),
+                                buf.str(),
+                                log4cxx::spi::LocationInfo("", "", 0));
+                } catch (const std::exception &ex) {
+                        std::ostringstream oss;
+                        oss << "Logging Error (Access Log) : " << ex.what();
+                        Logger::putLogError(
+                                LOG_CAT_L7VSD_SESSION,
+                                3,
+                                oss.str(),
+                                __FILE__,
+                                __LINE__);
+
+                }
         }
-        catch (const std::exception& ex) {
-            std::ostringstream oss;
-            oss << "Logging Error (Access Log) : " << ex.what();
-            Logger::putLogError(
-                          LOG_CAT_L7VSD_SESSION,
-                          3,
-                          oss.str(),
-                          __FILE__,
-                          __LINE__ );
 
-        }
-    }
+        /*!
+         * increase reffernce count.
+         *
+         * @retrun void
+         */
+        virtual void    addRef();
 
-    /*!
-     * increase reffernce count.
-     *
-     * @retrun void
-     */
-    virtual void    addRef();
+        /*!
+         * decrease reffernce count.
+         *
+         * @retrun void
+         */
+        virtual void    releaseRef();
 
-    /*!
-     * decrease reffernce count.
-     *
-     * @retrun void
-     */
-    virtual void    releaseRef();
+        /*!
+         * decrease reffernce count.
+         *
+         * @param inequal check object
+         * @return check result
+         */
+        virtual bool    operator<=(const int access_num);
 
-    /*!
-     * decrease reffernce count.
-     *
-     * @param inequal check object
-     * @return check result
-     */
-    virtual bool    operator<=(const int access_num );
+        /*!
+         * member variable data getter.
+         *
+         * @retrun member variable data
+         */
+        virtual std::string getAcLogFileName();
 
-    /*!
-     * member variable data getter.
-     *
-     * @retrun member variable data
-     */
-    virtual std::string getAcLogFileName();
+        /*!
+         * logrotate data compare.
+         *
+         * @param check object
+         * @retrun true logrotate data equal
+         */
+        virtual bool    checkRotateParameterComp(
+                accesslog_rotate_map_type &rotatedata);
 
-    /*!
-     * logrotate data compare.
-     *
-     * @param check object
-     * @retrun true logrotate data equal
-     */
-    virtual bool    checkRotateParameterComp(
-                        accesslog_rotate_map_type &rotatedata);
-    
-    /*!
-     * member variable data getter.
-     *
-     * @retrun member variable data
-     */
-    virtual bool    is_rotate_default_flag();
-    
+        /*!
+         * member variable data getter.
+         *
+         * @retrun member variable data
+         */
+        virtual bool    is_rotate_default_flag();
+
 protected:
 
-    
-    int access_cnt;
 
-    std::string access_log_file_name_;
+        int access_cnt;
 
-    //! initialized flag
-    bool initialized;
-  
-    appender_property access_log_property;
+        std::string access_log_file_name_;
 
-    accesslog_rotate_map_type aclog_args;
-    
-    bool rotate_default_flag;
-    
-    /*!
-     * Logger setting function.
-     *
-     * @param   default logrotation info use flag
-     * @param   logrotation designation contents
-     * @retrun  false failed
-     */
-    virtual bool setAcLoggerConf(
-                    const appender_property& access_log_default_property,
-                    accesslog_rotate_map_type& rotatedata);
+        //! initialized flag
+        bool initialized;
+
+        appender_property access_log_property;
+
+        accesslog_rotate_map_type aclog_args;
+
+        bool rotate_default_flag;
+
+        /*!
+         * Logger setting function.
+         *
+         * @param   default logrotation info use flag
+         * @param   logrotation designation contents
+         * @retrun  false failed
+         */
+        virtual bool setAcLoggerConf(
+                const appender_property &access_log_default_property,
+                accesslog_rotate_map_type &rotatedata);
 
 };
 

@@ -20,7 +20,7 @@
 #define REPEAT_SEC  3
 
 /*
- * column number definitions for table um7VirtualServiceTable 
+ * column number definitions for table um7VirtualServiceTable
  */
 #define COLUMN_UM7VSINDEX                   1
 #define COLUMN_UM7VSPROTOCOL                2
@@ -40,7 +40,7 @@
 #define COLUMN_UM7VSTHROUGHPUTDOWN          16
 
 /*
- * column number definitions for table um7RealServerTable 
+ * column number definitions for table um7RealServerTable
  */
 #define COLUMN_UM7RSINDEX                   1
 #define COLUMN_UM7RSVIRTUALSERVICEINDEX     2
@@ -52,12 +52,12 @@
 #define COLUMN_UM7RSINACTIVECONN            8
 
 /*
- * function declarations 
+ * function declarations
  */
-void    init_netsnmp_bridge(void*);
+void    init_netsnmp_bridge(void *);
 void    initialize_table_um7VirtualServiceTable();
 void    initialize_table_um7RealServerTable();
-void    getL7vsdData(unsigned int, void*);
+void    getL7vsdData(unsigned int, void *);
 int     send_um7StateAlert_trap();
 int     send_um7VirtualServiceAlert_trap();
 int     send_um7ReplicationAlert_trap();

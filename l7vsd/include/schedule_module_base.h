@@ -30,55 +30,57 @@
 #include "module_base.h"
 #include "realserver.h"
 
-namespace l7vs{
+namespace l7vs
+{
 
 //
 //! @class schedule_module_base
 //!    @brief    schedule module abstract base class.
 //! @brief    all schedule module is extened this class.
-class schedule_module_base : public module_base{
+class schedule_module_base : public module_base
+{
 public:
-    //! realserver list iterator type
-    typedef    std::list<l7vs::realserver>
-                                    rslist_type;
-    typedef    boost::function< rslist_type::iterator (void)>
-                                    rslist_iterator_begin_func_type;
-    typedef    boost::function< rslist_type::iterator (void)>
-                                    rslist_iterator_end_func_type;
-    typedef    boost::function< rslist_type::iterator (rslist_type::iterator)>
-                                    rslist_iterator_next_func_type;
+        //! realserver list iterator type
+        typedef    std::list<l7vs::realserver>
+        rslist_type;
+        typedef    boost::function< rslist_type::iterator(void)>
+        rslist_iterator_begin_func_type;
+        typedef    boost::function< rslist_type::iterator(void)>
+        rslist_iterator_end_func_type;
+        typedef    boost::function< rslist_type::iterator(rslist_type::iterator)>
+        rslist_iterator_next_func_type;
 public:
-    //!    constractor
-    schedule_module_base( std::string in_modulename ) : module_base( in_modulename ) {};
-    //! destractor
-    virtual    ~schedule_module_base(){};
-    //!    initialize function
-    virtual    void    initialize() = 0;
-    //! handle schedule called then schedule function for TCP/IP endpoint
-    //! @param[in]    thread id
-    //! @param[in]    list iterator first function object
-    //!    @param[in]    list iterator last function object
-    //!    @param[in]    list iterator next function object
-    //! @param[out]    scheduled TCP/IP endpoint
-    virtual    void    handle_schedule(
-                                        boost::thread::id,
-                                        rslist_iterator_begin_func_type,
-                                        rslist_iterator_end_func_type,
-                                        rslist_iterator_next_func_type,
-                                        boost::asio::ip::tcp::endpoint&) = 0;
+        //!    constractor
+        schedule_module_base(std::string in_modulename) : module_base(in_modulename) {};
+        //! destractor
+        virtual    ~schedule_module_base() {};
+        //!    initialize function
+        virtual    void    initialize() = 0;
+        //! handle schedule called then schedule function for TCP/IP endpoint
+        //! @param[in]    thread id
+        //! @param[in]    list iterator first function object
+        //!    @param[in]    list iterator last function object
+        //!    @param[in]    list iterator next function object
+        //! @param[out]    scheduled TCP/IP endpoint
+        virtual    void    handle_schedule(
+                boost::thread::id,
+                rslist_iterator_begin_func_type,
+                rslist_iterator_end_func_type,
+                rslist_iterator_next_func_type,
+                boost::asio::ip::tcp::endpoint &) = 0;
 
-    //! handle schedule calles then schedule function for UDP endpoint
-    //! @param[in]    thread id
-    //! @param[in]    list iterator first function object
-    //!    @param[in]    list iterator last function object
-    //!    @param[in]    list iterator next function object
-    //! @param[out]    scheduled UDP endpoint
-    virtual    void    handle_schedule(
-                                        boost::thread::id,
-                                        rslist_iterator_begin_func_type,
-                                        rslist_iterator_end_func_type,
-                                        rslist_iterator_next_func_type,
-                                        boost::asio::ip::udp::endpoint&) = 0;
+        //! handle schedule calles then schedule function for UDP endpoint
+        //! @param[in]    thread id
+        //! @param[in]    list iterator first function object
+        //!    @param[in]    list iterator last function object
+        //!    @param[in]    list iterator next function object
+        //! @param[out]    scheduled UDP endpoint
+        virtual    void    handle_schedule(
+                boost::thread::id,
+                rslist_iterator_begin_func_type,
+                rslist_iterator_end_func_type,
+                rslist_iterator_next_func_type,
+                boost::asio::ip::udp::endpoint &) = 0;
 
 };
 

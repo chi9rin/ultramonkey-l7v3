@@ -6,33 +6,37 @@ class   QueueContainer
 {
 
 public:
-    typedef boost::shared_array<char> dataPtr;
+        typedef boost::shared_array<char> dataPtr;
 
 protected:
-    size_t  size_;
-    dataPtr data_;
+        size_t  size_;
+        dataPtr data_;
 
 public:
-    QueueContainer() {
-        size_ = 0;
-    }
-    QueueContainer( size_t   insize, char* inptr ) {
-        size_ = insize;
-        data_.reset( inptr );
-    }
-    QueueContainer( const QueueContainer& inqueue ) {
-        size_ = inqueue.size_;
-        data_ = inqueue.data_;
-    }
-    ~QueueContainer() {}
+        QueueContainer() {
+                size_ = 0;
+        }
+        QueueContainer(size_t   insize, char *inptr) {
+                size_ = insize;
+                data_.reset(inptr);
+        }
+        QueueContainer(const QueueContainer &inqueue) {
+                size_ = inqueue.size_;
+                data_ = inqueue.data_;
+        }
+        ~QueueContainer() {}
 
-    QueueContainer* reset( size_t insize, char* inptr ) {
-        size_ = insize;
-        data_.reset( inptr );
-        return this;
-    }
+        QueueContainer *reset(size_t insize, char *inptr) {
+                size_ = insize;
+                data_.reset(inptr);
+                return this;
+        }
 
-    size_t  size(){ return size_; }
-    dataPtr data(){ return data_; }
+        size_t  size() {
+                return size_;
+        }
+        dataPtr data() {
+                return data_;
+        }
 };
 #endif  // QUEUECONTAINER_H

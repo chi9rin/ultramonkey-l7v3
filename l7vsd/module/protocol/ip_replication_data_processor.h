@@ -37,71 +37,68 @@
 namespace l7vs
 {
 
-struct ip_replication_data_header
-{
-    char virtualserver_ip[IP_MAXLENGTH];
-    unsigned short virtualserver_port;
-    size_t offset;
-    size_t size;
+struct ip_replication_data_header {
+        char virtualserver_ip[IP_MAXLENGTH];
+        unsigned short virtualserver_port;
+        size_t offset;
+        size_t size;
 };
 
-struct ip_replication_data
-{
-    char realserver_ip[IP_MAXLENGTH];
-    unsigned short realserver_port;
-    time_t last_time;
-    int valid;
+struct ip_replication_data {
+        char realserver_ip[IP_MAXLENGTH];
+        unsigned short realserver_port;
+        time_t last_time;
+        int valid;
 };
 
-struct ip_replication_temp_data
-{
-    char op_code;
-    int ip_hash;
-    time_t last_time;
-    boost::asio::ip::tcp::endpoint rs_endpoint;
+struct ip_replication_temp_data {
+        char op_code;
+        int ip_hash;
+        time_t last_time;
+        boost::asio::ip::tcp::endpoint rs_endpoint;
 };
 
 class ip_replication_data_processor
 {
-    public:
+public:
         //! loglevel get function object type
         typedef    boost::function< LOG_LEVEL_TAG(void) >
-                                        getloglevel_func_type;
+        getloglevel_func_type;
         //! log output function object type
-        typedef    boost::function< void (const unsigned int, const std::string&, const char*, int) >
-                                        logger_func_type;
+        typedef    boost::function< void (const unsigned int, const std::string &, const char *, int) >
+        logger_func_type;
 
-    public:
-        ip_replication_data_processor(char* ip_replication_area_begin,
-                                        int ip_replication_area_size,
-                                        const boost::asio::ip::tcp::endpoint& virtual_service_endpoint,
-                                        getloglevel_func_type ingetloglevel,
-                                        logger_func_type inputLogFatal,
-                                        logger_func_type inputLogError,
-                                        logger_func_type inputLogWarn,
-                                        logger_func_type inputLogInfo,
-                                        logger_func_type inputLogDebug);
+public:
+        ip_replication_data_processor(char *ip_replication_area_begin,
+                                      int ip_replication_area_size,
+                                      const boost::asio::ip::tcp::endpoint &virtual_service_endpoint,
+                                      getloglevel_func_type ingetloglevel,
+                                      logger_func_type inputLogFatal,
+                                      logger_func_type inputLogError,
+                                      logger_func_type inputLogWarn,
+                                      logger_func_type inputLogInfo,
+                                      logger_func_type inputLogDebug);
 
         virtual ~ip_replication_data_processor();
 
-        void put_into_temp_list(const ip_replication_temp_data& data);
+        void put_into_temp_list(const ip_replication_temp_data &data);
 
         void write_replication_area();
 
-        ip_replication_data* get_replication_area();
+        ip_replication_data *get_replication_area();
 
         void register_replication_area_lock(boost::function<void(void)> intable_lock);
 
         void register_replication_area_unlock(boost::function<void(void)> intable_unlock);
 
-    protected:
-        int get_from_temp_list(ip_replication_temp_data& data);
+protected:
+        int get_from_temp_list(ip_replication_temp_data &data);
 
-    protected:
+protected:
         std::deque<ip_replication_temp_data> temp_list;
         boost::mutex temp_list_mutex;
         boost::condition temp_list_condition;
-        ip_replication_data* replication_area;
+        ip_replication_data *replication_area;
         boost::function<void(void)> replication_area_lock;
         boost::function<void(void)> replication_area_unlock;
         boost::asio::ip::tcp::endpoint virtual_service_endpoint;

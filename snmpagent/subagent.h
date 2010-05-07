@@ -13,30 +13,32 @@
 class l7ag_subagent
 {
 private:
-    l7ag_parameter snmpparam;
-    std::map<std::string,l7vs::LOG_LEVEL_TAG> levelstring_map;
+        l7ag_parameter snmpparam;
+        std::map<std::string, l7vs::LOG_LEVEL_TAG> levelstring_map;
 
-    bool            stop_flag;
-    THREAD_STAT_TAG stat;           // TODO no need? set only STOP. no read.
+        bool            stop_flag;
+        THREAD_STAT_TAG stat;           // TODO no need? set only STOP. no read.
 
-    MessageQueue    msg_queue;
-    TrapQueue       trap_queue;
+        MessageQueue    msg_queue;
+        TrapQueue       trap_queue;
 
-    MessengerClient*    messenger;  // IPC class
-    l7ag_dispatcher*    dispatcher; // Dispatch class
+        MessengerClient    *messenger;  // IPC class
+        l7ag_dispatcher    *dispatcher; // Dispatch class
 
-    void    reload_config();
-    void    load_loglevel();
-    void    loglevelmap_init();
+        void    reload_config();
+        void    load_loglevel();
+        void    loglevelmap_init();
 
 public:
-    l7ag_subagent();
-    ~l7ag_subagent();
+        l7ag_subagent();
+        ~l7ag_subagent();
 
-    bool    start();
-    void    stop();
+        bool    start();
+        void    stop();
 
-    l7ag_parameter* get_parameter(){ return &snmpparam; }
+        l7ag_parameter *get_parameter() {
+                return &snmpparam;
+        }
 };
 
 #endif //__SUBAGENT_H__
