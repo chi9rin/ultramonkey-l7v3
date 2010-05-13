@@ -3,7 +3,7 @@
 # l7directord
 # Linux Director Daemon - run "perldoc l7directord" for details
 #
-# 2005-2008 (C) NTT COMWARE
+# Copyright (C) 2005-2009  NTT COMWARE Corporation.
 #
 # License:   GNU General Public License (GPL)
 #

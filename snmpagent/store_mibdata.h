@@ -2,9 +2,7 @@
 //!    @file    store_mibdata.h
 //!    @brief    net-snmp mibdata stored header
 //
-//    copyright(c) sdy corporation.2008
-//    mail: h.okada at sdy.co.jp
-//    Copyright (c) 2008 norihisa nakai (n dot nakai at sdy dot co do jp)
+//    Copyright (C) 2008  NTT COMWARE Corporation.
 //
 //    Distributed under the Boost Software License, Version 1.0. (See accompanying
 //    file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
