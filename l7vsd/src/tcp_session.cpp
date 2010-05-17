@@ -1646,8 +1646,8 @@ void tcp_session::up_thread_realserver_send(const TCP_PROCESS_TYPE_TAG process_t
         {
                 rd_scoped_lock scoped_lock(exit_flag_update_mutex);
                 if (unlikely(exit_flag)) {
-                        func_tag = UP_FUNC_EXIT;
-                        break;
+                        up_thread_next_call_function = up_thread_function_array[UP_FUNC_EXIT];
+                        return;
                 }
         }
 
@@ -1733,6 +1733,9 @@ void tcp_session::up_thread_realserver_send(const TCP_PROCESS_TYPE_TAG process_t
         }
 
 }
+
+// XXX ---- koko made yonda ----
+
 //! up thread raise module event of handle_realserver_select
 //! @param[in]        process_type is prosecess type
 void tcp_session::up_thread_realserver_get_destination_event(const TCP_PROCESS_TYPE_TAG process_type)
@@ -1748,11 +1751,11 @@ void tcp_session::up_thread_realserver_get_destination_event(const TCP_PROCESS_T
         protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_select(up_thread_id, server_endpoint);
         up_thread_data_dest_side.set_endpoint(server_endpoint);
 
-        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
-        up_thread_function_pair func = up_thread_function_array[func_type->second];
+        std::map< protocol_module_base::EVENT_TAG , UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
+        up_thread_function_pair    func    = up_thread_function_array[func_type->second];
         if (module_event == protocol_module_base::SORRYSERVER_SELECT) {
                 // protocol module sorry mode change
-                tcp_thread_message *down_msg = new tcp_thread_message;
+                tcp_thread_message    *down_msg    = new tcp_thread_message;
 
                 std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator
                 down_func = up_thread_message_down_thread_function_map.find(
@@ -1781,8 +1784,8 @@ void tcp_session::up_thread_realserver_connect(const TCP_PROCESS_TYPE_TAG proces
         }
 
         boost::asio::ip::tcp::endpoint server_endpoint = up_thread_data_dest_side.get_endpoint();
-        std::map<endpoint, tcp_socket_ptr>::iterator get_socket = up_thread_send_realserver_socket_map.find(server_endpoint);
-        std::map<endpoint, tcp_socket_ptr>::iterator map_end = up_thread_send_realserver_socket_map.end();
+        std::map<endpoint, tcp_socket_ptr>::iterator get_socket =  up_thread_send_realserver_socket_map.find(server_endpoint);
+        std::map<endpoint, tcp_socket_ptr>::iterator map_end =  up_thread_send_realserver_socket_map.end();
         UP_THREAD_FUNC_TYPE_TAG func_tag;
         if (get_socket != map_end) {
                 func_tag = UP_FUNC_REALSERVER_CONNECT_EVENT;
@@ -1791,7 +1794,6 @@ void tcp_session::up_thread_realserver_connect(const TCP_PROCESS_TYPE_TAG proces
                 boost::system::error_code ec;
                 bool bres = new_socket->connect(server_endpoint, ec);
                 if (likely(bres)) {
-			// write access log
                         {
                                 rd_scoped_lock scoped_lock(access_log_flag_mutex);
                                 if (access_log_flag && access_logger != NULL) {
@@ -1810,38 +1812,44 @@ void tcp_session::up_thread_realserver_connect(const TCP_PROCESS_TYPE_TAG proces
                         }
                         parent_service.connection_active(server_endpoint);
                         if (unlikely(!new_socket->set_non_blocking_mode(ec))) {
-                                // cannot set socket to non-blocking mode
+                                // socket set nonblocking mode error
                                 std::stringstream buf;
-                                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                                buf << "set non blocking socket error:" << ec.message();
+                                buf << "Thread ID[";
+                                buf << boost::this_thread::get_id();
+                                buf << "] set non blocking socket error:";
+                                buf << ec.message();
                                 Logger::putLogError(LOG_CAT_L7VSD_SESSION, 34, buf.str(), __FILE__, __LINE__);
                                 up_thread_exit(process_type);
                                 return;
                         }
 
-                        // set realserver socket options(recieve buffer size)
+                        //set realserver_socket options(recieve buffer size)
                         if (downstream_buffer_size > 0) {
-                                boost::asio::socket_base::receive_buffer_size opt(downstream_buffer_size);
-                                new_socket->get_socket().set_option(opt, ec);
+                                boost::asio::socket_base::receive_buffer_size opt1(downstream_buffer_size);
+                                new_socket->get_socket().set_option(opt1, ec);
                                 if (unlikely(ec)) {
-	                                // cannot set socket to non-blocking mode
+                                        // socket set nonblocking mode error
                                         std::stringstream buf;
-                                        buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                                        buf << "realserver socket recieve buffer size error: " << ec.message();
+                                        buf << "Thread ID[";
+                                        buf << boost::this_thread::get_id();
+                                        buf << "] realserver socket recieve buffer size error: ";
+                                        buf << ec.message();
                                         Logger::putLogError(LOG_CAT_L7VSD_SESSION, 35, buf.str(), __FILE__, __LINE__);
                                         up_thread_exit(process_type);
                                         return;
                                 }
                         }
-                        // set realserver socket options(send buffer size)
+                        //set realserver_socket options(send buffer size)
                         if (upstream_buffer_size > 0) {
-                                boost::asio::socket_base::send_buffer_size opt(upstream_buffer_size);
-                                new_socket->get_socket().set_option(opt, ec);
+                                boost::asio::socket_base::send_buffer_size opt2(upstream_buffer_size);
+                                new_socket->get_socket().set_option(opt2, ec);
                                 if (unlikely(ec)) {
-	                                // cannot set socket to non-blocking mode
+                                        // socket set nonblocking mode error
                                         std::stringstream buf;
-                                        buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                                        buf << "realserver socket send buffer size error: " << ec.message();
+                                        buf << "Thread ID[";
+                                        buf << boost::this_thread::get_id();
+                                        buf << "] realserver socket send buffer size error: ";
+                                        buf << ec.message();
                                         Logger::putLogError(LOG_CAT_L7VSD_SESSION, 36, buf.str(), __FILE__, __LINE__);
                                         up_thread_exit(process_type);
                                         return;
@@ -1856,19 +1864,19 @@ void tcp_session::up_thread_realserver_connect(const TCP_PROCESS_TYPE_TAG proces
                         func_tag = UP_FUNC_REALSERVER_CONNECT_EVENT;
                 } else {
                         func_tag = UP_FUNC_REALSERVER_CONNECT_FAIL_EVENT;
-                        // cannot connect
+                        //connect socket error
                         std::stringstream buf;
-                        buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                        buf << "cannot connect real server: " << ec.message();
+                        buf << "Thread ID[";
+                        buf << boost::this_thread::get_id();
+                        buf << "] connect socket error:";
+                        buf << ec.message();
                         Logger::putLogError(LOG_CAT_L7VSD_SESSION, 37, buf.str(), __FILE__, __LINE__);
                 }
         }
         up_thread_function_pair func = up_thread_function_array[func_tag];
-	{
-	        boost::mutex::scoped_lock lock(realserver_connect_mutex);
-	        realserver_connect_status = true;
-	        realserver_connect_cond.notify_one();
-	}
+        boost::mutex::scoped_lock lock(realserver_connect_mutex);
+        realserver_connect_status = true;
+        realserver_connect_cond.notify_one();
         up_thread_next_call_function = func;
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -1877,7 +1885,6 @@ void tcp_session::up_thread_realserver_connect(const TCP_PROCESS_TYPE_TAG proces
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
         }
 }
-// XXX kokomade
 //! up thread raise module event of handle_realserver_connect
 //! @param[in]        process_type is prosecess type
 void tcp_session::up_thread_realserver_connect_event(const TCP_PROCESS_TYPE_TAG process_type)
