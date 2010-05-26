@@ -175,7 +175,7 @@ tcp_session::tcp_session(
                 std::make_pair(UP_FUNC_EXIT, boost::bind(&tcp_session::up_thread_exit, this, _1));
 
         // set up_thread_message_down_thread_function_map
-        std::pair<DOWN_THREAD_FUNC_TYPE_TAG , tcp_session_func > add_up_thread_message_func;
+        std::pair<DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func> add_up_thread_message_func;
         add_up_thread_message_func.first = DOWN_FUNC_CLIENT_DISCONNECT_EVENT;
         add_up_thread_message_func.second = boost::bind(&tcp_session::down_thread_client_disconnect_event, this, _1);
         up_thread_message_down_thread_function_map.insert(add_up_thread_message_func);
@@ -235,7 +235,7 @@ tcp_session::tcp_session(
         down_thread_function_array[DOWN_FUNC_EXIT]    = std::make_pair(DOWN_FUNC_EXIT, boost::bind(&tcp_session::down_thread_exit, this, _1));
 
         // set down_thread_message_up_thread_function_map
-        std::pair<UP_THREAD_FUNC_TYPE_TAG , tcp_session_func > add_down_thread_message_func;
+        std::pair<UP_THREAD_FUNC_TYPE_TAG, tcp_session_func> add_down_thread_message_func;
         add_down_thread_message_func.first = UP_FUNC_CLIENT_DISCONNECT_EVENT;
         add_down_thread_message_func.second = boost::bind(&tcp_session::up_thread_client_disconnect_event, this, _1);
         down_thread_message_up_thread_function_map.insert(add_down_thread_message_func);
@@ -247,7 +247,7 @@ tcp_session::tcp_session(
         down_thread_message_up_thread_function_map.insert(add_down_thread_message_func);
 
         // set virtual_service_message_up_thread_function_map
-        std::pair<TCP_VIRTUAL_SERVICE_MESSAGE_TAG , tcp_session_func > add_up_thread_vs_message_func;
+        std::pair<TCP_VIRTUAL_SERVICE_MESSAGE_TAG, tcp_session_func> add_up_thread_vs_message_func;
         add_up_thread_vs_message_func.first = SORRY_STATE_ENABLE;
         add_up_thread_vs_message_func.second = boost::bind(&tcp_session::up_thread_sorry_enable_event, this, _1);
         virtual_service_message_up_thread_function_map.insert(add_up_thread_vs_message_func);
@@ -259,7 +259,7 @@ tcp_session::tcp_session(
         virtual_service_message_up_thread_function_map.insert(add_up_thread_vs_message_func);
 
         // set virtual_service_message_down_thread_function_map
-        std::pair<TCP_VIRTUAL_SERVICE_MESSAGE_TAG , tcp_session_func > add_down_thread_vs_message_func;
+        std::pair<TCP_VIRTUAL_SERVICE_MESSAGE_TAG, tcp_session_func> add_down_thread_vs_message_func;
         add_down_thread_vs_message_func.first = SORRY_STATE_ENABLE;
         add_down_thread_vs_message_func.second = boost::bind(&tcp_session::down_thread_sorry_enable_event, this, _1);
         virtual_service_message_down_thread_function_map.insert(add_down_thread_vs_message_func);
@@ -1238,7 +1238,7 @@ void tcp_session::up_thread_client_accept(const TCP_PROCESS_TYPE_TAG process_typ
                                         //ERROR
                                         ssl_handshake_timer->cancel();
                                         func_tag = UP_FUNC_CLIENT_DISCONNECT;
-                                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, 113, "ssl socket handshaking failed" , __FILE__, __LINE__);
+                                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, 113, "ssl socket handshaking failed", __FILE__, __LINE__);
                                         //----Debug log----------------------------------------------------------------------
                                         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                                                 std::stringstream buf;
@@ -1713,7 +1713,7 @@ void tcp_session::up_thread_realserver_send(const TCP_PROCESS_TYPE_TAG process_t
                         func_tag = UP_FUNC_REALSERVER_SEND;
                 } else {
                         protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_send(up_thread_id);
-                        std::map< protocol_module_base::EVENT_TAG , UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
+                        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
                         func_tag = func_type->second;
                 }
         } else {
@@ -1734,8 +1734,6 @@ void tcp_session::up_thread_realserver_send(const TCP_PROCESS_TYPE_TAG process_t
 
 }
 
-// XXX ---- koko made yonda ----
-
 //! up thread raise module event of handle_realserver_select
 //! @param[in]        process_type is prosecess type
 void tcp_session::up_thread_realserver_get_destination_event(const TCP_PROCESS_TYPE_TAG process_type)
@@ -1751,15 +1749,14 @@ void tcp_session::up_thread_realserver_get_destination_event(const TCP_PROCESS_T
         protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_select(up_thread_id, server_endpoint);
         up_thread_data_dest_side.set_endpoint(server_endpoint);
 
-        std::map< protocol_module_base::EVENT_TAG , UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
-        up_thread_function_pair    func    = up_thread_function_array[func_type->second];
+        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
+        up_thread_function_pair func = up_thread_function_array[func_type->second];
         if (module_event == protocol_module_base::SORRYSERVER_SELECT) {
                 // protocol module sorry mode change
-                tcp_thread_message    *down_msg    = new tcp_thread_message;
+                tcp_thread_message *down_msg = new tcp_thread_message;
 
-                std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator
-                down_func = up_thread_message_down_thread_function_map.find(
-                                    DOWN_FUNC_SORRY_ENABLE_EVENT);
+                std::map<DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func>::iterator
+                down_func = up_thread_message_down_thread_function_map.find(DOWN_FUNC_SORRY_ENABLE_EVENT);
 
                 down_msg->message = down_func->second;
                 while (!down_thread_message_que.push(down_msg)) {}
@@ -1784,8 +1781,8 @@ void tcp_session::up_thread_realserver_connect(const TCP_PROCESS_TYPE_TAG proces
         }
 
         boost::asio::ip::tcp::endpoint server_endpoint = up_thread_data_dest_side.get_endpoint();
-        std::map<endpoint, tcp_socket_ptr>::iterator get_socket =  up_thread_send_realserver_socket_map.find(server_endpoint);
-        std::map<endpoint, tcp_socket_ptr>::iterator map_end =  up_thread_send_realserver_socket_map.end();
+        std::map<endpoint, tcp_socket_ptr>::iterator get_socket = up_thread_send_realserver_socket_map.find(server_endpoint);
+        std::map<endpoint, tcp_socket_ptr>::iterator map_end = up_thread_send_realserver_socket_map.end();
         UP_THREAD_FUNC_TYPE_TAG func_tag;
         if (get_socket != map_end) {
                 func_tag = UP_FUNC_REALSERVER_CONNECT_EVENT;
@@ -1814,10 +1811,8 @@ void tcp_session::up_thread_realserver_connect(const TCP_PROCESS_TYPE_TAG proces
                         if (unlikely(!new_socket->set_non_blocking_mode(ec))) {
                                 // socket set nonblocking mode error
                                 std::stringstream buf;
-                                buf << "Thread ID[";
-                                buf << boost::this_thread::get_id();
-                                buf << "] set non blocking socket error:";
-                                buf << ec.message();
+                                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
+                                buf << "set non blocking socket error: " << ec.message();
                                 Logger::putLogError(LOG_CAT_L7VSD_SESSION, 34, buf.str(), __FILE__, __LINE__);
                                 up_thread_exit(process_type);
                                 return;
@@ -1830,10 +1825,8 @@ void tcp_session::up_thread_realserver_connect(const TCP_PROCESS_TYPE_TAG proces
                                 if (unlikely(ec)) {
                                         // socket set nonblocking mode error
                                         std::stringstream buf;
-                                        buf << "Thread ID[";
-                                        buf << boost::this_thread::get_id();
-                                        buf << "] realserver socket recieve buffer size error: ";
-                                        buf << ec.message();
+                                        buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
+                                        buf << "realserver socket recieve buffer size error: " << ec.message();
                                         Logger::putLogError(LOG_CAT_L7VSD_SESSION, 35, buf.str(), __FILE__, __LINE__);
                                         up_thread_exit(process_type);
                                         return;
@@ -1846,10 +1839,8 @@ void tcp_session::up_thread_realserver_connect(const TCP_PROCESS_TYPE_TAG proces
                                 if (unlikely(ec)) {
                                         // socket set nonblocking mode error
                                         std::stringstream buf;
-                                        buf << "Thread ID[";
-                                        buf << boost::this_thread::get_id();
-                                        buf << "] realserver socket send buffer size error: ";
-                                        buf << ec.message();
+                                        buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
+                                        buf << "realserver socket send buffer size error: " << ec.message();
                                         Logger::putLogError(LOG_CAT_L7VSD_SESSION, 36, buf.str(), __FILE__, __LINE__);
                                         up_thread_exit(process_type);
                                         return;
@@ -1866,10 +1857,8 @@ void tcp_session::up_thread_realserver_connect(const TCP_PROCESS_TYPE_TAG proces
                         func_tag = UP_FUNC_REALSERVER_CONNECT_FAIL_EVENT;
                         //connect socket error
                         std::stringstream buf;
-                        buf << "Thread ID[";
-                        buf << boost::this_thread::get_id();
-                        buf << "] connect socket error:";
-                        buf << ec.message();
+                        buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
+                        buf << "connect socket error: " << ec.message();
                         Logger::putLogError(LOG_CAT_L7VSD_SESSION, 37, buf.str(), __FILE__, __LINE__);
                 }
         }
@@ -1897,12 +1886,12 @@ void tcp_session::up_thread_realserver_connect_event(const TCP_PROCESS_TYPE_TAG 
 
         endpoint server_endpoint = up_thread_data_dest_side.get_endpoint();
         up_thread_data_dest_side.initialize();
-        boost::array< char , MAX_BUFFER_SIZE >& data_buff = up_thread_data_dest_side.get_data();
+        boost::array<char, MAX_BUFFER_SIZE>& data_buff = up_thread_data_dest_side.get_data();
         size_t data_size = 0;
         protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_connect(up_thread_id, data_buff, data_size);
         up_thread_data_dest_side.set_endpoint(server_endpoint);
         up_thread_data_dest_side.set_size(data_size);
-        std::map< protocol_module_base::EVENT_TAG , UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
+        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
         up_thread_next_call_function = up_thread_function_array[func_type->second];
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -1923,7 +1912,7 @@ void tcp_session::up_thread_realserver_connection_fail_event(const TCP_PROCESS_T
 
         endpoint server_endpoint = up_thread_data_dest_side.get_endpoint();
         protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_connection_fail(up_thread_id, server_endpoint);
-        std::map< protocol_module_base::EVENT_TAG , UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
+        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
         up_thread_next_call_function = up_thread_function_array[func_type->second];
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -1948,12 +1937,12 @@ void tcp_session::up_thread_realserver_disconnect(const TCP_PROCESS_TYPE_TAG pro
         bool bres = close_socket->second->close(ec);
         if (bres) {
                 parent_service.connection_inactive(server_endpoint);
-                tcp_thread_message        *up_msg        = new tcp_thread_message;
-                tcp_thread_message        *down_msg    = new tcp_thread_message;
-                up_thread_function_pair    up_func    = up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT_EVENT];
+                tcp_thread_message *up_msg = new tcp_thread_message;
+                tcp_thread_message *down_msg = new tcp_thread_message;
+                up_thread_function_pair up_func = up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT_EVENT];
                 up_msg->endpoint_info = server_endpoint;
                 up_msg->message = up_func.second;
-                std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator down_func = up_thread_message_down_thread_function_map.find(DOWN_FUNC_REALSERVER_DISCONNECT_EVENT);
+                std::map<DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func>::iterator down_func = up_thread_message_down_thread_function_map.find(DOWN_FUNC_REALSERVER_DISCONNECT_EVENT);
                 down_msg->endpoint_info = server_endpoint;
                 down_msg->message = down_func->second;
                 while (!up_thread_message_que.push(up_msg)) {}
@@ -1984,7 +1973,7 @@ void tcp_session::up_thread_realserver_disconnect_event(const TCP_PROCESS_TYPE_T
         }
         up_thread_send_realserver_socket_map.erase(server_endpoint);
 
-        std::map< protocol_module_base::EVENT_TAG , UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
+        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
         up_thread_next_call_function = up_thread_function_array[func_type->second];
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -1993,6 +1982,9 @@ void tcp_session::up_thread_realserver_disconnect_event(const TCP_PROCESS_TYPE_T
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
         }
 }
+
+// kokomade yonda
+
 //! up thread close all realserver socket and raise module event of handle_realserver_disconnect
 //! @param[in]        process_type is prosecess type
 void tcp_session::up_thread_all_realserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type)
@@ -2038,7 +2030,7 @@ void tcp_session::up_thread_all_realserver_disconnect(const TCP_PROCESS_TYPE_TAG
                 module_event = protocol_module->handle_realserver_disconnect(up_thread_id, boost::asio::ip::tcp::endpoint());
         }
         up_thread_send_realserver_socket_map.clear();
-        std::map< protocol_module_base::EVENT_TAG , UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
+        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
         up_thread_next_call_function = up_thread_function_array[func_type->second];
 
         //allrealserver_disconnect.
@@ -2163,7 +2155,7 @@ void tcp_session::up_thread_sorryserver_send(const TCP_PROCESS_TYPE_TAG process_
                                 func_tag = UP_FUNC_SORRYSERVER_SEND;
                         } else {
                                 protocol_module_base::EVENT_TAG module_event = protocol_module->handle_sorryserver_send(up_thread_id);
-                                std::map< protocol_module_base::EVENT_TAG , UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
+                                std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
                                 if (unlikely(func_type == up_thread_module_event_map.end())) {
                                         //Error unknown protocol_module_base::EVENT_TAG return
                                         std::stringstream buf;
@@ -2213,7 +2205,7 @@ void tcp_session::up_thread_sorryserver_get_destination_event(const TCP_PROCESS_
         protocol_module_base::EVENT_TAG module_event = protocol_module->handle_sorryserver_select(up_thread_id, server_endpoint);
         up_thread_data_dest_side.set_endpoint(server_endpoint);
 
-        std::map< protocol_module_base::EVENT_TAG , UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
+        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
         up_thread_next_call_function = up_thread_function_array[func_type->second];
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2279,12 +2271,12 @@ void tcp_session::up_thread_sorryserver_connect_event(const TCP_PROCESS_TYPE_TAG
 
         endpoint sorry_endpoint = up_thread_data_dest_side.get_endpoint();
         up_thread_data_dest_side.initialize();
-        boost::array< char , MAX_BUFFER_SIZE >& data_buff = up_thread_data_dest_side.get_data();
+        boost::array<char, MAX_BUFFER_SIZE>& data_buff = up_thread_data_dest_side.get_data();
         size_t data_size = 0;
         protocol_module_base::EVENT_TAG module_event = protocol_module->handle_sorryserver_connect(up_thread_id, data_buff, data_size);
         up_thread_data_dest_side.set_endpoint(sorry_endpoint);
         up_thread_data_dest_side.set_size(data_size);
-        std::map< protocol_module_base::EVENT_TAG , UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
+        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
         up_thread_next_call_function = up_thread_function_array[func_type->second];
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2305,7 +2297,7 @@ void tcp_session::up_thread_sorryserver_connection_fail_event(const TCP_PROCESS_
 
         endpoint server_endpoint = up_thread_data_dest_side.get_endpoint();
         protocol_module_base::EVENT_TAG module_event = protocol_module->handle_sorryserver_connection_fail(up_thread_id, server_endpoint);
-        std::map< protocol_module_base::EVENT_TAG , UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
+        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
         up_thread_next_call_function = up_thread_function_array[func_type->second];
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2367,7 +2359,7 @@ void tcp_session::up_thread_sorryserver_mod_disconnect(const TCP_PROCESS_TYPE_TA
                 rw_scoped_lock scope_lock(module_function_sorryserver_disconnect_mutex);
                 module_event = protocol_module->handle_sorryserver_disconnect(up_thread_id, sorry_endpoint);
         }
-        std::map< protocol_module_base::EVENT_TAG , UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
+        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
         up_thread_next_call_function = up_thread_function_array[func_type->second];
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2393,7 +2385,7 @@ void tcp_session::up_thread_sorryserver_disconnect_event(const TCP_PROCESS_TYPE_
                 rw_scoped_lock scope_lock(module_function_sorryserver_disconnect_mutex);
                 module_event = protocol_module->handle_sorryserver_disconnect(up_thread_id, sorry_endpoint);
         }
-        std::map< protocol_module_base::EVENT_TAG , UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
+        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
         up_thread_next_call_function = up_thread_function_array[func_type->second];
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2426,7 +2418,7 @@ void tcp_session::up_thread_sorry_enable_event(const TCP_PROCESS_TYPE_TAG proces
                 //----Debug log----------------------------------------------------------------------
                 module_event = protocol_module->handle_sorry_enable(up_thread_id);
         }
-        std::map< protocol_module_base::EVENT_TAG , UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
+        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
         up_thread_next_call_function = up_thread_function_array[func_type->second];
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2459,7 +2451,7 @@ void tcp_session::up_thread_sorry_disable_event(const TCP_PROCESS_TYPE_TAG proce
                 //----Debug log----------------------------------------------------------------------
                 module_event = protocol_module->handle_sorry_disable(up_thread_id);
         }
-        std::map< protocol_module_base::EVENT_TAG , UP_THREAD_FUNC_TYPE_TAG >::iterator func_type = up_thread_module_event_map.find(module_event);
+        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
         up_thread_next_call_function = up_thread_function_array[func_type->second];
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2660,7 +2652,7 @@ void tcp_session::down_thread_realserver_receive(const TCP_PROCESS_TYPE_TAG proc
 
                         protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_recv(down_thread_id, server_endpoint, data_buff, recv_size);
 
-                        std::map< protocol_module_base::EVENT_TAG , DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
+                        std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type = down_thread_module_event_map.find(module_event);
                         func_tag = func_type->second;
                 } else {
                         func_tag = DOWN_FUNC_REALSERVER_RECEIVE;
@@ -2759,7 +2751,7 @@ void tcp_session::down_thread_realserver_disconnect_event(const TCP_PROCESS_TYPE
                 erase_socket++;
         }
 
-        std::map< protocol_module_base::EVENT_TAG , DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
+        std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type = down_thread_module_event_map.find(module_event);
         down_thread_next_call_function = down_thread_function_array[func_type->second];
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2813,7 +2805,7 @@ void tcp_session::down_thread_all_realserver_disconnect(const TCP_PROCESS_TYPE_T
                 module_event = protocol_module->handle_realserver_disconnect(down_thread_id, boost::asio::ip::tcp::endpoint());
         }
         down_thread_receive_realserver_socket_list.clear();
-        std::map< protocol_module_base::EVENT_TAG , DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
+        std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type = down_thread_module_event_map.find(module_event);
         down_thread_next_call_function = down_thread_function_array[func_type->second];
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2837,7 +2829,7 @@ void tcp_session::down_thread_client_connection_chk_event(const TCP_PROCESS_TYPE
         std::size_t data_size;
         protocol_module_base::EVENT_TAG module_event = protocol_module->handle_client_connection_check(down_thread_id, data_buff, data_size);
         down_thread_data_client_side.set_size(data_size);
-        std::map< protocol_module_base::EVENT_TAG , DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
+        std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type = down_thread_module_event_map.find(module_event);
         down_thread_next_call_function = down_thread_function_array[func_type->second];
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2862,7 +2854,7 @@ void tcp_session::down_thread_client_respond_event(const TCP_PROCESS_TYPE_TAG pr
                 rw_scoped_lock scope_lock(module_function_response_send_inform_mutex);
                 module_event = protocol_module->handle_response_send_inform(down_thread_id);
         }
-        std::map< protocol_module_base::EVENT_TAG , DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
+        std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type = down_thread_module_event_map.find(module_event);
         down_thread_next_call_function = down_thread_function_array[func_type->second];
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2989,7 +2981,7 @@ void tcp_session::down_thread_client_send(const TCP_PROCESS_TYPE_TAG process_typ
                                 //down_send_wait.reset();
                         } else {
                                 protocol_module_base::EVENT_TAG module_event = protocol_module->handle_client_send(down_thread_id);
-                                std::map< protocol_module_base::EVENT_TAG , DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
+                                std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type = down_thread_module_event_map.find(module_event);
                                 func_tag = func_type->second;
                         }
                         break;
@@ -3057,7 +3049,7 @@ void tcp_session::down_thread_client_disconnect_event(const TCP_PROCESS_TYPE_TAG
                 rw_scoped_lock scope_lock(module_function_client_disconnect_mutex);
                 module_event = protocol_module->handle_client_disconnect(down_thread_id);
         }
-        std::map< protocol_module_base::EVENT_TAG , DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type =
+        std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type =
                 down_thread_module_event_map.find(module_event);
         down_thread_function_pair    func    = down_thread_function_array[func_type->second];
         down_thread_next_call_function = func;
@@ -3176,7 +3168,7 @@ void tcp_session::down_thread_sorryserver_receive(const TCP_PROCESS_TYPE_TAG pro
                                 //----Debug log----------------------------------------------------------------------
                                 down_thread_data_dest_side.set_size(recv_size);
                                 protocol_module_base::EVENT_TAG module_event = protocol_module->handle_sorryserver_recv(down_thread_id, sorry_endpoint, data_buff, recv_size);
-                                std::map< protocol_module_base::EVENT_TAG , DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
+                                std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type = down_thread_module_event_map.find(module_event);
                                 func_tag = func_type->second;
                         } else {
                                 func_tag = DOWN_FUNC_SORRYSERVER_RECEIVE;
@@ -3252,7 +3244,7 @@ void tcp_session::down_thread_sorryserver_mod_disconnect(const TCP_PROCESS_TYPE_
                 module_event = protocol_module->handle_sorryserver_disconnect(down_thread_id, sorry_endpoint);
         }
 
-        std::map< protocol_module_base::EVENT_TAG , DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
+        std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type = down_thread_module_event_map.find(module_event);
         down_thread_function_pair    func    = down_thread_function_array[func_type->second];
         down_thread_next_call_function = func;
 
@@ -3278,7 +3270,7 @@ void tcp_session::down_thread_sorryserver_disconnect_event(const TCP_PROCESS_TYP
                 rw_scoped_lock scope_lock(module_function_sorryserver_disconnect_mutex);
                 module_event = protocol_module->handle_sorryserver_disconnect(down_thread_id, sorry_endpoint);
         }
-        std::map< protocol_module_base::EVENT_TAG , DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
+        std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type = down_thread_module_event_map.find(module_event);
         down_thread_function_pair    func    = down_thread_function_array[func_type->second];
         down_thread_next_call_function = func;
 
@@ -3312,7 +3304,7 @@ void tcp_session::down_thread_sorry_enable_event(const TCP_PROCESS_TYPE_TAG proc
                 //----Debug log----------------------------------------------------------------------
                 module_event = protocol_module->handle_sorry_enable(down_thread_id);
         }
-        std::map< protocol_module_base::EVENT_TAG , DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
+        std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type = down_thread_module_event_map.find(module_event);
         down_thread_function_pair    func    = down_thread_function_array[func_type->second];
         down_thread_next_call_function = func;
 
@@ -3346,7 +3338,7 @@ void tcp_session::down_thread_sorry_disable_event(const TCP_PROCESS_TYPE_TAG pro
                 //----Debug log----------------------------------------------------------------------
                 module_event = protocol_module->handle_sorry_disable(down_thread_id);
         }
-        std::map< protocol_module_base::EVENT_TAG , DOWN_THREAD_FUNC_TYPE_TAG >::iterator func_type = down_thread_module_event_map.find(module_event);
+        std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type = down_thread_module_event_map.find(module_event);
         down_thread_function_pair    func    = down_thread_function_array[func_type->second];
         down_thread_next_call_function = func;
 
