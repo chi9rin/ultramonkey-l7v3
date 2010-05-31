@@ -1,26 +1,21 @@
-[Xxx. xx 2009] 3.0.0-0 Shinya TAKEBAYASHI
-  - Impliment MultiThread Arch. using boost asio and boost thread library.
-  - Impliment IPv6 protocol logic.
-  - Impliment UDP protocol logic.
-  - Impliment SorryURI support.
-  - Change l7vsadm - l7vsd protocol DGRAM to STREAM. and DATA serialized from boost serializable.
-  - Change epoll api to MultpThread session control.
-  - Change protocol and schedule module arch. module event driven model.
-  - Change Using one virtualservice is one accept endpoint.
-  - Change URL protocol module is multi url support.
-  - Fixed algorithm for logger. ( log mode serch logic added. and MultiThread fix. )
-  - Fixed algorithm for parameter. ( using boost algorithm template. and MulthThread fix. )
-  - 
+[Xxx. xx 2010] 3.0.0-0 Shinya TAKEBAYASHI
+  - Implimented Multi-threading architecture using Boost::Asio and Boost::Thread library.
+  - Implimented IPv6 protocol logic.
+  - Implimented SorryURI support.
+  - Change l7vsadm - l7vsd protocol from DGRAM to STREAM. And serialized stream data using Boost::Serializable.
+  - Change protocol and schedule module architecture to module event driven model.
+  - Fixed algorithm for logger. (Search Log mode logic added.)
+  - Fixed algorithm for parameter. (Using boost algorithm template.)
 
 [Dec. 17 2008] 2.1.0-0 Shinya TAKEBAYASHI
   - Added option for FAST SCHEDULE to sessionless module
     Establishing connection when client connection was established.
-  - Implimented access logger ( CLIENT -DESTINATION mapping )
+  - Implimented access logger ( CLIENT-DESTINATION mapping )
   - Optimized event listener.
   - Fixed algorithms for some check type.
   - "Checkout" has been enabled.
   - Created "man" page.(Japanese(UTF-8) only ;))
-  - Impliment flow control logic(sever).
+  - Implimented flow control logic(sever).
   - Eliminated flow control logic(client).
 
 [May. 26 2008] 2.0.0-0 Shinya TAKEBAYASHI
