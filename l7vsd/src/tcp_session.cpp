@@ -2560,7 +2560,7 @@ void tcp_session::down_thread_realserver_receive(const TCP_PROCESS_TYPE_TAG proc
         if (!down_realserver_epollfd_registered) {
                 if (epoll_ctl(down_realserver_epollfd, EPOLL_CTL_ADD, event.data.fd, &event) < 0) {
                         std::stringstream buf;
-                        buf << "doun_thread_realserver_receive: epoll_ctl EPOLL_CTL_ADD error: " << strerror(errno);
+                        buf << "down_thread_realserver_receive: epoll_ctl EPOLL_CTL_ADD error: " << strerror(errno);
                         Logger::putLogWarn(LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__);
                         boost::this_thread::yield();
                         return;
@@ -3070,7 +3070,7 @@ void tcp_session::down_thread_sorryserver_receive(const TCP_PROCESS_TYPE_TAG pro
                 }
                 if (epoll_ctl(down_sorryserver_epollfd, EPOLL_CTL_ADD, event.data.fd, &event) < 0) {
                         std::stringstream buf;
-                        buf << "doun_thread_sorryserver_receive: epoll_ctl EPOLL_CTL_ADD error: ";
+                        buf << "down_thread_sorryserver_receive: epoll_ctl EPOLL_CTL_ADD error: ";
                         buf << strerror(errno);
                         Logger::putLogWarn(LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__);
                         boost::this_thread::yield();
