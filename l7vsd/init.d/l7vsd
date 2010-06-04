@@ -1,4 +1,4 @@
-#!/bin/sh
+﻿#!/bin/sh
 # Start/Stop script for l7vsd
 #
 # chkconfig: - 95 34
@@ -23,8 +23,8 @@ start() {
 	PROCS=`ps ax | grep $DAEMON | grep -v grep | wc -l`
 	if [ $PROCS -ne 0 ]; then
 	    echo "$PROG is running."
-	    RETVAL=-1
-	    return
+	    RETVAL=255
+	    return $RETVAL
 	fi
 	cleanup
     fi
@@ -49,9 +49,9 @@ stop() {
     PID=`pidof l7vsd`
     if [ -z $PID ]; then
 	echo "$PROG is not running."
-	RETVAL=-1
+	RETVAL=255
 	cleanup
-	return
+	return $RETVAL
     fi
 
     echo -n "Stopping $PROG: "
@@ -69,7 +69,7 @@ stop() {
 status() {
     if [ ! -e $PIDFILE ]; then
 	echo "$PROG is not running."
-	RETVAL=-1
+	RETVAL=255
     else
 	echo -n "$PROG running with pid: "
 	cat $PIDFILE
@@ -88,7 +88,8 @@ cleanup() {
 # Prefer for Running script
 if [ ! -x $DAEMON ]; then
     echo "$DAEMON does not exist!"
-    exit -1
+    RETVAL=255
+    exit $RETVAL
 fi
 
 case "$1" in
@@ -118,7 +119,7 @@ case "$1" in
     
     *)
 	echo $"Usage: $0 {start|stop|restart|condrestart|status}"
-	RETVAL=-1
+	RETVAL=255
 
 esac
 
