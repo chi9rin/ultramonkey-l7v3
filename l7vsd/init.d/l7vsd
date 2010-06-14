@@ -1,4 +1,4 @@
-﻿#!/bin/sh
+#!/bin/sh
 # Start/Stop script for l7vsd
 #
 # chkconfig: - 95 34
