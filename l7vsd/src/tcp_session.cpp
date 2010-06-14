@@ -1002,7 +1002,7 @@ void tcp_session::up_thread_run()
                                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
                         }
                         to_time(LOCKTIMEOUT, xt);
-                        downthread_status_cond.wait(lock, xt);
+                        downthread_status_cond.timed_wait(lock, xt);
                 }
         }
 
