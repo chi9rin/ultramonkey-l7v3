@@ -3,6 +3,10 @@
 /* Define to 1 if you have the `alarm' function. */
 #undef HAVE_ALARM
 
+/* Define to 1 if you have the declaration of `IP_TRANSPARENT', and to 0 if
+   you don't. */
+#undef HAVE_DECL_IP_TRANSPARENT
+
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 

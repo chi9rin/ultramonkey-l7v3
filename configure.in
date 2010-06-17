@@ -29,6 +29,12 @@ AC_CHECK_LIB(boost_system-mt, main, :,
 # Checks for header files.
 AC_CHECK_HEADERS([limits.h unistd.h])
 
+# Checks for declarations.
+AC_CHECK_DECLS([IP_TRANSPARENT], [], [], [[
+	#include <sys/socket.h>
+	#include <linux/in.h>
+]])
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
 AC_C_CONST

@@ -24,6 +24,12 @@
 
 #ifndef TCP_SOCKET_OPTION_H
 #define TCP_SOCKET_OPTION_H
+
+#include "config.h"
+#if HAVE_DECL_IP_TRANSPARENT && !defined(IP_TRANSPARENT)
+#define IP_TRANSPARENT          19
+#endif
+
 namespace l7vs
 {
 //! tcp_socket_option

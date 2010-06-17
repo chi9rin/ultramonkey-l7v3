@@ -32,6 +32,7 @@
 #include <sstream>
 #include "error_code.h"
 #include "l7vs_command.h"
+#include "tcp_socket_option.h"
 
 #ifndef     L7VS_MODULE_PATH
 #define L7VS_MODULE_PATH    "./"
