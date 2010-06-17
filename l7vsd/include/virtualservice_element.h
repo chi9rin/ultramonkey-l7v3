@@ -78,6 +78,7 @@ public:
         std::string             protocol_module_for_indication_options;
         std::string             access_log_rotate_key_info;
         std::string             access_log_rotate_verbose_info;
+        int                     socket_option_ip_transparent;
         int                     socket_option_tcp_defer_accept;
         int                     socket_option_tcp_nodelay;
         int                     socket_option_tcp_cork;
@@ -92,6 +93,7 @@ public:
                 throughput_upstream(0ULL),
                 throughput_downstream(0ULL),
                 access_log_flag(0),
+                socket_option_ip_transparent(0),
                 socket_option_tcp_defer_accept(0),
                 socket_option_tcp_nodelay(0),
                 socket_option_tcp_cork(0),
@@ -116,6 +118,7 @@ public:
                     protocol_module_for_indication_options(in.protocol_module_for_indication_options),
                     access_log_rotate_key_info(in.access_log_rotate_key_info),
                     access_log_rotate_verbose_info(in.access_log_rotate_verbose_info),
+                    socket_option_ip_transparent(in.socket_option_ip_transparent),
                     socket_option_tcp_defer_accept(in.socket_option_tcp_defer_accept),
                     socket_option_tcp_nodelay(in.socket_option_tcp_nodelay),
                     socket_option_tcp_cork(in.socket_option_tcp_cork),
@@ -154,6 +157,7 @@ public:
                 protocol_module_for_indication_options = in.protocol_module_for_indication_options;
                 access_log_rotate_key_info = in.access_log_rotate_key_info;
                 access_log_rotate_verbose_info = in.access_log_rotate_verbose_info;
+                socket_option_ip_transparent = in.socket_option_ip_transparent;
                 socket_option_tcp_defer_accept = in.socket_option_tcp_defer_accept;
                 socket_option_tcp_nodelay = in.socket_option_tcp_nodelay;
                 socket_option_tcp_cork = in.socket_option_tcp_cork;
@@ -191,6 +195,7 @@ public:
                     elem1.protocol_module_for_indication_options == elem2.protocol_module_for_indication_options &&
                     elem1.access_log_rotate_key_info == elem2.access_log_rotate_key_info &&
                     elem1.access_log_rotate_verbose_info == elem2.access_log_rotate_verbose_info &&
+                    elem1.socket_option_ip_transparent == elem2.socket_option_ip_transparent &&
                     elem1.socket_option_tcp_defer_accept == elem2.socket_option_tcp_defer_accept &&
                     elem1.socket_option_tcp_nodelay == elem2.socket_option_tcp_nodelay &&
                     elem1.socket_option_tcp_cork == elem2.socket_option_tcp_cork &&
@@ -233,6 +238,7 @@ public:
                     elem1.protocol_module_for_indication_options == elem2.protocol_module_for_indication_options &&
                     elem1.access_log_rotate_key_info == elem2.access_log_rotate_key_info &&
                     elem1.access_log_rotate_verbose_info == elem2.access_log_rotate_verbose_info &&
+                    elem1.socket_option_ip_transparent == elem2.socket_option_ip_transparent &&
                     elem1.socket_option_tcp_defer_accept == elem2.socket_option_tcp_defer_accept &&
                     elem1.socket_option_tcp_nodelay == elem2.socket_option_tcp_nodelay &&
                     elem1.socket_option_tcp_cork == elem2.socket_option_tcp_cork &&
@@ -322,6 +328,7 @@ public:
                                     "protocol_module_for_indication_options=%s: "
                                     "access_log_rotate_key_info=%s: "
                                     "access_log_rotate_verbose_info=%s: "
+                                    "socket_option_ip_transparent=%d: "
                                     "socket_option_tcp_defer_accept=%d: "
                                     "socket_option_tcp_nodelay=%d: "
                                     "socket_option_tcp_cork=%d: "
@@ -342,6 +349,7 @@ public:
                    % elem.protocol_module_for_indication_options
                    % elem.access_log_rotate_key_info
                    % elem.access_log_rotate_verbose_info
+                   % elem.socket_option_ip_transparent
                    % elem.socket_option_tcp_defer_accept
                    % elem.socket_option_tcp_nodelay
                    % elem.socket_option_tcp_cork
@@ -379,6 +387,7 @@ private:
                 ar &protocol_module_for_indication_options;
                 ar &access_log_rotate_key_info;
                 ar &access_log_rotate_verbose_info;
+                ar &socket_option_ip_transparent;
                 ar &socket_option_tcp_defer_accept;
                 ar &socket_option_tcp_nodelay;
                 ar &socket_option_tcp_cork;

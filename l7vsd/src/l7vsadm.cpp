@@ -1076,11 +1076,15 @@ bool    l7vs::l7vsadm::parse_opt_vs_socket_func(int &pos, int argc, char *argv[]
                 return false;
         }
 
+#ifdef IP_TRANSPARENT
+        bool is_set_transparent = false;
+#endif
         bool is_set_defer_accept = false;
         bool is_set_nodelay = false;
         bool is_set_cork = false;
         bool is_set_quickack = false;
 
+        request.vs_element.socket_option_ip_transparent = 0;
         request.vs_element.socket_option_tcp_defer_accept = 0;
         request.vs_element.socket_option_tcp_nodelay = 0;
         request.vs_element.socket_option_tcp_cork = 0;
@@ -1091,7 +1095,27 @@ bool    l7vs::l7vsadm::parse_opt_vs_socket_func(int &pos, int argc, char *argv[]
         boost::split(socket_options, socket_option_string, boost::algorithm::is_any_of(","));
 
         BOOST_FOREACH(std::string option, socket_options) {
-                if (option == "deferaccept") {
+                if (option == "transparent") {
+#ifdef IP_TRANSPARENT
+                        if (!is_set_transparent) {
+                                is_set_transparent = true;
+                                request.vs_element.socket_option_ip_transparent = 1;
+                        } else {
+                                // transparent is duplicated
+                                std::stringstream buf;
+                                buf << "socket option transparent is duplicated.";
+                                l7vsadm_err.setter(true, buf.str());
+                                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, /*XXX*/999, buf.str(), __FILE__, __LINE__);
+                                return false;
+                        }
+#else
+                        std::stringstream buf;
+                        buf << "socket option transparent(IP_TRANSPARENT) not supported on this platform";
+                        l7vsadm_err.setter(true, buf.str());
+                        Logger::putLogError(LOG_CAT_L7VSADM_PARSE, /*XXX*/999, buf.str(), __FILE__, __LINE__);
+                        return false;
+#endif
+                } else if (option == "deferaccept") {
                         if (!is_set_defer_accept) {
                                 is_set_defer_accept = true;
                                 request.vs_element.socket_option_tcp_defer_accept = 1;
@@ -1914,7 +1938,11 @@ bool    l7vs::l7vsadm::parse_help_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG c
                   "  --qos-up           -Q QoSval-up           QoS Threshold(bps) set to real server direction\n"
                   "  --qos-down         -q QoSval-down         QoS Threshold(bps) set to client direction\n"
                   "  --ssl              -z ssl-config-file     SSL configuration file(Use SSL)\n"
+#ifdef IP_TRANSPARENT
+                  "  --sockopt          -O socket-option       transparent,deferaccept,nodelay,cork,quickackon or quickackoff set to socket option\n"
+#else
                   "  --sockopt          -O socket-option       deferaccept,nodelay,cork,quickackon or quickackoff set to socket option\n"
+#endif
                   "  --access-log       -L access-log-flag     access log flag 0(none) or 1(output)\n"
                   "  --access-log-name  -a access-log-file     access log file\n"
                   "                        [logrotate-args]\n"

@@ -926,7 +926,7 @@ sub validate_config {
              || $name eq 'accesslog') {
             $value = defined $value && $value =~ /^yes$/i ? 1
                    : defined $value && $value =~ /^no$/i  ? 0
-                   :                                     undef
+                   :                                        undef
                    ;
             if (!defined $value) {
                 config_error($line, 'ERR0102', $config);
@@ -985,14 +985,15 @@ sub validate_config {
         }
         elsif ( $name eq 'socketoption') {
             $value = lc $value;
-            # socketoption=OPTION,OPTION,OPTION
+            $value =~ s/ //g;
             if (!defined $value) {
                 config_error($line, 'ERR0124', $config);
             }
             my @option_value = split /,/, $value;
-            # OPTION:deferaccept,nodelay,cork,quickackon|quickackoff
+            # OPTION:transparent,deferaccept,nodelay,cork,quickackon|quickackoff
             for my $option (@option_value) {
-                if($option !~ /^deferaccept|nodelay|cork|quickackon|quickackoff$/) {
+		$option =~ s/ //g;
+                if($option !~ /^transparent|deferaccept|nodelay|cork|quickackon|quickackoff$/) {
                     config_error($line, 'ERR0124', $config);
                 }
             }
@@ -4920,65 +4921,82 @@ When communication with Client is SSL, the file name for SSL setting is
 designated.
 
 
-=item B<socketoption = ">I<OPTION,OPTION, ...>B<">
+=item B<socketoption = ">I<OPTION...>B<">
 
-An option of the socket used in VirtualService (TCP) is designated.
+An option of the socket used in VirtualService is designated.
 The setting possible value is described.
 
-1.deferaccept
-           In a listener socket of VirtualService, TCP_DEFER_ACCEPT setting.
+=over
 
-2.nodelay
-           In a socket for communication with Client in Session and RealServer, TCP_NODELAY setting.
+=item B<transparent>
 
-3.cork
-           In a socket for communication with Client in Session and RealServer, TCP_CORK setting.
+Set IP_TRANSPARENT option to the RealServer socket.
 
-4.quickackon or quickackoff
-           In a socket for communication with Client in Session and RealServer, TCP_QUICKACK setting.
+=item B<deferaccept>
 
-example:
-       socketoption=deferaccept,nodelay,quickackoff
+Set TCP_DEFER_ACCEPT option to the listener socket of VirtualService.
 
-=item B<accesslog = ">I<ACCESSLOG_ROTATE_TYPE>B<">
+=item B<nodelay>
 
-A presence of access log output is established.
-yes: outputs/no: doesn't output.
+Set TCP_NODELAY option to the Client and RealServer socket.
 
-=item B<accesslog_rotate_type = date>|B<size>|B<datesize>
+=item B<cork>
 
-The rotation type designates "date" "size" "datesize".
+Set TCP_CORK option to the Client and RealServer socket.
+
+=item B<quickackon> or B<quickackoff>
+
+Set or unset TCP_QUICKACK option to the Client and RealServer socket.
+
+=back
+
+=item B<accesslog = >[B<yes>|B<no>]
+
+If B<yes>, then output client access log. The default is B<no>.
+
+=item B<accesslog_rotate_type = >[B<date>|B<size>|B<datesize>]
+
+B<date> means rotate access log with the specified date/time. B<size> means rotate access log when that file size exceeds the specified size. B<datesize> means both B<date> and B<size>.
 
 =item B<accesslog_rotate_max_backup_index = >I<n>
 
-The maximum number of back-up file is designated.
+Maximum number of backup files.
 
 =item B<accesslog_rotate_max_filesize = > I<n>[B<K>|B<M>|B<G>]
 
-The most large size of log is designated.
-When "size" and "datesize" are set as accesslog_rotate_type, it becomes indispensable. K(kilo), M(mega) and G(giga) unit are available.
+Threshold file size of access log when B<accesslog_rotate_type> is set to B<size> or B<datesize>. B<K>(kilo), B<M>(mega) and B<G>(giga) units are available.
 
-=item B<accesslog_rotate_rotation_timing = year>|B<month>|B<week>|B<date>|B<hour>
+=item B<accesslog_rotate_rotation_timing = >[B<year>|B<month>|B<week>|B<date>|B<hour>]
 
-It's designated at the timing of a rotation.
-When "date" and "datesize" are set as accesslog_rotate_type, it becomes indispensable.
+Rotate timing type when B<accesslog_rotate_type> is set to B<date> or B<datesize>.
 
 =item B<accesslog_rotate_rotation_timing_value = ">I<rotation_timing_value>B<">
 
-When "year" was designated as accesslog_rotate_rotation_timing.
-  FORMAT: "MM/dd hh:mm" MM(month) dd(day) hh(hour):mm(minute)
+Rotate timing. The formats are different by B<accesslog_rotate_rotation_timing> setting.
 
-When "month" was designated as accesslog_rotate_rotation_timing.
-  FORMAT: "dd hh:mm" dd(day) hh(hour):mm(minute)
+=over
 
-When "week" was designated as accesslog_rotate_rotation_timing.
-  FORMAT: "<week> hh:mm" sun|mon|tue|wed|thu|fri|sat(week) hh(hour):mm(minute)"
+=item B<accesslog_rotate_rotation_timing=year>
 
-When "date" was designated as accesslog_rotate_rotation_timing.
-  FORMAT: "hh:mm" hh(hour):mm(minute)
+FORMAT: B<"MM/dd HH:mm">
 
-When "hour" was designated as accesslog_rotate_rotation_timing.
-  FORMAT: "mm" mm(minute)
+=item B<accesslog_rotate_rotation_timing=month>
+
+FORMAT: B<"dd HH:mm">
+
+=item B<accesslog_rotate_rotation_timing=week>
+
+FORMAT: B<">[B<sun>|B<mon>|B<tue>|B<wed>|B<thu>|B<fri>|B<sat>] B<HH:mm">
+
+=item B<accesslog_rotate_rotation_timing=date>
+
+FORMAT: B<"HH:mm">
+
+=item B<accesslog_rotate_rotation_timing=hour>
+
+FORMAT: B<"mm">
+
+=back
 
 =back
 

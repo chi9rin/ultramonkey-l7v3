@@ -28,6 +28,10 @@ namespace l7vs
 {
 //! tcp_socket_option
 struct tcp_socket_option_info {
+        //! IP_TRANSPARENT   (false:not set,true:set option)
+        bool transparent_opt;
+        //! IP_TRANSPARENT option value  (false:off,true:on)
+        bool transparent_val;
         //! TCP_NODELAY   (false:not set,true:set option)
         bool nodelay_opt;
         //! TCP_NODELAY option value  (false:off,true:on)

@@ -1792,6 +1792,34 @@ void tcp_session::up_thread_realserver_connect(const TCP_PROCESS_TYPE_TAG proces
         } else {
                 tcp_socket_ptr new_socket(new tcp_socket(io, socket_opt_info));
                 boost::system::error_code ec;
+                if (socket_opt_info.transparent_opt) {
+#ifdef IP_TRANSPARENT
+                        int val = socket_opt_info.transparent_val;
+                        size_t len = sizeof(val);
+                        // set IP_TRANSPARENT
+                        boost::asio::detail::socket_ops::setsockopt(
+                                new_socket->get_socket(), SOL_IP, IP_TRANSPARENT, &val, len, ec);
+                        if (unlikely(ec)) {
+                                //ERROR
+                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999,
+                                                    "socket option(IP_TRANSPARENT) set failed",
+                                                    __FILE__, __LINE__);
+                        } else {
+                                endpoint client_endpoint = up_thread_data_client_side.get_endpoint();
+                                // bind client address
+                                new_socket->get_socket().bind(client_endpoint, ec);
+                                if (unlikely(ec)) {
+                                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999,
+                                                            "bind client addr failed",
+                                                            __FILE__, __LINE__);
+                                }
+                        }
+#else
+                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999,
+                                            "setsockopt(IP_TRANSPARENT) not supported on this platform",
+                                            __FILE__, __LINE__);
+#endif
+                }
                 bool bres = new_socket->connect(server_endpoint, ec);
                 if (likely(bres)) {
                         {
@@ -2220,6 +2248,34 @@ void tcp_session::up_thread_sorryserver_connect(const TCP_PROCESS_TYPE_TAG proce
 
         endpoint sorry_endpoint = up_thread_data_dest_side.get_endpoint();
         boost::system::error_code ec;
+        if (socket_opt_info.transparent_opt) {
+#ifdef IP_TRANSPARENT
+                int val = socket_opt_info.transparent_val;
+                size_t len = sizeof(val);
+                // set IP_TRANSPARENT
+                boost::asio::detail::socket_ops::setsockopt(
+                        sorryserver_socket.second->get_socket(), SOL_IP, IP_TRANSPARENT, &val, len, ec);
+                if (unlikely(ec)) {
+                        //ERROR
+                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999,
+                                            "socket option(IP_TRANSPARENT) set failed",
+                                            __FILE__, __LINE__);
+                } else {
+                        endpoint client_endpoint = up_thread_data_client_side.get_endpoint();
+                        // bind client address
+                        sorryserver_socket.second->get_socket().bind(client_endpoint, ec);
+                        if (unlikely(ec)) {
+                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999,
+                                                    "bind client addr failed",
+                                                    __FILE__, __LINE__);
+                        }
+                }
+#else
+                Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999,
+                                    "setsockopt(IP_TRANSPARENT) not supported on this platform",
+                                    __FILE__, __LINE__);
+#endif
+        }
         bool bres = sorryserver_socket.second->connect(sorry_endpoint, ec);
         UP_THREAD_FUNC_TYPE_TAG func_tag;
         if (likely(bres)) {
