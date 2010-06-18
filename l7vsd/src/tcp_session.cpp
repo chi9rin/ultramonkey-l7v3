@@ -1276,6 +1276,7 @@ void tcp_session::up_thread_client_accept_event(const TCP_PROCESS_TYPE_TAG proce
 
         protocol_module_base::EVENT_TAG module_event;
         module_event = protocol_module->handle_accept(up_thread_id);
+        up_thread_data_client_side.set_endpoint(client_endpoint);
         std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
 
         up_thread_function_pair func = up_thread_function_array[func_type->second];
@@ -1792,34 +1793,38 @@ void tcp_session::up_thread_realserver_connect(const TCP_PROCESS_TYPE_TAG proces
         } else {
                 tcp_socket_ptr new_socket(new tcp_socket(io, socket_opt_info));
                 boost::system::error_code ec;
-                if (socket_opt_info.transparent_opt) {
 #ifdef IP_TRANSPARENT
-                        int val = socket_opt_info.transparent_val;
-                        size_t len = sizeof(val);
+                endpoint client_endpoint = up_thread_data_client_side.get_endpoint();
+                if (socket_opt_info.transparent_opt && (
+                        ( server_endpoint.address().is_v4() && client_endpoint.address().is_v4() ) ||
+                        ( server_endpoint.address().is_v6() && client_endpoint.address().is_v6() ) ) ) {
                         // set IP_TRANSPARENT
-                        boost::asio::detail::socket_ops::setsockopt(
-                                new_socket->get_socket(), SOL_IP, IP_TRANSPARENT, &val, len, ec);
+                        boost::asio::detail::socket_option::boolean<SOL_IP, IP_TRANSPARENT> trans(socket_opt_info.transparent_val);
+                        if (client_endpoint.address().is_v4()) {
+                                new_socket->get_socket().open(boost::asio::ip::tcp::v4());
+                        } else {
+                                new_socket->get_socket().open(boost::asio::ip::tcp::v6());
+                        }
+                        new_socket->get_socket().set_option(trans, ec);
                         if (unlikely(ec)) {
-                                //ERROR
-                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999,
-                                                    "socket option(IP_TRANSPARENT) set failed",
+                                std::stringstream buf;
+                                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
+                                buf << "socket option(IP_TRANSPARENT) set failed: " << ec.message();
+                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, buf.str(),
                                                     __FILE__, __LINE__);
                         } else {
-                                endpoint client_endpoint = up_thread_data_client_side.get_endpoint();
                                 // bind client address
                                 new_socket->get_socket().bind(client_endpoint, ec);
                                 if (unlikely(ec)) {
-                                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999,
-                                                            "bind client addr failed",
+                                        std::stringstream buf;
+                                        buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
+                                        buf << "bind client addr failed: " << ec.message();
+                                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, buf.str(),
                                                             __FILE__, __LINE__);
                                 }
                         }
-#else
-                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999,
-                                            "setsockopt(IP_TRANSPARENT) not supported on this platform",
-                                            __FILE__, __LINE__);
-#endif
                 }
+#endif
                 bool bres = new_socket->connect(server_endpoint, ec);
                 if (likely(bres)) {
                         {
@@ -2248,34 +2253,38 @@ void tcp_session::up_thread_sorryserver_connect(const TCP_PROCESS_TYPE_TAG proce
 
         endpoint sorry_endpoint = up_thread_data_dest_side.get_endpoint();
         boost::system::error_code ec;
-        if (socket_opt_info.transparent_opt) {
 #ifdef IP_TRANSPARENT
-                int val = socket_opt_info.transparent_val;
-                size_t len = sizeof(val);
+        endpoint client_endpoint = up_thread_data_client_side.get_endpoint();
+        if (socket_opt_info.transparent_opt && (
+                ( sorry_endpoint.address().is_v4() && client_endpoint.address().is_v4() ) ||
+                ( sorry_endpoint.address().is_v6() && client_endpoint.address().is_v6() ) ) ) {
                 // set IP_TRANSPARENT
-                boost::asio::detail::socket_ops::setsockopt(
-                        sorryserver_socket.second->get_socket(), SOL_IP, IP_TRANSPARENT, &val, len, ec);
+                boost::asio::detail::socket_option::boolean<SOL_IP, IP_TRANSPARENT> trans(socket_opt_info.transparent_val);
+                if (client_endpoint.address().is_v4()) {
+                        sorryserver_socket.second->get_socket().open(boost::asio::ip::tcp::v4());
+                } else {
+                        sorryserver_socket.second->get_socket().open(boost::asio::ip::tcp::v6());
+                }
+                sorryserver_socket.second->get_socket().set_option(trans, ec);
                 if (unlikely(ec)) {
-                        //ERROR
-                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999,
-                                            "socket option(IP_TRANSPARENT) set failed",
+                        std::stringstream buf;
+                        buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
+                        buf << "socket option(IP_TRANSPARENT) set failed: " << ec.message();
+                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, buf.str(),
                                             __FILE__, __LINE__);
                 } else {
-                        endpoint client_endpoint = up_thread_data_client_side.get_endpoint();
                         // bind client address
                         sorryserver_socket.second->get_socket().bind(client_endpoint, ec);
                         if (unlikely(ec)) {
-                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999,
-                                                    "bind client addr failed",
+                                std::stringstream buf;
+                                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
+                                buf << "bind client addr failed: " << ec.message();
+                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, buf.str(),
                                                     __FILE__, __LINE__);
                         }
                 }
-#else
-                Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999,
-                                    "setsockopt(IP_TRANSPARENT) not supported on this platform",
-                                    __FILE__, __LINE__);
-#endif
         }
+#endif
         bool bres = sorryserver_socket.second->connect(sorry_endpoint, ec);
         UP_THREAD_FUNC_TYPE_TAG func_tag;
         if (likely(bres)) {
