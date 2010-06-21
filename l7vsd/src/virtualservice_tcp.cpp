@@ -2377,7 +2377,7 @@ bool l7vs::virtualservice_tcp::set_ssl_config()
                         } catch (std::exception &e) {
                                 std::stringstream buf;
                                 buf << "Set root CA path error : " << e.what() << ".";
-                                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 107,
+                                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, /*FIXME*/999,
                                                     buf.str(),
                                                     __FILE__, __LINE__);
                                 throw - 1;
@@ -2389,7 +2389,7 @@ bool l7vs::virtualservice_tcp::set_ssl_config()
                         } catch (std::exception &e) {
                                 std::stringstream buf;
                                 buf << "Set root CA file error : " << e.what() << ".";
-                                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 108,
+                                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, /*FIXME*/999,
                                                     buf.str(),
                                                     __FILE__, __LINE__);
                                 throw - 1;
@@ -2403,7 +2403,7 @@ bool l7vs::virtualservice_tcp::set_ssl_config()
                 } catch (std::exception &e) {
                         std::stringstream buf;
                         buf << "Set certificate chain file error : " << e.what() << ".";
-                        Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 109, buf.str(),
+                        Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, /*FIXME*/999, buf.str(),
                                             __FILE__, __LINE__);
                         throw - 1;
                 }
@@ -2415,7 +2415,7 @@ bool l7vs::virtualservice_tcp::set_ssl_config()
                 } catch (std::exception &e) {
                         std::stringstream buf;
                         buf << "Set password callback error : " << e.what() << ".";
-                        Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 110, buf.str(),
+                        Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, /*FIXME*/999, buf.str(),
                                             __FILE__, __LINE__);
                         throw - 1;
                 }
@@ -2427,7 +2427,7 @@ bool l7vs::virtualservice_tcp::set_ssl_config()
                 } catch (std::exception &e) {
                         std::stringstream buf;
                         buf << "Set private key file and filetype error : " << e.what() << ".";
-                        Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 111, buf.str(),
+                        Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, /*FIXME*/999, buf.str(),
                                             __FILE__, __LINE__);
                         throw - 1;
                 }
@@ -2438,7 +2438,7 @@ bool l7vs::virtualservice_tcp::set_ssl_config()
                 } catch (std::exception &e) {
                         std::stringstream buf;
                         buf << "Set verify option error : " << e.what() << ".";
-                        Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 112, buf.str(),
+                        Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, /*FIXME*/999, buf.str(),
                                             __FILE__, __LINE__);
                         throw - 1;
                 }
@@ -2452,7 +2452,7 @@ bool l7vs::virtualservice_tcp::set_ssl_config()
                 } catch (std::exception &e) {
                         std::stringstream buf;
                         buf << "Set SSL option error : " << e.what() << ".";
-                        Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 113, buf.str(),
+                        Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, /*FIXME*/999, buf.str(),
                                             __FILE__, __LINE__);
                         throw - 1;
                 }
@@ -2464,7 +2464,7 @@ bool l7vs::virtualservice_tcp::set_ssl_config()
                         } catch (std::exception &e) {
                                 std::stringstream buf;
                                 buf << "Set tmp DH file error : " << e.what() << ".";
-                                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 114,
+                                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, /*FIXME*/999,
                                                     buf.str(),
                                                     __FILE__, __LINE__);
                                 throw - 1;
@@ -2477,7 +2477,7 @@ bool l7vs::virtualservice_tcp::set_ssl_config()
                                                      cipher_list.c_str()) != 1)) {
                         std::stringstream buf;
                         buf << "Set cipher list error.";
-                        Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 115,
+                        Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, /*FIXME*/999,
                                             buf.str(),
                                             __FILE__, __LINE__);
                         throw - 1;
@@ -2491,7 +2491,7 @@ bool l7vs::virtualservice_tcp::set_ssl_config()
                                              (const unsigned char *)"ultramonkey", 11) != 1)) {
                                 std::stringstream buf;
                                 buf << "Set session id context error.";
-                                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 116,
+                                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, /*FIXME*/999,
                                                     buf.str(),
                                                     __FILE__, __LINE__);
                                 throw - 1;
