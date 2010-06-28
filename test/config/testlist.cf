@@ -1,1 +1,31 @@
-﻿#!/bin/bash#VirtualServiceVS1ADDR="10.133.26.88:9876"#RealServerRS1="WEB3"RS1ADDR="10.144.133.81:80"RS2="WEB1"RS2ADDR="10.144.133.85:80"#SorryServerSS="client04"SSADDR="10.144.133.82:80"#Echo ServerESADDR="127.0.0.1:7"[root@fedora2 config]# cd .svn/        env_conf.sh  testlist.cf[root@fedora2 config]# while read aaa; do echo $aaa; done < testlist.cf # umtest.sh が読み込むコンフィグファイル# 試験用scriptが格納されているファルダの名前を列挙する# 先頭が#のフォルダ名については試験が実行されないsessionless# ip# sslid# rr# wrr# lc
+﻿#!/bin/bash
+
+#VirtualService
+VS1ADDR="10.133.26.88:9876"
+
+#RealServer
+RS1="WEB3"
+RS1ADDR="10.144.133.81:80"
+RS2="WEB1"
+RS2ADDR="10.144.133.85:80"
+
+#SorryServer
+SS="client04"
+SSADDR="10.144.133.82:80"
+
+#Echo Server
+ESADDR="127.0.0.1:7"
+
+[root@fedora2 config]# cd 
+.svn/        env_conf.sh  testlist.cf
+[root@fedora2 config]# while read aaa; do echo $aaa; done < testlist.cf 
+# umtest.sh が読み込むコンフィグファイル
+# 試験用scriptが格納されているファルダの名前を列挙する
+# 先頭が#のフォルダ名については試験が実行されない
+
+sessionless
+# ip
+# sslid
+# rr
+# wrr
+# lc
