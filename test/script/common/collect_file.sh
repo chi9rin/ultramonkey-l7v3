@@ -16,7 +16,7 @@ else
 	LOG "l7director config file moved ${TAR_DIR} ."
 fi
 
-mv ${L7VS_TAR_DIR}/* ${TAR_DIR} 2> /dev/null
+mv ${L7VS_LOG_DIR}/* ${TAR_DIR} 2> /dev/null
 if [ $? -ne 0 ]
 then
 	LOG_ERR "UM-L7's log file move failed."
