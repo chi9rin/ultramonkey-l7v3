@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bim/bash
 
 mv ${TMP_DIR}/l7vs/* ${L7VSD_CONF_DIR} 2> /dev/null
 if [ $? -ne 0 ]

@@ -1,4 +1,4 @@
-﻿# UltraMonkey-L7がインストールされているか確認
+# UltraMonkey-L7がインストールされているか確認
 #!/bin/bash
 
 if [ ! -e ${L7VSD} ]

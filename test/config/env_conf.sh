@@ -1,7 +1,7 @@
-﻿#!/bin/bash
+#!/bin/bash
 
 #VirtualService
-VS1ADDR="10.133.26.88:9876"
+VS1ADDR="192.168.131.233:9876"
 
 #RealServer
 RS1="WEB3"

@@ -1,4 +1,4 @@
-﻿#!/bin/sh
+#!/bin/bash
 
 function LOG_ {
 echo "`date +'%Y/%m/%d %H:%M:%S'` [$1] $2 $3" >> ${LOG_FILE}

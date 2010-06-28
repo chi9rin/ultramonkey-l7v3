@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 
 mv ${L7VSD_CONF_DIR}/* ${TAR_DIR} 2> /dev/null
 if [ $? -ne 0 ]

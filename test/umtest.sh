@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 
 # 基本設定
 TEST_DIR="/home/hibari/test"
@@ -31,7 +31,6 @@ L7VSD_CONF_DIR="/etc/l7vs"
 L7DIRECTORD_CONF_DIR="/etc/ha.d/conf"
 L7VS_LOG_DIR="/var/log/l7vs"
 
-
 ####################
 # 前処理
 ####################
@@ -61,35 +60,35 @@ cd ${TEST_DIR}
 
 for KIND in `cat ${CONF_DIR}/testlist.cf | sed '/^ *$/d' | grep -v "^#"`
 do
-	EVIDENCE_DIR="${LOG_DIR}/${KIND}"
-	mkdir ${EVIDENCE_DIR}
+        EVIDENCE_DIR="${LOG_DIR}/${KIND}"
+        mkdir ${EVIDENCE_DIR}
 
-	cd ${SCRIPT_DIR}/${KIND}
-	for SCRIPT in umtest.sh *.pl *.py
-	do
-		if [ -f ${SCRIPT} ]
-		then
-		# スクリプト実行
-		(
-		. ${SCRIPT}
-		) > /dev/null 2>&1
-		# レポート記入
-		if [ $? -eq 0 ]
-		then
-			echo -e "${KIND}t${SCRIPT}tOK" | tee -a ${REPORT_FILE}
-		else
-			echo -e "${KIND}t${SCRIPT}tNG" | tee -a ${REPORT_FILE}
-		fi
-		# l7vsd,l7directordプロセス停止
-		. ${STOP_MONKEY}
-		# ログ収集
-		TAR_DIR=${EVIDENCE_DIR}/`echo "${SCRIPT}" | cut -d "." -f 1`
-		mkdir ${TAR_DIR}
-		. ${COLLECT_FILE}
-		#tarで圧縮
-		# tar cfz dist.tar.gz targetfolder
-		fi
-	done
+        cd ${SCRIPT_DIR}/${KIND}
+        for SCRIPT in *.sh *.pl *.py
+        do
+                if [ -f ${SCRIPT} ]
+                then
+                # スクリプト実行
+                (
+                . ${SCRIPT}
+                ) > /dev/null 2>&1
+                # レポート記入
+                if [ $? -eq 0 ]
+                then
+                        echo -e "${KIND}\t${SCRIPT}\tOK" | tee -a ${REPORT_FILE}
+                else
+                        echo -e "${KIND}\t${SCRIPT}\tNG" | tee -a ${REPORT_FILE}
+                fi
+                # l7vsd,l7directordプロセス停止
+                . ${STOP_MONKEY}
+                # ログ収集
+                TAR_DIR=${EVIDENCE_DIR}/`echo "${SCRIPT}" | cut -d "." -f 1`
+                mkdir ${TAR_DIR}
+                . ${COLLECT_FILE}
+                #tarで圧縮
+                # tar cfz dist.tar.gz targetfolder
+                fi
+        done
 done
 cd ${TEST_DIR}
 ###################

@@ -1,5 +1,4 @@
-﻿#!/bin/bash
-
+#!/bin/bash
 
 cp ./materials/l7directord.cf /etc/ha.d/conf/
 cp ./materials/l7vs.cf /etc/l7vs/

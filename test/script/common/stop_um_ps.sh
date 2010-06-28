@@ -1,6 +1,4 @@
-﻿#!/bin/bash
-
-
+#!/bin/bash
 
 if [ -n "`pgrep l7vsd`" ]
 then
