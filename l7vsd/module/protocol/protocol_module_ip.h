@@ -23,6 +23,7 @@
  **********************************************************************/
 
 #include <boost/thread/mutex.hpp>
+#include <boost/lexical_cast.hpp>
 #include "ip_protocol_module_base.h"
 #include "ip_session_data_processor.h"
 #include "ip_replication_data_processor.h"

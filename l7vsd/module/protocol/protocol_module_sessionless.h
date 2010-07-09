@@ -23,6 +23,7 @@
  **********************************************************************/
 
 #include <boost/thread/mutex.hpp>
+#include <boost/lexical_cast.hpp>
 #include "http_protocol_module_base.h"
 
 #ifndef PROTOCOL_MODULE_SESSIONLESS_H

@@ -27,6 +27,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/thread/condition.hpp>
+#include <queue>
 #include "logger_enum.h"
 
 #define SSLID_LENGTH (32)

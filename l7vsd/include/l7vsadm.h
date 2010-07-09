@@ -25,6 +25,7 @@
 #ifndef    L7VSADM_H
 #define    L7VSADM_H
 #include <map>
+#include <boost/lexical_cast.hpp>
 #include <boost/function.hpp>
 #include <boost/asio.hpp>
 #include <boost/regex.hpp>

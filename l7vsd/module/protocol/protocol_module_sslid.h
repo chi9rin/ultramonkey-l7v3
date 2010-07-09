@@ -28,6 +28,7 @@
 #include "ssl_protocol_module_base.h"
 #include "sslid_replication_data_processor.h"
 #include "sslid_session_data_processor.h"
+#include <boost/lexical_cast.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/shared_ptr.hpp>
 #include <map>
