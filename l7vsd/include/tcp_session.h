@@ -192,7 +192,7 @@ protected:
         //! parent virtualservice
         virtualservice_tcp &parent_service;
         //! thread main loop exit flag
-        volatile bool exit_flag;
+        volatile int exit_flag;
         //! thread main loop exit flag update mutex
         wr_mutex exit_flag_update_mutex;
 
