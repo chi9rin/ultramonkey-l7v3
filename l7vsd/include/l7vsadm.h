@@ -392,10 +392,6 @@ protected:
         int command_wait_interval;
         //! Number of times of l7vsadm command conflict check.
         int command_wait_count;
-        //! Interval of connected check to l7vsd.
-        int connect_wait_interval;
-        //! Number of times of connected check to l7vsd.
-        int connect_wait_count;
 
 public:
         //! constractor

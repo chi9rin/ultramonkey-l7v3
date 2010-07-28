@@ -2218,9 +2218,7 @@ void    l7vs::l7vsadm::disp_list_verbose()
 l7vs::l7vsadm::l7vsadm()
         :   numeric_flag(false),
             command_wait_interval(L7VSADM_DEFAULT_WAIT_INTERVAL),
-            command_wait_count(L7VSADM_DEFAULT_WAIT_COUNT),
-            connect_wait_interval(L7VSADM_DEFAULT_WAIT_INTERVAL),
-            connect_wait_count(L7VSADM_DEFAULT_WAIT_COUNT)
+            command_wait_count(L7VSADM_DEFAULT_WAIT_COUNT)
 {
         Logger    logger(LOG_CAT_L7VSADM_COMMON, 35, "l7vsadm::l7vsadm(constructor)", __FILE__, __LINE__);
 
@@ -2566,13 +2564,6 @@ void    l7vs::l7vsadm::set_parameter()
                 Logger::putLogWarn(LOG_CAT_L7VSADM_COMMON, 9, msg, __FILE__, __LINE__);
 
         }
-        if ((connect_wait_interval * connect_wait_count) > L7VSADM_MAX_WAIT) {
-                // When wait value too long, use default parameter value.
-                connect_wait_interval = L7VSADM_DEFAULT_WAIT_INTERVAL;
-                connect_wait_count = L7VSADM_DEFAULT_WAIT_COUNT;
-                std::string    msg("Connect wait value too long. Use default value.");
-                Logger::putLogWarn(LOG_CAT_L7VSADM_COMMON, 10, msg, __FILE__, __LINE__);
-        }
 }
 
 //! l7vsadm command execute
@@ -2690,45 +2681,22 @@ bool    l7vs::l7vsadm::execute(int argc, char *argv[])
                         boost::asio::io_service    io;
                         stream_protocol::socket    s(io);
 
-                        int    connect_retry_count = 0;
-                        while (true) {
-                                // Check signal.
-                                if (signal_flag) {
-                                        std::stringstream buf;
-                                        buf << boost::format("Signal (%d) Received.") % received_sig;
-                                        l7vsadm_err.setter(true, buf.str());
-                                        Logger::putLogError(LOG_CAT_L7VSADM_COMMON, 5, buf.str(), __FILE__, __LINE__);
-                                        break;
-                                }
-
+                        // Check signal.
+                        if (signal_flag) {
+                                std::stringstream buf;
+                                buf << boost::format("Signal (%d) Received.") % received_sig;
+                                l7vsadm_err.setter(true, buf.str());
+                                Logger::putLogError(LOG_CAT_L7VSADM_COMMON, 5, buf.str(), __FILE__, __LINE__);
+                        } else {
                                 // Try connect to config socket.
                                 boost::system::error_code err;
                                 s.connect(stream_protocol::endpoint(L7VS_CONFIG_SOCKNAME), err);
-                                if (!err) {
-                                        break;
-                                } else {
-                                        //connect_retry_count was to be unused.
-                                        //must be delete below "waiting" code!
+                                if (err) {
                                         std::stringstream   buf;
                                         buf << boost::format("connect() failed: %s.") % err.message();
                                         l7vsadm_err.setter(true, buf.str());
                                         Logger::putLogError(LOG_CAT_L7VSADM_COMMON, 9, buf.str(), __FILE__, __LINE__);
-                                        break;
                                 }
-
-                                connect_retry_count++;
-                                if (connect_retry_count > connect_wait_count) {
-                                        std::stringstream    buf;
-                                        buf << boost::format("connect() to daemon timeout: %s.") % err.message();
-                                        l7vsadm_err.setter(true, buf.str());
-                                        Logger::putLogError(LOG_CAT_L7VSADM_COMMON, 6, buf.str(), __FILE__, __LINE__);
-                                        break;
-                                }
-                                // Connect retrying.
-                                boost::xtime xt;
-                                xtime_get(&xt, boost::TIME_UTC);
-                                xt.sec += connect_wait_interval;
-                                boost::thread::sleep(xt);
                         }
 
                         // display err
