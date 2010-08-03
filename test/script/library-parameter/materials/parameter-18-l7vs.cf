@@ -1,0 +1,8 @@
+[logger]
+[l7vsadm]
+[l7vsd]
+[virtualservice]
+[replication]
+[snmpagent]
+[session]
+

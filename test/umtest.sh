@@ -1,100 +1,144 @@
 #!/bin/bash
 
-# 基本設定
+# SET PATH
 TEST_DIR="/home/hibari/test"
-DATE=`date +'%Y-%m-%d(%Hh%Mm)'`
+DATE=`date +'%Y-%m-%d(%Hh%Mm%Ss)'`
 
+LOG_BASE_DIR="${TEST_DIR}/log"
 CONF_DIR="${TEST_DIR}/config"
 SCRIPT_DIR="${TEST_DIR}/script"
 COMMON_SCRIPT_DIR="${SCRIPT_DIR}/common"
-LOG_DIR="${TEST_DIR}/log/$DATE"
-LOG_FILE="${LOG_DIR}/${DATE}.log"
 TMP_DIR="${TEST_DIR}/work"
 REPORT_DIR="${TEST_DIR}/report"
 REPORT_FILE="${REPORT_DIR}/${DATE}.rep"
 
-ENV_CONF="${CONF_DIR}/env_conf.sh"
 CHECK_ENV="${COMMON_SCRIPT_DIR}/check_env.sh"
-INIT_ENV="${COMMON_SCRIPT_DIR}/init_env.sh"
 LOGGER="${COMMON_SCRIPT_DIR}/logger.sh"
+LIGHTTPD_FUNC="${COMMON_SCRIPT_DIR}/lighttpd_func.sh"
 STOP_MONKEY="${COMMON_SCRIPT_DIR}/stop_um_ps.sh"
 SAVE_FILE="${COMMON_SCRIPT_DIR}/save_file.sh"
 RETURN_FILE="${COMMON_SCRIPT_DIR}/return_file.sh"
 COLLECT_FILE="${COMMON_SCRIPT_DIR}/collect_file.sh"
+SET_DEFAULT_CONF="${COMMON_SCRIPT_DIR}/set_default_conf.sh"
 
-L7VSD="/usr/sbin/l7vsd"
-L7VSADM="/usr/sbin/l7vsadm"
-L7DIRECTORD="/usr/sbin/l7directord"
-INIT_L7VSD="/etc/init.d/l7vsd"
-INIT_L7DIRECTORD="/etc/init.d/l7directord"
-L7VSD_CONF_DIR="/etc/l7vs"
-L7DIRECTORD_CONF_DIR="/etc/ha.d/conf"
-L7VS_LOG_DIR="/var/log/l7vs"
+# Functions
+usage (){
+	echo "usage : umtest [dirname [TestScriptName]]"
+}
+
+check_option (){
+	while getopts hC option
+	do
+		case "$option" in
+		  h)
+			usage
+			exit 0
+			;;
+		  C)
+			echo "rm -rf ${REPORT_DIR}/*"
+			echo "rm -rf ${LOG_BASE_DIR}/*"
+			exit 1
+			;;
+                  \?)
+			usage
+			exit 1
+			;;
+		esac
+		shift
+	done
+	shift `expr "$OPTIND" - 1`
+}
+
+#Check option
+check_option "$@"
 
 ####################
-# 前処理
+# Pretreatment
 ####################
 cd ${TEST_DIR}
 
-# Loggerの準備
+# Logger
 . ${LOGGER}
-# 環境設定ファイルの読み込み
-. ${ENV_CONF}
-# 環境チェック
+# Check environment.
 . ${CHECK_ENV}
-# l7vsd,l7directordプロセス停止
+# Stop UltraMonkey-L7.
 . ${STOP_MONKEY}
-# コンフィグファイルとログファイル退避
+# Save log and config files.
 . ${SAVE_FILE}
+# Initialize environment.
+. ${LIGHTTPD_FUNC}
 
-# 試験環境初期化
-#　ここで、httpサーバ立ち上げたりする
-#. ${INIT_ENV}
 
 ###################
-# 試験実施
+# Test
 ###################
-
-# メモ　後で消すこと↓
-#コンフィグファイルの配置はスクリプトの中で行う
-
-for KIND in `cat ${CONF_DIR}/testlist.cf | sed '/^ *$/d' | grep -v "^#"`
+LOG "Execute test scripts."
+for KIND in ${1:-`ls ${SCRIPT_DIR}`}
 do
-        EVIDENCE_DIR="${LOG_DIR}/${KIND}"
-        mkdir ${EVIDENCE_DIR}
-
-        cd ${SCRIPT_DIR}/${KIND}
-        for SCRIPT in *.sh *.pl *.py
-        do
-                if [ -f ${SCRIPT} ]
-                then
-                # スクリプト実行
-                (
-                . ${SCRIPT}
-                ) > /dev/null 2>&1
-                # レポート記入
-                if [ $? -eq 0 ]
-                then
-                        echo -e "${KIND}\t${SCRIPT}\tOK" | tee -a ${REPORT_FILE}
-                else
-                        echo -e "${KIND}\t${SCRIPT}\tNG" | tee -a ${REPORT_FILE}
-                fi
-                # l7vsd,l7directordプロセス停止
-                . ${STOP_MONKEY}
-                # ログ収集
-                TAR_DIR=${EVIDENCE_DIR}/`echo "${SCRIPT}" | cut -d "." -f 1`
-                mkdir ${TAR_DIR}
-                . ${COLLECT_FILE}
-                #tarで圧縮
-                # tar cfz dist.tar.gz targetfolder
-                fi
-        done
+	if [ ! -d "${SCRIPT_DIR}/${KIND}" ]
+	then
+		LOG_WARN "${SCRIPT_DIR}/${KIND} not exist."
+		continue
+	fi
+	if [ $KIND == "common" ]
+	then
+		continue
+	fi
+	EVIDENCE_DIR="${LOG_DIR}/${KIND}"
+	LOG "Make evidence directory ${EVIDENCE_DIR}."
+	mkdir ${EVIDENCE_DIR}
+	cd ${SCRIPT_DIR}/${KIND}
+	for SCRIPT in ${2:-*}
+	do
+		if [ -x ${SCRIPT} ]
+		then
+			make_lighttpd_tmpdir
+			# Execute script
+			LOG "Execute ${SCRIPT} ."
+			(
+				. ${SCRIPT}
+			) 2> /dev/null 1> ${TMP_DIR}/tmp
+			# Write report.
+			if [ $? -eq 0 ]
+			then
+				echo -e "${KIND}\t${SCRIPT}\tOK" | tee -a ${REPORT_FILE}
+			else
+				echo -e "${KIND}\t${SCRIPT}\tNG" | tee -a ${REPORT_FILE}
+				cat ${TMP_DIR}/tmp | tee -a ${REPORT_FILE}
+			fi
+			# Stop UltraMonkey-L7.
+			. ${STOP_MONKEY}
+			# Collect logs.
+			TAR_DIR=${EVIDENCE_DIR}/`echo "${SCRIPT}" | cut -d "." -f 1`
+			mkdir ${TAR_DIR}
+			. ${COLLECT_FILE}
+			#tarで圧縮
+			# tar cfz dist.tar.gz targetfolder
+			# Stop HTTP server.
+			stop_all_lighttpd	
+			clean_lighttpd_tmpdir
+		else
+			LOG_WARN "${SCRIPT_DIR}/${KIND}/${SCRIPT} cannot execute."
+			continue
+		fi
+	done
 done
+# Count OK and NG
+echo "############# Summary ###############" | tee -a ${REPORT_FILE}
+grep -v "^Test failed" ${REPORT_FILE} | 
+awk 'BEGIN{OkCon=0;NgCon=0;}
+     {if($3 == "OK")
+	 OkCon++;
+      if($3 == "NG")
+	 NgCon++;}
+     END{printf("OK=%d\tNG=%d\n",OkCon,NgCon)}' | tee -a ${REPORT_FILE}
+LOG "Test scripts end."
 cd ${TEST_DIR}
 ###################
-# 後処理
+# Aftertreatment
 ###################
-# l7vsd,l7directordプロセス停止
+# Stop UltraMonkey-L7.
 . ${STOP_MONKEY}
-# ログファイル・コンフィグファイル復帰
+# Return log and config files.
 . ${RETURN_FILE}
+

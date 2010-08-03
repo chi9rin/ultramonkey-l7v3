@@ -1,28 +1,37 @@
 #!/bin/bash
 
-. ../../config/env_conf.sh
+. ${SET_DEFAULT_CONF}
 
-#cp ./materials/l7directord.cf /etc/ha.d/conf/
-#cp ./materials/l7vs.cf /etc/l7vs/
-#cp -r ./materials/sslproxy /etc/l7vs/
+#Add Service
+$L7VSD
+if [ $? -ne 0 ]
+then
+        echo "Test failed: $L7VSD"
+        exit 1
+fi
 
-/etc/init.d/l7vsd start > /dev/null
+usleep 100000
+$L7VSADM -A -t 127.0.0.1:40001 -m sessionless -s wrr
+if [ $? -ne 0 ]
+then
+        echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m sessionless -s wrr"
+        exit 1
+fi
 
-l7vsadm -A -t ${VS1ADDR} -m sessionless -s wrr
-
-RET=`LANG=C wget -t 1 -O- http://${VS1ADDR}/ 2>&1`
+#Connect
+RET=`LANG=C $WGET -t 1 -O- http://127.0.0.1:40001/ 2>&1`
 if [ $? -ne 1 ]
 then
-	exit 1
+        echo "Test failed: LANG=C $WGET -t 1 -qO- http://127.0.0.1:40001/"
+        exit 1
 fi
 
 RET=`echo "$RET" | grep "Connecting to .* connected."`
 if [ -z "${RET}" ]
 then
+	echo"Test failed: echo $RET | grep Connecting to .* connected."
         exit 1
 fi
-
-/etc/init.d/l7vsd stop > /dev/null
 
 exit 0
 
