@@ -3,7 +3,6 @@
 ENV_CONF_FILE="${CONF_DIR}/server_env.cf"
 DEFAULT_CONF_DIR="${CONF_DIR}/lighttpd"
 LIGHTTPD_TMP_DIR="/tmp/umtest$DATE"
-LIGHTTPD="/usr/sbin/lighttpd"
 
 clean_lighttpd_tmpdir (){
 	if [ -d ${LIGHTTPD_TMP_DIR} ]
