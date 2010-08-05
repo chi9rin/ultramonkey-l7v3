@@ -62,21 +62,13 @@ check_uml7 (){
 
 # check Lighty installed
 check_http_server (){
-        LIGHTTPD="/usr/sbin/lighttpd"
-	INIT_LIGHTTPD="/etc/init.d/lighttpd"
+        LIGHTTPD=`which lighttpd`
 	if [ ! -e ${LIGHTTPD} ]
 	then
 		LOG_FATAL "${LIGHTTPD} not exist. "
                 exit 1
 	fi
-
-	if [ !  -e ${INIT_LIGHTTPD} ]
-        then
-                LOG_FATAL "${INIT_LIGHTTPD} not exist. "
-                exit 1
-        fi
 }
-
 
 # check commands installed
 check_commands (){
