@@ -67,6 +67,7 @@ check_http_server (){
 	if [ ! -e ${LIGHTTPD} ]
 	then
 		LOG_FATAL "${LIGHTTPD} not exist. "
+                exit 1
 	fi
 
 	if [ !  -e ${INIT_LIGHTTPD} ]

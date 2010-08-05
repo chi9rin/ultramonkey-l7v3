@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # SET PATH
-TEST_DIR="dirname $0"
+TEST_DIR=`dirname $0`
 DATE=`date +'%Y-%m-%d(%Hh%Mm%Ss)'`
 
 CONF_DIR="${TEST_DIR}/config"
