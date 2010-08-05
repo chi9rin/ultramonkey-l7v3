@@ -1,16 +1,12 @@
 #!/bin/bash
 
 # SET PATH
-TEST_DIR="/home/hibari/test"
+TEST_DIR="dirname $0"
 DATE=`date +'%Y-%m-%d(%Hh%Mm%Ss)'`
 
-LOG_BASE_DIR="${TEST_DIR}/log"
 CONF_DIR="${TEST_DIR}/config"
 SCRIPT_DIR="${TEST_DIR}/script"
 COMMON_SCRIPT_DIR="${SCRIPT_DIR}/common"
-TMP_DIR="${TEST_DIR}/work"
-REPORT_DIR="${TEST_DIR}/report"
-REPORT_FILE="${REPORT_DIR}/${DATE}.rep"
 
 CHECK_ENV="${COMMON_SCRIPT_DIR}/check_env.sh"
 LOGGER="${COMMON_SCRIPT_DIR}/logger.sh"
@@ -20,6 +16,26 @@ SAVE_FILE="${COMMON_SCRIPT_DIR}/save_file.sh"
 RETURN_FILE="${COMMON_SCRIPT_DIR}/return_file.sh"
 COLLECT_FILE="${COMMON_SCRIPT_DIR}/collect_file.sh"
 SET_DEFAULT_CONF="${COMMON_SCRIPT_DIR}/set_default_conf.sh"
+
+# Make work directory
+LOG_BASE_DIR="${TEST_DIR}/log"
+if [ ! -d ${LOG_BASE_DIR} ]
+then
+	mkdir ${LOG_BASE_DIR}
+fi
+
+TMP_DIR="${TEST_DIR}/work"
+if [ ! -d ${TMP_DIR} ]
+then
+	mkdir ${TMP_DIR}
+fi
+
+REPORT_DIR="${TEST_DIR}/report"
+REPORT_FILE="${REPORT_DIR}/${DATE}.rep"
+if [ ! -d ${REPORT_DIR} ]
+then
+	mkdir ${REPORT_DIR}
+fi
 
 # Functions
 usage (){
@@ -35,9 +51,10 @@ check_option (){
 			exit 0
 			;;
 		  C)
-			echo "rm -rf ${REPORT_DIR}/*"
-			echo "rm -rf ${LOG_BASE_DIR}/*"
-			exit 1
+			rm -rf ${REPORT_DIR}
+			rm -rf ${LOG_BASE_DIR}
+			rm -rf ${TMP_DIR}
+			exit 0
 			;;
                   \?)
 			usage
@@ -86,7 +103,7 @@ do
 	fi
 	EVIDENCE_DIR="${LOG_DIR}/${KIND}"
 	LOG "Make evidence directory ${EVIDENCE_DIR}."
-	mkdir ${EVIDENCE_DIR}
+	mkdir -p ${EVIDENCE_DIR}
 	cd ${SCRIPT_DIR}/${KIND}
 	for SCRIPT in ${2:-*}
 	do

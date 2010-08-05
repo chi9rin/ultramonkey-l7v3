@@ -9,6 +9,7 @@ function LOG_ {
 }
 function LOG_FATAL {
         LOG_ FATAL "$1" "umtest stoped."
+	echo "$1 umtest stoped."
 }
 function LOG_ERR {
         LOG_ ERROR "$1"
