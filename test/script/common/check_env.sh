@@ -99,8 +99,18 @@ check_original_tools (){
 	TEST_CLIENT="${COMMON_SCRIPT_DIR}/test_client"
 	if [ ! -e ${TEST_CLIENT} ]
 	then
-		LOG_FATAL "${TEST_CLIENT} not exist."
-		exit 1
+		if [ -e "${TEST_CLIENT}.c" ]
+		then
+			gcc -g -o ${TEST_CLIENT} ${TEST_CLIENT}.c
+		else
+			LOG_FATAL "${TEST_CLIENT} not exist."
+			exit 1
+		fi
+		if [ ! -e ${TEST_CLIENT} ]
+		then
+			LOG_FATAL "${TEST_CLIENT} not exist."
+			exit 1
+		fi
 	fi
 }
 #check_env main

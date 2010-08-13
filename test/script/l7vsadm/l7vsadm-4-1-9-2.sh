@@ -11,9 +11,9 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -A -t 333.333.333.333:3333 -m ip 2>&1 | grep "PARSE ERROR : target endpoint parse error:invalid endpoint:Host not found (non-authoritative), try again later:333.333.333.333:3333"`
-EXPECT="PARSE ERROR : target endpoint parse error:invalid endpoint:Host not found (non-authoritative), try again later:333.333.333.333:3333"
-if [ "${RET}" != "${EXPECT}" ]
+EXPECT="PARSE ERROR : target endpoint parse error:invalid endpoint:Host not found.*:333.333.333.333:3333"
+$L7VSADM -A -t 333.333.333.333:3333 -m ip 2>&1 | grep "${EXPECT}" > /dev/null
+if [ "$?" -ne 0 ]
 then
         echo "Test failed: $L7VSADM -A -t 333.333.333.333:3333 -m ip"
         exit 1

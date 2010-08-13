@@ -11,10 +11,10 @@ then
 fi
 usleep 100000
 
-$L7VSADM -A -t localhost:40001 -m sessionless
+$L7VSADM -A -t 127.0.0.1:40001 -m sessionless
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM -A -t localhost:40001 -m sessionless"
+        echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m sessionless"
         exit 1
 fi
 

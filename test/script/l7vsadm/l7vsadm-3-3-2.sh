@@ -11,10 +11,10 @@ then
 fi
 usleep 100000
 
-$L7VSADM -A -t localhost:40001 -m ip --timeout 100
+$L7VSADM -A -t 127.0.0.1:40001 -m ip --timeout 100
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM -A -t localhost:40001 -m ip --timeout 100"
+        echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m ip --timeout 100"
         exit 1
 fi
 

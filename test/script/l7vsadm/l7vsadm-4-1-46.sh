@@ -11,10 +11,9 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -A -t [3ae3:90a0:bd05:01d2:288a:1fc0:0001:10ee-ErrorAdder]:40001 -m sessionless 2>&1 | grep "PARSE ERROR : target endpoint parse error:invalid endpoint:Host not found (non-authoritative), try again later:\[3ae3:90a0:bd05:01d2:288a:1fc0:0001:10ee-ErrorAdder\]:40001"`
-EXPECT="PARSE ERROR : target endpoint parse error:invalid endpoint:Host not found (non-authoritative), try again later:[3ae3:90a0:bd05:01d2:288a:1fc0:0001:10ee-ErrorAdder]:40001"
-
-if [ "${RET}" != "${EXPECT}" ]
+EXPECT="PARSE ERROR : target endpoint parse error:invalid endpoint:Host not found.*:\[3ae3:90a0:bd05:01d2:288a:1fc0:0001:10ee-ErrorAdder\]:40001"
+$L7VSADM -A -t [3ae3:90a0:bd05:01d2:288a:1fc0:0001:10ee-ErrorAdder]:40001 -m sessionless 2>&1 | grep "${EXPECT}" > /dev/null
+if [ "$?" -ne 0 ]
 then
         echo "Test failed: $L7VSADM -A -t [3ae3:90a0:bd05:01d2:288a:1fc0:0001:10ee-ErrorAdder]:40001 -m sessionless"
         exit 1

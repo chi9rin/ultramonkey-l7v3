@@ -11,11 +11,11 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -A -t localhost:40001 -m ip -q G 2>&1 | grep "PARSE ERROR : invalid qos_downstream value."`
+RET=`$L7VSADM -A -t localhost:40001 -m ip -q x 2>&1 | grep "PARSE ERROR : invalid qos_downstream value."`
 EXPECT="PARSE ERROR : invalid qos_downstream value."
 if [ "${RET}" != "${EXPECT}" ]
 then
-        echo "Test failed: $L7VSADM -A -t localhost:40001 -m ip -q G"
+        echo "Test failed: $L7VSADM -A -t localhost:40001 -m ip -q x"
         exit 1
 fi
 

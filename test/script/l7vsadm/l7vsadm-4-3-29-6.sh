@@ -18,11 +18,11 @@ then
         exit 1
 fi
 
-RET=`$L7VSADM -E -t localhost:40001 -m ip -q 1000G 2>&1 | grep "PARSE ERROR : qos_downstream value is too big."`
-EXPECT="PARSE ERROR : qos_downstream value is too big."
+RET=`$L7VSADM -E -t localhost:40001 -m ip -q K 2>&1 | grep "PARSE ERROR : invalid qos_downstream value."`
+EXPECT="PARSE ERROR : invalid qos_downstream value."
 if [ "${RET}" != "${EXPECT}" ]
 then
-        echo "Test failed: $L7VSADM -E -t localhost:40001 -m ip -q 1000G"
+        echo "Test failed: $L7VSADM -E -t localhost:40001 -m ip -q K"
         exit 1
 fi
 

@@ -2,7 +2,7 @@
 
 # SET PATH
 TEST_DIR=`dirname $0`
-DATE=`date +'%Y-%m-%d(%Hh%Mm%Ss)'`
+DATE=`date +'%Y%m%d-%H%M%S'`
 
 CONF_DIR="${TEST_DIR}/config"
 SCRIPT_DIR="${TEST_DIR}/script"
@@ -72,7 +72,6 @@ check_option "$@"
 ####################
 # Pretreatment
 ####################
-cd ${TEST_DIR}
 
 # Logger
 . ${LOGGER}
@@ -104,29 +103,36 @@ do
 	EVIDENCE_DIR="${LOG_DIR}/${KIND}"
 	LOG "Make evidence directory ${EVIDENCE_DIR}."
 	mkdir -p ${EVIDENCE_DIR}
-	cd ${SCRIPT_DIR}/${KIND}
-	for SCRIPT in ${2:-*}
+	pushd ${SCRIPT_DIR}/${KIND} > /dev/null
+	SCRIPT_LIST=`ls | sort -n -t - -k2 -k3 -k4 -k5`
+	popd > /dev/null
+	for SCRIPT_NAME in ${2:-${SCRIPT_LIST}}
 	do
-		if [ -x ${SCRIPT} ]
+		SCRIPT=${SCRIPT_DIR}/${KIND}/${SCRIPT_NAME}
+		if [ -d ${SCRIPT} ]
 		then
+			continue
+		elif [ -x ${SCRIPT} ]
+		then
+			SCRIPT_NAME=`basename ${SCRIPT}`
 			make_lighttpd_tmpdir
 			# Execute script
-			LOG "Execute ${SCRIPT} ."
+			LOG "Execute ${SCRIPT_NAME} ."
 			(
 				. ${SCRIPT}
 			) 2> /dev/null 1> ${TMP_DIR}/tmp
 			# Write report.
 			if [ $? -eq 0 ]
 			then
-				echo -e "${KIND}\t${SCRIPT}\tOK" | tee -a ${REPORT_FILE}
+				echo -e "${KIND}\t${SCRIPT_NAME}\tOK" | tee -a ${REPORT_FILE}
 			else
-				echo -e "${KIND}\t${SCRIPT}\tNG" | tee -a ${REPORT_FILE}
+				echo -e "${KIND}\t${SCRIPT_NAME}\tNG" | tee -a ${REPORT_FILE}
 				cat ${TMP_DIR}/tmp | tee -a ${REPORT_FILE}
 			fi
 			# Stop UltraMonkey-L7.
 			. ${STOP_MONKEY}
 			# Collect logs.
-			TAR_DIR=${EVIDENCE_DIR}/`echo "${SCRIPT}" | cut -d "." -f 1`
+			TAR_DIR=${EVIDENCE_DIR}/`echo "${SCRIPT_NAME}" | cut -d "." -f 1`
 			mkdir ${TAR_DIR}
 			. ${COLLECT_FILE}
 			#tarで圧縮
@@ -135,7 +141,7 @@ do
 			stop_all_lighttpd	
 			clean_lighttpd_tmpdir
 		else
-			LOG_WARN "${SCRIPT_DIR}/${KIND}/${SCRIPT} cannot execute."
+			LOG_WARN "${SCRIPT} cannot execute."
 			continue
 		fi
 	done
@@ -150,7 +156,6 @@ awk 'BEGIN{OkCon=0;NgCon=0;}
 	 NgCon++;}
      END{printf("OK=%d\tNG=%d\n",OkCon,NgCon)}' | tee -a ${REPORT_FILE}
 LOG "Test scripts end."
-cd ${TEST_DIR}
 ###################
 # Aftertreatment
 ###################
@@ -159,3 +164,5 @@ cd ${TEST_DIR}
 # Return log and config files.
 . ${RETURN_FILE}
 
+grep -v 'OK' ${REPORT_FILE} | grep '\bNG\b' > /dev/null && exit 1
+exit 0

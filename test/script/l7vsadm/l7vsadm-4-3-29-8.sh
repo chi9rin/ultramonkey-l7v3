@@ -18,11 +18,11 @@ then
         exit 1
 fi
 
-RET=`$L7VSADM -E -t localhost:40001 -m ip -q M 2>&1 | grep "PARSE ERROR : invalid qos_downstream value."`
+RET=`$L7VSADM -E -t localhost:40001 -m ip -q G 2>&1 | grep "PARSE ERROR : invalid qos_downstream value."`
 EXPECT="PARSE ERROR : invalid qos_downstream value."
 if [ "${RET}" != "${EXPECT}" ]
 then
-        echo "Test failed: $L7VSADM -E -t localhost:40001 -m ip -q M"
+        echo "Test failed: $L7VSADM -E -t localhost:40001 -m ip -q G"
         exit 1
 fi
 
