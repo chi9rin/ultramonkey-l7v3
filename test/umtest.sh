@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # SET PATH
-TEST_DIR=`dirname $0`
+TEST_DIR=""
 DATE=`date +'%Y%m%d-%H%M%S'`
 
 CONF_DIR="${TEST_DIR}/config"
@@ -16,6 +16,12 @@ SAVE_FILE="${COMMON_SCRIPT_DIR}/save_file.sh"
 RETURN_FILE="${COMMON_SCRIPT_DIR}/return_file.sh"
 COLLECT_FILE="${COMMON_SCRIPT_DIR}/collect_file.sh"
 SET_DEFAULT_CONF="${COMMON_SCRIPT_DIR}/set_default_conf.sh"
+
+if [ ! -d "$TEST_DIR" ]
+then
+	echo "TEST_DIR not defined."
+	exit 1
+fi
 
 # Make work directory
 LOG_BASE_DIR="${TEST_DIR}/log"
@@ -119,6 +125,7 @@ do
 			# Execute script
 			LOG "Execute ${SCRIPT_NAME} ."
 			(
+				cd ${SCRIPT_DIR}/${KIND}
 				. ${SCRIPT}
 			) 2> /dev/null 1> ${TMP_DIR}/tmp
 			# Write report.
