@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # SET PATH
-TEST_DIR=""
+#TEST_DIR=""
 DATE=`date +'%Y%m%d-%H%M%S'`
 
 CONF_DIR="${TEST_DIR}/config"
@@ -19,7 +19,7 @@ SET_DEFAULT_CONF="${COMMON_SCRIPT_DIR}/set_default_conf.sh"
 
 if [ ! -d "$TEST_DIR" ]
 then
-	echo "TEST_DIR not defined."
+	echo "Please set TEST_DIR."
 	exit 1
 fi
 
