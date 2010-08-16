@@ -213,10 +213,10 @@ protected:
         UPTHREAD_STATUS_TAG     upthread_status;
         boost::mutex            upthread_status_mutex;
         boost::condition        upthread_status_cond;
-        DOWNTHREAD_STATUS_TAG downthread_status;
+        DOWNTHREAD_STATUS_TAG   downthread_status;
         boost::mutex            downthread_status_mutex;
         boost::condition        downthread_status_cond;
-        bool                            realserver_connect_status;
+        bool                    realserver_connect_status;
         boost::mutex            realserver_connect_mutex;
         boost::condition        realserver_connect_cond;
 

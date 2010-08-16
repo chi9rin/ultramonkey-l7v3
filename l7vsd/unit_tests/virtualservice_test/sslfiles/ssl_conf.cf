@@ -1,0 +1,31 @@
+[ssl]
+
+# Global configuration.				→基本項目（行頭の#はコメント行、行頭以外の#は不可）
+timout_sec = 30
+
+# SSL configuration.					→SSL項目（行頭の#はコメント行、行頭以外の#は不可）
+#ca_dir = "/home/komata/KomataCA/certs"
+ca_dir = "/home/komata/KomataCA/"
+ca_file = "CAfile.pem"
+cert_chain_dir = "/home/komata/KomataCA/SERVER/"
+cert_chain_file = "cert.pem"
+private_key_dir = "/home/komata/KomataCA/SERVER/"
+private_key_file = "server.key"
+private_key_filetype = "SSL_FILETYPE_PEM"
+private_key_passwd_dir = "/home/komata/KomataCA/SERVER/"
+private_key_passwd_file = "passwd.txt"
+verify_options = "SSL_VERIFY_PEER"
+verify_options = "SSL_VERIFY_FAIL_IF_NO_PEER_CERT"
+verify_cert_depth = 4 
+ssl_options = "SSL_OP_ALL"
+ssl_options = "SSL_OP_NO_SSLv2"
+ssl_options = "SSL_OP_SINGLE_DH_USE"
+tmp_dh_dir = "/home/komata/KomataCA/"
+tmp_dh_file = "dh512.pem"
+cipher_list = "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH"
+
+# SSL session cache configuration. 			→SSLセッションキャッシュ用の設定(OpenSSL標準の内部セッションキャッシュを使用)
+session_cache = "on"
+session_cache_size = 20480
+session_cache_timeout = 300
+

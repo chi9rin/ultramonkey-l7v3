@@ -1,0 +1,62 @@
+TARGET	= logger_access_manager_test
+INCDIR	= ../../../l7vsd/include
+SRCDIR	= ../../../l7vsd/src
+CC	= g++
+CFLAGS	= -O0 -g -Wall -Werror -pthread -DPARAMETER_FILE='"./test_cf_files/l7vs.cf"' #-fprofile-arcs -ftest-coverage
+LD	= g++
+LIBS	= -L/usr/lib64 -lrt \
+				-llog4cxx -ldl \
+				-lboost_system-mt \
+				-lboost_thread-mt \
+				-lboost_unit_test_framework-mt
+
+PARAMETERDIR2    = ./parameter_stub
+PARAMETER2       = $(PARAMETERDIR2)/parameter.a
+LOGGER_PROCESS2 = -DLOGGER_PROCESS_VSD
+
+LDFLAGS	=  -L$(PARAMETERDIR2)
+
+PARAMETERDIR	= ./logger_implement_access_stub
+PARAMETER	= $(PARAMETERDIR)/logger_implement_access.a
+LOGGER_PROCESS = -DLOGGER_PROCESS_VSD
+SNMPDIR		=../../../l7vsd/snmpagent
+
+
+
+
+SRCS	= 	\
+	$(PARAMETERDIR2)/parameter_impl.cpp \
+	$(PARAMETERDIR2)/parameter.cpp \
+	  logger_access_manager_test.cpp 
+#	  $(SRCDIR)/logger_impl.cpp \
+#	$(PARAMETERDIR2)/parameter.h \
+#	$(PARAMETERDIR2)/parameter_impl.h \
+#	  $(SRCDIR)/parameter_impl.cpp \
+#	  $(SRCDIR)/parameter.cpp \
+#	  $(SRCDIR)/strict_time_based_rolling_policy.cpp \
+#	  $(SRCDIR)/time_and_size_based_rolling_policy.cpp \
+#	  logger_impl_test.cpp 
+
+.SUFFIXES: .cpp .o
+.cpp.o:
+	$(CC) $(CFLAGS) -L$(PARAMETERDIR2) $(LOGGER_PROCESS) -DPARAMETER_FILE='"./test_cf_files/l7vs.cf"' -DLOGGER_CONSOLE=\"./test.log\" -I/usr/include/apr-1/ -I./ -I$(PARAMETERDIR2) -I$(INCDIR) -I$(SRCDIR) -I$(SNMPDIR)  -c $< -o $@
+
+OBJS	= $(SRCS:.cpp=.o)
+
+all:	$(TARGET)
+
+$(TARGET): $(OBJS) $(PARAMETER) $(PARAMETER2)
+	$(LD) $(LDFLAGS) $(LIBS) -o $(TARGET) -I$(PARAMETERDIR2) -I$(INCDIR) -I$(SRCDIR) $(OBJS) $(PARAMETER) -DPARAMETER_FILE='"./test_cf_files/l7vs.cf"' #/usr/lib64/libboost_unit_test_framework.a
+
+$(PARAMETER):
+	$(MAKE) -C $(PARAMETERDIR)
+
+$(PARAMETER2):
+	$(MAKE) -C $(PARAMETERDIR2)
+
+logger_access_manager_test.o: $(SRCDIR)/logger_access_manager.cpp
+
+clean:
+	rm -f $(TARGET) *.o
+#	$(MAKE) -C $(PARAMETERDIR) clean
+#	$(MAKE) -C $(PARAMETERDIR2) clean
