@@ -32,10 +32,10 @@ then
 fi
 usleep 100000
 
-$L7VSADM -A -t 127.0.0.1:40001 -m sessionless -b ${SorryServer1_ADDR}:${SorryServer1_PORT} -u 2
+$L7VSADM -A -t 127.0.0.1:40001 -m sessionless -b ${SorryServer1_ADDR}:${SorryServer1_PORT} -u 4
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m sessionless -b ${SorryServer1_ADDR}:${SorryServer1_PORT} -u 2"
+        echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m sessionless -b ${SorryServer1_ADDR}:${SorryServer1_PORT} -u 4"
         exit 1
 fi
 
@@ -52,6 +52,14 @@ usleep 100000
 
 $TEST_CLIENT 127.0.0.1 40001 &
 CONNECT2=$!
+usleep 100000
+
+$TEST_CLIENT 127.0.0.1 40001 &
+CONNECT3=$!
+usleep 100000
+
+$TEST_CLIENT 127.0.0.1 40001 &
+CONNECT4=$!
 usleep 100000
 
 #Connect
@@ -76,10 +84,48 @@ then
         exit 1
 fi
 
+#Connect
+RET=`$WGET -t 1 -qO- http://127.0.0.1:40001/`
+if [ "${RET}" != "${RealServer1}" ]
+then
+        echo "Test failed: $WGET -t 1 -qO- http://127.0.0.1:40001/"
+        exit 1
+fi
+
 kill ${CONNECT2}
 if [ $? -ne 0 ]
 then
         echo "Test failed: kill ${CONNECT2}"
+        exit 1
+fi
+
+#Connect
+RET=`$WGET -t 1 -qO- http://127.0.0.1:40001/`
+if [ "${RET}" != "${RealServer1}" ]
+then
+        echo "Test failed: $WGET -t 1 -qO- http://127.0.0.1:40001/"
+        exit 1
+fi
+
+kill ${CONNECT3}
+if [ $? -ne 0 ]
+then
+        echo "Test failed: kill ${CONNECT3}"
+        exit 1
+fi
+
+kill ${CONNECT4}
+if [ $? -ne 0 ]
+then
+        echo "Test failed: kill ${CONNECT4}"
+        exit 1
+fi
+
+#Connect
+RET=`$WGET -t 1 -qO- http://127.0.0.1:40001/`
+if [ "${RET}" != "${RealServer1}" ]
+then
+        echo "Test failed: $WGET -t 1 -qO- http://127.0.0.1:40001/"
         exit 1
 fi
 

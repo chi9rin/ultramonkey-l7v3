@@ -32,27 +32,19 @@ then
 fi
 usleep 100000
 
-$L7VSADM -A -t 127.0.0.1:40001 -m sessionless -b ${SorryServer1_ADDR}:${SorryServer1_PORT} -u 2
+$L7VSADM -A -t 127.0.0.1:40001 -m sessionless -b ${SorryServer1_ADDR}:${SorryServer1_PORT} -f 0
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m sessionless -b ${SorryServer1_ADDR}:${SorryServer1_PORT} -u 2"
+        echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m sessionless -b ${SorryServer1_ADDR}:${SorryServer1_PORT} -f 0"
         exit 1
 fi
 
-$L7VSADM -a -t 127.0.0.1:40001 -m sessionless -r ${RealServer1_ADDR}:${RealServer1_PORT}
+$L7VSADM -a -t 127.0.0.1:40001 -m sessionless -r ${RealServer1_ADDR}:${RealServer1_PORT} -w 0
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM -a -t 127.0.0.1:40001 -m sessionless -r ${RealServer1_ADDR}:${RealServer1_PORT}"
+        echo "Test failed: $L7VSADM -a -t 127.0.0.1:40001 -m sessionless -r ${RealServer1_ADDR}:${RealServer1_PORT} -w 0"
         exit 1
 fi
-
-$TEST_CLIENT 127.0.0.1 40001 &
-CONNECT1=$!
-usleep 100000
-
-$TEST_CLIENT 127.0.0.1 40001 &
-CONNECT2=$!
-usleep 100000
 
 #Connect
 RET=`$WGET -t 1 -qO- http://127.0.0.1:40001/`
@@ -62,24 +54,19 @@ then
         exit 1
 fi
 
-if [ -z "${RET}" ]
+# change weight
+$L7VSADM -e -t 127.0.0.1:40001 -m sessionless -r ${RealServer1_ADDR}:${RealServer1_PORT} -w 1
+if [ $? -ne 0 ]
+then
+        echo "Test failed: $L7VSADM -e -t 127.0.0.1:40001 -m sessionless -r ${RealServer1_ADDR}:${RealServer1_PORT} -w 1"
+        exit 1
+fi
+
+#Connect
+RET=`$WGET -t 1 -qO- http://127.0.0.1:40001/`
+if [ "${RET}" != "${RealServer1}" ]
 then
         echo "Test failed: $WGET -t 1 -qO- http://127.0.0.1:40001/"
-        exit 1
-fi
-
-# kill active connect
-kill ${CONNECT1}
-if [ $? -ne 0 ]
-then
-        echo "Test failed: kill ${CONNECT1}"
-        exit 1
-fi
-
-kill ${CONNECT2}
-if [ $? -ne 0 ]
-then
-        echo "Test failed: kill ${CONNECT2}"
         exit 1
 fi
 
