@@ -16,10 +16,10 @@ INCLUDES	=		\
 				-I../../.. \
 				-I../../src \
 				-I/usr/include
-LIBS		=		-lboost_system \
-				-lboost_thread \
-				-lboost_unit_test_framework \
-				-lboost_serialization \
+LIBS		=		-lboost_system-mt \
+				-lboost_thread-mt \
+				-lboost_unit_test_framework-mt \
+				-lboost_serialization-mt \
 				-llog4cxx \
 
 LDFLAGS		= -lrt -ldl -lssl 
