@@ -1419,6 +1419,7 @@ void    l7vs::virtualservice_tcp::run()
         acceptor_.set_option(option);
         //set socket option TCP_DEFER_ACCEPT
         if (defer_accept_opt) {
+                boost::system::error_code ec;
                 size_t len = sizeof(defer_accept_val);
                 int err = ::setsockopt(acceptor_.native(), IPPROTO_TCP, TCP_DEFER_ACCEPT, &defer_accept_val, len);
                 if (unlikely(err)) {
@@ -1642,10 +1643,6 @@ void l7vs::virtualservice_tcp::set_socket_option()
         }
 
         // socket option check & set
-        //! IP_TRANSPARENT (false:not set,true:set option)
-        set_sock_opt.transparent_opt = false;
-        //! TCP_DEFER_ACCEPT option value (false:off,true:on)
-        set_sock_opt.transparent_val = false;
         //! TCP_DEFER_ACCEPT (false:not set,true:set option)
         defer_accept_opt = false;
         //! TCP_DEFER_ACCEPT option value
@@ -1664,13 +1661,6 @@ void l7vs::virtualservice_tcp::set_socket_option()
         set_sock_opt.quickack_val = false;
 
         // set socket option
-        if (element.socket_option_ip_transparent != 0) {
-                set_sock_opt.transparent_opt = true;
-                if (element.socket_option_ip_transparent == 1) {
-                        set_sock_opt.transparent_val = true;
-                }
-        }
-
         if (element.socket_option_tcp_defer_accept != 0) {
                 defer_accept_opt = true;
                 if (element.socket_option_tcp_defer_accept == 1) {
@@ -1702,13 +1692,11 @@ void l7vs::virtualservice_tcp::set_socket_option()
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                 boost::format formatter("set_socket_option"
-                                        " transparent_opt[%s] transparent_val[%s]"
                                         " defer_accept_opt[%s] defer_accept_val[%d]"
                                         " nodelay_opt[%s] nodelay_val[%s]"
                                         " cork_opt[%s] cork_val[%s]"
                                         " quickack_opt[%s]" "quickack_val[%s]");
-                formatter % (set_sock_opt.transparent_opt ? "true" : "false") % (set_sock_opt.transparent_val ? "true" : "false")
-                % (defer_accept_opt ? "true" : "false") % defer_accept_val
+                formatter % (defer_accept_opt ? "true" : "false") % defer_accept_val
                 % (set_sock_opt.nodelay_opt ? "true" : "false") % (set_sock_opt.nodelay_val ? "true" : "false")
                 % (set_sock_opt.cork_opt ? "true" : "false") % (set_sock_opt.cork_val ? "true" : "false")
                 % (set_sock_opt.quickack_opt ? "true" : "false") % (set_sock_opt.quickack_val ? "true" : "false");
