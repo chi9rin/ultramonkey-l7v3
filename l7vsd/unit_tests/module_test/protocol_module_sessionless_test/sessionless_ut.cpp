@@ -3139,6 +3139,7 @@ void handle_realserver_select_tcp_test(){
 
     cout << "[157]--------------------------------------------- " << endl;
     //unit_test[157] endpoint = 決定 rs endpointなし場合
+    this->initialize(rslist_begin, rslist_end, rslist_next, rslist_lock, rslist_unlock);
     boost::thread down_thread1(down_thread_func);
     thread_data_ptr dataup1(new session_thread_data_sessionless);
     thread_data_ptr datadown1(new session_thread_data_sessionless);
@@ -3159,11 +3160,11 @@ void handle_realserver_select_tcp_test(){
 
     //endpoint = 決定
     BOOST_CHECK_EQUAL(ep1, string_to_endpoint <boost::asio::ip::tcp> ("10.10.10.10:8888"));
-    //遷移先ステータスを設定する status = FINALIZE
-    BOOST_CHECK_EQUAL(ret, FINALIZE);
+    //遷移先ステータスを設定する status = REALSERVER_CONNECT
+    BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
 
     cout << "[158]--------------------------------------------- " << endl;
-    //unit_test[158] realserverが決定済みで、送信可能データがない場合、CLIENT_RECVを返す。
+    //unit_test[158] realserverが決定済みで、送信可能データがない場合、REALSERVER_CONNECTを返す。
     this->session_thread_data_map.clear();
     boost::asio::ip::tcp::endpoint ep_1;
     thread_data_ptr data_1(new session_thread_data_sessionless);
@@ -3179,8 +3180,8 @@ void handle_realserver_select_tcp_test(){
     ret = this->handle_realserver_select(boost::this_thread::get_id(), ep_1);
     //endpoint = 決定
     BOOST_CHECK_EQUAL(ep_1, string_to_endpoint <boost::asio::ip::tcp> ("10.10.10.10:8888"));
-    //遷移先ステータスを設定する status = CLIENT_RECV
-    BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
+    //遷移先ステータスを設定する status = REALSERVER_CONNECT
+    BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
 
     cout << "[159]--------------------------------------------- " << endl;
     //unit_test[159] realserverが決定済みで、送信可能データがある場合、REALSERVER_CONNECTを返す。
@@ -3233,6 +3234,8 @@ void handle_realserver_select_tcp_test_thread(){
     EVENT_TAG ret;
     cout << "[161]--------------------------------------------- " << endl;
     //unit_test[161] endpoint = 決定
+    this->initialize(rslist_begin, rslist_end, rslist_next, rslist_lock, rslist_unlock);
+    this->getloglevel = &stb_getloglevel_is_none;
     boost::thread down_thread(down_thread_func);
     thread_data_ptr dataup(new session_thread_data_sessionless);
     thread_data_ptr datadown(new session_thread_data_sessionless);
@@ -3255,8 +3258,8 @@ void handle_realserver_select_tcp_test_thread(){
         boost::mutex::scoped_lock sclock(check_mutex);
         //endpoint = 決定
         BOOST_CHECK_EQUAL(ep, string_to_endpoint <boost::asio::ip::tcp> ("10.10.10.10:8888"));
-        //遷移先ステータスを設定する status = CLIENT_RECV
-        BOOST_CHECK_EQUAL(ret, FINALIZE);
+        //遷移先ステータスを設定する status = REALSERVER_CONNECT
+        BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
     }
 }
 
@@ -3346,7 +3349,7 @@ void handle_realserver_connect_test(){
     memset(send_buffer.c_array(), 0, MAX_BUFFER_SIZE);
 
     ret = handle_realserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
-    BOOST_CHECK_EQUAL(ret, FINALIZE);
+    BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
 
     cout << "[167]--------------------------------------------- " << endl;
     // unit_test[167] 送信状態リストが空の場合
