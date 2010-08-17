@@ -208,9 +208,10 @@ void    virtualservice_base_test2(){
     BOOST_CHECK( vs->get_param_data().session_pool_size == l7vs::virtualservice_base::SESSION_POOL_NUM_DEFAULT );
 
     // unit_test[37]  load_parameterでパラメータをロードする(パラメータが存在するケース)
-    debugg_flug_struct::getInstance().param_exist_flag() = true;
-    vs->call_load_parameter();
-    BOOST_CHECK( vs->get_param_data().session_pool_size == SESSION_POOL_NUM_PARAM );
+// This test is not use
+//    debugg_flug_struct::getInstance().param_exist_flag() = true;
+//    vs->call_load_parameter();
+//    BOOST_CHECK( vs->get_param_data().session_pool_size == SESSION_POOL_NUM_PARAM );
 
 
 }

@@ -6,26 +6,23 @@
 TARGET		= vs_base_ut vs_tcp_ut vs_tcp_thread_ut vs_tcp_thread_ut2 vs_tcp_it vs_tcp_sorry_ut
 #TARGET		= vs_tcp_ut
 CPP			= g++
-CPPFLAGS	= -O0 -g -Wall -Werror -pthread -D__SNMPBRIDGE_H__ -DMAX_BUFFER_SIZE=65535 -DDEBUG
+CPPFLAGS	= -O0 -g -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG -DPARAMETER_FILE='"../l7vs_logger/l7vs.cf"'
 # CPPFLAGS	= -O2 -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG
 
-PARAMETERDIR    = ./parameter_stub
 
 INCLUDES	=		\
-				-I./parameter_stub \
 				-I./ \
 				-I../../include \
 				-I../../.. \
 				-I../../src \
 				-I/usr/include
-LIBS		=		-lboost_system-mt \
-				-lboost_thread-mt \
-				-lboost_unit_test_framework-mt \
-				-lboost_serialization-mt \
+LIBS		=		-lboost_system \
+				-lboost_thread \
+				-lboost_unit_test_framework \
+				-lboost_serialization \
 				-llog4cxx \
-                                -lparameter
 
-LDFLAGS		= -lrt -ldl -lssl -L$(PARAMETERDIR)
+LDFLAGS		= -lrt -ldl -lssl 
 
 LOGGER_PROCESS = -DLOGGER_PROCESS_VSD
 
@@ -38,10 +35,12 @@ BASESRCS		=	\
                                 ../../src/logger_access_manager.cpp \
                                 ../../src/strict_time_based_rolling_policy.cpp \
                                 ../../src/time_and_size_based_rolling_policy.cpp \
+				../../src/parameter.cpp \
+				../../src/parameter_impl.cpp \
+				../../src/virtualservice_tcp.cpp \
 				../../src/virtualservice_base.cpp \
-				virtualservice_tcp.cpp \
-				virtualservice_udp.cpp \
-				virtualservice.cpp \
+				../../src/virtualservice_udp.cpp \
+				../../src/virtualservice.cpp \
 				vs_base_test.cpp
 
 
@@ -54,10 +53,12 @@ TCPSRCS		=	\
                                 ../../src/logger_access_manager.cpp \
                                 ../../src/strict_time_based_rolling_policy.cpp \
                                 ../../src/time_and_size_based_rolling_policy.cpp \
-				../../src/virtualservice_base.cpp \
+				../../src/parameter.cpp \
+				../../src/parameter_impl.cpp \
 				../../src/virtualservice_tcp.cpp \
-				virtualservice_udp.cpp \
-				virtualservice.cpp \
+				../../src/virtualservice_base.cpp \
+				../../src/virtualservice_udp.cpp \
+				../../src/virtualservice.cpp \
 				vs_tcp_test.cpp
 
 
@@ -69,10 +70,12 @@ TCPTSRCS		=	\
                                 ../../src/logger_access_manager.cpp \
                                 ../../src/strict_time_based_rolling_policy.cpp \
                                 ../../src/time_and_size_based_rolling_policy.cpp \
-				../../src/virtualservice_base.cpp \
+				../../src/parameter.cpp \
+				../../src/parameter_impl.cpp \
 				../../src/virtualservice_tcp.cpp \
-				virtualservice_udp.cpp \
-				virtualservice.cpp \
+				../../src/virtualservice_base.cpp \
+				../../src/virtualservice_udp.cpp \
+				../../src/virtualservice.cpp \
 				vs_tcp_thread_test.cpp
 
 
@@ -83,10 +86,12 @@ TCPT2SRCS		=	\
                                 ../../src/logger_access_manager.cpp \
                                 ../../src/strict_time_based_rolling_policy.cpp \
                                 ../../src/time_and_size_based_rolling_policy.cpp \
-                               ../../src/virtualservice_base.cpp \
-                               ../../src/virtualservice_tcp.cpp \
-				virtualservice_udp.cpp \
-				virtualservice.cpp \
+				../../src/parameter.cpp \
+				../../src/parameter_impl.cpp \
+				../../src/virtualservice_tcp.cpp \
+                                ../../src/virtualservice_base.cpp \
+				../../src/virtualservice_udp.cpp \
+				../../src/virtualservice.cpp \
 				vs_tcp_thread_test2.cpp
 
 
@@ -97,10 +102,12 @@ ITSRCS		=	\
                                 ../../src/logger_access_manager.cpp \
                                 ../../src/strict_time_based_rolling_policy.cpp \
                                 ../../src/time_and_size_based_rolling_policy.cpp \
-                               ../../src/virtualservice_base.cpp \
-                               ../../src/virtualservice_tcp.cpp \
-				virtualservice_udp.cpp \
-				virtualservice.cpp \
+				../../src/parameter.cpp \
+				../../src/parameter_impl.cpp \
+				../../src/virtualservice_tcp.cpp \
+                                ../../src/virtualservice_base.cpp \
+				../../src/virtualservice_udp.cpp \
+				../../src/virtualservice.cpp \
 				vs_tcp_it_ut.cpp
 
 SORRYSRCS		=	\
@@ -110,8 +117,10 @@ SORRYSRCS		=	\
 				../../src/logger_access_manager.cpp \
 				../../src/strict_time_based_rolling_policy.cpp \
  				../../src/time_and_size_based_rolling_policy.cpp \
-				virtualservice_udp.cpp \
-				virtualservice.cpp \
+				../../src/parameter.cpp \
+				../../src/parameter_impl.cpp \
+				../../src/virtualservice.cpp \
+				../../src/virtualservice_udp.cpp \
 				vs_tcp_sorry_test.cpp
 
 .SUFFIX:	.cpp .o

@@ -587,8 +587,8 @@ void	l7vs::session_thread_control::join(){
 		boost::mutex::scoped_lock downthread_running_wait( downthread_running_mutex );
 		downthread_condition.notify_all(); //condition wait thread is run.
 	}
-	upthread_joining_condition.wait( up_lk );
-	downthread_joining_condition.wait( down_lk );
+	//upthread_joining_condition.wait( up_lk );
+	//downthread_joining_condition.wait( down_lk );
 	if( LOG_LV_DEBUG == l7vs::Logger::getLogLevel( l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE ) ){
 	boost::format fmt("out_function : void session_thread_control::stopd ownstream() : up_status = %d / down_status = %d");
 		fmt % upthread_state % downthread_state;
