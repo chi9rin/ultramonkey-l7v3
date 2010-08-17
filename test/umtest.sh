@@ -1,7 +1,8 @@
 #!/bin/bash
 
+
 # SET PATH
-#TEST_DIR=""
+TEST_DIR=$(cd $(dirname "$0") && pwd)
 DATE=`date +'%Y%m%d-%H%M%S'`
 
 CONF_DIR="${TEST_DIR}/config"
@@ -95,6 +96,8 @@ check_option "$@"
 # Test
 ###################
 LOG "Execute test scripts."
+
+
 for KIND in ${1:-`ls ${SCRIPT_DIR}`}
 do
 	if [ ! -d "${SCRIPT_DIR}/${KIND}" ]
