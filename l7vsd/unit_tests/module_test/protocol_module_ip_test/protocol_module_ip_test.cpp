@@ -2251,6 +2251,7 @@ public:
 
             thread_data->end_flag = END_FLAG_OFF;
             thread_data->data_state = HTTP_START;
+            this->forwarded_for = FORWARDED_FOR_ON;
             recvbuffer.assign('0');
             memset(recvbuffer.c_array(), 0, MAX_BUFFER_SIZE);
             memcpy(recvbuffer.c_array(), "1234567890", 10);
@@ -2801,7 +2802,7 @@ public:
         //unit_test[134] get_endpoint_from_session_data後endpoint = 未決定
         //unit_test[134] schedule_moduleにて振り分け先realserverを決定
         //unit_test[134] データ状態がHTTP_STARTの場合
-        //unit_test[134] status = CLIENT_RECV
+        //unit_test[134] status = REALSERVER_CONNECT
         {
             this->session_thread_data_map.clear();
             thread_data_ptr data_ptr(new session_thread_data_ip);
@@ -2826,8 +2827,8 @@ public:
 
             BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
             BOOST_CHECK_EQUAL(entry.last_time, 0);
-            BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_RECV);
+            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
+            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
             this->session_thread_data_map.clear();
             delete this->replication_data_processor;
             delete this->ip_data_processor;
@@ -2950,7 +2951,7 @@ public:
         //unit_test[138] get_endpoint_from_session_data後endpoint = 決定
         //unit_test[138] rsリストを検索し、realserver endpointの存在チェックしrealserver endpoint が存在する場合
         //unit_test[138] データ状態がHTTP_STARTの場合
-        //unit_test[138] status = CLIENT_RECV
+        //unit_test[138] status = REALSERVER_CONNECT
         {
             this->session_thread_data_map.clear();
             thread_data_ptr data_ptr(new session_thread_data_ip);
@@ -2980,8 +2981,8 @@ public:
             ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
             BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
             BOOST_CHECK_EQUAL(entry.last_time, 0);
-            BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_RECV);
+            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
+            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
             this->session_thread_data_map.clear();
             delete this->replication_data_processor;
             delete this->ip_data_processor;
@@ -3191,7 +3192,7 @@ public:
         //unit_test[144] rescheduleモード
         //unit_test[144] schedule_moduleにて振り分け先realserverを決定する
         //unit_test[144] データ状態がHTTP_STARTの場合
-        //unit_test[144] status = CLIENT_RECV
+        //unit_test[144] status = REALSERVER_CONNECT
         {
             this->session_thread_data_map.clear();
             thread_data_ptr data_ptr(new session_thread_data_ip);
@@ -3218,8 +3219,8 @@ public:
             ip_session_table_entry entry = (dynamic_cast<ip_session_data_processor_stub*>(this->ip_data_processor))->get_session_data_stub(data_ptr->ip_hash);
             BOOST_CHECK_EQUAL(entry.rs_endpoint, rs_endpoint);
             BOOST_CHECK_EQUAL(entry.last_time, 0);
-            BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
-            BOOST_CHECK_EQUAL(data_ptr->last_status, CLIENT_RECV);
+            BOOST_CHECK_EQUAL(ret, REALSERVER_CONNECT);
+            BOOST_CHECK_EQUAL(data_ptr->last_status, REALSERVER_CONNECT);
             this->session_thread_data_map.clear();
             delete this->replication_data_processor;
             delete this->ip_data_processor;
@@ -6154,6 +6155,7 @@ public:
             boost::array<char, MAX_BUFFER_SIZE> recvbuffer= { { "HTTP/1.1 ert\r\nHIJKLMNrn" } };
             size_t recvlen = 23;
             boost::asio::ip::tcp::endpoint ep;
+            this->forwarded_for = FORWARDED_FOR_ON;
             status = this->handle_realserver_recv(boost::this_thread::get_id(),ep,recvbuffer,recvlen);
             BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_length, 33u);
             BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_state, HTTP_START);
@@ -6384,6 +6386,7 @@ public:
             };
             size_t recvlen = strlen(recvbuffer.data());
             boost::asio::ip::tcp::endpoint ep;
+            this->forwarded_for = FORWARDED_FOR_ON;
             status = this->handle_realserver_recv(boost::this_thread::get_id(),ep,recvbuffer,recvlen);
             {
                 boost::mutex::scoped_lock sclock(session_thread_data_map_mutex);
@@ -6558,6 +6561,7 @@ public:
             boost::array<char, MAX_BUFFER_SIZE> recvbuffer= { { "HTTP/1.1 ert\r\nHIJKLMNrn" } };
             size_t recvlen = 23;
             boost::asio::ip::tcp::endpoint ep;
+            this->forwarded_for = FORWARDED_FOR_ON;
             status = this->handle_sorryserver_recv(boost::this_thread::get_id(),ep,recvbuffer,recvlen);
             BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_length, 33u);
             BOOST_CHECK_EQUAL(this->session_thread_data_map[boost::this_thread::get_id()]->data_state, HTTP_START);
@@ -6785,6 +6789,7 @@ public:
             };
             size_t recvlen = strlen(recvbuffer.data());
             boost::asio::ip::tcp::endpoint ep;
+            this->forwarded_for = FORWARDED_FOR_ON;
             status = this->handle_sorryserver_recv(boost::this_thread::get_id(),ep,recvbuffer,recvlen);
             {
                 boost::mutex::scoped_lock sclock(session_thread_data_map_mutex);
