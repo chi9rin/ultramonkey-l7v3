@@ -1419,10 +1419,9 @@ void    l7vs::virtualservice_tcp::run()
         acceptor_.set_option(option);
         //set socket option TCP_DEFER_ACCEPT
         if (defer_accept_opt) {
-                boost::system::error_code ec;
                 size_t len = sizeof(defer_accept_val);
-                boost::asio::detail::socket_ops::setsockopt(acceptor_.native(), IPPROTO_TCP, TCP_DEFER_ACCEPT, &defer_accept_val, len, ec);
-                if (unlikely(ec)) {
+                int err = ::setsockopt(acceptor_.native(), IPPROTO_TCP, TCP_DEFER_ACCEPT, &defer_accept_val, len);
+                if (unlikely(err)) {
                         //ERROR
                         Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 17, "socket option(TCP_DEFER_ACCEPT) set failed" , __FILE__, __LINE__);
                 }

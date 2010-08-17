@@ -80,9 +80,8 @@ bool tcp_socket::connect(boost::asio::ip::tcp::endpoint connect_endpoint,
                         if (opt_info.cork_opt) {
                                 int val = opt_info.cork_val;
                                 size_t len = sizeof(val);
-                                boost::asio::detail::socket_ops::setsockopt(
-                                        my_socket.native(), IPPROTO_TCP, TCP_CORK, &val, len, ec);
-                                if (unlikely(ec)) {
+                                int err = ::setsockopt(my_socket.native(), IPPROTO_TCP, TCP_CORK, &val, len);
+                                if (unlikely(err)) {
                                         //ERROR
                                         Logger::putLogError(LOG_CAT_L7VSD_SESSION, 101,
                                                             "socket option(TCP_CORK) set failed" ,
@@ -140,9 +139,8 @@ void tcp_socket::accept()
                 boost::system::error_code ec;
                 int val = opt_info.cork_val;
                 size_t len = sizeof(val);
-                boost::asio::detail::socket_ops::setsockopt(
-                        my_socket.native(), IPPROTO_TCP, TCP_CORK, &val, len, ec);
-                if (unlikely(ec)) {
+                int err = ::setsockopt(my_socket.native(), IPPROTO_TCP, TCP_CORK, &val, len);
+                if (unlikely(err)) {
                         //ERROR
                         Logger::putLogError(LOG_CAT_L7VSD_SESSION, 103,
                                             "socket option(TCP_CORK) set failed" ,
@@ -280,9 +278,8 @@ std::size_t tcp_socket::read_some(
                 if (opt_info.quickack_opt) {
                         int val = opt_info.quickack_val;
                         size_t len = sizeof(val);
-                        boost::asio::detail::socket_ops::setsockopt(
-                                my_socket.native(), IPPROTO_TCP, TCP_QUICKACK, &val, len, ec);
-                        if (unlikely(ec)) {
+                        int err = ::setsockopt(my_socket.native(), IPPROTO_TCP, TCP_QUICKACK, &val, len);
+                        if (unlikely(err)) {
                                 //ERROR
                                 std::stringstream buf;
                                 buf << "Thread ID[";

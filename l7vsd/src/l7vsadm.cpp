@@ -30,6 +30,7 @@
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
+#include <csignal>
 #include <sys/file.h>
 #include "l7vsadm.h"
 #include "logger.h"
