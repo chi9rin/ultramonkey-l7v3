@@ -73,6 +73,69 @@ check_option (){
 	shift `expr "$OPTIND" - 1`
 }
 
+# main function
+# $1 dirname
+# $2 filename
+um_test (){
+	if [ ! -d "$1" ]
+	then
+		LOG_WARN "$1 not exist."
+		return
+	fi
+	KIND=`basename $1`
+	echo "TEST : $KIND"
+	if [ $KIND == "common" -o $KIND == "materials" ]
+	then
+		return
+	fi
+
+	EVIDENCE_DIR="${LOG_DIR}/${KIND}"
+	LOG "Make evidence directory ${EVIDENCE_DIR}."
+	mkdir -p ${EVIDENCE_DIR}
+	SCRIPT_LIST=`ls $1 | sort -n -t - -k2 -k3 -k4 -k5`
+	for SCRIPT_NAME in ${2:-${SCRIPT_LIST}}
+	do
+		SCRIPT=$1/${SCRIPT_NAME}
+		if [ -d ${SCRIPT} ]
+		then
+			( um_test ${SCRIPT} )
+		elif [ -x ${SCRIPT} ]
+		then
+			SCRIPT_NAME=`basename ${SCRIPT}`
+			make_lighttpd_tmpdir
+			# Execute script
+			LOG "Execute ${SCRIPT_NAME} ."
+			(
+				cd $1
+				. ${SCRIPT}
+			) 2> /dev/null 1> ${TMP_DIR}/tmp
+			# Write report.
+			if [ $? -eq 0 ]
+			then
+				echo -e "${KIND}\t${SCRIPT_NAME}\tOK" | tee -a ${REPORT_FILE}
+			else
+				echo -e "${KIND}\t${SCRIPT_NAME}\tNG" | tee -a ${REPORT_FILE}
+				cat ${TMP_DIR}/tmp | tee -a ${REPORT_FILE}
+			fi
+			# Stop UltraMonkey-L7.
+			. ${STOP_MONKEY}
+			# Collect logs.
+			TAR_DIR=${EVIDENCE_DIR}/`echo "${SCRIPT_NAME}" | cut -d "." -f 1`
+			mkdir ${TAR_DIR}
+			. ${COLLECT_FILE}
+			# tar zip
+			# tar cfz dist.tar.gz targetfolder
+			# Stop HTTP server.
+			stop_all_lighttpd	
+			clean_lighttpd_tmpdir
+		else
+			LOG_WARN "${SCRIPT} cannot execute."
+			continue
+		fi
+	done
+#done
+}
+
 #Check option
 check_option "$@"
 
@@ -98,64 +161,20 @@ check_option "$@"
 LOG "Execute test scripts."
 
 
-for KIND in ${1:-`ls ${SCRIPT_DIR}`}
+for ARG in ${@:-${SCRIPT_DIR}}
 do
-	if [ ! -d "${SCRIPT_DIR}/${KIND}" ]
+	ABSPATH=$(cd $(dirname "$ARG") && pwd)/$(basename "$ARG")
+	if [ -d ${ABSPATH} ]
 	then
-		LOG_WARN "${SCRIPT_DIR}/${KIND} not exist."
-		continue
-	fi
-	if [ $KIND == "common" ]
+		um_test ${ABSPATH}
+	elif [ -x ${ABSPATH} ]
 	then
-		continue
+		um_test `dirname ${ABSPATH}` `basename ${ABSPATH}`
+	else
+		LOG_WARN "${ABSPATH} cannot execute."
 	fi
-	EVIDENCE_DIR="${LOG_DIR}/${KIND}"
-	LOG "Make evidence directory ${EVIDENCE_DIR}."
-	mkdir -p ${EVIDENCE_DIR}
-	pushd ${SCRIPT_DIR}/${KIND} > /dev/null
-	SCRIPT_LIST=`ls | sort -n -t - -k2 -k3 -k4 -k5`
-	popd > /dev/null
-	for SCRIPT_NAME in ${2:-${SCRIPT_LIST}}
-	do
-		SCRIPT=${SCRIPT_DIR}/${KIND}/${SCRIPT_NAME}
-		if [ -d ${SCRIPT} ]
-		then
-			continue
-		elif [ -x ${SCRIPT} ]
-		then
-			SCRIPT_NAME=`basename ${SCRIPT}`
-			make_lighttpd_tmpdir
-			# Execute script
-			LOG "Execute ${SCRIPT_NAME} ."
-			(
-				cd ${SCRIPT_DIR}/${KIND}
-				. ${SCRIPT}
-			) 2> /dev/null 1> ${TMP_DIR}/tmp
-			# Write report.
-			if [ $? -eq 0 ]
-			then
-				echo -e "${KIND}\t${SCRIPT_NAME}\tOK" | tee -a ${REPORT_FILE}
-			else
-				echo -e "${KIND}\t${SCRIPT_NAME}\tNG" | tee -a ${REPORT_FILE}
-				cat ${TMP_DIR}/tmp | tee -a ${REPORT_FILE}
-			fi
-			# Stop UltraMonkey-L7.
-			. ${STOP_MONKEY}
-			# Collect logs.
-			TAR_DIR=${EVIDENCE_DIR}/`echo "${SCRIPT_NAME}" | cut -d "." -f 1`
-			mkdir ${TAR_DIR}
-			. ${COLLECT_FILE}
-			#tarで圧縮
-			# tar cfz dist.tar.gz targetfolder
-			# Stop HTTP server.
-			stop_all_lighttpd	
-			clean_lighttpd_tmpdir
-		else
-			LOG_WARN "${SCRIPT} cannot execute."
-			continue
-		fi
-	done
 done
+
 # Count OK and NG
 echo "############# Summary ###############" | tee -a ${REPORT_FILE}
 grep -v "^Test failed" ${REPORT_FILE} | 
