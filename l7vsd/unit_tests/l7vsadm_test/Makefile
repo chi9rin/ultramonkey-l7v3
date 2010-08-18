@@ -7,11 +7,11 @@ TARGET		= l7vsadm_ut
 CPP			= g++
 CPPFLAGS	= -Wall -O0 -g -Wno-write-strings -Werror -pthread -DPARAMETER_FILE='"./l7vs.cf"' -DLOGGER_PROCESS_ADM -DL7VS_CONFIG_SOCK_PATH='"."' -DMAX_BUFFER_SIZE='(65535)' -DVERSION=\"3.0.0-0\"
 INCLUDES	= 	-I../../include -I../../..
-LIBS		=	-lboost_system-mt \
-				-lboost_thread-mt \
-				-lboost_serialization-mt \
-				-lboost_unit_test_framework-mt \
-				-lboost_regex-mt \
+LIBS		=	-lboost_system \
+				-lboost_thread \
+				-lboost_serialization \
+				-lboost_unit_test_framework \
+				-lboost_regex \
 				-llog4cxx 
 
 LDFLAGS		= -lrt -ldl

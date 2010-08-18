@@ -150,7 +150,7 @@ void    server_thread(){
     buf.assign( 0x00 );
 
     // accept
-    //std::cout << "sock:" << L7VS_CONFIG_SOCKNAME << std::endl;
+    std::cout << "sock:" << L7VS_CONFIG_SOCKNAME << std::endl;
     boost::asio::io_service        server_io;
     stream_protocol::acceptor    acc(    server_io,
                                         stream_protocol::endpoint( L7VS_CONFIG_SOCKNAME ) );
@@ -2036,11 +2036,11 @@ void    parse_vs_func_test(){
         int        argc    = 17;
         char*    argv[]    = {    "l7vsadm_test",
                             "--add-service",
-                            "--target",
+                            "--tcp-service",
                             "10.144.169.86:11500",
-                            "--module",
-                            "curl",
-                            "specified_url",
+                            "--proto-module",
+                            "cinsert",
+                            "mod_arg",
                             "--scheduler",
                             "wrr",
                             "--upper",
@@ -2048,9 +2048,9 @@ void    parse_vs_func_test(){
                             "--bypass",
                             "10.144.169.87:80",
                             "--qos-up",
-                            "12800K",
+                            "100M",
                             "--qos-down",
-                            "25600K"
+                            "200M"
                             };
     
         bool ret = adm.parse_vs_func_wp( cmd, argc, argv );
@@ -2063,9 +2063,9 @@ void    parse_vs_func_test(){
         boost::asio::ip::tcp::endpoint    tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:11500" );
         BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, tcp_acc_ep );
         // unit_test[135] parse_vs_func normal case 2 (CMD_ADD_VS long_option) protocol module name check
-        BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "curl" );
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
         // unit_test[136] parse_vs_func normal case 2 (CMD_ADD_VS long_option) protocol module arg check
-        BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "specified_url" );
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "mod_arg" );
         // unit_test[137] parse_vs_func normal case 2 (CMD_ADD_VS long_option) schedule module name check
         BOOST_CHECK_EQUAL( adm.get_request().vs_element.schedule_module_name, "wrr" );
         // unit_test[138] parse_vs_func normal case 2 (CMD_ADD_VS long_option) sorry_maxconnection check
@@ -2074,9 +2074,9 @@ void    parse_vs_func_test(){
         boost::asio::ip::tcp::endpoint    sorry_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.87:80" );
         BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_endpoint, sorry_ep );
         // unit_test[140] parse_vs_func normal case 2 (CMD_ADD_VS long_option) qos_upstream check
-        BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, ( 13107200ULL / 8 ) );
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, ( 100000000ULL / 8 ) );
         // unit_test[141] parse_vs_func normal case 2 (CMD_ADD_VS long_option) qos_downstream check
-        BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, ( 26214400ULL / 8 ) );
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, ( 200000000ULL / 8 ) );
     }
 
     // parse_vs_func normal case 3 (CMD_EDIT_VS short_option)
@@ -2128,9 +2128,9 @@ void    parse_vs_func_test(){
         // unit_test[150] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) sorry_flag check
         BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_flag, true );
         // unit_test[151] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) qos_upstream check
-        BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, ( 104857600ULL / 8 ) );
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, ( 100000000ULL / 8 ) );
         // unit_test[152] parse_vs_func normal case 3 (CMD_EDIT_VS short_option) qos_downstream check
-        BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, ( 209715200ULL / 8 ) );
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, ( 200000000ULL / 8 ) );
     }
 
     // parse_vs_func normal case 4 (CMD_EDIT_VS long_option)
@@ -2140,11 +2140,11 @@ void    parse_vs_func_test(){
         int        argc    = 19;
         char*    argv[]    = {    "l7vsadm_test",
                             "--edit-service",
-                            "--target",
+                            "--tcp-service",
                             "10.144.169.86:11500",
-                            "--module",
-                            "curl",
-                            "specified_url",
+                            "--proto-module",
+                            "cinsert",
+                            "mod_arg",
                             "--scheduler",
                             "lc",
                             "--upper",
@@ -2154,9 +2154,9 @@ void    parse_vs_func_test(){
                             "--flag",
                             "1",
                             "--qos-up",
-                            "12800K",
+                            "100M",
                             "--qos-down",
-                            "25600K"
+                            "200M"
                             };
     
         bool ret = adm.parse_vs_func_wp( cmd, argc, argv );
@@ -2169,9 +2169,9 @@ void    parse_vs_func_test(){
         boost::asio::ip::tcp::endpoint    tcp_acc_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:11500" );
         BOOST_CHECK_EQUAL( adm.get_request().vs_element.tcp_accept_endpoint, tcp_acc_ep );
         // unit_test[156] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) protocol module name check
-        BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "curl" );
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_module_name, "cinsert" );
         // unit_test[157] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) protocol module arg check
-        BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "specified_url" );
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.protocol_args.front(), "mod_arg" );
         // unit_test[158] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) schedule module name check
         BOOST_CHECK_EQUAL( adm.get_request().vs_element.schedule_module_name, "lc" );
         // unit_test[159] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) sorry_maxconnection check
@@ -2182,9 +2182,9 @@ void    parse_vs_func_test(){
         // unit_test[161] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) sorry_flag check
         BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_flag, true );
         // unit_test[162] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) qos_upstream check
-        BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, ( 13107200ULL / 8 ) );
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_upstream, ( 100000000ULL / 8 ) );
         // unit_test[163] parse_vs_func normal case 4 (CMD_EDIT_VS long_option) qos_downstream check
-        BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, ( 26214400ULL / 8 ) );
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.qos_downstream, ( 200000000ULL / 8 ) );
     }
 
     // parse_vs_func normal case 5 (CMD_DEL_VS short_option)
@@ -2223,9 +2223,9 @@ void    parse_vs_func_test(){
         int        argc    = 7;
         char*    argv[]    = {    "l7vsadm_test",
                             "--delete-service",
-                            "--target",
+                            "--tcp-service",
                             "10.144.169.86:11500",
-                            "--module",
+                            "--proto-module",
                             "curl",
                             "specified_url"
                             };
@@ -2297,13 +2297,16 @@ void    parse_vs_func_test(){
     {
         l7vsadm_test    adm;
         l7vs::l7vsadm_request::COMMAND_CODE_TAG    cmd = l7vs::l7vsadm_request::CMD_EDIT_VS;
-        int        argc    = 6;
+        int        argc    = 9;
         char*    argv[]    = {    "l7vsadm_test",
                             "-E",
                             "-t",
                             "10.144.169.87:22100",
                             "-m",
-                            "cinsert"
+                            "cinsert",
+                            "mod_arg",
+                            "-s",
+                            "lc"
                             };
     
         bool ret = adm.parse_vs_func_wp( cmd, argc, argv );
@@ -2710,9 +2713,9 @@ void    parse_rs_func_test(){
         int        argc    = 11;
         char*    argv[]    = {    "l7vsadm_test",
                             "--add-server",
-                            "--target",
+                            "--tcp-service",
                             "10.144.169.86:11500",
-                            "--module",
+                            "--proto-module",
                             "cinsert",
                             "mod_arg",
                             "--real-server",
@@ -2786,9 +2789,9 @@ void    parse_rs_func_test(){
         int        argc    = 11;
         char*    argv[]    = {    "l7vsadm_test",
                             "--edit-server",
-                            "--target",
+                            "--tcp-service",
                             "10.144.169.86:11500",
-                            "--module",
+                            "--proto-module",
                             "cinsert",
                             "mod_arg",
                             "--real-server",
@@ -2858,9 +2861,9 @@ void    parse_rs_func_test(){
         int        argc    = 9;
         char*    argv[]    = {    "l7vsadm_test",
                             "--delete-server",
-                            "--target",
+                            "--tcp-service",
                             "10.144.169.86:11500",
-                            "--module",
+                            "--proto-module",
                             "cinsert",
                             "mod_arg",
                             "--real-server",
@@ -3926,9 +3929,9 @@ void    execute_test(){
         boost::asio::ip::tcp::endpoint    sorry_ep = string_to_endpoint<boost::asio::ip::tcp>( "10.144.169.86:8080" );
         BOOST_CHECK_EQUAL( test_request.vs_element.sorry_endpoint, sorry_ep );
         // unit_test[337] execute normal case 6 (vs operation add-vs) qos_upstream check
-        BOOST_CHECK_EQUAL( test_request.vs_element.qos_upstream, ( 104857600ULL / 8 ) );
+        BOOST_CHECK_EQUAL( test_request.vs_element.qos_upstream, ( 100000000ULL / 8 ) );
         // unit_test[338] execute normal case 6 (vs operation add-vs) qos_downstream check
-        BOOST_CHECK_EQUAL( test_request.vs_element.qos_downstream, ( 209715200ULL / 8 ) );
+        BOOST_CHECK_EQUAL( test_request.vs_element.qos_downstream, ( 200000000ULL / 8 ) );
     }
 
     // execute normal case 7 (vs operation edit-vs)
@@ -3991,9 +3994,9 @@ void    execute_test(){
         // unit_test[347] execute normal case 7 (vs operation edit-vs) sorry_flag check
         BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_flag, true );
         // unit_test[348] execute normal case 7 (vs operation edit-vs) qos_upstream check
-        BOOST_CHECK_EQUAL( test_request.vs_element.qos_upstream, ( 104857600ULL / 8 ) );
+        BOOST_CHECK_EQUAL( test_request.vs_element.qos_upstream, ( 100000000ULL / 8 ) );
         // unit_test[349] execute normal case 7 (vs operation edit-vs) qos_downstream check
-        BOOST_CHECK_EQUAL( test_request.vs_element.qos_downstream, ( 209715200ULL / 8 ) );
+        BOOST_CHECK_EQUAL( test_request.vs_element.qos_downstream, ( 200000000ULL / 8 ) );
     }
 
     // execute normal case 8 (vs operation del-vs)
