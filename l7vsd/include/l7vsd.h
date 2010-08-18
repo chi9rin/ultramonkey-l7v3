@@ -42,7 +42,7 @@
 #include "realserver_element.h"
 #include "realserver.h"
 #include "replication.h"
-//#include "snmpbridge.h"
+#include "snmpbridge.h"
 #include "protocol_module_control.h"
 #include "schedule_module_control.h"
 #include "logger.h"
