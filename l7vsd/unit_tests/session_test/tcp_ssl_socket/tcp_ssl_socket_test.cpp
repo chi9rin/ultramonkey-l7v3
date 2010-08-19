@@ -452,20 +452,20 @@ void accept_test(){
     boost::asio::ssl::stream<boost::asio::ip::tcp::socket>* pSocket = test_obj.get_socket_pointer();
 
     int val;
-    size_t len;
+    socklen_t len;
 
     // unit_test [2] accept test set TCP_CORK check
     std::cout << "[2] accept test set TCP_CORK check" << std::endl;
     val = 0;
     len = sizeof(val);
-    boost::asio::detail::socket_ops::getsockopt(pSocket->lowest_layer().native(),IPPROTO_TCP,TCP_CORK,&val,&len,ec);
+    ::getsockopt(pSocket->lowest_layer().native(),IPPROTO_TCP,TCP_CORK,&val,&len);
     BOOST_CHECK_EQUAL(val,1);
 
     // unit_test [3] accept test set TCP_NODELAY check
     std::cout << "[3] accept test set TCP_NODELAY check" << std::endl;
     val = 0;
     len = sizeof(val);
-    boost::asio::detail::socket_ops::getsockopt(pSocket->lowest_layer().native(),IPPROTO_TCP,TCP_NODELAY,&val,&len,ec);
+    ::getsockopt(pSocket->lowest_layer().native(),IPPROTO_TCP,TCP_NODELAY,&val,&len);
     BOOST_CHECK_EQUAL(val,1);
 
     // close

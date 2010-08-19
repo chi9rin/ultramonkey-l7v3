@@ -141,10 +141,10 @@ std::cout << "pool_size = [" << pool_size << "]\n";
 
     // unit_test[54]  set TCP_DEFER_ACCEPT test
     int val = 0;
-    size_t len = sizeof(val);
+    socklen_t len = sizeof(val);
     boost::system::error_code ec;
-    boost::asio::detail::socket_ops::getsockopt(vs->get_acceptor().native(),IPPROTO_TCP,TCP_DEFER_ACCEPT,&val,&len,ec);
-    BOOST_CHECK(!ec);
+    int err = ::getsockopt(vs->get_acceptor().native(),IPPROTO_TCP,TCP_DEFER_ACCEPT,&val,&len);
+    BOOST_CHECK(!err);
     BOOST_CHECK(val);
     
     // unit_test[4]  stop method test
@@ -4670,10 +4670,10 @@ void    virtualservice_tcp_initialize_to_finalize(){
 
     // unit_test[156]  set TCP_DEFER_ACCEPT test
     int val = 0;
-    size_t len = sizeof(val);
+    socklen_t len = sizeof(val);
     boost::system::error_code ec;
-    boost::asio::detail::socket_ops::getsockopt(vs->get_acceptor().native(),IPPROTO_TCP,TCP_DEFER_ACCEPT,&val,&len,ec);
-    BOOST_CHECK(!ec);
+    int err = ::getsockopt(vs->get_acceptor().native(),IPPROTO_TCP,TCP_DEFER_ACCEPT,&val,&len);
+    BOOST_CHECK(!err);
     BOOST_CHECK(val);
     
     // unit_test[157]  stop method test

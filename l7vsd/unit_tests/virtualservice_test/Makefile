@@ -6,7 +6,7 @@
 TARGET		= vs_base_ut vs_tcp_ut vs_tcp_thread_ut vs_tcp_thread_ut2 vs_tcp_it vs_tcp_sorry_ut
 #TARGET		= vs_tcp_ut
 CPP			= g++
-CPPFLAGS	= -O0 -g -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG -DPARAMETER_FILE='"../l7vs_logger/l7vs.cf"'
+CPPFLAGS	= -O0 -g -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG -DPARAMETER_FILE='"./l7vs.cf"'
 # CPPFLAGS	= -O2 -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG
 
 
@@ -139,6 +139,8 @@ ITOBJS		= $(ITSRCS:.cpp=.o)
 
 SORRYOBJS		= $(SORRYSRCS:.cpp=.o)
 
+ACCESSLOG		= access_log.log 
+
 all:	$(TARGET)
 
 vs_base_ut:	$(BASEOBJS)
@@ -163,5 +165,5 @@ vs_tcp_sorry_ut: $(SORRYOBJS)
 # 	$(CPP) $(INCLUDES) -o $@ $(OBJS) $(LIBS)
 
 clean:
-	rm -f $(TARGET) $(BASEOBJS) $(TCPOBJS) $(TPCTOBJS) $(TPCT2OBJS) $(ITOBJS) $(SORRYOBJS)
+	rm -f $(TARGET) $(BASEOBJS) $(TCPOBJS) $(TPCTOBJS) $(TPCT2OBJS) $(ITOBJS) $(SORRYOBJS) $(ACCESSLOG)
 

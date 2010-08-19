@@ -7,7 +7,7 @@ TARGET		= l7vsadm_ut
 CPP			= g++
 CPPFLAGS	= -Wall -O0 -g -Wno-write-strings -Werror -pthread -DPARAMETER_FILE='"./l7vs.cf"' -DLOGGER_PROCESS_ADM -DL7VS_CONFIG_SOCK_PATH='"."' -DMAX_BUFFER_SIZE='(65535)' -DVERSION=\"3.0.0-0\"
 INCLUDES	= 	-I../../include -I../../..
-LIBS		=	-lboost_system \
+LIBS		=	-lboost_system-mt \
 				-lboost_thread-mt \
 				-lboost_serialization-mt \
 				-lboost_unit_test_framework-mt \
@@ -44,6 +44,8 @@ OBJS		= $(SRCS:.cpp=.o)
 PARAMETER_OBJS	= $(PARAMETER_SRCS:.cpp=.o)
 LOGGER_OBJS	= $(LOGGER_SRCS:.cpp=.o)
 
+LOGFILES	= l7vsadm.log l7vsd.log
+
 all:	$(TARGET)
 
 $(TARGET):	$(OBJS) $(PARAMETER) $(LOGGER)
@@ -56,5 +58,5 @@ $(LOGGER):	$(LOGGER_OBJS)
 	$(AR) $(ARFLAGS) $@ $(LOGGER_OBJS)
 
 clean:
-	rm -f $(TARGET) $(OBJS) $(PARAMETER) $(PARAMETER_OBJS) $(LOGGER) $(LOGGER_OBJS) l7vsadm.log
+	rm -f $(TARGET) $(OBJS) $(PARAMETER) $(PARAMETER_OBJS) $(LOGGER) $(LOGGER_OBJS) $(LOGFILES)
 

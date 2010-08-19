@@ -6,7 +6,7 @@
 TARGET		= stc_ut
 CPP			= g++
 CPPFLAGS	= -O0 -g -Wall -Werror -pthread -D__SNMPBRIDGE_H__ -DMAX_BUFFER_SIZE=65535
-INCLUDES	=	-I logger_stb \
+INCLUDES	=	\
 				-I./ \
 				-I../../src \
 				-I../../include \
@@ -21,7 +21,6 @@ LDFLAGS		= -lrt -ldl -lssl
 
 SRCS		=	\
 			stub.cpp \
-			logger_stb/logger.cpp \
 			../../src/virtualservice_base.cpp \
 			../../src/virtualservice_tcp.cpp \
 			../../src/virtualservice_udp.cpp \

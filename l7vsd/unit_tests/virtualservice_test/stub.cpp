@@ -142,7 +142,7 @@ void    l7vs::Logger::putLogInfo( l7vs::LOG_CATEGORY_TAG, const unsigned int, co
 }
 
 void    l7vs::Logger::putLogDebug( l7vs::LOG_CATEGORY_TAG, const unsigned int, const std::string& msg, const char*, int ){
-    std::cout << "DEBUG : " << msg << std::endl;
+//    std::cout << "DEBUG : " << msg << std::endl;
 }
 
 l7vs::l7vsd::l7vsd(){}
@@ -304,7 +304,7 @@ l7vs::tcp_session::tcp_session(virtualservice_tcp& vs,
 
     exit_flag = false;
 //    session_pause_flag = false;
-    std::cout << "SESSION:CREATE" << std::endl;
+//    std::cout << "SESSION:CREATE" << std::endl;
 }
 
 l7vs::tcp_session::~tcp_session(void){}

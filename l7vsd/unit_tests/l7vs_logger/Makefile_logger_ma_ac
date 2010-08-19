@@ -58,5 +58,5 @@ logger_access_manager_test.o: $(SRCDIR)/logger_access_manager.cpp
 
 clean:
 	rm -f $(TARGET) *.o
-#	$(MAKE) -C $(PARAMETERDIR) clean
-#	$(MAKE) -C $(PARAMETERDIR2) clean
+	$(MAKE) -C $(PARAMETERDIR) clean
+	$(MAKE) -C $(PARAMETERDIR2) clean

@@ -317,9 +317,9 @@ void accept_test(){
     // unit_test [4] accept test set socket option TCP_CORK
     std::cout << "[4] accept test set socket option TCP_CORK" << std::endl;
     int val;
-    size_t len = sizeof(val);
-    boost::asio::detail::socket_ops::getsockopt(test_obj.get_socket_pointer()->native(),IPPROTO_TCP,TCP_CORK,&val,&len,ec);
-    BOOST_CHECK(!ec);
+    socklen_t len = sizeof(val);
+    int err = ::getsockopt(test_obj.get_socket_pointer()->native(),IPPROTO_TCP,TCP_CORK,&val,&len);
+    BOOST_CHECK(!err);
     BOOST_CHECK((bool)val == set_option.cork_val);
 
     test_obj.test_close(ec);
@@ -395,9 +395,9 @@ void connect_test(){
     // unit_test [4] connect test set socket option TCP_CORK
     std::cout << "[4] connect test set socket option TCP_CORK" << std::endl;
     int val;
-    size_t len = sizeof(val);
-    boost::asio::detail::socket_ops::getsockopt(test_obj.get_socket_pointer()->native(),IPPROTO_TCP,TCP_CORK,&val,&len,ec);
-    BOOST_CHECK(!ec);
+    socklen_t len = sizeof(val);
+    int err = ::getsockopt(test_obj.get_socket_pointer()->native(),IPPROTO_TCP,TCP_CORK,&val,&len);
+    BOOST_CHECK(!err);
     BOOST_CHECK((bool)val == set_option.cork_val);
     
     
