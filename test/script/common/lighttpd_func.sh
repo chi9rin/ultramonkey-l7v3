@@ -51,7 +51,7 @@ make_lighttpd_tmpdir (){
 #make lighhtpd_configfile
 start_lighttpd (){
 #Set default value
-template_file=${DEFAULT_CONF_DIR}/no_ssl_default.conf
+template_file=${DEFAULT_CONF_DIR}/default.conf
 server_ipaddr=127.0.0.1
 OPTIND=1
 while getopts s:a:p:t:iS option

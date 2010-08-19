@@ -1,7 +1,6 @@
 #!/bin/bash
 . ${SET_DEFAULT_CONF}
 
-#Add Service
 RET=`$L7VSD -h`
 EXPECT="Usage: l7vsd [-h]
    -h    --help         print this help messages and exit"

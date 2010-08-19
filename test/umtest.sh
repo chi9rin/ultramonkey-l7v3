@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 # SET PATH
 TEST_DIR=$(cd $(dirname "$0") && pwd)
 DATE=`date +'%Y%m%d-%H%M%S'`
@@ -46,7 +45,7 @@ fi
 
 # Functions
 usage (){
-	echo "usage : umtest [dirname [TestScriptName]]"
+	echo "usage : umtest [DIR|TESTSCRIPT]"
 }
 
 check_option (){
@@ -83,12 +82,12 @@ um_test (){
 		return
 	fi
 	KIND=`basename $1`
-	echo "TEST : $KIND"
 	if [ $KIND == "common" -o $KIND == "materials" ]
 	then
 		return
 	fi
 
+	echo -e "\n[$KIND]" | tee -a ${REPORT_FILE}
 	EVIDENCE_DIR="${LOG_DIR}/${KIND}"
 	LOG "Make evidence directory ${EVIDENCE_DIR}."
 	mkdir -p ${EVIDENCE_DIR}
@@ -108,14 +107,14 @@ um_test (){
 			(
 				cd $1
 				. ${SCRIPT}
-			) 2> /dev/null 1> ${TMP_DIR}/tmp
+			) 2> /dev/null 1> ${TMP_DIR}/umtest_tmp
 			# Write report.
 			if [ $? -eq 0 ]
 			then
-				echo -e "${KIND}\t${SCRIPT_NAME}\tOK" | tee -a ${REPORT_FILE}
+				echo -e "${SCRIPT_NAME}\tOK" | tee -a ${REPORT_FILE}
 			else
-				echo -e "${KIND}\t${SCRIPT_NAME}\tNG" | tee -a ${REPORT_FILE}
-				cat ${TMP_DIR}/tmp | tee -a ${REPORT_FILE}
+				echo -e "${SCRIPT_NAME}\tNG" | tee -a ${REPORT_FILE}
+				cat ${TMP_DIR}/umtest_tmp | tee -a ${REPORT_FILE}
 			fi
 			# Stop UltraMonkey-L7.
 			. ${STOP_MONKEY}
@@ -136,7 +135,9 @@ um_test (){
 #done
 }
 
+####################
 #Check option
+####################
 check_option "$@"
 
 ####################
@@ -159,8 +160,6 @@ check_option "$@"
 # Test
 ###################
 LOG "Execute test scripts."
-
-
 for ARG in ${@:-${SCRIPT_DIR}}
 do
 	ABSPATH=$(cd $(dirname "$ARG") && pwd)/$(basename "$ARG")
@@ -179,9 +178,9 @@ done
 echo "############# Summary ###############" | tee -a ${REPORT_FILE}
 grep -v "^Test failed" ${REPORT_FILE} | 
 awk 'BEGIN{OkCon=0;NgCon=0;}
-     {if($3 == "OK")
+     {if($2 == "OK")
 	 OkCon++;
-      if($3 == "NG")
+      if($2 == "NG")
 	 NgCon++;}
      END{printf("OK=%d\tNG=%d\n",OkCon,NgCon)}' | tee -a ${REPORT_FILE}
 LOG "Test scripts end."
@@ -193,5 +192,4 @@ LOG "Test scripts end."
 # Return log and config files.
 . ${RETURN_FILE}
 
-grep -v 'OK' ${REPORT_FILE} | grep '\bNG\b' > /dev/null && exit 1
 exit 0
