@@ -37,7 +37,7 @@ then
 fi
 
 REPORT_DIR="${TEST_DIR}/report"
-REPORT_FILE="${REPORT_DIR}/${DATE}.rep"
+REPORT_FILE="${REPORT_DIR}/${DATE}_report"
 if [ ! -d ${REPORT_DIR} ]
 then
 	mkdir ${REPORT_DIR}
