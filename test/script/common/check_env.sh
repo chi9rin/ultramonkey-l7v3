@@ -63,7 +63,7 @@ check_uml7 (){
 # check Lighty installed
 check_http_server (){
         LIGHTTPD=`which lighttpd`
-	if [ ! -e ${LIGHTTPD} ]
+	if [ $? -ne 0 ]
 	then
 		LOG_FATAL "${LIGHTTPD} not exist. "
                 exit 1

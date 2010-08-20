@@ -43,18 +43,27 @@ then
 	mkdir ${REPORT_DIR}
 fi
 
+# Error message output
+ERROR_MESSAGE="/dev/null"
+# Debug flag
+DEBUG_FLAG=""
+
 # Functions
 usage (){
 	echo "usage : umtest [DIR|TESTSCRIPT]"
 }
 
 check_option (){
-	while getopts hC option
+	while getopts hxC option
 	do
 		case "$option" in
 		  h)
 			usage
 			exit 0
+			;;
+		  x)
+			DEBUG_FLAG="ON"
+			ERROR_MESSAGE=`tty`
 			;;
 		  C)
 			rm -rf ${REPORT_DIR}
@@ -69,7 +78,6 @@ check_option (){
 		esac
 		shift
 	done
-	shift `expr "$OPTIND" - 1`
 }
 
 # main function
@@ -106,8 +114,12 @@ um_test (){
 			LOG "Execute ${SCRIPT_NAME} ."
 			(
 				cd $1
+				if [ -n "${DEBUG_FLAG}" ]
+				then
+	                                set -x
+				fi
 				. ${SCRIPT}
-			) 2> /dev/null 1> ${TMP_DIR}/umtest_tmp
+			) 2> ${ERROR_MESSAGE} 1> ${TMP_DIR}/umtest_tmp
 			# Write report.
 			if [ $? -eq 0 ]
 			then
@@ -139,7 +151,7 @@ um_test (){
 #Check option
 ####################
 check_option "$@"
-
+shift `expr "$OPTIND" - 1`
 ####################
 # Pretreatment
 ####################
