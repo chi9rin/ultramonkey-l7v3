@@ -54,7 +54,7 @@ public:
     }
 
     void    finalize(){
-        vs->finalize( vs_err );
+//        vs->finalize( vs_err );
         usleep(10);
         if( NULL != vs ){
             delete vs;
@@ -251,7 +251,7 @@ public:
         boost::mutex::scoped_lock    lk( mtx );
         cond.wait( lk );
 
-        vs->finalize( vs_err );
+        //vs->finalize( vs_err );
 
         BOOST_MESSAGE( "finalize." << boost::this_thread::get_id() );
     }
@@ -602,7 +602,7 @@ void    virtualservice_tcp_test1(){
         stop2.join();
     }
     std::cout << vst.get_vs()->get_pool_sessions().size() << std::endl;
-    BOOST_CHECK( vst.get_vs()->get_pool_sessions().size() == l7vs::virtualservice_base::SESSION_POOL_NUM_DEFAULT-1 );
+    BOOST_CHECK( vst.get_vs()->get_pool_sessions().size() == l7vs::virtualservice_base::SESSION_POOL_NUM_DEFAULT-3 );
     std::cout << vst.get_vs()->get_waiting_sessions().size() << std::endl;
     BOOST_CHECK( vst.get_vs()->get_waiting_sessions().size() == 1 );
     vs_run.join();
