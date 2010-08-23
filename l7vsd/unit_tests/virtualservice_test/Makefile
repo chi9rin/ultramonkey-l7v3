@@ -14,6 +14,7 @@ INCLUDES	=		\
 				-I./ \
 				-I../../include \
 				-I../../.. \
+				-I../../../snmpagent \
 				-I../../src \
 				-I/usr/include
 LIBS		=		-lboost_system-mt \
