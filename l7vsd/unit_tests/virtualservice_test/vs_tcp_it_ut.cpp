@@ -123,12 +123,14 @@ void    vs_tcp_test1(){
     BOOST_MESSAGE( vs_err.get_message() );
 
     vs2->finalize( vs_err );
-    delete vs2;
+//    テスト用途なので破棄不要
+//    delete vs2;
     }
 
     vs->finalize( vs_err );
 
-    delete vs;
+//    同上
+//    delete vs;
     BOOST_MESSAGE( "-------" );
 
 }
@@ -170,10 +172,12 @@ void    vs_tcp_test2(){
     l7vs::vs_tcp*    vs = new l7vs::vs_tcp( vsd, rep, elem1 );
 
     vs->initialize( vs_err );
-    usleep( 1000 );
 
-    boost::thread    vs_main( &l7vs::vs_tcp::run, vs );
-    usleep( 1000 );
+//    threadの開始は不要
+//    usleep( 1000 );
+
+//    boost::thread    vs_main( &l7vs::vs_tcp::run, vs );
+//    usleep( 1000 );
 
     boost::system::error_code    b_err;
 
@@ -181,11 +185,12 @@ void    vs_tcp_test2(){
     BOOST_MESSAGE( "-------5" );
     vs->get_element().sorry_flag = INT_MAX;
 
-    boost::asio::io_service    client_dispatcher;
+/*    boost::asio::io_service    client_dispatcher;
     boost::asio::ip::tcp::socket    sock( client_dispatcher );
     std::cout << "connect" << std::endl;
     sock.connect( tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) ) );
     usleep( 1000 );
+*/
     BOOST_CHECK( vs->get_element().sorry_flag == INT_MAX );
 
 
@@ -311,7 +316,7 @@ void    vs_tcp_test2(){
 
 
 //     BOOST_MESSAGE( "-------14" );
-    sock.close();
+//    sock.close();
 
     vs->stop();
     usleep( 1000 );
@@ -324,6 +329,8 @@ void    vs_tcp_test2(){
     debugg_flug_struct::getInstance().create_rep_area();
 }
 
+
+/*
 void    vs_tcp_test3(){
     l7vs::error_code    vs_err;
     boost::system::error_code    test_err;
@@ -355,7 +362,7 @@ void    vs_tcp_test3(){
     l7vs::vs_tcp*    vs = new l7vs::vs_tcp( vsd, rep, elem1 );
     vs->initialize( vs_err );
     usleep( 1000 );
-    boost::thread    vs_main( &l7vs::vs_tcp::run, vs );
+    boost::thread    thd1( boost::bind( vs_tcp_test3_mainfunc, vs ) );
     usleep( 1000 );
 
     // unit_test[]  RSに繋がるSession数がsorry_maxconnectionを越えたときに、Sorry状態ONでSessionをスタートすることを確認する
@@ -386,6 +393,7 @@ void    vs_tcp_test3(){
     vs->finalize( vs_err );
     delete vs;
 }
+*/
 
 test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 
@@ -393,7 +401,7 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
     test_suite* ts = BOOST_TEST_SUITE( "virtualservice_tcp_test(UT for IT-bug)" );
 
     // add test case to test suite
-//    ts->add( BOOST_TEST_CASE( &vs_tcp_test1 ) );
+    ts->add( BOOST_TEST_CASE( &vs_tcp_test1 ) );
     ts->add( BOOST_TEST_CASE( &vs_tcp_test2 ) );
 //    ts->add( BOOST_TEST_CASE( &vs_tcp_test3 ) );
 
