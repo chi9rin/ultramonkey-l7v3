@@ -117,7 +117,7 @@ l7vs::Logger::~Logger(){}
 void    l7vs::Logger::loadConf(){}
 
 l7vs::LOG_LEVEL_TAG l7vs::Logger::getLogLevel( l7vs::LOG_CATEGORY_TAG ){
-    l7vs::LOG_LEVEL_TAG        ret_tag = l7vs::LOG_LV_DEBUG;
+    l7vs::LOG_LEVEL_TAG        ret_tag = l7vs::LOG_LV_WARN;
     return ret_tag;
 }
 
