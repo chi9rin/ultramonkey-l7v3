@@ -11,15 +11,7 @@ then
 fi
 usleep 100000
 
-$L7VSADM -A -t 127.0.0.1:40001 -m sessionless
-if [ $? -ne 0 ]
-then
-        echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m sessionless"
-        exit 1
-fi
-
-
-RET=`$L7VSADM -V -n`
+RET=`$L7VSADM --verbose --numeric`
 EXPECT="Layer-7 Virtual Server version 3.0.0-1
 L7vsd Log Level:
 Category                       Level
@@ -81,20 +73,11 @@ Prot LocalAddress:Port ProtoMod Scheduler Protomod_opt_string
      Access_log_flag
      Access_log_file
      Access_log_rotate option
-  -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
-TCP 127.0.0.1:40001 sessionless rr --sorry-uri '/'
-    none 0 0
-    0 0
-    0 0
-    none
-    none
-    0
-    none
-    --ac-rotate-type size --ac-rotate-max-backup-index 10 --ac-rotate-max-filesize 10M"
+  -> RemoteAddress:Port           Forward Weight ActiveConn InactConn"
 
 if [ "${RET}" != "${EXPECT}" ]
 then
-        echo "Test failed: $L7VSADM -V -n"
+        echo "Test failed: $L7VSADM --verbose --numeric"
         exit 1
 fi
 
