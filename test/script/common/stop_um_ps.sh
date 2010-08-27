@@ -15,7 +15,7 @@ fi
 if [ -n "`pgrep l7directord`" ]
 then
 	${INIT_L7DIRECTORD} stop > /dev/null 2>&1
-	pgrep l7directord | xargs kill > /dev/null 2>&1
+	pgrep l7directord | xargs kill -KILL > /dev/null 2>&1
 	usleep 100000
 	if [ -n "`pgrep l7directord`" ]
 	then
