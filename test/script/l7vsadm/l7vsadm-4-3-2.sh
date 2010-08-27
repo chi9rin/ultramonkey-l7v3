@@ -22,10 +22,10 @@ then
 fi
 usleep 100000
 
-$L7VSADM -A -t 127.0.0.1:40001 -m ip
+$L7VSADM -A -t 127.0.0.1:40001 -m ip -L 0 -a /var/log/l7vs/access_log
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m ip"
+        echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m ip -L 0 -a /var/log/l7vs/access_log"
         exit 1
 fi
 
@@ -100,7 +100,7 @@ TCP 127.0.0.1:40001 ip rr --timeout 3600 --no-reschedule --sorry-uri '/'
     none
     none
     0
-    none
+    /var/log/l7vs/access_log
     --ac-rotate-type size --ac-rotate-max-backup-index 10 --ac-rotate-max-filesize 10M"
 if [ "${RET}" != "${EXPECT}" ]
 then
@@ -108,7 +108,8 @@ then
         exit 1
 fi
 
-$L7VSADM --edit-service --tcp-service 127.0.0.1:40001 --proto-module ip --scheduler lc --upper 200 --bypass ${SorryServer1_ADDR}:${SorryServer1_PORT} --flag 0 --qos-up 1M --qos-down 1M --access-log 0
+
+$L7VSADM --edit-service --tcp-service 127.0.0.1:40001 --proto-module ip --scheduler lc --upper 200 --bypass ${SorryServer1_ADDR}:${SorryServer1_PORT} --flag 1 --qos-up 1M --qos-down 1M --access-log 1
 if [ $? -ne 0 ]
 then
         echo "Test failed:  $L7VSADM --edit-service --tcp-service 127.0.0.1:40001 --proto-module ip --scheduler lc --upper 200 --bypass ${SorryServer1_ADDR}:${SorryServer1_PORT} --flag 0 --qos-up 1M --qos-down 1M --access-log 0"
@@ -180,15 +181,14 @@ Prot LocalAddress:Port ProtoMod Scheduler Protomod_opt_string
      Access_log_rotate option
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
 TCP 127.0.0.1:40001 ip lc --timeout 3600 --no-reschedule --sorry-uri '/'
-    127.0.0.1:50001 200 0
+    127.0.0.1:50001 200 1
     1000000 0
     1000000 0
     none
     none
-    0
-    none
+    1
+    /var/log/l7vs/access_log
     --ac-rotate-type size --ac-rotate-max-backup-index 10 --ac-rotate-max-filesize 10M"
-
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -V -n"

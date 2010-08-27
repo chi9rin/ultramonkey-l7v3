@@ -11,10 +11,24 @@ then
 fi
 usleep 100000
 
-$L7VSADM -A -t localhost:40001 -m ip --timeout 100
+$L7VSADM -A -t localhost:40001 -m sessionless
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM -A -t localhost:40001 -m ip --timeout 100"
+        echo "Test failed: $L7VSADM -A -t localhost:40001 -m sessionless"
+        exit 1
+fi
+
+$L7VSADM -a -t localhost:40001 -m sessionless -r localhost:40002 -w 3
+if [ $? -ne 0 ]
+then
+        echo "Test failed: $L7VSADM -a -t localhost:40001 -m sessionless -r localhost:40002 -w 3"
+        exit 1
+fi
+
+$L7VSADM -a -t localhost:40001 -m sessionless -r localhost:40003 -w 0
+if [ $? -ne 0 ]
+then
+        echo "Test failed: $L7VSADM -a -t localhost:40001 -m sessionless -r localhost:40003 -w 0"
         exit 1
 fi
 
@@ -27,17 +41,17 @@ Prot LocalAddress:Port ProtoMod Scheduler
      Access_log_file
      Access_log_rotate option
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
-TCP localhost:40001 ip rr
+TCP localhost:40001 sessionless rr
     none
     none
     0
     none
-    none"
-
-echo "$RET"
+    none
+  -> localhost:40002              Masq    3      0          0         
+  -> localhost:40003              Masq    0      0          0         "
 if [ "${RET}" != "${EXPECT}" ]
 then
-        echo "Test failed: $L7VSADM -K"
+        echo "Test failed: $L7VSADM -l"
         exit 1
 fi
 

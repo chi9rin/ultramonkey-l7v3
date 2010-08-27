@@ -62,12 +62,6 @@ then
         exit 1
 fi
 
-if [ -z "${RET}" ]
-then
-        echo "Test failed: $WGET -t 1 -qO- http://127.0.0.1:40001/"
-        exit 1
-fi
-
 # kill active connect
 kill ${CONNECT1}
 if [ $? -ne 0 ]
