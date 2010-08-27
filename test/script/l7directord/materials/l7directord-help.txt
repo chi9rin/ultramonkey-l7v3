@@ -1,0 +1,451 @@
+L7DIRECTORD(1)        User Contributed Perl Documentation       L7DIRECTORD(1)
+
+
+
+NNAAMMEE
+       l7directord - UltraMonkey-L7 Director Daemon
+
+       Daemon to monitor remote services and control UltraMonkey-L7
+
+SSYYNNOOPPSSIISS
+       ll77ddiirreeccttoorrdd [--dd] [_c_o_n_f_i_g_u_r_a_t_i_o_n] {ssttaarrtt|ssttoopp|rreessttaarrtt|ttrryy--
+       rreessttaarrtt|rreellooaadd|ssttaattuuss|ccoonnffiiggtteesstt}
+
+       ll77ddiirreeccttoorrdd --tt [_c_o_n_f_i_g_u_r_a_t_i_o_n]
+
+       ll77ddiirreeccttoorrdd --hh||----hheellpp
+
+       ll77ddiirreeccttoorrdd --vv||----vveerrssiioonn
+
+DDEESSCCRRIIPPTTIIOONN
+       ll77ddiirreeccttoorrdd is a daemon to monitor and administer real servers in a
+       cluster of load balanced virtual servers. ll77ddiirreeccttoorrdd is similar to
+       llddiirreeccttoorrdd in terms of functionality except that it triggers ll77vvssaaddmm.
+       ll77ddiirreeccttoorrdd typically is started from command line but can be included
+       to start from heartbeat. On startup ll77ddiirreeccttoorrdd reads the file
+       //eettcc//hhaa..dd//ccoonnff//_c_o_n_f_i_g_u_r_a_t_i_o_n.  After parsing the file, entries for
+       virtual servers are created on the UltraMonkey-L7.  Now at regular
+       intervals the specified real servers are monitored and if they are
+       considered alive, added to a list for each virtual server. If a real
+       server fails, it is removed from that list. Only one instance of
+       ll77ddiirreeccttoorrdd can be started for each configuration, but more instances
+       of ll77ddiirreeccttoorrdd may be started for different configurations. This helps
+       to group clusters of services.  This can be done by putting an entry
+       inside //eettcc//hhaa..dd//hhaarreessoouurrcceess
+
+       _n_o_d_e_n_a_m_e _v_i_r_t_u_a_l_-_i_p_-_a_d_d_r_e_s_s _l_7_d_i_r_e_c_t_o_r_d_:_:_c_o_n_f_i_g_u_r_a_t_i_o_n
+
+       to start l7directord from heartbeat.
+
+OOPPTTIIOONNSS
+       _c_o_n_f_i_g_u_r_a_t_i_o_n:
+           This is the name for the configuration as specified in the file
+           //eettcc//hhaa..dd//ccoonnff//_c_o_n_f_i_g_u_r_a_t_i_o_n
+
+       --dd  Don’t start as daemon. Useful for debugging.
+
+       --hh  Help. Print user manual of l7directord.
+
+       --vv  Version. Print version of l7directord.
+
+       --tt  Run syntax tests for configuration files only. The program
+           immediately exits after these syntax parsing tests with either a
+           return code of 0 (Syntax OK) or return code not equal to 0 (Syntax
+           Error).
+
+       ssttaarrtt
+           Start the daemon for the specified configuration.
+
+       ssttoopp
+           Stop the daemon for the specified configuration. This is the same
+           as sending a TERM signal to the running daemon.
+
+       rreessttaarrtt
+           Restart the daemon for the specified configuration. The same as
+           stopping and starting.
+
+       ttrryy--rreessttaarrtt
+           Try to restart the daemon for the specified configuration. If
+           l7directord is already running for the specified configuration,
+           then the same is stopped and started (Similar to restart).
+           However, if l7directord is not already running for the specified
+           configuration, then an error message is thrown and the program
+           exits.
+
+       rreellooaadd
+           Reload the configuration file. This is only useful for
+           modifications inside a virtual server entry. It will have no effect
+           on adding or removing a virtual server block. This is the same as
+           sending a HUP signal to the running daemon.
+
+       ssttaattuuss
+           Show status of the running daemon for the specified configuration.
+
+       ccoonnffiiggtteesstt
+           This is the same as --tt.
+
+SSYYNNTTAAXX
+   DDeessccrriippttiioonn hhooww ttoo wwrriittee ccoonnffiigguurraattiioonn ffiilleess
+       vviirrttuuaall == _(_i_p___a_d_d_r_e_s_s_|_h_o_s_t_n_a_m_e_:_p_o_r_t_n_u_m_b_e_r_|_s_e_r_v_i_c_e_n_a_m_e_)
+           Defines a virtual service by IP-address (or hostname) and port (or
+           servicename). All real services and flags for a virtual service
+           must follow this line immediately and be indented.  For ldirectord,
+           Firewall-mark settings could be set. But for l7directord Firewall-
+           mark settings cannot be set.
+
+       cchheecckkttiimmeeoouutt == _n
+           Timeout in seconds for connect checks. If the timeout is exceeded
+           then the real server is declared dead.  Default is 5 seconds. If
+           defined in virtual server section then the global value is
+           overridden.
+
+       nneeggoottiiaatteettiimmeeoouutt == _n
+           Timeout in seconds for negotiate checks. Default is 5 seconds.  If
+           defined in virtual server section then the global value is
+           overridden.
+
+       cchheecckkiinntteerrvvaall == _n
+           Defines the number of second between server checks. Default is 10
+           seconds.  If defined in virtual server section then the global
+           value is overridden.
+
+       rreettrryyiinntteerrvvaall == _n
+           Defines the number of second between server checks when server
+           status is NG.  Default is 10 seconds. If defined in virtual server
+           section then the global value is overridden.
+
+       cchheecckkccoouunntt == _n
+           The number of times a check will be attempted before it is
+           considered to have failed. Note that the checktimeout is additive,
+           so if checkcount is 3 and checktimeout is 2 seconds and
+           retryinterval is 1 second, then a total of 8 seconds (2 + 1 + 2 + 1
+           + 2) worth of timeout will occur before the check fails. Default is
+           1. If defined in virtual server section then the global value is
+           overridden.
+
+       ccoonnffiiggiinntteerrvvaall == _n
+           Defines the number of second between configuration checks.  Default
+           is 5 seconds.
+
+       aauuttoorreellooaadd == [yyeess|nnoo]
+           Defines if <l7directord> should continuously check the
+           configuration file for modification each ccoonnffiiggiinntteerrvvaall seconds. If
+           this is set to yyeess and the configuration file changed on disk and
+           its modification time (mtime) is newer than the previous version,
+           the configuration is automatically reloaded.  Default is nnoo.
+
+       ccaallllbbaacckk == ""_/_p_a_t_h_/_t_o_/_c_a_l_l_b_a_c_k""
+           If this directive is defined, ll77ddiirreeccttoorrdd automatically calls the
+           executable _/_p_a_t_h_/_t_o_/_c_a_l_l_b_a_c_k after the configuration file has
+           changed on disk. This is useful to update the configuration file
+           through ssccpp on the other heartbeated host. The first argument to
+           the callback is the name of the configuration.
+
+           This directive might also be used to restart ll77ddiirreeccttoorrdd
+           automatically after the configuration file changed on disk.
+           However, if aauuttoorreellooaadd is set to yyeess, the configuration is reloaded
+           anyway.
+
+       ffaallllbbaacckk == _i_p___a_d_d_r_e_s_s_|_h_o_s_t_n_a_m_e_[_:_p_o_r_t_n_u_m_b_e_r_|_s_e_r_v_i_c_e_n_a_m_e_] [mmaassqq]
+           the server onto which a web service is redirected if all real
+           servers are down. Typically this would be 127.0.0.1 with an
+           emergency page.
+
+           This directive may also appear within a virtual server, in which
+           case it will override the global fallback server, if set.  Only a
+           value of mmaassqq can be specified here. The default is _m_a_s_q.
+
+       llooggffiillee == ""_/_p_a_t_h_/_t_o_/_l_o_g_f_i_l_e""|syslog_facility
+           An alternative logfile might be specified with this directive. If
+           the logfile does not have a leading ’/’, it is assumed to be a
+           _s_y_s_l_o_g(3) facility name.
+
+           The default is to log directly to the file
+           _/_v_a_r_/_l_o_g_/_l_7_v_s_/_l_7_d_i_r_e_c_t_o_r_d_._l_o_g.
+
+       eexxeeccuuttee == ""_c_o_n_f_i_g_u_r_a_t_i_o_n""
+           Use this directive to start an instance of l7directord for the
+           named _c_o_n_f_i_g_u_r_a_t_i_o_n.
+
+       ssuuppeerrvviisseedd
+           If this directive is specified, the daemon does not go into
+           background mode.  All log-messages are redirected to stdout instead
+           of a logfile.  This is useful to run ll77ddiirreeccttoorrdd supervised from
+           daemontools.  See http://untroubled.org/rpms/daemontools/ or
+           http://cr.yp.to/daemontools.html for details.
+
+       qquuiieesscceenntt == [yyeess|nnoo]
+           If yyeess, then when real or fallback servers are determined to be
+           down, they are not actually removed from the UltraMonkey-L7, but
+           set weight to zero.  If nnoo, then the real or fallback servers will
+           be removed from the UltraMonkey-L7. The default is yyeess.
+
+           This directive may also appear within a virtual server, in which
+           case it will override the global fallback server, if set.
+
+   SSeeccttiioonn vviirrttuuaall
+       The following commands must follow a vviirrttuuaall entry and must be indented
+       with a minimum of 4 spaces or one tab.
+
+       rreeaall ==
+       _i_p___a_d_d_r_e_s_s_|_h_o_s_t_n_a_m_e_[_-_>_i_p___a_d_d_r_e_s_s_|_h_o_s_t_n_a_m_e_]_[_:_p_o_r_t_n_u_m_b_e_r_|_s_e_r_v_i_c_e_n_a_m_e]
+       [mmaassqq] [_n] [""_r_e_q_u_e_s_t"",, ""_r_e_c_e_i_v_e""]
+           Defines a real service by IP-address (or hostname) and port (or
+           servicename). If the port is omitted then a 0 will be used.
+           Optionally a range of IP addresses (or two hostnames) may be given,
+           in which case each IP address in the range will be treated as a
+           real server using the given port. The second argument defines the
+           forwarding method, it must be mmaassqq only.  The third argument
+           defines the weight of each real service. This argument is optional.
+           Default is 1. The last two arguments are optional too. They define
+           a request-receive pair to be used to check if a server is alive.
+           They override the request-receive pair in the virtual server
+           section. These two strings must be quoted. If the request string
+           starts with _h_t_t_p_:_/_/_._._. the IP-address and port of the real server
+           is overridden, otherwise the IP-address and port of the real server
+           is used.
+
+       mmoodduullee == _p_r_o_t_o_-_m_o_d_u_l_e _m_o_d_u_l_e_-_a_r_g_s _[_o_p_t_-_m_o_d_u_l_e_-_a_r_g_s_]
+           Indicates the module parameter of ll77ddiirreeccttoorrdd. Here pprroottoo--mmoodduullee
+           denotes the protocol module name (For example, pfilter). mmoodduullee--
+           aarrggss denotes the arguments for the protocol module (For example,
+           --pattern-match ’*.html*’).  mmoodduullee--aarrggss is optional only when set
+           sseessssiioonnlleessss, iipp and sssslliidd module to pprroottoo--mmoodduullee.  The last
+           argument is optional (For example, --reschedule).
+
+   MMoorree tthhaann oonnee ooff tthheessee eennttrriieess mmaayy bbee iinnssiiddee aa vviirrttuuaall sseeccttiioonn::
+       mmaaxxccoonnnn == _n
+           Defines the maximum connection that the virtual service can handle.
+           If the number of requests cross the maxconn limit, the requests
+           would be redirected to the sorry server.
+
+       qqoossuupp == _n[KK|MM|GG]
+           Defines the bandwidth quota size in bps for up stream. If the
+           number of the bandwidth is over the qosup limit, a packet to the
+           virtual service will be delayed until the number of bandwidth
+           become below the qosup limit.  KK(kilo), MM(mega) and GG(giga) unit
+           are available.
+
+       qqoossddoowwnn == _n[KK|MM|GG]
+           Defines the bandwidth quota size in bps for down stream. If the
+           number of the bandwidth is over the qosdown limit, a packet to the
+           client will be delayed until the number of bandwidth become below
+           the qosdown limit.  KK(kilo), MM(mega) and GG(giga) unit are
+           available.
+
+       ssoorrrryysseerrvveerr ==_i_p___a_d_d_r_e_s_s_|_h_o_s_t_n_a_m_e_[_:_p_o_r_t_n_u_m_b_e_r_|_s_e_r_v_i_c_e_n_a_m_e_]
+           Defines a sorry server by IP-address (or hostname) and port (or
+           servicename). Firewall-mark settings cannot be set.  If the number
+           of requests to the virtual service cross the maxconn limit, the
+           requests would be redirected to the sorry server.
+
+       cchheecckkttyyppee == nneeggoottiiaattee|ccoonnnneecctt|_N|ppiinngg|ccuussttoomm|ooffff|oonn
+           Type of check to perform. Negotiate sends a request and matches a
+           receive string. Connect only attempts to make a TCP/IP connection,
+           thus the request and receive strings may be omitted.  If checktype
+           is a number then negotiate and connect is combined so that after
+           each N connect attempts one negotiate attempt is performed. This is
+           useful to check often if a service answers and in much longer
+           intervals a negotiating check is done. Ping means that ICMP ping
+           will be used to test the availability of real servers.  Ping is
+           also used as the connect check for UDP services. Custom means that
+           custom command will be used to test the availability of real
+           servers.  Off means no checking will take place and no real or
+           fallback servers will be activated.  On means no checking will take
+           place and real servers will always be activated. Default is
+           _n_e_g_o_t_i_a_t_e.
+
+       sseerrvviiccee ==
+       ffttpp|ssmmttpp|hhttttpp|ppoopp|nnnnttpp|iimmaapp|llddaapp|hhttttppss|ddnnss|mmyyssqqll|ppggssqqll|ssiipp|nnoonnee
+           The type of service to monitor when using checktype=negotiate. None
+           denotes a service that will not be monitored. If the port specified
+           for the virtual server is 21, 25, 53, 80, 110, 119, 143, 389, 443,
+           3306, 5432 or 5060 then the default is ffttpp, ssmmttpp, ddnnss, hhttttpp, ppoopp,
+           nnnnttpp, iimmaapp, llddaapp, hhttttppss, mmyyssqqll, ppggssqqll or ssiipp respectively.
+           Otherwise the default service is nnoonnee.
+
+       cchheecckkppoorrtt == _n
+           Number of port to monitor. Sometimes check port differs from
+           service port.  Default is port specified for the real server.
+
+       rreeqquueesstt == ""_u_r_i _t_o _r_e_q_u_e_s_t_e_d _o_b_j_e_c_t""
+           This object will be requested each checkinterval seconds on each
+           real server.  The string must be inside quotes. Note that this
+           string may be overridden by an optional per real-server based
+           request-string.
+
+           For a DNS check this should the name of an A record, or the address
+           of a PTR record to look up.
+
+           For a MySQL or PostgreSQL checks, this should be a SQL query.  The
+           data returned is not checked, only that the answer is one or more
+           rows.  This is a required setting.
+
+       rreecceeiivvee == ""_r_e_g_e_x_p _t_o _c_o_m_p_a_r_e""
+           If the requested result contains this _r_e_g_e_x_p _t_o _c_o_m_p_a_r_e, the real
+           server is declared alive. The regexp must be inside quotes. Keep in
+           mind that regexps are not plain strings and that you need to escape
+           the special characters if they should as literals. Note that this
+           regexp may be overridden by an optional per real-server based
+           receive regexp.
+
+           For a DNS check this should be any one the A record’s addresses or
+           any one of the PTR record’s names.
+
+           For a MySQL check, the receive setting is not used.
+
+       hhttttppmmeetthhoodd == GGEETT|HHEEAADD
+           Sets the HTTP method, which should be used to fetch the URI
+           specified in the request-string. GET is the method used by default
+           if the parameter is not set. If HEAD is used, the receive-string
+           should be unset.
+
+       vviirrttuuaallhhoosstt == ""_h_o_s_t_n_a_m_e""
+           Used when using a negotiate check with HTTP or HTTPS. Sets the host
+           header used in the HTTP request.  In the case of HTTPS this
+           generally needs to match the common name of the SSL certificate. If
+           not set then the host header will be derived from the request url
+           for the real server if present.  As a last resort the IP address of
+           the real server will be used.
+
+       llooggiinn == ""_u_s_e_r_n_a_m_e""
+           Username to use to login to FTP, POP, IMAP, MySQL and PostgreSQL
+           servers.  For FTP, the default is anonymous. For POP and IMAP, the
+           default is the empty string, in which case authentication will not
+           be attempted.  For a MySQL and PostgreSQL, the username must be
+           provided.
+
+           For SIP the username is used as both the to and from address for an
+           OPTIONS query. If unset it defaults to l7directord\@<hostname>,
+           hostname is derived as per the passwd option below.
+
+       ppaasssswwdd == ""_p_a_s_s_w_o_r_d""
+           Password to use to login to FTP, POP, IMAP, MySQL and PostgreSQL
+           servers.  Default is for FTP is l7directord\@<hostname>, where
+           hostname is the environment variable HOSTNAME evaluated at run
+           time, or sourced from uname if unset. The default for all other
+           services is an empty password, in the case of MySQL and PostgreSQL
+           this means authentication will not be performed.
+
+       ddaattaabbaassee == ""_d_a_t_a_b_a_s_e_n_a_m_e""
+           Database to use for MySQL and PostgreSQL servers, this is the
+           database that the query (set by rreecceeiivvee above) will be performed
+           against.  This is a required setting.
+
+       sscchheedduulleerr == _s_c_h_e_d_u_l_e_r___n_a_m_e
+           Scheduler to be used by UltraMonkey-L7 for load balancing.  The
+           available schedulers are only llcc and rrrr. The default is _r_r.
+
+       pprroottooccooll == ttccpp
+           Protocol to be used. ll77vvssaaddmm supports only ttccpp.  Since the virtual
+           is specified as an IP address and port, it would be tcp and will
+           default to tcp.
+
+       rreeaallddoowwnnccaallllbbaacckk == ""_/_p_a_t_h_/_t_o_/_r_e_a_l_d_o_w_n_c_a_l_l_b_a_c_k""
+           If this directive is defined, ll77ddiirreeccttoorrdd automatically calls the
+           executable _/_p_a_t_h_/_t_o_/_r_e_a_l_d_o_w_n_c_a_l_l_b_a_c_k after a real server’s status
+           changes to down. The first argument to the realdowncallback is the
+           real server’s IP-address and port (ip_address:portnumber).
+
+       rreeaallrreeccoovveerrccaallllbbaacckk == ""_/_p_a_t_h_/_t_o_/_r_e_a_l_r_e_c_o_v_e_r_c_a_l_l_b_a_c_k""
+           If this directive is defined, ll77ddiirreeccttoorrdd automatically calls the
+           executable _/_p_a_t_h_/_t_o_/_r_e_a_l_r_e_c_o_v_e_r_c_a_l_l_b_a_c_k after a real server’s
+           status changes to up. The first argument to the realrecovercallback
+           is the real server’s IP-address and port (ip_address:portnumber).
+
+       ccuussttoommcchheecckk == ""_c_u_s_t_o_m _c_h_e_c_k _c_o_m_m_a_n_d""
+           If this directive is defined and set cchheecckkttyyppee to custom,
+           ll77ddiirreeccttoorrdd exec custom command for real servers health checking.
+           Only if custom command returns 0, real servers will change to up.
+           Otherwise real servers will change to down. Custom check command
+           has some macro string. See below.
+
+           __IIPP__
+               Change to real server IP address.
+
+           __PPOORRTT__
+               Change to real server port number.
+
+       ssssllccoonnffiiggffiillee == ""_/_p_a_t_h_/_t_o_/_s_s_l_c_o_n_f_i_g_f_i_l_e""
+           When communication with Client is SSL, the file name for SSL
+           setting is designated.
+
+       ssoocckkeettooppttiioonn == ""_O_P_T_I_O_N_._._.""
+           An option of the socket used in VirtualService is designated.  The
+           setting possible value is described.
+
+           ttrraannssppaarreenntt
+               Set IP_TRANSPARENT option to the RealServer socket.
+
+           ddeeffeerraacccceepptt
+               Set TCP_DEFER_ACCEPT option to the listener socket of
+               VirtualService.
+
+           nnooddeellaayy
+               Set TCP_NODELAY option to the Client and RealServer socket.
+
+           ccoorrkk
+               Set TCP_CORK option to the Client and RealServer socket.
+
+           qquuiicckkaacckkoonn or qquuiicckkaacckkooffff
+               Set or unset TCP_QUICKACK option to the Client and RealServer
+               socket.
+
+       aacccceesssslloogg == [yyeess|nnoo]
+           If yyeess, then output client access log. The default is nnoo.
+
+       aacccceesssslloogg__rroottaattee__ttyyppee == [ddaattee|ssiizzee|ddaatteessiizzee]
+           ddaattee means rotate access log with the specified date/time. ssiizzee
+           means rotate access log when that file size exceeds the specified
+           size. ddaatteessiizzee means both ddaattee and ssiizzee.
+
+       aacccceesssslloogg__rroottaattee__mmaaxx__bbaacckkuupp__iinnddeexx == _n
+           Maximum number of backup files.
+
+       aacccceesssslloogg__rroottaattee__mmaaxx__ffiilleessiizzee ==  _n[KK|MM|GG]
+           Threshold file size of access log when aacccceesssslloogg__rroottaattee__ttyyppee is set
+           to ssiizzee or ddaatteessiizzee. KK(kilo), MM(mega) and GG(giga) units are
+           available.
+
+       aacccceesssslloogg__rroottaattee__rroottaattiioonn__ttiimmiinngg == [yyeeaarr|mmoonntthh|wweeeekk|ddaattee|hhoouurr]
+           Rotate timing type when aacccceesssslloogg__rroottaattee__ttyyppee is set to ddaattee or
+           ddaatteessiizzee.
+
+       aacccceesssslloogg__rroottaattee__rroottaattiioonn__ttiimmiinngg__vvaalluuee == ""_r_o_t_a_t_i_o_n___t_i_m_i_n_g___v_a_l_u_e""
+           Rotate timing. The formats are different by
+           aacccceesssslloogg__rroottaattee__rroottaattiioonn__ttiimmiinngg setting.
+
+           aacccceesssslloogg__rroottaattee__rroottaattiioonn__ttiimmiinngg==yyeeaarr
+               FORMAT: ""MMMM//dddd HHHH::mmmm""
+
+           aacccceesssslloogg__rroottaattee__rroottaattiioonn__ttiimmiinngg==mmoonntthh
+               FORMAT: ""dddd HHHH::mmmm""
+
+           aacccceesssslloogg__rroottaattee__rroottaattiioonn__ttiimmiinngg==wweeeekk
+               FORMAT: ""[ssuunn|mmoonn|ttuuee|wweedd|tthhuu|ffrrii|ssaatt] HHHH::mmmm""
+
+           aacccceesssslloogg__rroottaattee__rroottaattiioonn__ttiimmiinngg==ddaattee
+               FORMAT: ""HHHH::mmmm""
+
+           aacccceesssslloogg__rroottaattee__rroottaattiioonn__ttiimmiinngg==hhoouurr
+               FORMAT: ""mmmm""
+
+FFIILLEESS
+       //eettcc//hhaa..dd//ccoonnff//ll77ddiirreeccttoorrdd..ccff
+
+       //vvaarr//lloogg//ll77vvss//ll77ddiirreeccttoorrdd..lloogg
+
+       //vvaarr//rruunn//ll77ddiirreeccttoorrdd.._c_o_n_f_i_g_u_r_a_t_i_o_n..ppiidd
+
+       //eettcc//sseerrvviicceess
+
+SSEEEE AALLSSOO
+       l7vsadm, heartbeat
+
+AAUUTTHHOORRSS
+       NTT COMWARE
+
+
+
+perl v5.10.1                      2010-08-05                    L7DIRECTORD(1)
+
