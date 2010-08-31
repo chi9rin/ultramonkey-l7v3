@@ -28,6 +28,9 @@ stop_lighttpd (){
 	then
 		kill $PID > /dev/null 2>&1
 		RET=$?
+		rm -f ${LIGHTTPD_TMP_DIR}/$1.cf
+		rm -rf ${LIGHTTPD_TMP_DIR}/$1
+		
 	fi
 	PID=""
 	return ${RET}
@@ -54,7 +57,7 @@ start_lighttpd (){
 template_file=${DEFAULT_CONF_DIR}/default.conf
 server_ipaddr=127.0.0.1
 OPTIND=1
-while getopts s:a:p:t:iS option
+while getopts s:a:p:t:l:iS option
 do
 	case "$option" in
 	  s)
@@ -75,6 +78,9 @@ do
 		;;
 	  t)
 		template_file=${DEFAULT_CONF_DIR}/${OPTARG}
+		;;
+	  l)
+		echo "accesslog.filename = \"${OPTARG}\"" >> ${LIGHTTPD_CONF_FILE}
 		;;
 
 	  a)

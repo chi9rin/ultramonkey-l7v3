@@ -22,7 +22,7 @@ then
         exit 1
 fi
 
-for (( i = 0; i < 9; i++ )){
+for (( i = 0; i < 10; i++ )){
 	$L7VSADM -A -t 127.0.0.1:40001 -m sessionless
 	if [ $? -eq 0 ]
 	then

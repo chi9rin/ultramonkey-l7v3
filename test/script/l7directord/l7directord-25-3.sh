@@ -2,6 +2,8 @@
 . ${SET_DEFAULT_CONF}
 \cp ./materials/l7directord-25-l7directord.cf ${L7DIRECTORD_CONF_DIR}/l7directord.cf
 
+exit 1
+
 #test l7directord config file
 RET=`$INIT_L7DIRECTORD configtest`
 if [ $? -ne 0 ]

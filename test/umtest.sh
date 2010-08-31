@@ -68,7 +68,6 @@ check_option (){
 		  C)
 			rm -rf ${REPORT_DIR}
 			rm -rf ${LOG_BASE_DIR}
-			rm -rf ${TMP_DIR}
 			exit 0
 			;;
                   \?)
@@ -203,5 +202,6 @@ LOG "Test scripts end."
 . ${STOP_MONKEY}
 # Return log and config files.
 . ${RETURN_FILE}
-
+# Delete temp directory
+rm -rf ${TMP_DIR}
 exit 0

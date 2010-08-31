@@ -9,6 +9,7 @@ SSLRealServer1_PORT=54431
 start_lighttpd -s $SSLRealServer1 -a $SSLRealServer1_ADDR -p $SSLRealServer1_PORT -S
 if [ $? -ne 0 ]
 then
+	sleep 100
         echo "Test failed: start_lighttpd SSLRealServer1"
         exit 1
 fi

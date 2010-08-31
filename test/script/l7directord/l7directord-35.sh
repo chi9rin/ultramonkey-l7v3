@@ -70,6 +70,7 @@ l7directord: ping:[::1]:50102:UP
 l7directord: ping:[::1]:50103:UP
 l7directord: ping:[::1]:50104:UP
 l7directord: ping:[::1]:50105:UP"
+
 if [ "$RET" != "$EXPECT" ]
 then
         echo "Test failed: ps -ef | grep l7directord | grep -v grep | grep -v umtest.sh | awk '{print \$8,\$9}'"
