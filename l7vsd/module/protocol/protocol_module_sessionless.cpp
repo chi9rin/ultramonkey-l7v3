@@ -2964,18 +2964,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                         throw - 1;
                 }
 
-                receive_data &recv_data = receive_data_it->second;
-
-                send_status_it it = recv_data.send_status_list.begin();
-                send_status_it it_end = recv_data.send_status_list.end();
-
-                it = find_if(it, it_end, data_send_possible());
-                if (it != it_end) {
-                        status = SORRYSERVER_CONNECT;
-                } else {
-                        status = CLIENT_RECV;
-                }
-
+                status = SORRYSERVER_CONNECT;
         } catch (int e) {
                 /*-------- DEBUG LOG --------*/
                 if (unlikely(LOG_LV_DEBUG == getloglevel())) {
@@ -3084,10 +3073,14 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                 //receive_buffer pointer check
                 receive_data &recv_data = receive_data_it->second;
                 if (unlikely(recv_data.receive_buffer == NULL)) {
+                        status = CLIENT_RECV;
+                        goto handle_sorryserver_connect_out;
+/*
                         boost::format formatter("Invalid pointer. thread id : %d.");
                         formatter % boost::this_thread::get_id();
                         putLogError(100065, formatter.str(), __FILE__, __LINE__);
                         throw - 1;
+*/
                 }
 
                 //send list check
@@ -3561,6 +3554,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                 status = FINALIZE;
         }
 
+handle_sorryserver_connect_out:
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel())) {
                 boost::format formatter("out_function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"

@@ -3,7 +3,7 @@ TARGET		= atomic_test
 ##TARGET2		= queue_bench
 ##TARGET3		= hash_bench
 CPP		= g++
-CPPFLAGS	= -O2 -g -Werror -pthread -D__X86_64__
+CPPFLAGS	= -O0 -g -Werror -pthread -D__X86_64__
 INCLUDES	=	-I../../logger \
 				-I../../parameter \
 				-I./ \

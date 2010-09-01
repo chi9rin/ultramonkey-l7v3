@@ -1,6 +1,6 @@
 /*!
- *    @file    tcp_socket_option.h
- *    @brief    tcp session socket option class
+ * @file  tcp_socket_option.h
+ * @brief tcp session socket option class
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.
@@ -27,30 +27,26 @@
 
 #include "config.h"
 #if HAVE_DECL_IP_TRANSPARENT && !defined(IP_TRANSPARENT)
-#define IP_TRANSPARENT          19
+#define IP_TRANSPARENT  19
 #endif
 
 namespace l7vs
 {
 //! tcp_socket_option
 struct tcp_socket_option_info {
-        //! IP_TRANSPARENT   (false:not set,true:set option)
-        bool transparent_opt;
-        //! IP_TRANSPARENT option value  (false:off,true:on)
-        bool transparent_val;
-        //! TCP_NODELAY   (false:not set,true:set option)
+        //! TCP_NODELAY (false:not set,true:set option)
         bool nodelay_opt;
-        //! TCP_NODELAY option value  (false:off,true:on)
+        //! TCP_NODELAY option value (false:off,true:on)
         bool nodelay_val;
-        //! TCP_CORK      (false:not set,true:set option)
+        //! TCP_CORK (false:not set,true:set option)
         bool cork_opt;
-        //! TCP_CORK option value     (false:off,true:on)
+        //! TCP_CORK option value (false:off,true:on)
         bool cork_val;
-        //! TCP_QUICKACK  (false:not set,true:set option)
+        //! TCP_QUICKACK (false:not set,true:set option)
         bool quickack_opt;
         //! TCP_QUICKACK option value (false:off,true:on)
         bool quickack_val;
 };
 }
-#endif//TCP_SOCKET_OPTION_H
+#endif //TCP_SOCKET_OPTION_H
 

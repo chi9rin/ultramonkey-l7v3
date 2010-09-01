@@ -7,7 +7,7 @@ TARGET		= vs_base_ut vs_tcp_ut vs_tcp_thread_ut vs_tcp_thread_ut2 vs_tcp_it vs_t
 #TARGET		= vs_tcp_ut
 CPP			= g++
 CPPFLAGS	= -O0 -g -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG -DPARAMETER_FILE='"./l7vs.cf"'
-# CPPFLAGS	= -O2 -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG
+# CPPFLAGS	= -O0 -Wall -Werror -pthread -DMAX_BUFFER_SIZE=65535 -DDEBUG
 
 
 INCLUDES	=		\

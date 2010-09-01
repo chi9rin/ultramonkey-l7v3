@@ -22,6 +22,7 @@
  *
  **********************************************************************/
 #include <boost/format.hpp>
+#include <cerrno>
 #include "tcp_session.h"
 #include "tcp_thread_message.h"
 #include "virtualservice.h"
@@ -1785,6 +1786,7 @@ void tcp_session::up_thread_realserver_get_destination_event(const TCP_PROCESS_T
 
         std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
         up_thread_function_pair func = up_thread_function_array[func_type->second];
+/*
         if (module_event == protocol_module_base::SORRYSERVER_SELECT) {
                 // protocol module sorry mode change
                 tcp_thread_message *down_msg = new tcp_thread_message;
@@ -1795,6 +1797,7 @@ void tcp_session::up_thread_realserver_get_destination_event(const TCP_PROCESS_T
                 down_msg->message = down_func->second;
                 while (!down_thread_message_que.push(down_msg)) {}
         }
+*/
 
         up_thread_next_call_function = func;
 
@@ -1823,6 +1826,58 @@ void tcp_session::up_thread_realserver_connect(const TCP_PROCESS_TYPE_TAG proces
         } else {
                 tcp_socket_ptr new_socket(new tcp_socket(io, socket_opt_info));
                 boost::system::error_code ec;
+#ifdef IP_TRANSPARENT
+                endpoint client_endpoint = up_thread_data_client_side.get_endpoint();
+                realserver_element::REALSERVER_FWDMODE_TAG fwdmode = realserver_element::FWD_NONE;
+                std::vector<realserver_element> real_vec = parent_service.get_element().realserver_vector;
+                for (std::vector<realserver_element>::iterator rs_itr = real_vec.begin();
+                        rs_itr != real_vec.end(); ++rs_itr) {
+                        if (rs_itr->tcp_endpoint == server_endpoint) {
+                                fwdmode = rs_itr->fwdmode;
+                                break;
+                        }
+                }
+                if (fwdmode == realserver_element::FWD_TPROXY && (
+                        ( server_endpoint.address().is_v4() && client_endpoint.address().is_v4() ) ||
+                        ( server_endpoint.address().is_v6() && client_endpoint.address().is_v6() ) ) ) {
+                        if (client_endpoint.address().is_v4()) {
+                                new_socket->get_socket().open(boost::asio::ip::tcp::v4(), ec);
+                        } else {
+                                new_socket->get_socket().open(boost::asio::ip::tcp::v6(), ec);
+                        }
+                        if (unlikely(ec)) {
+                                std::stringstream buf;
+                                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
+                                buf << "realserver socket open error: " << ec.message();
+                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, buf.str(),
+                                        __FILE__, __LINE__);
+                                goto out_tproxy;
+                        }
+                        // set IP_TRANSPARENT
+                        int on = 1;
+                        int err = ::setsockopt(new_socket->get_socket().native(),
+                                SOL_IP, IP_TRANSPARENT, &on, sizeof(on));
+                        if (unlikely(err)) {
+                                ec = boost::system::error_code(errno, boost::asio::error::get_system_category());
+                                std::stringstream buf;
+                                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
+                                buf << "realserver socket option(IP_TRANSPARENT) set failed: " << ec.message();
+                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, buf.str(),
+                                        __FILE__, __LINE__);
+                                goto out_tproxy;
+                        }
+                        // bind client address
+                        new_socket->get_socket().bind(client_endpoint, ec);
+                        if (unlikely(ec)) {
+                                std::stringstream buf;
+                                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
+                                buf << "bind client addr to realserver socket failed: " << ec.message();
+                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, buf.str(),
+                                        __FILE__, __LINE__);
+                        }
+                }
+out_tproxy:
+#endif
                 bool bres = new_socket->connect(server_endpoint, ec);
                 if (likely(bres)) {
                         {
@@ -2251,6 +2306,49 @@ void tcp_session::up_thread_sorryserver_connect(const TCP_PROCESS_TYPE_TAG proce
 
         endpoint sorry_endpoint = up_thread_data_dest_side.get_endpoint();
         boost::system::error_code ec;
+#ifdef IP_TRANSPARENT
+        endpoint client_endpoint = up_thread_data_client_side.get_endpoint();
+        if (parent_service.get_element().sorry_fwdmode == virtualservice_element::FWD_TPROXY && (
+                ( sorry_endpoint.address().is_v4() && client_endpoint.address().is_v4() ) ||
+                ( sorry_endpoint.address().is_v6() && client_endpoint.address().is_v6() ) ) ) {
+                if (client_endpoint.address().is_v4()) {
+                        sorryserver_socket.second->get_socket().open(boost::asio::ip::tcp::v4(), ec);
+                } else {
+                        sorryserver_socket.second->get_socket().open(boost::asio::ip::tcp::v6(), ec);
+                }
+                if (unlikely(ec)) {
+                        std::stringstream buf;
+                        buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
+                        buf << "sorryserver socket open error: " << ec.message();
+                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, buf.str(),
+                                __FILE__, __LINE__);
+                        goto out_tproxy;
+                }
+                // set IP_TRANSPARENT
+                int on = 1;
+                int err = ::setsockopt(sorryserver_socket.second->get_socket().native(),
+                        SOL_IP, IP_TRANSPARENT, &on, sizeof(on));
+                if (unlikely(err)) {
+                        ec = boost::system::error_code(errno, boost::asio::error::get_system_category());
+                        std::stringstream buf;
+                        buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
+                        buf << "sorryserver socket option(IP_TRANSPARENT) set failed: " << ec.message();
+                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, buf.str(),
+                                __FILE__, __LINE__);
+                        goto out_tproxy;
+                }
+                // bind client address
+                sorryserver_socket.second->get_socket().bind(client_endpoint, ec);
+                if (unlikely(ec)) {
+                        std::stringstream buf;
+                        buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
+                        buf << "bind client addr to sorryserver socket failed: " << ec.message();
+                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, buf.str(),
+                                __FILE__, __LINE__);
+                }
+        }
+out_tproxy:
+#endif
         bool bres = sorryserver_socket.second->connect(sorry_endpoint, ec);
         UP_THREAD_FUNC_TYPE_TAG func_tag;
         if (likely(bres)) {
@@ -2299,6 +2397,13 @@ void tcp_session::up_thread_sorryserver_connect_event(const TCP_PROCESS_TYPE_TAG
         up_thread_data_dest_side.set_size(data_size);
         std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
         up_thread_next_call_function = up_thread_function_array[func_type->second];
+
+        // protocol module sorry mode change
+        tcp_thread_message *down_msg = new tcp_thread_message;
+        std::map<DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func>::iterator
+        down_func = up_thread_message_down_thread_function_map.find(DOWN_FUNC_SORRY_ENABLE_EVENT);
+        down_msg->message = down_func->second;
+        while (!down_thread_message_que.push(down_msg)) {}
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                 boost::format formatter("Thread ID[%d] FUNC OUT up_thread_sorryserver_connect_event: NEXT_FUNC[%s]");
@@ -3142,12 +3247,13 @@ void tcp_session::down_thread_sorryserver_receive(const TCP_PROCESS_TYPE_TAG pro
                                         Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__);
                                 }
                                 //----Debug log----------------------------------------------------------------------
+                                down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_SORRYSERVER_RECEIVE];
                         } else {
                                 std::stringstream buf;
                                 buf << "down_thread_sorryserver_receive: epoll_wait error: " << strerror(errno);
                                 Logger::putLogWarn(LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__);
+                                down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_SORRYSERVER_DISCONNECT];
                         }
-                        down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_SORRYSERVER_DISCONNECT];
                         return;
                 }
 

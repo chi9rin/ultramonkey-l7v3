@@ -2559,8 +2559,10 @@ void    parse_opt_rs_realserver_func_test(){
         // unit_test[202] parse_opt_rs_realserver_func normal case 2 (realserver specified in name) return value check
         BOOST_CHECK_EQUAL( ret, true );    
         // unit_test[203] parse_opt_rs_realserver_func normal case 2 (realserver specified in name) endpoint check
-        boost::asio::ip::tcp::endpoint    ep = string_to_endpoint<boost::asio::ip::tcp>( "127.0.0.1:80" );
-        BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().tcp_endpoint, ep );
+        boost::asio::ip::tcp::endpoint ep1 = string_to_endpoint<boost::asio::ip::tcp>("127.0.0.1:80");
+        boost::asio::ip::tcp::endpoint ep2 = string_to_endpoint<boost::asio::ip::tcp>("[::1]:80");
+        BOOST_CHECK( adm.get_request().vs_element.realserver_vector.front().tcp_endpoint == ep1 ||
+        	adm.get_request().vs_element.realserver_vector.front().tcp_endpoint == ep2);
     }
 
     // parse_opt_rs_realserver_func error case 1 (invalid endpoint)

@@ -452,7 +452,8 @@ l7vs::virtualservice_element        &l7vs::virtualservice_base::get_element()
                 rs_element.set_inact(itr->get_inact());
                 rs_element.tcp_endpoint    = itr->tcp_endpoint;
                 rs_element.udp_endpoint    = itr->udp_endpoint;
-                rs_element.weight        = itr->weight;
+                rs_element.weight          = itr->weight;
+                rs_element.fwdmode         = itr->fwdmode;
                 element.realserver_vector.push_back(rs_element);
         }
         rs_list_unlock();
