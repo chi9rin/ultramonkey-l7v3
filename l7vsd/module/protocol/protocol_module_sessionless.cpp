@@ -1774,7 +1774,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                                 new_send_it->send_offset = recv_data.receive_buffer_max_size - recv_data.receive_buffer_rest_size
                                                            - request_data_remain_size;
 
-                                if (forwarded_for == FORWARDED_FOR_ON) {
+                                if (forwarded_for == FORWARDED_FOR_ON || session_data->sorry_flag == SORRY_FLAG_ON) {
                                         //check http method
                                         check_result = check_http_method(recv_data.receive_buffer + new_send_it->send_offset,
                                                                          request_data_remain_size);
@@ -3135,7 +3135,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                         }
                                 }
 
-                                if (forwarded_for == FORWARDED_FOR_ON) {
+                                if (forwarded_for == FORWARDED_FOR_ON || session_data->sorry_flag == SORRY_FLAG_ON) {
                                         //search X-Forwarded-For header
                                         ret = find_http_header(recv_data.receive_buffer + it->send_offset, it->send_possible_size,
                                                                str_forword_for.c_str(), header_offset, header_offset_len);

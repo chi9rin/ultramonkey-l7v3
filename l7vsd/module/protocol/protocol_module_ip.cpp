@@ -1555,7 +1555,7 @@ protocol_module_base::EVENT_TAG protocol_module_ip::handle_client_recv(const boo
                                 putLogError(600037, formatter.str(), __FILE__, __LINE__);
                                 status = FINALIZE;
                         } else {
-                                if (forwarded_for == FORWARDED_FOR_OFF) {
+                                if (forwarded_for == FORWARDED_FOR_OFF && session_data_ptr->sorry_flag == SORRY_FLAG_OFF) {
                                         session_data_ptr->data_state = UNKNOWN;
                                 }
                                 //data state is HTTP_START
@@ -3373,7 +3373,7 @@ protocol_module_base::EVENT_TAG protocol_module_ip::handle_realserver_recv(
                         putLogError(600070, formatter.str(), __FILE__, __LINE__);
                         status = FINALIZE;
                 } else {
-                        if (forwarded_for == FORWARDED_FOR_OFF) {
+                        if (forwarded_for == FORWARDED_FOR_OFF && session_data_ptr->sorry_flag == SORRY_FLAG_OFF) {
                                 session_data_ptr->data_state = UNKNOWN;
                         }
                         //data state is HTTP_START
@@ -3675,7 +3675,7 @@ protocol_module_base::EVENT_TAG protocol_module_ip::handle_sorryserver_recv(
 
                         status = FINALIZE;
                 } else {
-                        if (forwarded_for == FORWARDED_FOR_OFF) {
+                        if (forwarded_for == FORWARDED_FOR_OFF && session_data_ptr->sorry_flag == SORRY_FLAG_OFF) {
                                 session_data_ptr->data_state = UNKNOWN;
                         }
                         //data state is HTTP_START
