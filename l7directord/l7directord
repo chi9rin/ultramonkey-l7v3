@@ -1750,11 +1750,11 @@ sub ld_operate_real {
         $module_key .= q{ } . $v->{module}{key};
     }
     if ($result == 0) {
-        ld_log( _message($success_code, get_ip_port($r), get_ip_port($v), $module_key, $weight) );
+        ld_log( _message($success_code, get_ip_port($r), $r->{forward}, get_ip_port($v), $module_key, $weight) );
     }
     else {
         ($output) = split /\n/, $output, 2;
-        ld_log( _message($error_code, get_ip_port($r), get_ip_port($v), $module_key, $output) );
+        ld_log( _message($error_code, get_ip_port($r), $r->{forward}, get_ip_port($v), $module_key, $output) );
     }
 }
 
@@ -3479,10 +3479,10 @@ sub _restore_service {
     }
 
     if (!defined $tag || $tag eq 'real') {
-        ld_log( _message( 'INF0301', get_ip_port($r), $r->{forward} ) );
+        ld_log( _message( 'INF0301', get_ip_port($r) ) );
     }
     elsif ($tag eq 'fallback') {
-        ld_log( _message( 'INF0302', get_ip_port($r), $r->{forward} ) );
+        ld_log( _message( 'INF0302', get_ip_port($r) ) );
     } 
 
     if ( defined $v->{realrecovercallback} && $r->{healthchecked} ){
@@ -4323,9 +4323,9 @@ sub _message_only {
         ERR0201 => "Failed to add virtual service to l7vsd: `%s %s', output: `%s'",
         ERR0202 => "Failed to edit virtual service on l7vsd: `%s %s', output: `%s'",
         ERR0203 => "Failed to delete virtual service from l7vsd: `%s %s', output: `%s'",
-        ERR0204 => "Failed to add server to l7vsd: `%s' ( x `%s %s'), output: `%s'",
-        ERR0205 => "Failed to edit server on l7vsd: `%s' ( x `%s %s'), output: `%s'",
-        ERR0206 => "Failed to delete server from l7vsd: `%s' ( x `%s %s'), output: `%s'",
+        ERR0204 => "Failed to add server to l7vsd: `%s %s' ( x `%s %s'), output: `%s'",
+        ERR0205 => "Failed to edit server on l7vsd: `%s %s' ( x `%s %s'), output: `%s'",
+        ERR0206 => "Failed to delete server from l7vsd: `%s %s' ( x `%s %s'), output: `%s'",
         ERR0207 => "Trying add server `%s', but virtual service `%s' is not found.",
         ERR0208 => "Trying delete server `%s', but virtual service `%s' is not found.",
         ERR0209 => "`%s' was already existed on l7vsd. ( x `%s %s')",
@@ -4468,12 +4468,12 @@ sub _message_only {
         INF0201 => "Add virtual service to l7vsd: `%s %s'",
         INF0202 => "Edit virtual service on l7vsd: `%s %s'",
         INF0203 => "Delete virtual service from l7vsd: `%s %s'",
-        INF0204 => "Add server to l7vsd: `%s' ( x `%s %s') (weight set to %d)",
-        INF0205 => "Edit server on l7vsd: `%s' ( x `%s %s') (weight set to %d)",
-        INF0206 => "Delete server from l7vsd: `%s' ( x `%s %s')",
+        INF0204 => "Add server to l7vsd: `%s %s' ( x `%s %s') (weight set to %d)",
+        INF0205 => "Edit server on l7vsd: `%s %s' ( x `%s %s') (weight set to %d)",
+        INF0206 => "Delete server from l7vsd: `%s %s' ( x `%s %s')",
         # server change
-        INF0301 => "Added real server. (`%s %s')",
-        INF0302 => "Added fallback server. (`%s %s')",
+        INF0301 => "Added real server. (`%s')",
+        INF0302 => "Added fallback server. (`%s')",
         INF0303 => "Changed real server to quiescent state. (`%s')",
         INF0304 => "Changed fallback server to quiescent state. (`%s')",
         INF0305 => "Deleted real server. (`%s')",
