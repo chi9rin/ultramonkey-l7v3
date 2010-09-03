@@ -1,0 +1,10 @@
+logfile          = /var/log/l7vs/l7directord.log
+
+retryinterval=2
+checkcount=10
+checktimeout=3
+virtual=127.0.0.1:50000
+    real=192.168.222.222:50001
+    checktype=ping
+    retryinterval=3
+

@@ -1,0 +1,7 @@
+virtual=127.0.0.1:50000
+    real=127.0.0.1:50001
+    real=127.0.0.1:50002
+    service=http
+    request=index.html
+    receive="Real"
+
