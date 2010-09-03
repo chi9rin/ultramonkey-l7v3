@@ -4909,7 +4909,7 @@ void handle_sorryserver_select_test(){
     BOOST_CHECK_EQUAL(ret, SORRYSERVER_CONNECT);
 
     cout << "[218]--------------------------------------------- " << endl;
-    //unit_test[218] sorryserverが決定済みで、送信可能データがない場合、CLIENT_RECVを返す。
+    //unit_test[218] sorryserverが決定済みで、送信可能データがない場合、SORRYSERVER_CONNECTを返す。
     this->session_thread_data_map.clear();
     boost::asio::ip::tcp::endpoint ep_1;
     thread_data_ptr data_1(new session_thread_data_sessionless);
@@ -4919,8 +4919,8 @@ void handle_sorryserver_select_test(){
     ret = this->handle_sorryserver_select(boost::this_thread::get_id(), ep_1);
     //送信先endpointにendpointを設定する
     BOOST_CHECK_EQUAL(dataup->target_endpoint, ep_1);
-    //遷移先ステータス status = CLIENT_RECV
-    BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
+    //遷移先ステータス status = SORRYSERVER_CONNECT
+    BOOST_CHECK_EQUAL(ret, SORRYSERVER_CONNECT);
 
     cout << "[219]--------------------------------------------- " << endl;
     //unit_test[219] sorryserverが決定済みで、送信可能データがある場合、SORRYSERVER_CONNECTを返す
@@ -5056,7 +5056,7 @@ void handle_sorryserver_connect_test(){
     memset(send_buffer.c_array(), 0, MAX_BUFFER_SIZE);
 
     ret = handle_sorryserver_connect(boost::this_thread::get_id(), send_buffer, send_buffer_len);
-    BOOST_CHECK_EQUAL(ret, FINALIZE);
+    BOOST_CHECK_EQUAL(ret, CLIENT_RECV);
 
     cout << "[225]--------------------------------------------- " << endl;
     // unit_test[225] 送信状態リストが空の場合
