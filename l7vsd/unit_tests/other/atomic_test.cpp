@@ -1,7 +1,8 @@
 #include <pthread.h>
 #include <iostream>
 #include <boost/lexical_cast.hpp>
-//#include <boost/test/unit_test.hpp>
+#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 //#include <boost/archive/text_oarchive.hpp>
 //#include <boost/archive/text_iarchive.hpp>
 
@@ -11,13 +12,17 @@
 
 //  このテストコードでは、Atomicとwrlock.の確認を同時に実施します。
 
+#define THREAD_COUNT 10
 #define CHECK(a,b,c,d)	do { \
 				if (a != b) { \
 					std::cout << "error " << c << ": "; \
 					std::cout << a << " != " << b; \
 					std::cout << ", line:" << d <<std::endl; \
+                                        ret = 1; \
 				} \
 			} while (0)
+
+using namespace boost::unit_test_framework;
 
 typedef    l7vs::atomic< int >    atomic_int_t;
 atomic_int_t    int_value;
@@ -29,6 +34,8 @@ typedef    l7vs::atomic< unsigned long long >    atomic_ulong_t;
 atomic_ulong_t    ulong_value;
 
 unsigned long long lock_ulong_value;
+
+static int ret = 0;
 
 void*    thread_func_atomic_i( void* param ){
     int temp;
@@ -115,7 +122,6 @@ void*    thread_func_atomic_i( void* param ){
 //std::cout << "int_value!==(:1)" << (int_value!=1001) << std::endl;
 //    BOOST_CHECK( 1 == (int_value!=1001) );
     CHECK(1, (int_value!=1001), "!=", __LINE__);
-    return 0;
 }
 
 void*    thread_func_atomic_ll( void* param ){
@@ -203,7 +209,6 @@ void*    thread_func_atomic_ll( void* param ){
 //std::cout << "long_value!==(:1)" << (long_value!=1001) << std::endl;
 //    BOOST_CHECK( 1 == (long_value!=1001) );
     CHECK(1, (long_value!= 1001), "!=", __LINE__);
-    return 0;
 }
 
 void*    thread_func_atomic_ull( void* param ){
@@ -291,42 +296,33 @@ void*    thread_func_atomic_ull( void* param ){
 //std::cout << "ulong_valu!==(:1)" << (ulong_value!=1001) << std::endl;
 //    BOOST_CHECK( 1 == (ulong_value!=1001) );
     CHECK(1, (ulong_value!= 1001), "!=", __LINE__);
-    return 0;
 }
 
-int main( int argc, char* argv[] ){
-    ulong_value = 0;
-    lock_ulong_value = 0;
-    if( 0 ){
-        std::cout << "usage : a.out [thread_num] " << std::endl;
-        return 0;
+void run_test(void* (*func)(void*)) {
+    pthread_t thd[THREAD_COUNT];
+
+    for( int i = 0; i < THREAD_COUNT; ++i ){
+        pthread_create(&thd[i], NULL, func, NULL);
     }
+    for( int i = 0; i < THREAD_COUNT; ++i ){
+        pthread_join(thd[i], NULL);
+    }
+}
 
-    //int count = boost::lexical_cast<int>( argv[1] );
-    int count = boost::lexical_cast<int>( "3" );
-    std::vector<pthread_t>    thread_vec;
-    pthread_t    thd[3];
-
+void atomic_test() {
     //atomic version
     std::cout << "atomic func time start" << std::endl;
-    for( int i = 0; i < count; ++i ){
-        pthread_create( &thd[0], NULL, thread_func_atomic_i, NULL );
-        pthread_create( &thd[1], NULL, thread_func_atomic_ll, NULL );
-        pthread_create( &thd[2], NULL, thread_func_atomic_ull, NULL );
-    }
-    thread_vec.push_back( thd[0] );
-    thread_vec.push_back( thd[1] );
-    thread_vec.push_back( thd[2] );
+    run_test(thread_func_atomic_i);
+    run_test(thread_func_atomic_ll);
+    run_test(thread_func_atomic_ull);
+    BOOST_CHECK( 0 == ret );
+}
 
-    int retval = 0;
-    for( std::vector<pthread_t>::iterator itr = thread_vec.begin();
-         itr != thread_vec.end();
-         ++itr ){
-        int ret;
-        pthread_join( *itr, (void**)&ret);
-        retval |= ret;
-    }
-    thread_vec.clear();
+test_suite* init_unit_test_suite( int argc, char* argv[] ){
+    ulong_value = 0;
+    lock_ulong_value = 0;
 
-    return retval;
+    test_suite* ts = BOOST_TEST_SUITE( "atomic class test" );
+    ts->add( BOOST_TEST_CASE( &atomic_test ) );
+    framework::master_test_suite().add( ts );
 }

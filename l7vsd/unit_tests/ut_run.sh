@@ -56,8 +56,8 @@ do
 	dir=`dirname $path`
 	file=`basename $path`
 	pushd $dir > /dev/null
-	echo "exec $path" 1>&2
-	./$file 1>&2
+	echo "exec $path"
+	./$file 2>&1 | tail -1
 	if [ "$?" -ne 0 ]; then
 		error="${error}Error detected in $path\n"
 	fi
