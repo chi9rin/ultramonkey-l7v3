@@ -16,6 +16,7 @@ SAVE_FILE="${COMMON_SCRIPT_DIR}/save_file.sh"
 RETURN_FILE="${COMMON_SCRIPT_DIR}/return_file.sh"
 COLLECT_FILE="${COMMON_SCRIPT_DIR}/collect_file.sh"
 SET_DEFAULT_CONF="${COMMON_SCRIPT_DIR}/set_default_conf.sh"
+START_SNMPD="${COMMON_SCRIPT_DIR}/start_snmpd.sh"
 
 if [ ! -d "$TEST_DIR" ]
 then
@@ -68,6 +69,7 @@ check_option (){
 		  C)
 			rm -rf ${REPORT_DIR}
 			rm -rf ${LOG_BASE_DIR}
+			rm -rf ${TMP_DIR}
 			exit 0
 			;;
                   \?)
@@ -108,9 +110,10 @@ um_test (){
 		elif [ -x ${SCRIPT} ]
 		then
 			SCRIPT_NAME=`basename ${SCRIPT}`
-			make_lighttpd_tmpdir
 			# Execute script
 			LOG "Execute ${SCRIPT_NAME} ."
+			make_lighttpd_tmpdir
+			. ${START_SNMPD}
 			(
 				cd $1
 				if [ -n "${DEBUG_FLAG}" ]
@@ -143,7 +146,6 @@ um_test (){
 			continue
 		fi
 	done
-#done
 }
 
 ####################
@@ -165,7 +167,6 @@ shift `expr "$OPTIND" - 1`
 . ${SAVE_FILE}
 # Initialize environment.
 . ${LIGHTTPD_FUNC}
-
 
 ###################
 # Test
@@ -205,3 +206,4 @@ LOG "Test scripts end."
 # Delete temp directory
 rm -rf ${TMP_DIR}
 exit 0
+

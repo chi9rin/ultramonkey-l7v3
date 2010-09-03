@@ -65,11 +65,43 @@ check_http_server (){
         LIGHTTPD=`which lighttpd`
 	if [ $? -ne 0 ]
 	then
-		LOG_FATAL "${LIGHTTPD} not exist. "
+		LOG_FATAL "lighttpd not exist. "
                 exit 1
 	fi
 }
 
+# check Net-snmp installed
+check_net_snmp (){
+	SNMPD=`which snmpd`
+	if [ $? -ne 0 ]
+	then
+		LOG_FATAL "snmpd not exist."
+		exit 1
+	fi
+
+	INIT_SNMPD="/etc/init.d/snmpd"
+	if [ ! -e ${INIT_SNMPD} ]
+	then       
+        	LOG_FATAL "/etc/init.d/snmpd not exist." 
+        	exit 1
+	fi
+	
+	SNMPTRAPD=`which snmptrapd`
+	if [ $? -ne 0 ]
+	then
+		LOG_FATAL "snmptrapd not exist."
+		exit 1
+	fi
+
+	INIT_SNMPTRAPD="/etc/init.d/snmptrapd"
+	if [ ! -e ${INIT_SNMPTRAPD} ]
+	then       
+        	LOG_FATAL "/etc/init.d/snmptrapd not exist." 
+        	exit 1
+	fi
+}
+
+	
 # check commands installed
 check_commands (){
 	WGET="/usr/bin/wget"
@@ -117,6 +149,7 @@ check_original_tools (){
 LOG "check_env start."
 check_uml7
 check_http_server
+check_net_snmp
 check_commands
 check_original_tools
 

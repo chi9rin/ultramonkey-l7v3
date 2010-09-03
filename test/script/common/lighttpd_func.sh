@@ -13,6 +13,24 @@ clean_lighttpd_tmpdir (){
 	return ${RET}
 }
 
+set_lighttpd_content (){
+	if [ ! -d ${LIGHTTPD_TMP_DIR}/$1 ]
+	then
+		echo "SERVERNAME:$1 is not exist."	
+		return 1
+	fi
+
+	if [ ! -f "$2" ]
+	then
+		echo "Content is not specified or not exist."
+		return 1
+	fi
+
+	\cp "$2" ${LIGHTTPD_TMP_DIR}/$1/${3:-`basename $2`}
+	return $?
+}
+
+
 up_lighttpd (){
 	if [ -n "$1" -a -f "${LIGHTTPD_TMP_DIR}/$1.cf" ]
 	then
