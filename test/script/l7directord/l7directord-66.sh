@@ -6,7 +6,7 @@
 RealServer1=RealServer1
 RealServer1_ADDR=127.0.0.1
 RealServer1_PORT=50001
-start_lighttpd -s $RealServer1 -a $RealServer1_ADDR -p $RealServer1_PORT -l ${TMP_DIR}/l7directord-66-access.log
+start_lighttpd -s $RealServer1 -a $RealServer1_ADDR -p $RealServer1_PORT -l ${L7VS_LOG_DIR}/l7directord-66-access.log
 
 if [ $? -ne 0 ]
 then
@@ -39,24 +39,24 @@ then
         exit 1
 fi
 
-RET=`cat ${TMP_DIR}/l7directord-66-access.log`
+RET=`cat ${L7VS_LOG_DIR}/l7directord-66-access.log`
 if [ -z "$RET" ]
 then
-        echo "Test failed: ${TMP_DIR}/l7directord-66-access.log"
+        echo "Test failed: ${L7VS_LOG_DIR}/l7directord-66-access.log"
         exit 1
 fi
 
 
 TIME1=""
 TIME2=""
-for TMP in `cat ${TMP_DIR}/l7directord-66-access.log | awk '{ print $4 }' | sed 's/:/ /' | awk '{ print $2}'`
+for TMP in `cat ${L7VS_LOG_DIR}/l7directord-66-access.log | awk '{ print $4 }' | sed 's/:/ /' | awk '{ print $2}'`
 do
-	TIME2=`date -d "$TMP" + '%s'`
+	TIME2=`date -d "$TMP" +'%s'`
 	if [ -n "$TIME1" ]
 	then
 		if [ $((TIME1+10)) -ne $((TIME2)) ]
 		then
-			echo "Test failed: cat ${TMP_DIR}/l7directord-66-access.log"
+			echo "Test failed: cat ${L7VS_LOG_DIR}/l7directord-66-access.log"
 			exit 1
 		fi
 	fi

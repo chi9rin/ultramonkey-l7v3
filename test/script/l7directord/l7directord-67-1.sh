@@ -3,7 +3,6 @@
 \cp ./materials/l7directord-67-1-l7directord.cf ${L7DIRECTORD_CONF_DIR}/l7directord.cf
 
 exit 1
-
 #Run http server
 RealServer1=RealServer1
 RealServer1_ADDR=127.0.0.1
@@ -33,8 +32,8 @@ then
         exit 1
 fi
 sleep 5
-
-tcpdump port 50001
+ 
+tcpdump -i eth0 port 50001
 exit 1
 
 RET=`ps -ef | grep l7directord | grep -v grep | grep -v umtest.sh | awk '{print $8,$9}'`
