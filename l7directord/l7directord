@@ -3,7 +3,7 @@
 # l7directord
 # Linux Director Daemon - run "perldoc l7directord" for details
 #
-# Copyright (C) 2005-2009  NTT COMWARE Corporation.
+# Copyright (C) 2005-2010  NTT COMWARE Corporation.
 #
 # License:   GNU General Public License (GPL)
 #
@@ -78,7 +78,7 @@ use Socket6;
 
 # current version
 our $VERSION     = '3.0.0-0';
-our $COPYRIGHT   = 'Copyright (C) 2009 NTT COMWARE CORPORATION';
+our $COPYRIGHT   = 'Copyright (C) 2010 NTT COMWARE CORPORATION';
 
 # default global config values
 our %GLOBAL = (
@@ -110,7 +110,7 @@ our %VIRTUAL = (
     maxconn             => 0,
     qosup               => 0,
     qosdown             => 0,
-    sorryserver         => { ip => '0.0.0.0', port => 0 },
+    sorryserver         => { ip => '0.0.0.0', port => 0, forward => 'none' },
     request             => undef,
     receive             => undef,
     httpmethod          => 'GET',
@@ -964,10 +964,19 @@ sub validate_config {
             $value = {name => $module, option => $option, key => $key};
         }
         elsif ($name eq 'sorryserver') {
+            my $forward = 'masq';
+            if ($value =~ /^(\S+)\s+(\S+)/) {
+                $value = $1;
+                $forward = lc $2;
+            }
             my $sorry_server = ld_gethostservbyname($value, 'tcp');
             if (!defined $sorry_server) {
                 config_error($line, 'ERR0114', $config);
             }
+            if ($forward && $forward !~ /^(?:masq|tproxy)$/) {
+                config_error($line, 'ERR0107', $config);
+            }
+            $sorry_server->{forward} = $forward;
             $value = $sorry_server;
         }
         elsif (    $name eq 'qosup'
@@ -1143,7 +1152,7 @@ sub _ld_service_resolve {
 # Parse a fallback server
 # pre: line: line number fallback server was read from
 #      fallback: Should be of the form
-#                ip_address|hostname[:port|:service_name] masq
+#                ip_address|hostname[:port|:service_name] [masq|tproxy]
 #      config_line: line read from configuration file
 # post: fallback is parsed
 # return: Reference to hash of the form
@@ -1161,15 +1170,13 @@ sub parse_fallback {
     if ( !defined $ip_port ) {
         config_error($line, 'ERR0114', $config_line);
     }
-    if (defined $forward && $forward !~ /^masq$/i) {
+    if (defined $forward && $forward !~ /^(?:masq|tproxy)$/i) {
         config_error($line, 'ERR0107', $config_line);
     }
 
     my %fallback = %REAL;
     $fallback{server} = $ip_port;
-    if (defined $forward) {
-        $fallback{forward} = $forward;
-    }
+    $fallback{option}{forward} = get_forward_flag($forward);
 
     return \%fallback;
 }
@@ -1178,7 +1185,7 @@ sub parse_fallback {
 # Parse a real server
 # pre: line: line number real server was read from
 #      real: Should be of the form
-#                ip_address|hostname[:port|:service_name] masq
+#                ip_address|hostname[:port|:service_name] [masq|tproxy]
 #      config_line: line read from configuration file
 # post: real is parsed
 # return: Reference to array include real server hash reference
@@ -1211,7 +1218,7 @@ sub parse_real {
     my %real = %REAL;
     if (defined $forward) {
         $forward = lc $forward;
-        if ($forward !~ /^masq$/) {
+        if ($forward !~ /^(?:masq|tproxy)$/) {
             config_error($line, 'ERR0107', $config_line);
         }
         $real{forward} = $forward;
@@ -1326,6 +1333,9 @@ sub ld_setup {
                 if ( defined $v->{sorryserver} && defined $v->{sorryserver}{ip} && defined $v->{sorryserver}{port} ) {
                     $v->{option}{flags} .= ' -b ' . $v->{sorryserver}{ip} . ':' . $v->{sorryserver}{port};
                 }
+                if ( defined $v->{sorryserver}{forward} ) {
+                    $v->{option}{flags} .= ' ' . get_forward_flag( $v->{sorryserver}{forward} );
+                }
                 if ( defined $v->{qosup} ) {
                     $v->{option}{flags} .= ' -Q ' . $v->{qosup};
                 }
@@ -1410,7 +1420,8 @@ sub ld_setup {
             }
             if ( defined $v->{fallback} ) {
                 for my $proto ( keys %{ $v->{fallback} } ) {
-                    $v->{fallback}{$proto}{option}{flags} = '-r ' . get_ip_port( $v->{fallback}{$proto} );
+                    $v->{fallback}{$proto}{option}{flags} = '-r ' . get_ip_port( $v->{fallback}{$proto} )
+                        . ' ' . $v->{fallback}{$proto}{option}{forward};
                 }
             }
             if (defined $v->{checktype} && $v->{checktype} =~ /^\d+$/) {
@@ -1444,7 +1455,7 @@ sub ld_setup {
                         $r->{server}{port} = $v->{server}{port};
                     }
 
-                    $r->{option}{flags} = '-r ' . get_ip_port($r);
+                    $r->{option}{flags} = '-r ' . get_ip_port($r) . ' ' . $r->{option}{forward};
         
                     # build request URL
                     if ( defined $v->{service} && defined $r->{server} ) {
@@ -1506,7 +1517,8 @@ sub ld_setup {
     }
 
     if (defined $CONFIG{fallback}) {
-        $CONFIG{fallback}{tcp}{option}{flags} = '-r ' . get_ip_port( $CONFIG{fallback}{tcp} );
+        $CONFIG{fallback}{tcp}{option}{flags} = '-r ' . get_ip_port( $CONFIG{fallback}{tcp} )
+            . ' ' . $CONFIG{fallback}{tcp}{option}{forward};
     }
 }
 
@@ -1538,7 +1550,7 @@ sub ld_setup {
 #
 #   rip_address: IP address of real server
 #   rport: Port of real server
-#   forwarding_mechanism: Forwarding mechanism for real server. This would be only masq.
+#   forwarding_mechanism: Forwarding mechanism for real server.(masq or tproxy)
 #   weight: Weight of real server
 #
 # pre: none
@@ -3467,10 +3479,10 @@ sub _restore_service {
     }
 
     if (!defined $tag || $tag eq 'real') {
-        ld_log( _message( 'INF0301', get_ip_port($r) ) );
+        ld_log( _message( 'INF0301', get_ip_port($r), $r->{forward} ) );
     }
     elsif ($tag eq 'fallback') {
-        ld_log( _message( 'INF0302', get_ip_port($r) ) );
+        ld_log( _message( 'INF0302', get_ip_port($r), $r->{forward} ) );
     } 
 
     if ( defined $v->{realrecovercallback} && $r->{healthchecked} ){
@@ -4048,8 +4060,7 @@ sub get_virtual_id_str {
 
 # get_forward_flag
 # Get the l7vsadm flag corresponging to a forwarding mechanism
-# pre: forward: Name of forwarding mechanism.
-#               Should be masq
+# pre: forward: Name of forwarding mechanism. (masq or tproxy)
 # post: none
 # return: l7vsadm flag corresponding to the forwading mechanism
 #         " " if $forward is unknown
@@ -4057,7 +4068,10 @@ sub get_forward_flag {
     my $forward = shift;
 
     if (defined $forward && $forward =~ /^masq$/i) {
-        return '-m';
+        return '-M';
+    }
+    elsif (defined $forward && $forward =~ /^tproxy$/i) {
+        return '-T';
     }
     return q{};
 }
@@ -4280,7 +4294,7 @@ sub _message_only {
         ERR0105 => "Invalid value (set `lc', `rr' or `wrr') `%s'.",
         ERR0106 => "Invalid value (set `http', `https', `ftp', `smtp', `pop', `imap', "
                  . "`ldap', `nntp', `dns', `mysql', `pgsql', `sip', or `none') `%s'.",
-        ERR0107 => "Invalid value (forwarding mode must be `masq') `%s'.",
+        ERR0107 => "Invalid value (forwarding mode must be `masq' or `tproxy') `%s'.",
         ERR0108 => "Invalid port number `%s'.",
         ERR0109 => "Invalid protocol (protocol must be `tcp') `%s'.",
         ERR0110 => "Invalid HTTP method (set `GET' or `HEAD') `%s'.",
@@ -4458,8 +4472,8 @@ sub _message_only {
         INF0205 => "Edit server on l7vsd: `%s' ( x `%s %s') (weight set to %d)",
         INF0206 => "Delete server from l7vsd: `%s' ( x `%s %s')",
         # server change
-        INF0301 => "Added real server. (`%s')",
-        INF0302 => "Added fallback server. (`%s')",
+        INF0301 => "Added real server. (`%s %s')",
+        INF0302 => "Added fallback server. (`%s %s')",
         INF0303 => "Changed real server to quiescent state. (`%s')",
         INF0304 => "Changed fallback server to quiescent state. (`%s')",
         INF0305 => "Deleted real server. (`%s')",
@@ -4669,7 +4683,7 @@ This directive might also be used to restart B<l7directord> automatically
 after the configuration file changed on disk. However, if B<autoreload>
 is set to B<yes>, the configuration is reloaded anyway.
 
-=item B<fallback = >I<ip_address|hostname[:portnumber|servicename]> [B<masq>]
+=item B<fallback = >I<ip_address|hostname[:portnumber|servicename]> [B<masq>|B<tproxy>]
 
 the server onto which a web service is redirected if all real
 servers are down. Typically this would be 127.0.0.1 with
@@ -4677,7 +4691,8 @@ an emergency page.
 
 This directive may also appear within a virtual server, in which
 case it will override the global fallback server, if set.
-Only a value of B<masq> can be specified here. The default is I<masq>.
+Also you can set either B<masq> or B<tproxy> as fallback forwarding
+mechanism. The default is B<masq>.
 
 =item B<logfile = ">I</path/to/logfile>B<">|syslog_facility
 
@@ -4720,14 +4735,14 @@ with a minimum of 4 spaces or one tab.
 
 =over
 
-=item B<real => I<ip_address|hostname[-E<gt>ip_address|hostname][:portnumber|servicename>] [B<masq>] [I<n>] [B<">I<request>B<", ">I<receive>B<">]
+=item B<real => I<ip_address|hostname[-E<gt>ip_address|hostname][:portnumber|servicename>] [B<masq>|B<tproxy>] [I<n>] [B<">I<request>B<", ">I<receive>B<">]
 
 Defines a real service by IP-address (or hostname) and port (or
 servicename). If the port is omitted then a 0 will be used.
 Optionally a range of IP addresses (or two hostnames) may be
 given, in which case each IP address in the range will be treated as a real
 server using the given port. The second argument defines the forwarding
-method, it must be B<masq> only.  The third argument defines the weight of
+mechanism, it must be B<masq> or B<tproxy>.  The third argument defines the weight of
 each real service. This argument is optional. Default is 1. The last two
 arguments are optional too. They define a request-receive pair to be used to
 check if a server is alive. They override the request-receive pair in the

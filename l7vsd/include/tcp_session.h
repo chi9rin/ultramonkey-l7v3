@@ -40,6 +40,7 @@
 #include "tcp_realserver_connect_socket_list.h"
 #include "tcp_data.h"
 #include "lockfree_queue.h"
+#include "virtualservice_element.h"
 
 #define TCP_SESSION_THREAD_STATE_BIT    8
 #define PARAM_UP_BUFFER_SIZE            "upstream_buffer_size"

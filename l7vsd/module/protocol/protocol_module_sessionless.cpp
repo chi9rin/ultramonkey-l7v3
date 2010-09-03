@@ -1111,7 +1111,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
 
                 //end flag on
                 if (session_data->end_flag == END_FLAG_ON) {
-                        status =  CLIENT_RECV;
+                        status = CLIENT_RECV;
                 }
                 //end flag off
                 else {

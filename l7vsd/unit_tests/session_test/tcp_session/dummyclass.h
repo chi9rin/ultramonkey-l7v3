@@ -26,6 +26,7 @@ namespace l7vs{
 
 #include "protocol_module_base.h"
 #include "tcp_socket_option.h"
+#include "virtualservice_element.h"
 
 typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket>  ssl_socket;
 
@@ -553,6 +554,7 @@ namespace l7vs{
             
     };
 
+/*
     class     virtualservice_element{
         public:
             virtualservice_element(){};
@@ -560,6 +562,7 @@ namespace l7vs{
             boost::asio::ip::tcp::endpoint
                             sorry_endpoint;
     };
+*/
     
     // Dummy virtualservice_tcp Class
     class    virtualservice_tcp{

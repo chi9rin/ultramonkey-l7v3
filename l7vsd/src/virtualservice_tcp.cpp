@@ -1180,8 +1180,6 @@ void l7vs::virtualservice_tcp::edit_virtualservice(const l7vs::virtualservice_el
  */
 void l7vs::virtualservice_tcp::add_realserver(const l7vs::virtualservice_element &in, l7vs::error_code &err)
 {
-std::stringstream foo; foo << in;
-Logger::putLogFatal(LOG_CAT_L7VSD_VIRTUALSERVICE, 68, foo.str(), __FILE__, __LINE__);
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                 boost::format formatter("in_function: void virtualservice_tcp::add_realserver( "
                                         "const l7vs::virtualservice_element& in,"
