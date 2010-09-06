@@ -130,6 +130,12 @@ public:
     bool    execute_wp( int argc, char* argv[] )
     { return execute( argc, argv ); }
 
+    bool    parse_opt_vs_fwdmode_func_wp( int& pos, int argc, char* argv[] )
+    { return parse_opt_vs_fwdmode_func( pos, argc, argv ); }
+
+    bool    parse_opt_rs_fwdmode_func_wp( int& pos, int argc, char* argv[] )
+    { return parse_opt_rs_fwdmode_func( pos, argc, argv ); }
+
     static void file_lock_class_test();
 
 };
@@ -3665,6 +3671,98 @@ void    parse_parameter_func_test(){
 
 }
 
+void    parse_opt_vs_fwdmode_func_test(){
+    BOOST_MESSAGE( "----- parse_opt_vs_fwdmode_func_test start -----" );
+
+    // parse_opt_vs_fwdmode_func normal case 1 (masq)
+    {
+        l7vsadm_test  adm;
+        int      pos  = 2;
+        int      argc = 3;
+        char*    argv1[] = { "l7vsadm_test", "-A", "-M" };
+        char*    argv2[] = { "l7vsadm_test", "-A", "--masq" };
+        bool     ret;
+
+        ret = adm.parse_opt_vs_fwdmode_func_wp( pos, argc, argv1 );
+        BOOST_CHECK_EQUAL( ret, true );
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_fwdmode, 1 );
+
+        ret = adm.parse_opt_vs_fwdmode_func_wp( pos, argc, argv2 );
+        BOOST_CHECK_EQUAL( ret, true );
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_fwdmode, 1 );
+    }
+
+    // parse_opt_vs_fwdmode_func normal case 2 (tproxy)
+    {
+        l7vsadm_test  adm;
+        int      pos  = 2;
+        int      argc = 3;
+        char*    argv1[] = { "l7vsadm_test", "-A", "-T" };
+        char*    argv2[] = { "l7vsadm_test", "-A", "--tproxy" };
+        bool     ret;
+
+        adm.get_request().vs_element.realserver_vector.push_back( l7vs::realserver_element() );
+
+        ret = adm.parse_opt_vs_fwdmode_func_wp( pos, argc, argv1 );
+        BOOST_CHECK_EQUAL( ret, true );
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_fwdmode, 2 );
+
+        ret = adm.parse_opt_vs_fwdmode_func_wp( pos, argc, argv2 );
+        BOOST_CHECK_EQUAL( ret, true );
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.sorry_fwdmode, 2 );
+    }
+
+    BOOST_MESSAGE( "----- parse_opt_vs_fwdmode_func_test end -----" );
+
+}
+
+void    parse_opt_rs_fwdmode_func_test(){
+    BOOST_MESSAGE( "----- parse_opt_rs_fwdmode_func_test start -----" );
+
+    // parse_opt_rs_fwdmode_func normal case 1 (masq)
+    {
+        l7vsadm_test  adm;
+        int      pos  = 2;
+        int      argc = 3;
+        char*    argv1[] = { "l7vsadm_test", "-a", "-M" };
+        char*    argv2[] = { "l7vsadm_test", "-a", "--masq" };
+        bool     ret;
+
+        adm.get_request().vs_element.realserver_vector.push_back( l7vs::realserver_element() );
+
+        ret = adm.parse_opt_rs_fwdmode_func_wp( pos, argc, argv1 );
+        BOOST_CHECK_EQUAL( ret, true );
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().fwdmode, 1 );
+
+        ret = adm.parse_opt_rs_fwdmode_func_wp( pos, argc, argv2 );
+        BOOST_CHECK_EQUAL( ret, true );
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().fwdmode, 1 );
+    }
+
+    // parse_opt_rs_fwdmode_func normal case 2 (tproxy)
+    {
+        l7vsadm_test  adm;
+        int      pos  = 2;
+        int      argc = 3;
+        char*    argv1[] = { "l7vsadm_test", "-a", "-T" };
+        char*    argv2[] = { "l7vsadm_test", "-a", "--tproxy" };
+        bool     ret;
+
+        adm.get_request().vs_element.realserver_vector.push_back( l7vs::realserver_element() );
+
+        ret = adm.parse_opt_rs_fwdmode_func_wp( pos, argc, argv1 );
+        BOOST_CHECK_EQUAL( ret, true );
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().fwdmode, 2 );
+
+        ret = adm.parse_opt_rs_fwdmode_func_wp( pos, argc, argv2 );
+        BOOST_CHECK_EQUAL( ret, true );
+        BOOST_CHECK_EQUAL( adm.get_request().vs_element.realserver_vector.front().fwdmode, 2 );
+    }
+
+    BOOST_MESSAGE( "----- parse_opt_rs_fwdmode_func_test end -----" );
+
+}
+
 void    execute_test(){
     BOOST_MESSAGE( "----- execute_test start -----" );
 
@@ -4477,6 +4575,9 @@ test_suite*    init_unit_test_suite( int argc, char* argv[] ){
 
     ts->add( BOOST_TEST_CASE( &parse_opt_parameter_reload_func_test ) );
     ts->add( BOOST_TEST_CASE( &parse_parameter_func_test ) );
+
+    ts->add( BOOST_TEST_CASE( &parse_opt_vs_fwdmode_func_test ) );
+    ts->add( BOOST_TEST_CASE( &parse_opt_rs_fwdmode_func_test ) );
 
     ts->add( BOOST_TEST_CASE( &execute_test ) );
 
