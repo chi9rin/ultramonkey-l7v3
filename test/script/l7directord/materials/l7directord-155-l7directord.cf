@@ -1,0 +1,2 @@
+execute=/etc/ha.d/conf/a.cf
+execute=/etc/ha.d/conf/b.cf

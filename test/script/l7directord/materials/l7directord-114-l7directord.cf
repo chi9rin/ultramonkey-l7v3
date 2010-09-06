@@ -1,0 +1,10 @@
+virtual=127.0.0.1:40001
+virtual=127.0.0.1:40002
+    real=127.0.0.1:50001
+    real=127.0.0.1:50002
+virtual=127.0.0.1:40003
+    real=[::1]:50003
+    real=[::1]:50004
+execute=/etc/ha.d/conf/1.cf
+execute=/etc/ha.d/conf/2.cf
+execute=/etc/ha.d/conf/3.cf
