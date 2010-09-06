@@ -84,6 +84,7 @@ void    virtualservice_tcp_sorry_test1(){
     elem1.sorry_endpoint            = 
             tcp_ep_type( boost::asio::ip::address::from_string( "AFAF:0E08::8FDE" ), (8080) );
     elem1.sorry_flag                = false;
+    elem1.sorry_fwdmode             = l7vs::virtualservice_element::FWD_MASQ;
     elem1.qos_upstream                = 65535ULL;
     elem1.qos_downstream            = 32767ULL;
     elem1.ssl_file_name            = "";
@@ -167,6 +168,7 @@ void    virtualservice_tcp_sorry_test2(){
     elem1.sorry_endpoint            = 
             tcp_ep_type( boost::asio::ip::address::from_string( "AFAF:0E08::8FDE" ), (8080) );
     elem1.sorry_flag                = false;
+    elem1.sorry_fwdmode             = l7vs::virtualservice_element::FWD_MASQ;
     elem1.qos_upstream                = 65535ULL;
     elem1.qos_downstream            = 32767ULL;
     elem1.ssl_file_name            = "";
@@ -250,6 +252,7 @@ void    virtualservice_tcp_sorry_test3(){
     elem1.sorry_endpoint            = 
             tcp_ep_type( boost::asio::ip::address::from_string( "AFAF:0E08::8FDE" ), (8080) );
     elem1.sorry_flag                = false;
+    elem1.sorry_fwdmode             = l7vs::virtualservice_element::FWD_MASQ;
     elem1.qos_upstream                = 65535ULL;
     elem1.qos_downstream            = 32767ULL;
     elem1.ssl_file_name            = "";
@@ -341,6 +344,7 @@ void    virtualservice_tcp_sorry_test4(){
     elem1.sorry_endpoint            = 
             tcp_ep_type( boost::asio::ip::address::from_string( "AFAF:0E08::8FDE" ), (8080) );
     elem1.sorry_flag                = false;
+    elem1.sorry_fwdmode             = l7vs::virtualservice_element::FWD_MASQ;
     elem1.qos_upstream                = 65535ULL;
     elem1.qos_downstream            = 32767ULL;
     elem1.ssl_file_name            = "";

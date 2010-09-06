@@ -394,6 +394,7 @@ void    virtualservice_tcp_test1(){
     elem1.sorry_maxconnection        = 1234LL;
     elem1.sorry_endpoint            = tcp_ep_type();
     elem1.sorry_flag                = false;
+    elem1.sorry_fwdmode             = l7vs::virtualservice_element::FWD_MASQ;
     elem1.qos_upstream                = 65535ULL;
     elem1.qos_downstream            = 32767ULL;
 
@@ -421,6 +422,7 @@ void    virtualservice_tcp_test1(){
     elem2.sorry_maxconnection        = 1234LL;
     elem2.sorry_endpoint            = tcp_ep_type();
     elem2.sorry_flag                = false;
+    elem2.sorry_fwdmode             = l7vs::virtualservice_element::FWD_MASQ;
     elem2.qos_upstream                = 65535ULL;
     elem2.qos_downstream            = 32767ULL;
 
@@ -524,6 +526,7 @@ void    virtualservice_tcp_test1(){
     elem3.sorry_maxconnection        = 1234LL;
     elem3.sorry_endpoint            = tcp_ep_type();
     elem3.sorry_flag                = false;
+    elem3.sorry_fwdmode             = l7vs::virtualservice_element::FWD_MASQ;
     elem3.qos_upstream                = 65535ULL;
     elem3.qos_downstream            = 32767ULL;
     for( size_t i = 0; i < 2; ++i ){
@@ -875,6 +878,7 @@ void    virtualservice_tcp_test2(){
     elem1.sorry_maxconnection        = 1234LL;
     elem1.sorry_endpoint            = tcp_ep_type();
     elem1.sorry_flag                = false;
+    elem1.sorry_fwdmode             = l7vs::virtualservice_element::FWD_MASQ;
     elem1.qos_upstream                = 65535ULL;
     elem1.qos_downstream            = 32767ULL;
 
@@ -949,6 +953,7 @@ void    virtualservice_tcp_test3(){
     elem1.sorry_maxconnection        = 1234LL;
     elem1.sorry_endpoint            = tcp_ep_type();
     elem1.sorry_flag                = false;
+    elem1.sorry_fwdmode             = l7vs::virtualservice_element::FWD_MASQ;
     elem1.qos_upstream                = 65535ULL;
     elem1.qos_downstream            = 32767ULL;
 
@@ -973,6 +978,7 @@ void    virtualservice_tcp_test3(){
     elem2.sorry_maxconnection        = 1234LL;
     elem2.sorry_endpoint            = tcp_ep_type();
     elem2.sorry_flag                = false;
+    elem2.sorry_fwdmode             = l7vs::virtualservice_element::FWD_MASQ;
     elem2.qos_upstream                = 65535ULL;
     elem2.qos_downstream            = 32767ULL;
     for( size_t i = 0; i < 2; ++i ){
@@ -1036,6 +1042,7 @@ void    virtualservice_tcp_test3(){
     elem3.sorry_maxconnection        = 1234LL;
     elem3.sorry_endpoint            = tcp_ep_type();
     elem3.sorry_flag                = false;
+    elem3.sorry_fwdmode             = l7vs::virtualservice_element::FWD_MASQ;
     elem3.qos_upstream                = 65535ULL;
     elem3.qos_downstream            = 32767ULL;
     for( size_t i = 0; i < 2; ++i ){
@@ -1110,6 +1117,7 @@ void    virtualservice_tcp_test3(){
     elem4.sorry_maxconnection        = 1234LL;
     elem4.sorry_endpoint            = tcp_ep_type();
     elem4.sorry_flag                = false;
+    elem4.sorry_fwdmode             = l7vs::virtualservice_element::FWD_MASQ;
     elem4.qos_upstream                = 65535ULL;
     elem4.qos_downstream            = 32767ULL;
     for( size_t i = 0; i < 2; ++i ){

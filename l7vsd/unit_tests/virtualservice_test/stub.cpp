@@ -117,7 +117,7 @@ l7vs::Logger::~Logger(){}
 void    l7vs::Logger::loadConf(){}
 
 l7vs::LOG_LEVEL_TAG l7vs::Logger::getLogLevel( l7vs::LOG_CATEGORY_TAG ){
-    l7vs::LOG_LEVEL_TAG        ret_tag = l7vs::LOG_LV_WARN;
+    l7vs::LOG_LEVEL_TAG        ret_tag = l7vs::LOG_LV_INFO;
     return ret_tag;
 }
 
@@ -142,7 +142,7 @@ void    l7vs::Logger::putLogInfo( l7vs::LOG_CATEGORY_TAG, const unsigned int, co
 }
 
 void    l7vs::Logger::putLogDebug( l7vs::LOG_CATEGORY_TAG, const unsigned int, const std::string& msg, const char*, int ){
-//    std::cout << "DEBUG : " << msg << std::endl;
+    std::cout << "DEBUG : " << msg << std::endl;
 }
 
 l7vs::l7vsd::l7vsd(){}

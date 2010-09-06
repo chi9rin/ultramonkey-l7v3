@@ -49,20 +49,21 @@ void    vs_tcp_test1(){
     l7vs::replication            rep;
     l7vs::virtualservice_element    elem1;
     //set element value
-    elem1.udpmode                    = false;
-    elem1.tcp_accept_endpoint        = tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) );
-    elem1.udp_recv_endpoint        = udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
+    elem1.udpmode              = false;
+    elem1.tcp_accept_endpoint  = tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) );
+    elem1.udp_recv_endpoint    = udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
     elem1.realserver_vector.clear();
-    elem1.protocol_module_name    = "PMtest1";
-    elem1.schedule_module_name    = "SMtest1";
+    elem1.protocol_module_name = "PMtest1";
+    elem1.schedule_module_name = "SMtest1";
     elem1.protocol_args.clear();
     elem1.protocol_args.push_back( "testarg" );
     elem1.protocol_args.push_back( "testarg2" );
-    elem1.sorry_maxconnection        = LLONG_MAX;
-    elem1.sorry_endpoint            = tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (8080) );
-    elem1.sorry_flag                = INT_MAX;
-    elem1.qos_upstream            = 65535ULL;
-    elem1.qos_downstream            = 32767ULL;
+    elem1.sorry_maxconnection  = LLONG_MAX;
+    elem1.sorry_endpoint       = tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (8080) );
+    elem1.sorry_flag           = INT_MAX;
+    elem1.sorry_fwdmode        = l7vs::virtualservice_element::FWD_MASQ;
+    elem1.qos_upstream         = 65535ULL;
+    elem1.qos_downstream       = 32767ULL;
 
     l7vs::vs_tcp*    vs = new l7vs::vs_tcp( vsd, rep, elem1 );
 
@@ -80,6 +81,8 @@ void    vs_tcp_test1(){
     BOOST_MESSAGE( "-------2" );
     BOOST_CHECK( vs->get_element().sorry_flag == 0 );
     BOOST_MESSAGE( vs->get_element().sorry_flag );
+    BOOST_CHECK( vs->get_element().sorry_fwdmode == l7vs::virtualservice_element::FWD_MASQ );
+    BOOST_MESSAGE( vs->get_element().sorry_fwdmode );
 
     vs->initialize( vs_err );
     BOOST_CHECK( vs_err == false );
@@ -154,20 +157,21 @@ void    vs_tcp_test2(){
     l7vs::replication            rep;
     l7vs::virtualservice_element    elem1;
     //set element value
-    elem1.udpmode                    = false;
-    elem1.tcp_accept_endpoint        = tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) );
-    elem1.udp_recv_endpoint            = udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
+    elem1.udpmode             = false;
+    elem1.tcp_accept_endpoint = tcp_ep_type( boost::asio::ip::address_v4::loopback(), (60000) );
+    elem1.udp_recv_endpoint   = udp_ep_type( boost::asio::ip::address::from_string( "10.144.169.20" ), (50000) );
     elem1.realserver_vector.clear();
-    elem1.protocol_module_name        = "PMtest1";
-    elem1.schedule_module_name        = "SMtest1";
+    elem1.protocol_module_name = "PMtest1";
+    elem1.schedule_module_name = "SMtest1";
     elem1.protocol_args.clear();
     elem1.protocol_args.push_back( "testarg" );
     elem1.protocol_args.push_back( "testarg2" );
-    elem1.sorry_maxconnection        = 1234LL;
-    elem1.sorry_endpoint            = tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (8080) );
-    elem1.sorry_flag                = true;
-    elem1.qos_upstream                = 65535ULL;
-    elem1.qos_downstream            = 32767ULL;
+    elem1.sorry_maxconnection = 1234LL;
+    elem1.sorry_endpoint      = tcp_ep_type( boost::asio::ip::address::from_string( "10.144.169.87" ), (8080) );
+    elem1.sorry_flag          = true;
+    elem1.sorry_fwdmode       = l7vs::virtualservice_element::FWD_MASQ;
+    elem1.qos_upstream        = 65535ULL;
+    elem1.qos_downstream      = 32767ULL;
 
     l7vs::vs_tcp*    vs = new l7vs::vs_tcp( vsd, rep, elem1 );
 
@@ -197,6 +201,7 @@ void    vs_tcp_test2(){
     // unit_test[6]  replicationデータ作成のテスト
     BOOST_MESSAGE( "-------6" );
     vs->get_element().sorry_flag = true;
+    vs->get_element().sorry_fwdmode = l7vs::virtualservice_element::FWD_TPROXY;
     vs->call_handle_replication_interrupt( test_err );
     l7vs::virtualservice_base::replication_header*    rep_head =
         reinterpret_cast<l7vs::virtualservice_base::replication_header*>( debugg_flug_struct::getInstance().get_rep_area() );
@@ -219,6 +224,8 @@ void    vs_tcp_test2(){
     BOOST_CHECK( 0 == strncmp( rep_data->sorry_endpoint, tmp_sorry_ep.str().c_str(), 47 ) );
     //sorry_flag
     BOOST_CHECK( rep_data->sorry_flag == true );
+    //sorry_fwdmode
+    BOOST_CHECK( rep_data->sorry_fwdmode == 2 );
     //qos_up
     BOOST_CHECK( rep_data->qos_up == elem1.qos_upstream );
     //qos_down

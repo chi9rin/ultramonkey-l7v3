@@ -18,8 +18,6 @@ using namespace boost::unit_test;
 typedef    boost::asio::ip::tcp::endpoint    tcp_ep_type;
 typedef    boost::asio::ip::udp::endpoint    udp_ep_type;
 
-int    counter;
-
 //Acceptテスト用Client
 void    client(){
     boost::system::error_code    b_err;
@@ -358,7 +356,6 @@ public:
 };
 
 void    virtualservice_tcp_test2_1(){
-    counter = 1;
     //replicationエリアを作成しておく
     debugg_flug_struct::getInstance().create_rep_area();
 
@@ -392,6 +389,7 @@ void    virtualservice_tcp_test2_1(){
     elem1.sorry_maxconnection        = 1234LL;
     elem1.sorry_endpoint            = tcp_ep_type();
     elem1.sorry_flag                = false;
+    elem1.sorry_fwdmode             = l7vs::virtualservice_element::FWD_MASQ;
     elem1.qos_upstream                = 65535ULL;
     elem1.qos_downstream            = 32767ULL;
 
@@ -401,7 +399,7 @@ void    virtualservice_tcp_test2_1(){
 
     //rs追加
     // unit_test[27]  add_rsとrs_list_lock
-    std::cout << counter++ << std::endl;
+    std::cout << "1" << std::endl;
     //RS追加用のelement準備
     l7vs::virtualservice_element    elem2;
     //set element value
@@ -416,6 +414,7 @@ void    virtualservice_tcp_test2_1(){
     elem2.sorry_maxconnection        = 1234LL;
     elem2.sorry_endpoint            = tcp_ep_type();
     elem2.sorry_flag                = false;
+    elem2.sorry_fwdmode             = l7vs::virtualservice_element::FWD_MASQ;
     elem2.qos_upstream                = 65535ULL;
     elem2.qos_downstream            = 32767ULL;
     for( size_t i = 0; i < 2; ++i ){
@@ -445,7 +444,7 @@ void    virtualservice_tcp_test2_1(){
     vst.get_vs()->del_realserver( elem2, vs_err );
 
     // unit_test[28]  add_rsとrs_list_unlock(ref_countが1でスタートした場合)
-    std::cout << counter++ << std::endl;
+    std::cout << "2" << std::endl;
     {
         //あらかじめlockしておいてref_countを1にしておく
         vst.get_vs()->rs_list_lock();
@@ -464,7 +463,7 @@ void    virtualservice_tcp_test2_1(){
     BOOST_CHECK( vst.get_vs()->get_ref_count() == 0 );
 
     // unit_test[29]  add_rsとconnection_active
-    std::cout << counter++ << std::endl;
+    std::cout << "3" << std::endl;
     //RS追加用のelement準備
     l7vs::virtualservice_element    elem3;
     //set element value
@@ -479,6 +478,7 @@ void    virtualservice_tcp_test2_1(){
     elem3.sorry_maxconnection        = 1234LL;
     elem3.sorry_endpoint            = tcp_ep_type();
     elem3.sorry_flag                = false;
+    elem3.sorry_fwdmode             = l7vs::virtualservice_element::FWD_MASQ;
     elem3.qos_upstream                = 65535ULL;
     elem3.qos_downstream            = 32767ULL;
     for( size_t i = 0; i < 2; ++i ){
@@ -513,7 +513,7 @@ void    virtualservice_tcp_test2_1(){
     vst.get_vs()->del_realserver( elem3, vs_err );
 
     // unit_test[30]  add_rsとconnection_inactive
-    std::cout << counter++ << std::endl;
+    std::cout << "4" << std::endl;
     {
         boost::thread    thread1( &vs_access::add_realserver, &vst, elem3 );
         boost::thread    thread2( &vs_access::connection_inactive, &vst, elem2.realserver_vector[0].tcp_endpoint );
@@ -538,7 +538,7 @@ void    virtualservice_tcp_test2_1(){
 
     //rs変更
     // unit_test[31]  edit_rsとrs_list_lock
-    std::cout << counter++ << std::endl;
+    std::cout << "5" << std::endl;
     //RS編集用のelement準備
     l7vs::virtualservice_element    elem4;
     //set element value
@@ -553,6 +553,7 @@ void    virtualservice_tcp_test2_1(){
     elem4.sorry_maxconnection        = 1234LL;
     elem4.sorry_endpoint            = tcp_ep_type();
     elem4.sorry_flag                = false;
+    elem4.sorry_fwdmode             = l7vs::virtualservice_element::FWD_MASQ;
     elem4.qos_upstream                = 65535ULL;
     elem4.qos_downstream            = 32767ULL;
     for( size_t i = 0; i < 2; ++i ){
@@ -579,7 +580,7 @@ void    virtualservice_tcp_test2_1(){
     BOOST_CHECK( vst.get_vs()->get_rs_list().size() == 4 );
 
     // unit_test[32]  edit_rsとrs_list_unlock
-    std::cout << counter++ << std::endl;
+    std::cout << "6" << std::endl;
     {
         //あらかじめlockしておいてref_countを1にしておく
         vst.get_vs()->rs_list_lock();
@@ -597,7 +598,7 @@ void    virtualservice_tcp_test2_1(){
     BOOST_CHECK( vst.get_vs()->get_ref_count() == 0 );
 
     // unit_test[33]  edit_rsとconnection_active
-    std::cout << counter++ << std::endl;
+    std::cout << "7" << std::endl;
     elem4.realserver_vector.clear();
     for( size_t i = 0; i < 2; ++i ){
         l7vs::realserver_element    rs_elem;
@@ -627,7 +628,7 @@ void    virtualservice_tcp_test2_1(){
         }
     }
     // unit_test[34]  edit_rsとconnection_inactive
-    std::cout << counter++ << std::endl;
+    std::cout << "8" << std::endl;
     {
         boost::thread    thread1( &vs_access::edit_realserver, &vst, elem4 );
         boost::thread    thread2( &vs_access::connection_inactive, &vst, elem2.realserver_vector[0].tcp_endpoint );
@@ -652,7 +653,7 @@ void    virtualservice_tcp_test2_1(){
 
     //rs削除
     // unit_test[35]  del_rsとrs_list_lock
-    std::cout << counter++ << std::endl;
+    std::cout << "9" << std::endl;
     {
         boost::thread    thread1( &vs_access::del_realserver, &vst, elem4 );
         boost::thread    thread2( &vs_access::rs_list_lock, &vst );
@@ -674,7 +675,7 @@ void    virtualservice_tcp_test2_1(){
     vst.get_vs()->add_realserver( elem4, vs_err );
 
     // unit_test[36]  del_rsとrs_list_unlock
-    std::cout << counter++ << std::endl;
+    std::cout << "10" << std::endl;
     {
         //あらかじめlockしておいてref_countを1にしておく
         vst.get_vs()->rs_list_lock();
