@@ -64,7 +64,8 @@ public:
                 realserver &rselem2 = const_cast<realserver &>(rs2);
                 return    rselem1.tcp_endpoint == rselem2.tcp_endpoint &&
                           rselem1.udp_endpoint == rselem2.udp_endpoint &&
-                          rselem1.weight == rselem2.weight;
+                          rselem1.weight == rselem2.weight &&
+                          rselem1.fwdmode == rselem2.fwdmode;
         }
 
         friend    bool    operator!=(const realserver &rs1, const realserver &rs2) {
@@ -72,7 +73,8 @@ public:
                 realserver &rselem2 = const_cast<realserver &>(rs2);
                 return  rselem1.tcp_endpoint != rselem2.tcp_endpoint ||
                         rselem1.udp_endpoint != rselem2.udp_endpoint ||
-                        rselem1.weight != rselem2.weight;
+                        rselem1.weight != rselem2.weight ||
+                        rselem1.fwdmode != rselem2.fwdmode;
         }
 
         friend    bool    operator<(const realserver &rs1, const realserver &rs2) {
@@ -80,7 +82,9 @@ public:
                 realserver &rselem2 = const_cast<realserver &>(rs2);
                 if (rselem1.tcp_endpoint < rselem2.tcp_endpoint) return true;
                 if (rselem1.tcp_endpoint != rselem2.tcp_endpoint) return false;
-                return rselem1.weight < rselem2.weight;
+                if (rselem1.weight < rselem2.weight) return true;
+                if (rselem1.weight != rselem2.weight) return false;
+                return rselem1.fwdmode < rselem2.fwdmode;
         }
 
         void    increment_active() {

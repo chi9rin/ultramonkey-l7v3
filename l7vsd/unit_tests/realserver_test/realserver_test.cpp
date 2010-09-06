@@ -2,6 +2,7 @@
 #include <boost/test/included/unit_test.hpp>
 #include <boost/thread/condition.hpp>
 #include "realserver.h"
+#include "realserver_element.h"
 #include "logger.h"
 #include "parameter.h"
 
@@ -143,6 +144,7 @@ void    realserver_test(){
     int                    ninact = 0;
     unsigned long long    send_byte = 0ULL;
     int                    weight = -1;
+    l7vs::realserver_element::REALSERVER_FWDMODE_TAG fwdmode = l7vs::realserver_element::FWD_NONE;
 
     // unit_test[1]  コンストラクタのテスト（全てが初期化済み）
     l7vs::realserver    server1;
@@ -151,12 +153,14 @@ void    realserver_test(){
     BOOST_CHECK_EQUAL( ninact, server1.get_inact() );
     BOOST_CHECK_EQUAL( send_byte, server1.send_byte );
     BOOST_CHECK_EQUAL( weight, server1.weight );
+    BOOST_CHECK_EQUAL( fwdmode, server1.fwdmode );
 
     // unit_test[2]  コピーコンストラクタのテスト（全てがコピー元と同じ）
     server1.tcp_endpoint = boost::asio::ip::tcp::endpoint ( boost::asio::ip::address::from_string( "11.11.11.11" ), 11 ) ;
     server1.udp_endpoint = boost::asio::ip::udp::endpoint ( boost::asio::ip::address::from_string( "22.22.22.22" ), 22 ) ;
     server1.send_byte = 10;
     server1.weight = 0;
+    server1.fwdmode = l7vs::realserver_element::FWD_TPROXY;
     server1.increment_active();
     server1.increment_inact();
 
@@ -166,6 +170,7 @@ void    realserver_test(){
     BOOST_CHECK_EQUAL( server2.get_inact(), server1.get_inact() );
     BOOST_CHECK_EQUAL( server2.send_byte, server1.send_byte );
     BOOST_CHECK_EQUAL( server2.weight, server1.weight );
+    BOOST_CHECK_EQUAL( server2.fwdmode, server1.fwdmode );
     BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
     BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
@@ -179,6 +184,7 @@ void    realserver_test(){
     BOOST_CHECK_EQUAL( server2.get_inact(), server1.get_inact() );
     BOOST_CHECK_EQUAL( server2.send_byte, server1.send_byte );
     BOOST_CHECK_EQUAL( server2.weight, server1.weight );
+    BOOST_CHECK_EQUAL( server2.fwdmode, server1.fwdmode );
     BOOST_CHECK( server2.tcp_endpoint != server1.tcp_endpoint );
     BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
@@ -190,6 +196,7 @@ void    realserver_test(){
     BOOST_CHECK_EQUAL( server2.get_inact(), server1.get_inact() );
     BOOST_CHECK_EQUAL( server2.send_byte, server1.send_byte );
     BOOST_CHECK_EQUAL( server2.weight, server1.weight );
+    BOOST_CHECK_EQUAL( server2.fwdmode, server1.fwdmode );
     BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
     BOOST_CHECK( server2.udp_endpoint != server1.udp_endpoint );
 
@@ -200,7 +207,20 @@ void    realserver_test(){
     BOOST_CHECK_EQUAL( server2.get_active(), server1.get_active() );
     BOOST_CHECK_EQUAL( server2.get_inact(), server1.get_inact() );
     BOOST_CHECK_EQUAL( server2.send_byte, server1.send_byte );
+    BOOST_CHECK_EQUAL( server2.fwdmode, server1.fwdmode );
     BOOST_CHECK( server2.weight != server1.weight );
+    BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
+    BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
+
+    // unit_test[5+]  比較オペレータのテスト３+（fwdmodeが異なるとエラー）
+    server1 = server2;
+    server1.fwdmode = l7vs::realserver_element::FWD_MASQ;
+    BOOST_CHECK_EQUAL( ( server1 == server2 ), false );
+    BOOST_CHECK_EQUAL( server2.get_active(), server1.get_active() );
+    BOOST_CHECK_EQUAL( server2.get_inact(), server1.get_inact() );
+    BOOST_CHECK_EQUAL( server2.send_byte, server1.send_byte );
+    BOOST_CHECK_EQUAL( server2.weight, server1.weight );
+    BOOST_CHECK( server2.fwdmode != server1.fwdmode );
     BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
     BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
@@ -212,6 +232,7 @@ void    realserver_test(){
     BOOST_CHECK_EQUAL( server2.get_inact(), server1.get_inact() );
     BOOST_CHECK_EQUAL( server2.send_byte, server1.send_byte );
     BOOST_CHECK_EQUAL( server2.weight, server1.weight );
+    BOOST_CHECK_EQUAL( server2.fwdmode, server1.fwdmode );
     BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
     BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
@@ -223,6 +244,7 @@ void    realserver_test(){
     BOOST_CHECK( server2.get_inact() != server1.get_inact() );
     BOOST_CHECK_EQUAL( server2.send_byte, server1.send_byte );
     BOOST_CHECK_EQUAL( server2.weight, server1.weight );
+    BOOST_CHECK_EQUAL( server2.fwdmode, server1.fwdmode );
     BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
     BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
@@ -234,6 +256,7 @@ void    realserver_test(){
     BOOST_CHECK_EQUAL( server2.get_inact(), server1.get_inact() );
     BOOST_CHECK( server2.send_byte != server1.send_byte );
     BOOST_CHECK_EQUAL( server2.weight, server1.weight );
+    BOOST_CHECK_EQUAL( server2.fwdmode, server1.fwdmode );
     BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
     BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
@@ -248,6 +271,7 @@ void    realserver_test(){
     BOOST_CHECK_EQUAL( server2.get_inact(), server1.get_inact() );
     BOOST_CHECK_EQUAL( server2.send_byte, server1.send_byte );
     BOOST_CHECK_EQUAL( server2.weight, server1.weight );
+    BOOST_CHECK_EQUAL( server2.fwdmode, server1.fwdmode );
     BOOST_CHECK( server2.tcp_endpoint != server1.tcp_endpoint );
     BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
@@ -259,6 +283,7 @@ void    realserver_test(){
     BOOST_CHECK_EQUAL( server2.get_inact(), server1.get_inact() );
     BOOST_CHECK_EQUAL( server2.send_byte, server1.send_byte );
     BOOST_CHECK_EQUAL( server2.weight, server1.weight );
+    BOOST_CHECK_EQUAL( server2.fwdmode, server1.fwdmode );
     BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
     BOOST_CHECK( server2.udp_endpoint != server1.udp_endpoint );
 
@@ -269,7 +294,20 @@ void    realserver_test(){
     BOOST_CHECK_EQUAL( server2.get_active(), server1.get_active() );
     BOOST_CHECK_EQUAL( server2.get_inact(), server1.get_inact() );
     BOOST_CHECK_EQUAL( server2.send_byte, server1.send_byte );
+    BOOST_CHECK_EQUAL( server2.fwdmode, server1.fwdmode );
     BOOST_CHECK( server2.weight != server1.weight );
+    BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
+    BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
+
+    // unit_test[11+]  否定オペレータのテスト３+（fwdmodeが異なると検出）
+    server1 = server2;
+    server1.fwdmode = l7vs::realserver_element::FWD_MASQ;
+    BOOST_CHECK_EQUAL( ( server1 != server2 ), true );
+    BOOST_CHECK_EQUAL( server2.get_active(), server1.get_active() );
+    BOOST_CHECK_EQUAL( server2.get_inact(), server1.get_inact() );
+    BOOST_CHECK_EQUAL( server2.send_byte, server1.send_byte );
+    BOOST_CHECK_EQUAL( server2.weight, server1.weight );
+    BOOST_CHECK( server2.fwdmode != server1.fwdmode );
     BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
     BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
@@ -281,6 +319,7 @@ void    realserver_test(){
     BOOST_CHECK_EQUAL( server2.get_inact(), server1.get_inact() );
     BOOST_CHECK_EQUAL( server2.send_byte, server1.send_byte );
     BOOST_CHECK_EQUAL( server2.weight, server1.weight );
+    BOOST_CHECK_EQUAL( server2.fwdmode, server1.fwdmode );
     BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
     BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
@@ -292,6 +331,7 @@ void    realserver_test(){
     BOOST_CHECK( server2.get_inact() != server1.get_inact() );
     BOOST_CHECK_EQUAL( server2.send_byte, server1.send_byte );
     BOOST_CHECK_EQUAL( server2.weight, server1.weight );
+    BOOST_CHECK_EQUAL( server2.fwdmode, server1.fwdmode );
     BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
     BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
@@ -303,6 +343,7 @@ void    realserver_test(){
     BOOST_CHECK_EQUAL( server2.get_inact(), server1.get_inact() );
     BOOST_CHECK( server2.send_byte != server1.send_byte );
     BOOST_CHECK_EQUAL( server2.weight, server1.weight );
+    BOOST_CHECK_EQUAL( server2.fwdmode, server1.fwdmode );
     BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
     BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
@@ -314,6 +355,7 @@ void    realserver_test(){
     BOOST_CHECK_EQUAL( server2.get_inact(), server1.get_inact() );
     BOOST_CHECK_EQUAL( server2.send_byte, server1.send_byte );
     BOOST_CHECK_EQUAL( server2.weight, server1.weight );
+    BOOST_CHECK_EQUAL( server2.fwdmode, server1.fwdmode );
     BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
     BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
@@ -327,6 +369,7 @@ void    realserver_test(){
     BOOST_CHECK_EQUAL( server2.get_inact(), server1.get_inact() );
     BOOST_CHECK_EQUAL( server2.send_byte, server1.send_byte );
     BOOST_CHECK_EQUAL( server2.weight, server1.weight );
+    BOOST_CHECK_EQUAL( server2.fwdmode, server1.fwdmode );
     BOOST_CHECK( server2.tcp_endpoint < server1.tcp_endpoint );
     BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
@@ -339,6 +382,7 @@ void    realserver_test(){
     BOOST_CHECK_EQUAL( server2.get_inact(), server1.get_inact() );
     BOOST_CHECK_EQUAL( server2.send_byte, server1.send_byte );
     BOOST_CHECK_EQUAL( server2.weight, server1.weight );
+    BOOST_CHECK_EQUAL( server2.fwdmode, server1.fwdmode );
     BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
     BOOST_CHECK( server2.udp_endpoint < server1.udp_endpoint );
 
@@ -350,7 +394,22 @@ void    realserver_test(){
     BOOST_CHECK_EQUAL( server2.get_active(), server1.get_active() );
     BOOST_CHECK_EQUAL( server2.get_inact(), server1.get_inact() );
     BOOST_CHECK_EQUAL( server2.send_byte, server1.send_byte );
+    BOOST_CHECK_EQUAL( server2.fwdmode, server1.fwdmode );
     BOOST_CHECK( server2.weight < server1.weight );
+    BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
+    BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
+
+    // unit_test[18+]  大小比較オペレータのテスト３+（TCP,weightが等しくfwdmodeが大きいと検出）
+    server1 = server2;
+    server1.fwdmode = l7vs::realserver_element::FWD_TPROXY;
+    server2.fwdmode = l7vs::realserver_element::FWD_MASQ;
+
+    BOOST_CHECK_EQUAL( ( server2 < server1 ), true );
+    BOOST_CHECK_EQUAL( server2.get_active(), server1.get_active() );
+    BOOST_CHECK_EQUAL( server2.get_inact(), server1.get_inact() );
+    BOOST_CHECK_EQUAL( server2.send_byte, server1.send_byte );
+    BOOST_CHECK_EQUAL( server2.weight, server1.weight );
+    BOOST_CHECK( server2.fwdmode < server1.fwdmode );
     BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
     BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
@@ -362,6 +421,7 @@ void    realserver_test(){
     BOOST_CHECK_EQUAL( server2.get_inact(), server1.get_inact() );
     BOOST_CHECK_EQUAL( server2.send_byte, server1.send_byte );
     BOOST_CHECK_EQUAL( server2.weight, server1.weight );
+    BOOST_CHECK_EQUAL( server2.fwdmode, server1.fwdmode );
     BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
     BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
@@ -373,6 +433,7 @@ void    realserver_test(){
     BOOST_CHECK( server2.get_inact() != server1.get_inact() );
     BOOST_CHECK_EQUAL( server2.send_byte, server1.send_byte );
     BOOST_CHECK_EQUAL( server2.weight, server1.weight );
+    BOOST_CHECK_EQUAL( server2.fwdmode, server1.fwdmode );
     BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
     BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
@@ -384,6 +445,7 @@ void    realserver_test(){
     BOOST_CHECK_EQUAL( server2.get_inact(), server1.get_inact() );
     BOOST_CHECK( server2.send_byte != server1.send_byte );
     BOOST_CHECK_EQUAL( server2.weight, server1.weight );
+    BOOST_CHECK_EQUAL( server2.fwdmode, server1.fwdmode );
     BOOST_CHECK( server2.tcp_endpoint == server1.tcp_endpoint );
     BOOST_CHECK( server2.udp_endpoint == server1.udp_endpoint );
 
