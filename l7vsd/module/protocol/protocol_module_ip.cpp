@@ -1841,7 +1841,9 @@ protocol_module_base::EVENT_TAG protocol_module_ip::handle_realserver_select(
                                 while (rs_list_itr != rs_list_end()) {
 
                                         if (rs_list_itr->tcp_endpoint == rs_endpoint) {
-                                                is_match = 1;
+                                                if (rs_list_itr->weight != 0) {
+                                                        is_match = 1;
+                                                }
                                                 break;
                                         }
 
