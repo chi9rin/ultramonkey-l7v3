@@ -467,9 +467,9 @@ l7vsd_LDADD = \
 	-llog4cxx \
 	-lrt \
 	-lssl \
-	-lboost_thread \
-	-lboost_system \
-	-lboost_serialization
+	-lboost_thread-mt \
+	-lboost_system-mt \
+	-lboost_serialization-mt
 
 l7vsadm_CPPFLAGS = \
 	-O2 -fno-strict-aliasing -g -Wall -Werror \
@@ -494,10 +494,10 @@ l7vsadm_LDADD = \
 	libl7vsadm_parameter.a \
 	-llog4cxx \
 	-lrt \
-	-lboost_thread \
-	-lboost_system \
-	-lboost_serialization \
-	-lboost_regex
+	-lboost_thread-mt \
+	-lboost_system-mt \
+	-lboost_serialization-mt \
+	-lboost_regex-mt
 
 all: all-am
 
