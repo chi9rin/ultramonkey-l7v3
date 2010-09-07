@@ -132,7 +132,7 @@ int ip_session_data_processor::get_endpoint_from_session_data(
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel())) {
                                 boost::format formatter("out_function : int ip_session_data_processor::"
-                                                        "get_endpoint_from_ip_data(int ip_hash, "
+                                                        "get_endpoint_from_session_data(int ip_hash, "
                                                         "boost::asio::ip::tcp::endpoint& endpoint) : return_value = 1.");
                                 putLogDebug(600194, formatter.str(), __FILE__, __LINE__);
                         }
@@ -160,9 +160,9 @@ int ip_session_data_processor::get_endpoint_from_session_data(
                         }
                 }
         } catch (const std::exception &e) {
-                std::cerr << "ip_session_data_processor::get_endpoint_from_ip_data() : exception: error = " << e.what() << "." << std::endl;
+                std::cerr << "ip_session_data_processor::get_endpoint_from_session_data() : exception: error = " << e.what() << "." << std::endl;
                 boost::format formatter("function : int ip_session_data_processor::"
-                                        "get_endpoint_from_ip_data() : exception : error = %s.");
+                                        "get_endpoint_from_session_data() : exception : error = %s.");
                 formatter % e.what();
                 putLogError(600104, formatter.str(), __FILE__, __LINE__);
 
@@ -172,7 +172,7 @@ int ip_session_data_processor::get_endpoint_from_session_data(
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel())) {
                 boost::format formatter("out_function : int ip_session_data_processor::"
-                                        "get_endpoint_from_ip_data(int ip_hash, "
+                                        "get_endpoint_from_session_data(int ip_hash, "
                                         "boost::asio::ip::tcp::endpoint& endpoint) : return_value = %d.");
                 formatter % ret;
                 putLogDebug(600195, formatter.str(), __FILE__, __LINE__);
