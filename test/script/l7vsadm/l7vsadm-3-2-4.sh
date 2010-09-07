@@ -2,27 +2,6 @@
 
 . ${SET_DEFAULT_CONF}
 
-#Run http server
-RealServer1=RealServer1
-RealServer1_ADDR=127.0.0.1
-RealServer1_PORT=50001
-start_lighttpd -s $RealServer1 -a $RealServer1_ADDR -p $RealServer1_PORT
-if [ $? -ne 0 ]
-then
-        echo "Test failed: start_lighttpd RealServer1"
-        exit 1
-fi
-
-RealServer2=RealServer2
-RealServer2_ADDR=127.0.0.1
-RealServer2_PORT=50002
-start_lighttpd -s $RealServer2 -a $RealServer2_ADDR -p $RealServer2_PORT
-if [ $? -ne 0 ]
-then
-        echo "Test failed: start_lighttpd RealServer2"
-        exit 1
-fi
-
 #Add Service
 $L7VSD
 if [ $? -ne 0 ]
@@ -32,29 +11,15 @@ then
 fi
 usleep 100000
 
-$L7VSADM -A -t localhost4:40001 -m sessionless
+$L7VSADM -A -t localhost6:40001 -m sessionless
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM -A -t localhost4:40001 -m sessionless"
-        exit 1
-fi
-
-$L7VSADM -a -t localhost4:40001 -m sessionless -r localhost4:${RealServer1_PORT} -w 3
-if [ $? -ne 0 ]
-then
-        echo "Test failed: $L7VSADM -a -t localhost4:40001 -m sessionless -r localhost4:${RealServer1_PORT} -w 3"
-        exit 1
-fi
-
-$L7VSADM -a -t localhost4:40001 -m sessionless -r localhost4:${RealServer2_PORT} -w 0
-if [ $? -ne 0 ]
-then
-        echo "Test failed: $L7VSADM -a -t localhost4:40001 -m sessionless -r localhost4:${RealServer2_PORT} -w 0"
+        echo "Test failed: $L7VSADM -A -t localhost6:40001 -m sessionless"
         exit 1
 fi
 
 
-RET=`$L7VSADM -V`
+RET=`$L7VSADM -V -n`
 EXPECT="Layer-7 Virtual Server version 3.0.0-1
 L7vsd Log Level:
 Category                       Level
@@ -117,7 +82,7 @@ Prot LocalAddress:Port ProtoMod Scheduler Protomod_opt_string
      Access_log_file
      Access_log_rotate option
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
-TCP localhost:40001 sessionless rr --sorry-uri '/'
+TCP [::1]:40001 sessionless rr --sorry-uri '/'
     none 0 0
     0 0
     0 0
@@ -125,12 +90,10 @@ TCP localhost:40001 sessionless rr --sorry-uri '/'
     none
     0
     none
-    --ac-rotate-type size --ac-rotate-max-backup-index 10 --ac-rotate-max-filesize 10M
-  -> localhost:50001              Masq    3      0          0         
-  -> localhost:50002              Masq    0      0          0         "
+    --ac-rotate-type size --ac-rotate-max-backup-index 10 --ac-rotate-max-filesize 10M"
 if [ "${RET}" != "${EXPECT}" ]
 then
-        echo "Test failed: $L7VSADM -V"
+        echo "Test failed: $L7VSADM -V -n"
         exit 1
 fi
 

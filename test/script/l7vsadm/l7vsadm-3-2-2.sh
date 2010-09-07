@@ -4,9 +4,9 @@
 
 #Run http server
 RealServer1=RealServer1
-RealServer1_ADDR=127.0.0.1
+RealServer1_ADDR=[::1]
 RealServer1_PORT=50001
-start_lighttpd -s $RealServer1 -a $RealServer1_ADDR -p $RealServer1_PORT
+start_lighttpd -s $RealServer1 -a $RealServer1_ADDR -p $RealServer1_PORT -i
 if [ $? -ne 0 ]
 then
         echo "Test failed: start_lighttpd RealServer1"
@@ -14,9 +14,9 @@ then
 fi
 
 RealServer2=RealServer2
-RealServer2_ADDR=127.0.0.1
+RealServer2_ADDR=[::1]
 RealServer2_PORT=50002
-start_lighttpd -s $RealServer2 -a $RealServer2_ADDR -p $RealServer2_PORT
+start_lighttpd -s $RealServer2 -a $RealServer2_ADDR -p $RealServer2_PORT -i
 if [ $? -ne 0 ]
 then
         echo "Test failed: start_lighttpd RealServer2"
@@ -32,24 +32,24 @@ then
 fi
 usleep 100000
 
-$L7VSADM -A -t localhost4:40001 -m sessionless
+$L7VSADM -A -t localhost6:40001 -m sessionless
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM -A -t localhost4:40001 -m sessionless"
+        echo "Test failed: $L7VSADM -A -t localhost6:40001 -m sessionless"
         exit 1
 fi
 
-$L7VSADM -a -t localhost4:40001 -m sessionless -r localhost4:${RealServer1_PORT} -w 3
+$L7VSADM -a -t localhost6:40001 -m sessionless -r localhost6:${RealServer1_PORT} -w 3
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM -a -t localhost4:40001 -m sessionless -r localhost4:${RealServer1_PORT} -w 3"
+        echo "Test failed: $L7VSADM -a -t localhost6:40001 -m sessionless -r localhost6:${RealServer1_PORT} -w 3"
         exit 1
 fi
 
-$L7VSADM -a -t localhost4:40001 -m sessionless -r localhost4:${RealServer2_PORT} -w 0
+$L7VSADM -a -t localhost6:40001 -m sessionless -r localhost6:${RealServer2_PORT} -w 0
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM -a -t localhost4:40001 -m sessionless -r localhost4:${RealServer2_PORT} -w 0"
+        echo "Test failed: $L7VSADM -a -t localhost6:40001 -m sessionless -r localhost6:${RealServer2_PORT} -w 0"
         exit 1
 fi
 

@@ -32,7 +32,7 @@
 #
 [logger]
 # l7vsd logfile base name
-l7vsd_log_filename = "/var/log/l7vs/l7vsd.log"
+l7vsd_log_filename == "/var/log/l7vs/l7vsd.log"
 # l7vsd log rotate pattern
 l7vsd_rotation = "size"
 # l7vsd rotate max backup number
@@ -145,7 +145,7 @@ snmpagent_system_environment     = "warn"
 # l7vsadm setting
 #
 [l7vsadm]
-cmd_interval = 100
+cmd_interval = 1
 cmd_count = 10
 
 #

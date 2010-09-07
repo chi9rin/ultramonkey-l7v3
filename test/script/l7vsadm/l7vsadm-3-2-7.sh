@@ -74,7 +74,6 @@ Prot LocalAddress:Port ProtoMod Scheduler Protomod_opt_string
      Access_log_file
      Access_log_rotate option
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn"
-
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -V"

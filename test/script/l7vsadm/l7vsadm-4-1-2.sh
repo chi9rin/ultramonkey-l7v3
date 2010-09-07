@@ -3,23 +3,13 @@
 . ${SET_DEFAULT_CONF}
 
 #Run http server
-RealServer1=RealServer1
-RealServer1_ADDR=127.0.0.1
-RealServer1_PORT=50001
-start_lighttpd -s $RealServer1 -a $RealServer1_ADDR -p $RealServer1_PORT
+SorryServer1=SorryServer1
+SorryServer1_ADDR=127.0.0.1
+SorryServer1_PORT=50001
+start_lighttpd -s $SorryServer1 -a $SorryServer1_ADDR -p $SorryServer1_PORT
 if [ $? -ne 0 ]
 then
-        echo "Test failed: start_lighttpd RealServer1"
-        exit 1
-fi
-
-RealServer2=RealServer2
-RealServer2_ADDR=127.0.0.1
-RealServer2_PORT=50002
-start_lighttpd -s $RealServer2 -a $RealServer2_ADDR -p $RealServer2_PORT
-if [ $? -ne 0 ]
-then
-        echo "Test failed: start_lighttpd RealServer2"
+        echo "Test failed: start_lighttpd SorryServer1"
         exit 1
 fi
 
@@ -32,27 +22,19 @@ then
 fi
 usleep 100000
 
-$L7VSADM -A -t localhost4:40001 -m sessionless
+$L7VSADM -A -t 127.0.0.1:40001 -m sessionless -u 1000 -q 512 -Q 512 -b $SorryServer1_ADDR:$SorryServer1_PORT -f 1 -T -z /etc/l7vs/sslproxy/sslproxy.target.cf -O deferaccept -L 1 -a /var/log/l7vs/access_log
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM -A -t localhost4:40001 -m sessionless"
+        echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m sessionless -u 1000 -q 512 -Q 512 -b $SorryServer1_ADDR:$SorryServer1_PORT -f 1 -T -z /etc/l7vs/sslproxy/sslproxy.target.cf -O deferaccept -L 1 -a /var/log/l7vs/access_log"
         exit 1
 fi
 
-$L7VSADM -a -t localhost4:40001 -m sessionless -r localhost4:${RealServer1_PORT} -w 3
+$L7VSADM -A -t 127.0.0.1:40001 -m sessionless -u 1000 -q 512 -Q 512 -b $SorryServer1_ADDR:$SorryServer1_PORT -f 1 -M -z /etc/l7vs/sslproxy/sslproxy.target.cf -O deferaccept -L 1 -a /var/log/l7vs/access_log
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM -a -t localhost4:40001 -m sessionless -r localhost4:${RealServer1_PORT} -w 3"
+        echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m sessionless -u 1000 -q 512 -Q 512 -b $SorryServer1_ADDR:$SorryServer1_PORT -f 1 -M -z /etc/l7vs/sslproxy/sslproxy.target.cf -O deferaccept -L 1 -a /var/log/l7vs/access_log"
         exit 1
 fi
-
-$L7VSADM -a -t localhost4:40001 -m sessionless -r localhost4:${RealServer2_PORT} -w 0
-if [ $? -ne 0 ]
-then
-        echo "Test failed: $L7VSADM -a -t localhost4:40001 -m sessionless -r localhost4:${RealServer2_PORT} -w 0"
-        exit 1
-fi
-
 
 RET=`$L7VSADM -V`
 EXPECT="Layer-7 Virtual Server version 3.0.0-1
@@ -117,7 +99,7 @@ Prot LocalAddress:Port ProtoMod Scheduler Protomod_opt_string
      Access_log_file
      Access_log_rotate option
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
-TCP localhost:40001 sessionless rr --sorry-uri '/'
+TCP 127.0.0.1:40001 sessionless rr --sorry-uri '/'
     none 0 0
     0 0
     0 0
@@ -125,12 +107,10 @@ TCP localhost:40001 sessionless rr --sorry-uri '/'
     none
     0
     none
-    --ac-rotate-type size --ac-rotate-max-backup-index 10 --ac-rotate-max-filesize 10M
-  -> localhost:50001              Masq    3      0          0         
-  -> localhost:50002              Masq    0      0          0         "
+    --ac-rotate-type size --ac-rotate-max-backup-index 10 --ac-rotate-max-filesize 10M"
 if [ "${RET}" != "${EXPECT}" ]
 then
-        echo "Test failed: $L7VSADM -V"
+        echo "Test failed: $L7VSADM -V -n"
         exit 1
 fi
 

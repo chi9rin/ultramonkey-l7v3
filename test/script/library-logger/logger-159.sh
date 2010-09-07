@@ -1,12 +1,11 @@
 #!/bin/bash
 
 # set config file
-cp materials/logger-99-l7vs.cf ${L7VSD_CONF_DIR}/l7vs.cf
+cp materials/logger-159-l7vs.cf ${L7VSD_CONF_DIR}/l7vs.cf
 
 # set dumy log file
 dd if=/dev/zero of=${L7VS_LOG_DIR}/l7vsd.log bs=1024 count=63
 dd if=/dev/zero of=${L7VS_LOG_DIR}/l7vsd.log.1 bs=1024 count=63
-dd if=/dev/zero of=${L7VS_LOG_DIR}/l7vsd.log.2 bs=1024 count=63
 
 #Add Service
 $L7VSD

@@ -91,7 +91,6 @@ TCP 127.0.0.1:40001 sessionless rr --sorry-uri '/'
     0
     none
     --ac-rotate-type size --ac-rotate-max-backup-index 10 --ac-rotate-max-filesize 10M"
-
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -V -n"

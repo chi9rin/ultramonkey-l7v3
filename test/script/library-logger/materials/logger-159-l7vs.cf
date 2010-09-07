@@ -38,7 +38,7 @@ l7vsd_rotation = "size"
 # l7vsd rotate max backup number
 l7vsd_max_backup_index = "10"
 # l7vsd rotate file size
-l7vsd_max_filesize = "10M"
+l7vsd_max_filesize = "65535"
 
 # l7vsd access log rotate pattern
 l7vsd_accesslog_rotate_type = "size"
@@ -145,7 +145,7 @@ snmpagent_system_environment     = "warn"
 # l7vsadm setting
 #
 [l7vsadm]
-cmd_interval = 100
+cmd_interval = 1
 cmd_count = 10
 
 #
