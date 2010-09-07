@@ -1625,7 +1625,9 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
 
                                                 while (rs_list_itr != rs_list_end()) {
                                                         if (rs_list_itr->tcp_endpoint == threaddata->selected_realserver) {
-                                                                is_match = 1;
+                                                                if (rs_list_itr->weight != 0) {
+                                                                        is_match = 1;
+                                                                }
                                                                 break;
                                                         }
 
