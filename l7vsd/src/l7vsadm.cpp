@@ -748,9 +748,9 @@ bool l7vs::l7vsadm::parse_opt_vs_fwdmode_func(int &pos, int argc, char *argv[])
 #ifdef IP_TRANSPARENT
                 request.vs_element.sorry_fwdmode = virtualservice_element::FWD_TPROXY;
 #else
+                std::stringstream buf("tproxy(IP_TRANSPARENT) not supported on this platform.");
                 l7vsadm_err.setter(true, buf.str());
-                Logger::putLogInfo(LOG_CAT_L7VSADM_PARSE, /*XXX*/999, 
-                        "tproxy(IP_TRANSPARENT) not supported on this platform.", __FILE__, __LINE__);
+                Logger::putLogInfo(LOG_CAT_L7VSADM_PARSE, /*XXX*/999, buf.str(), __FILE__, __LINE__);
                 return false;
 #endif
         } else {
@@ -1429,9 +1429,9 @@ bool l7vs::l7vsadm::parse_opt_rs_fwdmode_func(int &pos, int argc, char *argv[])
 #ifdef IP_TRANSPARENT
                 request.vs_element.realserver_vector.front().fwdmode = realserver_element::FWD_TPROXY;
 #else
+                std::stringstream buf("tproxy(IP_TRANSPARENT) not supported on this platform.");
                 l7vsadm_err.setter(true, buf.str());
-                Logger::putLogInfo(LOG_CAT_L7VSADM_PARSE, /*XXX*/999, 
-                        "tproxy(IP_TRANSPARENT) not supported on this platform.", __FILE__, __LINE__);
+                Logger::putLogInfo(LOG_CAT_L7VSADM_PARSE, /*XXX*/999, buf.str(), __FILE__, __LINE__);
                 return false;
 #endif
         } else {
