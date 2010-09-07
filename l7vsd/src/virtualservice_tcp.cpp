@@ -177,6 +177,7 @@ void l7vs::virtualservice_tcp::handle_replication_interrupt(const boost::system:
         rep_data_ptr->sorry_maxconnection = element.sorry_maxconnection;
         strncpy(rep_data_ptr->sorry_endpoint, tmp_sorry_ep.str().c_str(), 48);
         rep_data_ptr->sorry_flag = element.sorry_flag;
+        rep_data_ptr->sorry_fwdmode = element.sorry_fwdmode;
         rep_data_ptr->qos_up = element.qos_upstream;
         rep_data_ptr->qos_down = element.qos_downstream;
 
@@ -305,6 +306,7 @@ void l7vs::virtualservice_tcp::read_replicationdata()
                         element.sorry_endpoint =
                                 tcp_endpoint_type(boost::asio::ip::address::from_string(ipaddr), portno);
                         element.sorry_flag = rep_data_ptr->sorry_flag;
+                        element.sorry_fwdmode = (virtualservice_element::SORRYSERVER_FWDMODE_TAG)(rep_data_ptr->sorry_fwdmode);
                         element.qos_upstream = rep_data_ptr->qos_up;
                         element.qos_downstream = rep_data_ptr->qos_down;
                         break;
@@ -1219,14 +1221,10 @@ void l7vs::virtualservice_tcp::add_realserver(const l7vs::virtualservice_element
         rw_scoped_lock inc_lock(rs_list_ref_count_inc_mutex);
 
         //waiting, rs_list_ref_count become 0
-        boost::xtime interval;
-        boost::mutex mtx;
-        boost::condition cond;
-
-        interval.nsec = virtualservice_base::REFCOUNT_WAIT_INTERVAL;
-        boost::mutex::scoped_lock lk(mtx);
         while (rs_list_ref_count != 0ULL) {
-                cond.timed_wait(lk, interval);
+                boost::this_thread::sleep(
+                        boost::posix_time::milliseconds(virtualservice_base::REFCOUNT_WAIT_INTERVAL)
+                );
         }
 
         //check duplication realserver
@@ -1311,14 +1309,10 @@ void l7vs::virtualservice_tcp::edit_realserver(const l7vs::virtualservice_elemen
         rw_scoped_lock inc_lock(rs_list_ref_count_inc_mutex);
 
         //waiting, rs_list_ref_count become 0
-        boost::xtime interval;
-        boost::mutex mtx;
-        boost::condition cond;
-
-        interval.nsec = virtualservice_base::REFCOUNT_WAIT_INTERVAL;
-        boost::mutex::scoped_lock lk(mtx);
         while (rs_list_ref_count != 0ULL) {
-                cond.timed_wait(lk, interval);
+                boost::this_thread::sleep(
+                        boost::posix_time::milliseconds(virtualservice_base::REFCOUNT_WAIT_INTERVAL)
+                );
         }
 
         virtualservice_element &in_element = const_cast<virtualservice_element &>(in);
@@ -1418,14 +1412,10 @@ void l7vs::virtualservice_tcp::del_realserver(const l7vs::virtualservice_element
         rw_scoped_lock inc_lock(rs_list_ref_count_inc_mutex);
 
         //waiting, rs_list_ref_count become 0
-        boost::xtime interval;
-        boost::mutex mtx;
-        boost::condition cond;
-
-        interval.nsec = virtualservice_base::REFCOUNT_WAIT_INTERVAL;
-        boost::mutex::scoped_lock lk(mtx);
         while (rs_list_ref_count != 0ULL) {
-                cond.timed_wait(lk, interval);
+                boost::this_thread::sleep(
+                        boost::posix_time::milliseconds(virtualservice_base::REFCOUNT_WAIT_INTERVAL)
+                );
         }
 
         virtualservice_element &in_element = const_cast<virtualservice_element &>(in);

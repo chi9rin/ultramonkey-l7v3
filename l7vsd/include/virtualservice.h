@@ -149,6 +149,7 @@ public:
                 long long          sorry_maxconnection;
                 char               sorry_endpoint[48];
                 bool               sorry_flag;
+                unsigned int       sorry_fwdmode;
                 unsigned long long qos_up;
                 unsigned long long qos_down;
         };
@@ -164,7 +165,7 @@ public:
         //! Operation timed out value
         const static int  OPERATION_TIMEOUT        = 1;
         //! wait interval for rs_ref_count check
-        const static int  REFCOUNT_WAIT_INTERVAL   = 10000;
+        const static int  REFCOUNT_WAIT_INTERVAL   = 10; // msec
         const static int  SCHEDULER_PRIORITY       = 20;
 protected:
 
