@@ -5,10 +5,10 @@
 $L7DIRECTORD -d start &
 usleep 100000
 
-RET=`ps -ef | grep "l7directord -d start"| grep -v grep`
-if [ -z "$RET" ]
+RET=`ps -eo ppid,args | grep $(which l7directord)| grep -v grep | awk '{print $1}'`
+if [ $RET -eq 1 ]
 then
-        echo "Test failed: ps -ef | grep -d l7directord start | grep -v grep"
+        echo "Test failed: ps -ef | grep l7directord start | grep -v grep"
         exit 1
 fi
 

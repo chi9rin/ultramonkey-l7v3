@@ -16,6 +16,7 @@ then
         echo "Test failed: kill -SIGUSER2"
         exit 1
 fi
+usleep 100000
 
 RET=`pgrep l7vsd`
 if [ $? -ne 0 ]
