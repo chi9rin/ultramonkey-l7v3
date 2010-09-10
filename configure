@@ -19166,7 +19166,7 @@ fi
 
 echo "$as_me:$LINENO: checking for main in -lboost_thread-mt" >&5
 echo $ECHO_N "checking for main in -lboost_thread-mt... $ECHO_C" >&6
-if test "${ac_cv_lib_boost_thread_main+set}" = set; then
+if test "${ac_cv_lib_boost_thread_mt_main+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -19209,20 +19209,20 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  ac_cv_lib_boost_thread_main=yes
+  ac_cv_lib_boost_thread_mt_main=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-ac_cv_lib_boost_thread_main=no
+ac_cv_lib_boost_thread_mt_main=no
 fi
 rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-echo "$as_me:$LINENO: result: $ac_cv_lib_boost_thread_main" >&5
-echo "${ECHO_T}$ac_cv_lib_boost_thread_main" >&6
-if test $ac_cv_lib_boost_thread_main = yes; then
+echo "$as_me:$LINENO: result: $ac_cv_lib_boost_thread_mt_main" >&5
+echo "${ECHO_T}$ac_cv_lib_boost_thread_mt_main" >&6
+if test $ac_cv_lib_boost_thread_mt_main = yes; then
   :
 else
   { { echo "$as_me:$LINENO: error: l7vsd require boost library. " >&5
@@ -19230,13 +19230,13 @@ echo "$as_me: error: l7vsd require boost library. " >&2;}
    { (exit 1); exit 1; }; }
 fi
 
-echo "$as_me:$LINENO: checking for main in -lboost_system" >&5
-echo $ECHO_N "checking for main in -lboost_system... $ECHO_C" >&6
-if test "${ac_cv_lib_boost_system_main+set}" = set; then
+echo "$as_me:$LINENO: checking for main in -lboost_system-mt" >&5
+echo $ECHO_N "checking for main in -lboost_system-mt... $ECHO_C" >&6
+if test "${ac_cv_lib_boost_system_mt_main+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lboost_system  $LIBS"
+LIBS="-lboost_system-mt  $LIBS"
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -19275,20 +19275,20 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  ac_cv_lib_boost_system_main=yes
+  ac_cv_lib_boost_system_mt_main=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-ac_cv_lib_boost_system_main=no
+ac_cv_lib_boost_system_mt_main=no
 fi
 rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-echo "$as_me:$LINENO: result: $ac_cv_lib_boost_system_main" >&5
-echo "${ECHO_T}$ac_cv_lib_boost_system_main" >&6
-if test $ac_cv_lib_boost_system_main = yes; then
+echo "$as_me:$LINENO: result: $ac_cv_lib_boost_system_mt_main" >&5
+echo "${ECHO_T}$ac_cv_lib_boost_system_mt_main" >&6
+if test $ac_cv_lib_boost_system_mt_main = yes; then
   :
 else
   { { echo "$as_me:$LINENO: error: l7vsd require boost library. " >&5
