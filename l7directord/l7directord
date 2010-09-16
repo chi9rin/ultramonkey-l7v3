@@ -4784,12 +4784,13 @@ bandwidth is over the qosdown limit, a packet to the client will be delayed
 until the number of bandwidth become below the qosdown limit.
 B<K>(kilo), B<M>(mega) and B<G>(giga) unit are available.
 
-=item B<sorryserver =>I<ip_address|hostname[:portnumber|servicename]>
+=item B<sorryserver =>I<ip_address|hostname[:portnumber|servicename]> [B<masq>|B<tproxy>]
 
 Defines a sorry server by IP-address (or hostname) and port (or
-servicename). Firewall-mark settings cannot be set.
-If the number of requests to the virtual service cross the maxconn limit, the requests would be
-redirected to the sorry server.
+servicename). The second argument defines the forwarding mechanism, it must be B<masq> or B<tproxy>.
+Firewall-mark settings cannot be set.
+If the number of requests to the virtual service cross the maxconn limit, or no available
+real server exists, then the requests would be redirected to the sorry server.
 
 =item B<checktype = negotiate>|B<connect>|I<N>|B<ping>|B<custom>|B<off>|B<on>
 
