@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -A -t 127.0.0.1:40001 -m ip -u 2>&1 | grep "PARSE ERROR : maxconnection value is not specified."`
-EXPECT="PARSE ERROR : maxconnection value is not specified."
+RET=`$L7VSADM -A -t 127.0.0.1:40001 -m ip -u 2>&1 | grep "PARSE ERROR: sorry max connection value is not specified.(--upper)"`
+EXPECT="PARSE ERROR: sorry max connection value is not specified.(--upper)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m ip -u"

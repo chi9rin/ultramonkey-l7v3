@@ -18,8 +18,8 @@ then
         exit 1
 fi
 
-RET=`$L7VSADM -E -t 127.0.0.1:40001 -m ip -b localhost: 2>&1 | grep "PARSE ERROR : sorryserver endpoint parse error:invalid port number (0):localhost:"`
-EXPECT="PARSE ERROR : sorryserver endpoint parse error:invalid port number (0):localhost:"
+RET=`$L7VSADM -E -t 127.0.0.1:40001 -m ip -b localhost: 2>&1 | grep "PARSE ERROR: sorryserver endpoint parse error(--bypass): invalid port number (0):localhost:"`
+EXPECT="PARSE ERROR: sorryserver endpoint parse error(--bypass): invalid port number (0):localhost:"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -E -t 127.0.0.1:40001 -m ip -b localhost:"

@@ -18,8 +18,8 @@ then
         exit 1
 fi
 
-RET=`$L7VSADM -a -t 127.0.0.1:40001 -m ip -r 2>&1 | grep "PARSE ERROR : Argument argc is illegal for -a command."`
-EXPECT="PARSE ERROR : Argument argc is illegal for -a command."
+RET=`$L7VSADM -a -t 127.0.0.1:40001 -m ip -r 2>&1 | grep "PARSE ERROR: Argument argc is illegal for -a command."`
+EXPECT="PARSE ERROR: Argument argc is illegal for -a command."
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -a -t 127.0.0.1:40001 -m ip -r"

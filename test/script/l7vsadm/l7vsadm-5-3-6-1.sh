@@ -37,8 +37,8 @@ then
 fi
 
 
-RET=`$L7VSADM -e -t -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} -w 2 2>&1 | grep "PARSE ERROR : target endpoint parse error:invalid endpoint:Service not found:-m"`
-EXPECT="PARSE ERROR : target endpoint parse error:invalid endpoint:Service not found:-m"
+RET=`$L7VSADM -e -t -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} -w 2 2>&1 | grep "PARSE ERROR: target endpoint parse error(--tcp-service): invalid endpoint:Service not found:-m"`
+EXPECT="PARSE ERROR: target endpoint parse error(--tcp-service): invalid endpoint:Service not found:-m"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -e -t -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} -w 2"

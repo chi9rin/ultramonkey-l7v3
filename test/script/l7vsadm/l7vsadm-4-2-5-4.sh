@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -D -t localhost: -m ip 2>&1 | grep "PARSE ERROR : target endpoint parse error:invalid port number (0):localhost:"`
-EXPECT="PARSE ERROR : target endpoint parse error:invalid port number (0):localhost:"
+RET=`$L7VSADM -D -t localhost: -m ip 2>&1 | grep "PARSE ERROR: target endpoint parse error(--tcp-service): invalid port number (0):localhost:"`
+EXPECT="PARSE ERROR: target endpoint parse error(--tcp-service): invalid port number (0):localhost:"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -D -t localhost: -m ip"

@@ -181,7 +181,7 @@ Prot LocalAddress:Port ProtoMod Scheduler Protomod_opt_string
      Access_log_rotate option
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
 TCP 127.0.0.1:40001 ip lc --timeout 3600 --no-reschedule --sorry-uri '/'
-    127.0.0.1:50001 200 1
+    127.0.0.1:50001(Masq) 200 1
     1000000 0
     1000000 0
     none

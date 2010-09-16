@@ -18,8 +18,8 @@ then
         exit 1
 fi
 
-RET=`$L7VSADM -E -t 127.0.0.1:40001 -m ip 2>&1 | grep "PARSE ERROR : All option omitted for edit vs command."`
-EXPECT="PARSE ERROR : All option omitted for edit vs command."
+RET=`$L7VSADM -E -t 127.0.0.1:40001 -m ip 2>&1 | grep "PARSE ERROR: All option omitted for edit vs command."`
+EXPECT="PARSE ERROR: All option omitted for edit vs command."
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -E -t 127.0.0.1:40001 -m ip"

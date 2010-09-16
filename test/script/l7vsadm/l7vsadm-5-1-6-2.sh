@@ -29,7 +29,7 @@ then
         exit 1
 fi
 
-EXPECT="PARSE ERROR : target endpoint parse error:invalid endpoint:Host not found.*:333.333.333.333:3333"
+EXPECT="PARSE ERROR: target endpoint parse error(--tcp-service): invalid endpoint:Host not found.*:333.333.333.333:3333"
 $L7VSADM -a -t 333.333.333.333:3333 -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} 2>&1 | grep "${EXPECT}" > /dev/null
 if [ "$?" -ne 0 ]
 then

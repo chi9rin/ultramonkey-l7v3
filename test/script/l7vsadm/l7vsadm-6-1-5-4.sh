@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -R -f -f 2>&1 | grep "PARSE ERROR : replication option is double specified."`
-EXPECT="PARSE ERROR : replication option is double specified."
+RET=`$L7VSADM -R -f -f 2>&1 | grep "PARSE ERROR: replication option is double specified.(--force)"`
+EXPECT="PARSE ERROR: replication option is double specified.(--force)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -R -f -f"

@@ -18,8 +18,8 @@ then
         exit 1
 fi
 
-RET=`$L7VSADM -E -t localhost: -m ip -s wrr 2>&1 | grep "PARSE ERROR : target endpoint parse error:invalid port number (0):localhost:"`
-EXPECT="PARSE ERROR : target endpoint parse error:invalid port number (0):localhost:"
+RET=`$L7VSADM -E -t localhost: -m ip -s wrr 2>&1 | grep "PARSE ERROR: target endpoint parse error(--tcp-service): invalid port number (0):localhost:"`
+EXPECT="PARSE ERROR: target endpoint parse error(--tcp-service): invalid port number (0):localhost:"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -E -t localhost: -m ip -s wrr"

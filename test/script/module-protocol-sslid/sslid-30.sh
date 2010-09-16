@@ -12,7 +12,7 @@ fi
 usleep 100000
 
 RET=`$L7VSADM -A -t 127.0.0.1:44431 -m sslid --maxlist 100 -M 200 2>&1 | grep "PARSE ERROR"`
-EXPECT="PARSE ERROR : protocol module argument error: Cannot set multiple option '-M/--maxlist'."
+EXPECT="PARSE ERROR: protocol module argument error(--proto-module): Cannot set multiple option '-M/--maxlist'."
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -A -t 127.0.0.1:44431 -m sslid --maxlist 100 -M 200"

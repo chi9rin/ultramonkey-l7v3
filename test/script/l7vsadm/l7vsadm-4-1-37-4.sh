@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -A -t localhost:40001 -m ip -O deferaccept nodelay 2>&1 | grep "PARSE ERROR : virtualservice option not found:nodelay"`
-EXPECT="PARSE ERROR : virtualservice option not found:nodelay"
+RET=`$L7VSADM -A -t localhost:40001 -m ip -O deferaccept nodelay 2>&1 | grep "PARSE ERROR: virtualservice option not found: nodelay"`
+EXPECT="PARSE ERROR: virtualservice option not found: nodelay"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -A -t localhost:40001 -m ip -O deferaccept nodelay"

@@ -18,8 +18,8 @@ then
         exit 1
 fi
 
-RET=`$L7VSADM -E -t 127.0.0.1:40001 -m ip -f 2>&1 | grep "PARSE ERROR : sorryflag value is not specified."`
-EXPECT="PARSE ERROR : sorryflag value is not specified."
+RET=`$L7VSADM -E -t 127.0.0.1:40001 -m ip -f 2>&1 | grep "PARSE ERROR: sorry flag value is not specified.(--flag)"`
+EXPECT="PARSE ERROR: sorry flag value is not specified.(--flag)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -E -t 127.0.0.1:40001 -m ip -f"

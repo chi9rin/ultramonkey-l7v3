@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -A -t 127.0.0.1:40001 -m xx 2>&1 | grep "PARSE ERROR : protocol module not found:xx"`
-EXPECT="PARSE ERROR : protocol module not found:xx"
+RET=`$L7VSADM -A -t 127.0.0.1:40001 -m xx 2>&1 | grep "PARSE ERROR: protocol module not found(--proto-module): xx"`
+EXPECT="PARSE ERROR: protocol module not found(--proto-module): xx"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m xx"

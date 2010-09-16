@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -A -t localhost:40001 -m sslid -z ${L7VSD_CONF_DIR}/sslproxy/sslproxy.target.cf 2>&1 | grep "PARSE ERROR : When \"protocol_module sslid\" was designated, it isn't possible to designate \"-z\" option."`
-EXPECT="PARSE ERROR : When \"protocol_module sslid\" was designated, it isn't possible to designate \"-z\" option."
+RET=`$L7VSADM -A -t localhost:40001 -m sslid -z ${L7VSD_CONF_DIR}/sslproxy/sslproxy.target.cf 2>&1 | grep "PARSE ERROR: You cannot set \"-z\" option with \"sslid\" protocol module."`
+EXPECT="PARSE ERROR: You cannot set \"-z\" option with \"sslid\" protocol module."
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -A -t localhost:40001 -m sslid -z ${L7VSD_CONF_DIR}/sslproxy/sslproxy.target.cf"

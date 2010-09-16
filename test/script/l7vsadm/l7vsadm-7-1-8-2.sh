@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -L -c l7vsd_virtualservice -l x 2>&1 | grep "PARSE ERROR : loglevel not found:x"`
-EXPECT="PARSE ERROR : loglevel not found:x"
+RET=`$L7VSADM -L -c l7vsd_virtualservice -l x 2>&1 | grep "PARSE ERROR: log level not found(--level): x"`
+EXPECT="PARSE ERROR: log level not found(--level): x"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -L -c l7vsd_virtualservice -l x"

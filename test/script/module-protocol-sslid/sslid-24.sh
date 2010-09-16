@@ -12,7 +12,7 @@ fi
 usleep 100000
 
 RET=`$L7VSADM -A -t 127.0.0.1:44431 -m sslid --maxlist 2147483648 2>&1 | grep "PARSE ERROR"`
-EXPECT="PARSE ERROR : protocol module argument error: '-M/--maxlist' option value '2147483648' is too large."
+EXPECT="PARSE ERROR: protocol module argument error(--proto-module): '-M/--maxlist' option value '2147483648' is too large."
 
 if [ "${RET}" != "${EXPECT}" ]
 then

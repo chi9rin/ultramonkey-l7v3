@@ -13,7 +13,7 @@ fi
 usleep 100000
 
 RET=`flock -n -x $L7VSADM l7vsadm 2>&1`
-EXPECT="COMMON ERROR : L7vsadm file lock timeout. (l7vsadm is already executing)"
+EXPECT="COMMON ERROR: L7vsadm file lock timeout. (l7vsadm is already executing)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: flock -n -x /usr/sbin/l7vsadm l7vsadm"

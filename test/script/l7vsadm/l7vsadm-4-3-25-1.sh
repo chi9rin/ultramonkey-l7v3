@@ -18,8 +18,8 @@ then
         exit 1
 fi
 
-RET=`$L7VSADM -E -t localhost:40001 -m ip -Q 2>&1 | grep "PARSE ERROR : qos_upstream value is not specified."`
-EXPECT="PARSE ERROR : qos_upstream value is not specified."
+RET=`$L7VSADM -E -t localhost:40001 -m ip -Q 2>&1 | grep "PARSE ERROR: QoS upstream value is not specified.(--qos-up)"`
+EXPECT="PARSE ERROR: QoS upstream value is not specified.(--qos-up)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -E -t localhost:40001 -m ip -Q"

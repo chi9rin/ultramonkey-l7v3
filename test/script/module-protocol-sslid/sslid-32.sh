@@ -12,7 +12,7 @@ fi
 usleep 100000
 
 RET=`$L7VSADM -A -t 127.0.0.1:44431 -m sslid -Q test 2>&1 | grep "PARSE ERROR"`
-EXPECT="PARSE ERROR : invalid qos_upstream value."
+EXPECT="PARSE ERROR: invalid QoS upstream value.(--qos-up)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -A -t 127.0.0.1:44431 -m sslid -Q test"

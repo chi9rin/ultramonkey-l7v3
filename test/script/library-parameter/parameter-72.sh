@@ -11,8 +11,8 @@ then
         exit 1
 fi
 
-RET=`$L7VSADM -A -t 127.0.0.1:44431 -m sessionless -z ${L7VSD_CONF_DIR}/sslproxy/Temp_sslproxy.target.cf 2>&1 | grep "PARSE ERROR : ssl config file cannot open."`
-EXPECT="PARSE ERROR : ssl config file cannot open."
+RET=`$L7VSADM -A -t 127.0.0.1:44431 -m sessionless -z ${L7VSD_CONF_DIR}/sslproxy/Temp_sslproxy.target.cf 2>&1 | grep "PARSE ERROR: ssl config file cannot open.(--ssl)"`
+EXPECT="PARSE ERROR: ssl config file cannot open.(--ssl)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -A -t 127.0.0.1:44431 -m sessionless -z ${L7VSD_CONF_DIR}/sslproxy/Temp_sslproxy.target.cf"

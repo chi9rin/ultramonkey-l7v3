@@ -16,7 +16,7 @@ TIME1=`date '+%s'`
 RET=`flock -n -x $L7VSADM l7vsadm 2>&1`
 TIME2=`date '+%s'`
  
-EXPECT="COMMON ERROR : L7vsadm file lock timeout. (l7vsadm is already executing)"
+EXPECT="COMMON ERROR: L7vsadm file lock timeout. (l7vsadm is already executing)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: flock -n -x $L7VSADM l7vsadm"

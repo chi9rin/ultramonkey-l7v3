@@ -93,7 +93,7 @@ Prot LocalAddress:Port ProtoMod Scheduler Protomod_opt_string
      Access_log_rotate option
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
 TCP 127.0.0.1:40001 sessionless rr --sorry-uri '/'
-    ${SorryServer1_ADDR}:${SorryServer1_PORT} 0 0
+    ${SorryServer1_ADDR}:${SorryServer1_PORT}(Masq) 0 0
     0 0
     0 0
     none

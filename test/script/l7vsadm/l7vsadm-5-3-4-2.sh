@@ -37,9 +37,8 @@ then
 fi
 
 
-RET=`$L7VSADM -e -t 127.0.0.1:40001 -r ${RealServer1_ADDR}:${RealServer1_PORT} -w 3 2>&1 | grep "PARSE ERROR : protocol module not specified."`
-EXPECT="PARSE ERROR : protocol module not specified."
-echo "$RET"
+RET=`$L7VSADM -e -t 127.0.0.1:40001 -r ${RealServer1_ADDR}:${RealServer1_PORT} -w 3 2>&1 | grep "PARSE ERROR: protocol module is not specified.(--proto-module)"`
+EXPECT="PARSE ERROR: protocol module is not specified.(--proto-module)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -e -t 127.0.0.1:40001 -r ${RealServer1_ADDR}:${RealServer1_PORT} -w 3"

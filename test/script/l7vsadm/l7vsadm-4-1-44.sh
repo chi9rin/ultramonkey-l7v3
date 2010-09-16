@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -A -t localhost:40001 -m ip -L 1 -a /var/log/l7vs/access_virtualservice.log --ac-rotation-timing x 2>&1 | grep "PARSE ERROR : access log rotation argument error."`
-EXPECT="PARSE ERROR : access log rotation argument error."
+RET=`$L7VSADM -A -t localhost:40001 -m ip -L 1 -a /var/log/l7vs/access_virtualservice.log --ac-rotation-timing x 2>&1 | grep "PARSE ERROR: access log rotation argument error.(--access-log-name)"`
+EXPECT="PARSE ERROR: access log rotation argument error.(--access-log-name)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -A -t localhost:40001 -m ip -L 1 -a /var/log/l7vs/access_virtualservice.log --ac-rotation-timing x"

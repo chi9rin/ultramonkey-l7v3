@@ -12,19 +12,19 @@ fi
 usleep 100000
 
 RET=`$L7VSADM -x 2>&1`
-EXPECT="PARSE ERROR : command not found.
+EXPECT="PARSE ERROR: command not found.
 Usage: 
   l7vsadm -A -t service-address -m proto-module [module-args]
-          [-s scheduler] [-u connection-count] [-b sorry-server]
+          [-s scheduler] [-u connection-count] [-b sorry-server] [-T|M]
           [-f sorry-flag] [-Q QoSval-up] [-q QoSval-down] [-z ssl-config-file]
           [-O socket-option] [-L access-log-flag] [-a access-log-file [logrotate-args]]
   l7vsadm -E -t service-address -m proto-module [module-args]
-          [-s scheduler] [-u connection-count] [-b sorry-server]
+          [-s scheduler] [-u connection-count] [-b sorry-server] [-T|M]
           [-f sorry-flag] [-Q QoSval-up] [-q QoSval-down] [-L access-log-flag]
   l7vsadm -D -t service-address -m proto-module [module-args]
   l7vsadm -C
   l7vsadm -a|e -t service-address -m proto-module [module-args]
-          -r server-address [-w weight]
+          -r server-address [-w weight] [-T|M]
   l7vsadm -d -t service-address -m proto-module [module-args]
           -r server-address
   l7vsadm -R -s replication-switch

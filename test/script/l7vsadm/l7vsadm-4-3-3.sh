@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -E -t localhost:40001 -x -m ip 2>&1 | grep "PARSE ERROR : virtualservice option not found:-x"`
-EXPECT="PARSE ERROR : virtualservice option not found:-x"
+RET=`$L7VSADM -E -t localhost:40001 -x -m ip 2>&1 | grep "PARSE ERROR: virtualservice option not found: -x"`
+EXPECT="PARSE ERROR: virtualservice option not found: -x"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -E -t localhost:40001 -x -m ip"

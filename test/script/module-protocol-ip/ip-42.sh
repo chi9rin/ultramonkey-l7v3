@@ -12,14 +12,14 @@ fi
 
 usleep 100000
 RET=`$L7VSADM -A -t 127.0.0.1:40001 -m ip --sorry-uri sorry12345 2>&1 | grep "PARSE ERROR"`
-if [ "$RET" != "PARSE ERROR : protocol module argument error: '-S/--sorry-uri' option value 'sorry12345' is not a valid URI." ]
+if [ "$RET" != "PARSE ERROR: protocol module argument error(--proto-module): '-S/--sorry-uri' option value 'sorry12345' is not a valid URI." ]
 then
         echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m ip --sorry-uri sorry12345"
         exit 1
 fi
 
 RET=`$L7VSADM -A -t 127.0.0.1:40001 -m ip -S sorry12345 2>&1 | grep "PARSE ERROR"`
-if [ "$RET" != "PARSE ERROR : protocol module argument error: '-S/--sorry-uri' option value 'sorry12345' is not a valid URI." ]
+if [ "$RET" != "PARSE ERROR: protocol module argument error(--proto-module): '-S/--sorry-uri' option value 'sorry12345' is not a valid URI." ]
 then
         echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m ip -S sorry12345"
         exit 1

@@ -37,8 +37,8 @@ then
 fi
 
 
-RET=`$L7VSADM -e -t localhost: -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} -w 2 2>&1 | grep "PARSE ERROR : target endpoint parse error:invalid port number (0):localhost:"`
-EXPECT="PARSE ERROR : target endpoint parse error:invalid port number (0):localhost:"
+RET=`$L7VSADM -e -t localhost: -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} -w 2 2>&1 | grep "PARSE ERROR: target endpoint parse error(--tcp-service): invalid port number (0):localhost:"`
+EXPECT="PARSE ERROR: target endpoint parse error(--tcp-service): invalid port number (0):localhost:"
 echo "$RET"
 if [ "${RET}" != "${EXPECT}" ]
 then

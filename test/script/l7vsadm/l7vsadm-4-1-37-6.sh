@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -A -t localhost:40001 -m ip -O quickackon,quickackoff 2>&1 | grep "PARSE ERROR : socket option quickack is duplicated."`
-EXPECT="PARSE ERROR : socket option quickack is duplicated."
+RET=`$L7VSADM -A -t localhost:40001 -m ip -O quickackon,quickackoff 2>&1 | grep "PARSE ERROR: socket option quickack is duplicated.(--sockopt)"`
+EXPECT="PARSE ERROR: socket option quickack is duplicated.(--sockopt)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -A -t localhost:40001 -m ip -O quickackon,quickackoff"

@@ -49,8 +49,8 @@ then
 fi
 
 
-RET=`$L7VSADM -e -t 127.0.0.1:40001 -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} 2>&1 | grep "PARSE ERROR : All option omitted for edit rs command."`
-EXPECT="PARSE ERROR : All option omitted for edit rs command."
+RET=`$L7VSADM -e -t 127.0.0.1:40001 -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} 2>&1 | grep "PARSE ERROR: All option omitted for edit rs command."`
+EXPECT="PARSE ERROR: All option omitted for edit rs command."
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -e -t 127.0.0.1:40001 -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT}"

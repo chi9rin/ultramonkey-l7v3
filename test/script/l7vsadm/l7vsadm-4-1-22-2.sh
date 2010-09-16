@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -A -t 127.0.0.1:40001 -m ip -f -1 2>&1 | grep "PARSE ERROR : invalid sorryflag value."`
-EXPECT="PARSE ERROR : invalid sorryflag value."
+RET=`$L7VSADM -A -t 127.0.0.1:40001 -m ip -f -1 2>&1 | grep "PARSE ERROR: invalid sorry flag value.(--flag)"`
+EXPECT="PARSE ERROR: invalid sorry flag value.(--flag)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m ip -f -1"

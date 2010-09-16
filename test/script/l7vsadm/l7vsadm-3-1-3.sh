@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -l -x 2>&1 | grep "PARSE ERROR : list option not found:-x"`
-EXPECT="PARSE ERROR : list option not found:-x"
+RET=`$L7VSADM -l -x 2>&1 | grep "PARSE ERROR: list option not found: -x"`
+EXPECT="PARSE ERROR: list option not found: -x"
 
 if [ "${RET}" != "${EXPECT}" ]
 then

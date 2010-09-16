@@ -29,7 +29,7 @@ then
         exit 1
 fi
 
-$L7VSADM -A -t 127.0.0.1:40001 -m sessionless -u 1000 -q 512 -Q 512 -b $SorryServer1_ADDR:$SorryServer1_PORT -f 1 -M -z /etc/l7vs/sslproxy/sslproxy.target.cf -O deferaccept -L 1 -a /var/log/l7vs/access_log
+$L7VSADM -A -t 127.0.0.1:40002 -m sessionless -u 1000 -q 512 -Q 512 -b $SorryServer1_ADDR:$SorryServer1_PORT -f 1 -M -z /etc/l7vs/sslproxy/sslproxy.target.cf -O deferaccept -L 1 -a /var/log/l7vs/access_log
 if [ $? -ne 0 ]
 then
         echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m sessionless -u 1000 -q 512 -Q 512 -b $SorryServer1_ADDR:$SorryServer1_PORT -f 1 -M -z /etc/l7vs/sslproxy/sslproxy.target.cf -O deferaccept -L 1 -a /var/log/l7vs/access_log"
@@ -99,14 +99,23 @@ Prot LocalAddress:Port ProtoMod Scheduler Protomod_opt_string
      Access_log_file
      Access_log_rotate option
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
-TCP 127.0.0.1:40001 sessionless rr --sorry-uri '/'
-    none 0 0
-    0 0
-    0 0
-    none
-    none
-    0
-    none
+TCP localhost:40001 sessionless rr --sorry-uri '/'
+    localhost:50001(Tproxy) 1000 1
+    512 0
+    512 0
+    /etc/l7vs/sslproxy/sslproxy.target.cf
+    deferaccept
+    1
+    /var/log/l7vs/access_log
+    --ac-rotate-type size --ac-rotate-max-backup-index 10 --ac-rotate-max-filesize 10M
+TCP localhost:40002 sessionless rr --sorry-uri '/'
+    localhost:50001(Masq) 1000 1
+    512 0
+    512 0
+    /etc/l7vs/sslproxy/sslproxy.target.cf
+    deferaccept
+    1
+    /var/log/l7vs/access_log
     --ac-rotate-type size --ac-rotate-max-backup-index 10 --ac-rotate-max-filesize 10M"
 if [ "${RET}" != "${EXPECT}" ]
 then

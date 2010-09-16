@@ -37,8 +37,8 @@ then
 fi
 
 
-RET=`$L7VSADM -e -t 127.0.0.1:40001 -m ip -w 3 2>&1 | grep "PARSE ERROR : realserver tcp endpoint not specified."`
-EXPECT="PARSE ERROR : realserver tcp endpoint not specified."
+RET=`$L7VSADM -e -t 127.0.0.1:40001 -m ip -w 3 2>&1 | grep "PARSE ERROR: realserver tcp endpoint not specified.(--real-server)"`
+EXPECT="PARSE ERROR: realserver tcp endpoint not specified.(--real-server)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -e -t 127.0.0.1:40001 -m ip -w 3"

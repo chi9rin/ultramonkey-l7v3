@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -R -s x 2>&1 | grep "PARSE ERROR : replication switch option not found:x"`
-EXPECT="PARSE ERROR : replication switch option not found:x"
+RET=`$L7VSADM -R -s x 2>&1 | grep "PARSE ERROR: replication switch option not found(--switch): x"`
+EXPECT="PARSE ERROR: replication switch option not found(--switch): x"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -R -s x"

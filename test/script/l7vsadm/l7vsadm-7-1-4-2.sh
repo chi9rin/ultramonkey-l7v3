@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -L -c l7vsd_virtualservice -c l7vsd_virtualservice 2>&1 | grep "PARSE ERROR : Option -c conflict."`
-EXPECT="PARSE ERROR : Option -c conflict."
+RET=`$L7VSADM -L -c l7vsd_virtualservice -c l7vsd_virtualservice 2>&1 | grep "PARSE ERROR: Option -c conflict."`
+EXPECT="PARSE ERROR: Option -c conflict."
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -L -c l7vsd_virtualservice -c l7vsd_virtualservice"

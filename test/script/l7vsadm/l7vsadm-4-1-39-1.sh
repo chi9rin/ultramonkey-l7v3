@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -A -t localhost:40001 -m ip -L 2>&1 | grep "PARSE ERROR : access log flag value is not specified."`
-EXPECT="PARSE ERROR : access log flag value is not specified."
+RET=`$L7VSADM -A -t localhost:40001 -m ip -L 2>&1 | grep "PARSE ERROR: access log flag value is not specified.(--access-log)"`
+EXPECT="PARSE ERROR: access log flag value is not specified.(--access-log)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -A -t localhost:40001 -m ip -L"

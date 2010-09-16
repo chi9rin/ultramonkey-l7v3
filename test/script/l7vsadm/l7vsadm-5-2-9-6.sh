@@ -37,8 +37,8 @@ then
 fi
 
 
-RET=`$L7VSADM -d -t 127.0.0.1:40001 -m ip -r 0.0.0.0:3333 2>&1 | grep "PARSE ERROR : realserver endpoint parse error:invalid address (INADDR_ANY):0.0.0.0:3333"`
-EXPECT="PARSE ERROR : realserver endpoint parse error:invalid address (INADDR_ANY):0.0.0.0:3333"
+RET=`$L7VSADM -d -t 127.0.0.1:40001 -m ip -r 0.0.0.0:3333 2>&1 | grep "PARSE ERROR: realserver endpoint parse error(--real-server): invalid address (INADDR_ANY):0.0.0.0:3333"`
+EXPECT="PARSE ERROR: realserver endpoint parse error(--real-server): invalid address (INADDR_ANY):0.0.0.0:3333"
 
 if [ "${RET}" != "${EXPECT}" ]
 then

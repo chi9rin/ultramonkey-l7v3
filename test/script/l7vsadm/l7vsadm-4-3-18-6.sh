@@ -18,8 +18,8 @@ then
         exit 1
 fi
 
-RET=`$L7VSADM -E -t 127.0.0.1:40001 -m ip -b 0.0.0.0:3333 2>&1 | grep "PARSE ERROR : sorryserver endpoint parse error:invalid address (INADDR_ANY):0.0.0.0:3333"`
-EXPECT="PARSE ERROR : sorryserver endpoint parse error:invalid address (INADDR_ANY):0.0.0.0:3333"
+RET=`$L7VSADM -E -t 127.0.0.1:40001 -m ip -b 0.0.0.0:3333 2>&1 | grep "PARSE ERROR: sorryserver endpoint parse error(--bypass): invalid address (INADDR_ANY):0.0.0.0:3333"`
+EXPECT="PARSE ERROR: sorryserver endpoint parse error(--bypass): invalid address (INADDR_ANY):0.0.0.0:3333"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -E -t 127.0.0.1:40001 -m ip -b 0.0.0.0:3333"

@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -A -t 127.0.0.1:40001 -m ip -f 1 -f 0 2>&1 | grep "PARSE ERROR : Option -f is conflict."`
-EXPECT="PARSE ERROR : Option -f is conflict."
+RET=`$L7VSADM -A -t 127.0.0.1:40001 -m ip -f 1 -f 0 2>&1 | grep "PARSE ERROR: Option -f is conflict."`
+EXPECT="PARSE ERROR: Option -f is conflict."
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m ip -f 1 -f 0"

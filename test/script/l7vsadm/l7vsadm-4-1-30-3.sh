@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -A -t localhost:40001 -m ip -q 1000K 2>&1 | grep "PARSE ERROR : qos_downstream value is too big."`
-EXPECT="PARSE ERROR : qos_downstream value is too big."
+RET=`$L7VSADM -A -t localhost:40001 -m ip -q 1000K 2>&1 | grep "PARSE ERROR: QoS downstream value is too big.(--qos-down)"`
+EXPECT="PARSE ERROR: QoS downstream value is too big.(--qos-down)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -A -t localhost:40001 -m ip -q 1000K"

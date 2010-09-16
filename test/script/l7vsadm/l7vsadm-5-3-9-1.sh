@@ -37,8 +37,8 @@ then
 fi
 
 
-RET=`$L7VSADM -e -t 127.0.0.1:40001 -m ip -r -w 3 2>&1 | grep "PARSE ERROR : realserver endpoint parse error:invalid endpoint:Service not found:-w"`
-EXPECT="PARSE ERROR : realserver endpoint parse error:invalid endpoint:Service not found:-w"
+RET=`$L7VSADM -e -t 127.0.0.1:40001 -m ip -r -w 3 2>&1 | grep "PARSE ERROR: realserver endpoint parse error(--real-server): invalid endpoint:Service not found:-w"`
+EXPECT="PARSE ERROR: realserver endpoint parse error(--real-server): invalid endpoint:Service not found:-w"
 echo "$RET"
 if [ "${RET}" != "${EXPECT}" ]
 then

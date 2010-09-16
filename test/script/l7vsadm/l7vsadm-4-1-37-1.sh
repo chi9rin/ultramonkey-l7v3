@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -A -t localhost:40001 -m ip -O 2>&1 | grep "PARSE ERROR : socket_option is not specified."`
-EXPECT="PARSE ERROR : socket_option is not specified."
+RET=`$L7VSADM -A -t localhost:40001 -m ip -O 2>&1 | grep "PARSE ERROR: socket option is not specified.(--sockopt)"`
+EXPECT="PARSE ERROR: socket option is not specified.(--sockopt)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -A -t localhost:40001 -m ip -O"

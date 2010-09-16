@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -A -t localhost:40001 -m ip -z /aaa/bbb 2>&1 | grep "PARSE ERROR : ssl config file cannot open."`
-EXPECT="PARSE ERROR : ssl config file cannot open."
+RET=`$L7VSADM -A -t localhost:40001 -m ip -z /aaa/bbb 2>&1 | grep "PARSE ERROR: ssl config file cannot open.(--ssl)"`
+EXPECT="PARSE ERROR: ssl config file cannot open.(--ssl)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -A -t localhost:40001 -m ip -z /aaa/bbb"

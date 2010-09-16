@@ -36,8 +36,8 @@ then
         exit 1
 fi
 
-RET=`$L7VSADM -e -t 127.0.0.1:40001 -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} -w 101 2>&1 | grep "PARSE ERROR : invalid weight value."`
-EXPECT="PARSE ERROR : invalid weight value."
+RET=`$L7VSADM -e -t 127.0.0.1:40001 -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} -w 101 2>&1 | grep "PARSE ERROR: invalid weight value.(--weight)"`
+EXPECT="PARSE ERROR: invalid weight value.(--weight)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -e -t 127.0.0.1:40001 -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} -w 101"

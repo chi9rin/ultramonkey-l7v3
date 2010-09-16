@@ -19,8 +19,8 @@ then
 fi
 
 
-RET=`$L7VSADM -E -t 127.0.0.1:40001 -m ip -u -1 2>&1 | grep "PARSE ERROR : invalid sorry_maxconnection value."`
-EXPECT="PARSE ERROR : invalid sorry_maxconnection value."
+RET=`$L7VSADM -E -t 127.0.0.1:40001 -m ip -u -1 2>&1 | grep "PARSE ERROR: invalid sorry max connection value.(--upper)"`
+EXPECT="PARSE ERROR: invalid sorry max connection value.(--upper)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -E -t 127.0.0.1:40001 -m ip -u -1"

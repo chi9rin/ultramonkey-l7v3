@@ -37,8 +37,8 @@ then
 fi
 
 
-RET=`$L7VSADM -d -t 127.0.0.1:40001 -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} -x  2>&1 | grep "PARSE ERROR : realserver option not found:-x"`
-EXPECT="PARSE ERROR : realserver option not found:-x"
+RET=`$L7VSADM -d -t 127.0.0.1:40001 -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} -x  2>&1 | grep "PARSE ERROR: realserver option not found(--real-server): -x"`
+EXPECT="PARSE ERROR: realserver option not found(--real-server): -x"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -d -t 127.0.0.1:40001 -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} -x"

@@ -18,7 +18,7 @@ then
         exit 1
 fi
 
-EXPECT="PARSE ERROR : sorryserver endpoint parse error:invalid endpoint:Host not found.*:333.333.333.333:3333"
+EXPECT="PARSE ERROR: sorryserver endpoint parse error(--bypass): invalid endpoint:Host not found.*:333.333.333.333:3333"
 $L7VSADM -E -t 127.0.0.1:40001 -m ip -b 333.333.333.333:3333 2>&1 | grep "${EXPECT}" > /dev/null
 if [ "$?" -ne 0 ]
 then

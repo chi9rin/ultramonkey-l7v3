@@ -40,7 +40,7 @@ then
 fi
 
 #Connect
-for (( i = 0; i < 8; i++ )){
+for (( i = 0; i < 10; i++ )){
 	RET=`wget -t 1 -qO- http://127.0.0.1:40001/`
 	if [ "${RET}" != "${RealServer1}" ]
 	then

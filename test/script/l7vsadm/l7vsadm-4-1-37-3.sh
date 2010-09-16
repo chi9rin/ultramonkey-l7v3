@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -A -t localhost:40001 -m ip -O deferacceptnodelay 2>&1 | grep "PARSE ERROR : unknown socket option."`
-EXPECT="PARSE ERROR : unknown socket option."
+RET=`$L7VSADM -A -t localhost:40001 -m ip -O deferacceptnodelay 2>&1 | grep "PARSE ERROR: unknown socket option.(--sockopt)"`
+EXPECT="PARSE ERROR: unknown socket option.(--sockopt)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -A -t localhost:40001 -m ip -O deferacceptnodelay"

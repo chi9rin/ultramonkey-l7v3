@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -X 2>&1 | grep "PARSE ERROR : command not found."`
-EXPECT="PARSE ERROR : command not found."
+RET=`$L7VSADM -X 2>&1 | grep "PARSE ERROR: command not found."`
+EXPECT="PARSE ERROR: command not found."
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -X"

@@ -38,7 +38,7 @@ then
         exit 1
 fi
 
-RET=`cat ${L7VS_LOG_DIR}/l7directord.log | grep "\[ERR0201\] Failed to add virtual service to l7vsd: .127.0.0.1:50001 ip ', output: .PARSE ERROR : protocol module argument error: Option error.'"`
+RET=`cat ${L7VS_LOG_DIR}/l7directord.log | grep "\[ERR0201\] Failed to add virtual service to l7vsd: .127.0.0.1:50001 ip ', output: .PARSE ERROR: protocol module argument error(--proto-module): Option error.'"`
 if [ -z "${RET}" ]
 then
         echo "Test failed: cat ${L7VS_LOG_DIR}/l7directord.log"
@@ -54,7 +54,7 @@ then
         exit 1
 fi
 
-RET=`cat ${L7VS_LOG_DIR}/l7directord.log | grep "\[ERR0201\] Failed to add virtual service to l7vsd: .127.0.0.1:50002 sslid ', output: .PARSE ERROR : protocol module argument error: Option error.'"`
+RET=`cat ${L7VS_LOG_DIR}/l7directord.log | grep "\[ERR0201\] Failed to add virtual service to l7vsd: .127.0.0.1:50002 sslid ', output: .PARSE ERROR: protocol module argument error(--proto-module): Option error.'"`
 if [ -z "${RET}" ]
 then
         echo "Test failed: cat ${L7VS_LOG_DIR}/l7directord.log"
@@ -69,7 +69,7 @@ then
         exit 1
 fi
 
-RET=`cat ${L7VS_LOG_DIR}/l7directord.log | grep "\[ERR0201\] Failed to add virtual service to l7vsd: .127.0.0.1:50003 sessionless ', output: .PARSE ERROR : protocol module argument error: Option error.'"`
+RET=`cat ${L7VS_LOG_DIR}/l7directord.log | grep "\[ERR0201\] Failed to add virtual service to l7vsd: .127.0.0.1:50003 sessionless ', output: .PARSE ERROR: protocol module argument error(--proto-module): Option error.'"`
 if [ -z "${RET}" ]
 then
         echo "Test failed: cat ${L7VS_LOG_DIR}/l7directord.log"

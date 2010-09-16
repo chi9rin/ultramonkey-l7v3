@@ -11,9 +11,9 @@ then
 fi
 usleep 100000
 
-EXPECT="PARSE ERROR : target endpoint parse error:invalid endpoint:Host not found.*:333.333.333.333:3333"
-$L7VSADM -A -t 333.333.333.333:3333 -m ip 2>&1 | grep "${EXPECT}" > /dev/null
-if [ "$?" -ne 0 ]
+RET=`$L7VSADM -A -t 333.333.333.333:3333 -m ip 2>&1 | grep "PARSE ERROR:"`
+EXPECT="PARSE ERROR: target endpoint parse error(--tcp-service): invalid endpoint:Host not found (authoritative):333.333.333.333:3333"
+if [ "$RET" != "$EXPECT" ]
 then
         echo "Test failed: $L7VSADM -A -t 333.333.333.333:3333 -m ip"
         exit 1

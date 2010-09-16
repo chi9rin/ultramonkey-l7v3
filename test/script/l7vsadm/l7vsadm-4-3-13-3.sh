@@ -19,8 +19,8 @@ then
 fi
 
 
-RET=`$L7VSADM -E -t 127.0.0.1:40001 -m ip -s xx 2>&1 | grep "PARSE ERROR : scheduler module not found:xx"`
-EXPECT="PARSE ERROR : scheduler module not found:xx"
+RET=`$L7VSADM -E -t 127.0.0.1:40001 -m ip -s xx 2>&1 | grep "PARSE ERROR: scheduler module not found(--scheduler): xx"`
+EXPECT="PARSE ERROR: scheduler module not found(--scheduler): xx"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -E -t 127.0.0.1:40001 -m ip -s xx"

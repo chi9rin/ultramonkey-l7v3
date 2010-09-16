@@ -29,8 +29,8 @@ then
         exit 1
 fi
 
-RET=`$L7VSADM -a -t 127.0.0.1:40001 -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} -w 1 -w 2 2>&1 | grep "PARSE ERROR : Option -w is conflict."`
-EXPECT="PARSE ERROR : Option -w is conflict."
+RET=`$L7VSADM -a -t 127.0.0.1:40001 -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} -w 1 -w 2 2>&1 | grep "PARSE ERROR: Option -w is conflict."`
+EXPECT="PARSE ERROR: Option -w is conflict."
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -a -t 127.0.0.1:40001 -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} -w 1 -w 2"

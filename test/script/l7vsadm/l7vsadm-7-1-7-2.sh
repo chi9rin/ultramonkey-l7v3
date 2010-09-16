@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -L -c l7vsd_x -l error 2>&1 | grep "PARSE ERROR : logcategory not found:l7vsd_x"`
-EXPECT="PARSE ERROR : logcategory not found:l7vsd_x"
+RET=`$L7VSADM -L -c l7vsd_x -l error 2>&1 | grep "PARSE ERROR: log category not found(--category): l7vsd_x"`
+EXPECT="PARSE ERROR: log category not found(--category): l7vsd_x"
 echo "$RET"
 if [ "${RET}" != "${EXPECT}" ]
 then

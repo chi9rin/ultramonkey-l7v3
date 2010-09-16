@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -P -r x 2>&1 | grep "PARSE ERROR : reload component not found:x"`
-EXPECT="PARSE ERROR : reload component not found:x"
+RET=`$L7VSADM -P -r x 2>&1 | grep "PARSE ERROR: reload component not found(--reload): x"`
+EXPECT="PARSE ERROR: reload component not found(--reload): x"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -P -r x"

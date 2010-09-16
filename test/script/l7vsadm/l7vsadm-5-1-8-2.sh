@@ -29,8 +29,8 @@ then
         exit 1
 fi
 
-RET=`$L7VSADM -a -t 127.0.0.1:40001 -m rrrrrrrrrrrrrrrrrrrr -r ${RealServer1_ADDR}:${RealServer1_PORT} 2>&1 | grep "PARSE ERROR : protomod name is too long."`
-EXPECT="PARSE ERROR : protomod name is too long."
+RET=`$L7VSADM -a -t 127.0.0.1:40001 -m rrrrrrrrrrrrrrrrrrrr -r ${RealServer1_ADDR}:${RealServer1_PORT} 2>&1 | grep "PARSE ERROR: protocol module name is too long.(--proto-module)"`
+EXPECT="PARSE ERROR: protocol module name is too long.(--proto-module)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -a -t 127.0.0.1:40001 -m rrrrrrrrrrrrrrrrrrrr -r ${RealServer1_ADDR}:${RealServer1_PORT}"

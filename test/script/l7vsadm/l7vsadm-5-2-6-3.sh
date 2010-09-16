@@ -37,8 +37,8 @@ then
 fi
 
 
-RET=`$L7VSADM -d -t :3333 -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} 2>&1 | grep "PARSE ERROR : target endpoint parse error:hostname is not specified::3333"`
-EXPECT="PARSE ERROR : target endpoint parse error:hostname is not specified::3333"
+RET=`$L7VSADM -d -t :3333 -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} 2>&1 | grep "PARSE ERROR: target endpoint parse error(--tcp-service): hostname is not specified::3333"`
+EXPECT="PARSE ERROR: target endpoint parse error(--tcp-service): hostname is not specified::3333"
 echo "$RET"
 if [ "${RET}" != "${EXPECT}" ]
 then

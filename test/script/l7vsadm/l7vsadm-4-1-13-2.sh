@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -A -t 127.0.0.1:40001 -m ip -s ssssssssssssssssssss 2>&1 | grep "PARSE ERROR : scheduler name is too long."`
-EXPECT="PARSE ERROR : scheduler name is too long."
+RET=`$L7VSADM -A -t 127.0.0.1:40001 -m ip -s ssssssssssssssssssss 2>&1 | grep "PARSE ERROR: schedule module name is too long.(--scheduler)"`
+EXPECT="PARSE ERROR: schedule module name is too long.(--scheduler)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m ip -s ssssssssssssssssssss"

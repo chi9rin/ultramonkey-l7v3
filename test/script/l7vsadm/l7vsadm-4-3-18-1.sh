@@ -18,8 +18,8 @@ then
         exit 1
 fi
 
-RET=`$L7VSADM -E -t 127.0.0.1:40001 -m ip -b 2>&1 | grep "PARSE ERROR : sorryserver endpoint is not specified."`
-EXPECT="PARSE ERROR : sorryserver endpoint is not specified."
+RET=`$L7VSADM -E -t 127.0.0.1:40001 -m ip -b 2>&1 | grep "PARSE ERROR: sorryserver endpoint is not specified.(--bypass)"`
+EXPECT="PARSE ERROR: sorryserver endpoint is not specified.(--bypass)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -E -t 127.0.0.1:40001 -m ip -b"

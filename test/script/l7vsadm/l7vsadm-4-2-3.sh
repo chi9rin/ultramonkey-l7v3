@@ -18,8 +18,8 @@ then
         exit 1
 fi
 
-RET=`$L7VSADM -D -t localhost:40001 -x -m ip 2>&1 | grep "PARSE ERROR : virtualservice option not found:-x"`
-EXPECT="PARSE ERROR : virtualservice option not found:-x"
+RET=`$L7VSADM -D -t localhost:40001 -x -m ip 2>&1 | grep "PARSE ERROR: virtualservice option not found: -x"`
+EXPECT="PARSE ERROR: virtualservice option not found: -x"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -D -t localhost:40001 -x -m ip"

@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -A -t localhost:40001 -m ip -O deferaccept,deferaccept 2>&1 | grep "PARSE ERROR : socket option deferaccept is duplicated."`
-EXPECT="PARSE ERROR : socket option deferaccept is duplicated."
+RET=`$L7VSADM -A -t localhost:40001 -m ip -O deferaccept,deferaccept 2>&1 | grep "PARSE ERROR: socket option deferaccept is duplicated.(--sockopt)"`
+EXPECT="PARSE ERROR: socket option deferaccept is duplicated.(--sockopt)"
 echo "$RET"
 if [ "${RET}" != "${EXPECT}" ]
 then

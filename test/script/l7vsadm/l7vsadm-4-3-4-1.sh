@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -E -m ip 2>&1 | grep "PARSE ERROR : Argument argc is illegal for -E command."`
-EXPECT="PARSE ERROR : Argument argc is illegal for -E command."
+RET=`$L7VSADM -E -m ip 2>&1 | grep "PARSE ERROR: Argument argc is illegal for -E command."`
+EXPECT="PARSE ERROR: Argument argc is illegal for -E command."
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -E -m ip"

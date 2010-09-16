@@ -11,7 +11,7 @@ then
 fi
 usleep 100000
 
-EXPECT="PARSE ERROR : target endpoint parse error:invalid endpoint:Host not found.*:\[3ae3:90a0:bd05:01d2:288a:1fc0:0001:10ee-ErrorAdder\]:40001"
+EXPECT="PARSE ERROR: target endpoint parse error(--tcp-service): invalid endpoint:Host not found.*:\[3ae3:90a0:bd05:01d2:288a:1fc0:0001:10ee-ErrorAdder\]:40001"
 $L7VSADM -A -t [3ae3:90a0:bd05:01d2:288a:1fc0:0001:10ee-ErrorAdder]:40001 -m sessionless 2>&1 | grep "${EXPECT}" > /dev/null
 if [ "$?" -ne 0 ]
 then

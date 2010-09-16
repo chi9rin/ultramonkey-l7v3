@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -A -t localhost:40001 -m ip -L 2 2>&1 | grep "PARSE ERROR : invalid access log flag value."`
-EXPECT="PARSE ERROR : invalid access log flag value."
+RET=`$L7VSADM -A -t localhost:40001 -m ip -L 2 2>&1 | grep "PARSE ERROR: invalid access log flag value.(--access-log)"`
+EXPECT="PARSE ERROR: invalid access log flag value.(--access-log)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -A -t localhost:40001 -m ip -L 2"

@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -A -t 127.0.0.1:40001 -m ip --xxx 2>&1 | grep "PARSE ERROR : protocol module argument error: Option error."` 
-EXPECT="PARSE ERROR : protocol module argument error: Option error."
+RET=`$L7VSADM -A -t 127.0.0.1:40001 -m ip --xxx 2>&1 | grep "PARSE ERROR: protocol module argument error(--proto-module): Option error."` 
+EXPECT="PARSE ERROR: protocol module argument error(--proto-module): Option error."
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m ip --xxx"
@@ -26,7 +26,7 @@ then
         exit 1
 fi
 
-RET=`cat ${L7VS_LOG_DIR}/l7vsadm.log | grep "\[ERROR\] l7vsadm_parse ADM42800018 protocol module argument error: Option error."`
+RET=`cat ${L7VS_LOG_DIR}/l7vsadm.log | grep "\[ERROR\] l7vsadm_parse ADM42800018 protocol module argument error(--proto-module): Option error."`
 if [ -z "${RET}" ]
 then
         echo "Test failed: cat ${L7VS_LOG_DIR}/l7vsadm.log"

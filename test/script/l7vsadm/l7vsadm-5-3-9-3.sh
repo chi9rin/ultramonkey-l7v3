@@ -37,8 +37,8 @@ then
 fi
 
 
-RET=`$L7VSADM -e -t 127.0.0.1:40001 -m ip -r :3333 -w 3 2>&1 | grep "PARSE ERROR : realserver endpoint parse error:hostname is not specified::3333"`
-EXPECT="PARSE ERROR : realserver endpoint parse error:hostname is not specified::3333"
+RET=`$L7VSADM -e -t 127.0.0.1:40001 -m ip -r :3333 -w 3 2>&1 | grep "PARSE ERROR: realserver endpoint parse error(--real-server): hostname is not specified::3333"`
+EXPECT="PARSE ERROR: realserver endpoint parse error(--real-server): hostname is not specified::3333"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -e -t 127.0.0.1:40001 -m ip -r :3333 -w 3"

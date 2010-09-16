@@ -18,8 +18,8 @@ then
         exit 1
 fi
 
-RET=`$L7VSADM -E -t 127.0.0.1:40001 -m ip -L -1 2>&1 | grep "PARSE ERROR : invalid access log flag value."`
-EXPECT="PARSE ERROR : invalid access log flag value."
+RET=`$L7VSADM -E -t 127.0.0.1:40001 -m ip -L -1 2>&1 | grep "PARSE ERROR: invalid access log flag value.(--access-log)"`
+EXPECT="PARSE ERROR: invalid access log flag value.(--access-log)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -E -t 127.0.0.1:40001 -m ip -L -1"

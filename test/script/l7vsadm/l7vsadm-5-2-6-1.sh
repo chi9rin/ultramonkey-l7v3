@@ -37,8 +37,8 @@ then
 fi
 
 
-RET=`$L7VSADM -d -t -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} 2>&1 | grep "PARSE ERROR : Argument argc is illegal for -d command."`
-EXPECT="PARSE ERROR : Argument argc is illegal for -d command."
+RET=`$L7VSADM -d -t -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} 2>&1 | grep "PARSE ERROR: Argument argc is illegal for -d command."`
+EXPECT="PARSE ERROR: Argument argc is illegal for -d command."
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -d -t -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT}"

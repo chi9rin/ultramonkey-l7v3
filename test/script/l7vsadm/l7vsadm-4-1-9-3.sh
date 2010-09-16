@@ -11,8 +11,8 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -A -t :3333 -m ip 2>&1 | grep "PARSE ERROR : target endpoint parse error:hostname is not specified::3333"`
-EXPECT="PARSE ERROR : target endpoint parse error:hostname is not specified::3333"
+RET=`$L7VSADM -A -t :3333 -m ip 2>&1 | grep "PARSE ERROR: target endpoint parse error(--tcp-service): hostname is not specified::3333"`
+EXPECT="PARSE ERROR: target endpoint parse error(--tcp-service): hostname is not specified::3333"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -A -t :3333 -m ip"

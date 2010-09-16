@@ -19,8 +19,8 @@ then
 fi
 
 
-RET=`$L7VSADM -E -t 127.0.0.1:40001 -m -s wrr 2>&1 | grep "PARSE ERROR : protocol module not found:-s"`
-EXPECT="PARSE ERROR : protocol module not found:-s"
+RET=`$L7VSADM -E -t 127.0.0.1:40001 -m -s wrr 2>&1 | grep "PARSE ERROR: protocol module not found(--proto-module): -s"`
+EXPECT="PARSE ERROR: protocol module not found(--proto-module): -s"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -E -t 127.0.0.1:40001 -m -s wrr"

@@ -4,7 +4,7 @@
 
 
 RET=`$L7VSADM 2>&1` 
-EXPECT="COMMON ERROR : connect() failed: No such file or directory."
+EXPECT="COMMON ERROR: connect() failed: No such file or directory."
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM"
