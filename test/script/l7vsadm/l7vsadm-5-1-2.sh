@@ -13,6 +13,16 @@ then
         exit 1
 fi
 
+RealServer2=RealServer2
+RealServer2_ADDR=127.0.0.1
+RealServer2_PORT=50002
+start_lighttpd -s $RealServer2 -a $RealServer2_ADDR -p $RealServer2_PORT
+if [ $? -ne 0 ]
+then
+        echo "Test failed: start_lighttpd RealServer2"
+        exit 1
+fi
+
 #Add Service
 $L7VSD
 if [ $? -ne 0 ]
@@ -29,10 +39,17 @@ then
         exit 1
 fi
 
-$L7VSADM --add-server --tcp-service 127.0.0.1:40001 --proto-module ip --real-server ${RealServer1_ADDR}:${RealServer1_PORT} --weight 2
+$L7VSADM --add-server --tcp-service 127.0.0.1:40001 --proto-module ip --real-server ${RealServer1_ADDR}:${RealServer1_PORT} --weight 2 --masq
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM --add-server --tcp-service 127.0.0.1:40001 --proto-module ip --real-server ${RealServer1_ADDR}:${RealServer1_PORT} --weight 2"
+        echo "Test failed: $L7VSADM --add-server --tcp-service 127.0.0.1:40001 --proto-module ip --real-server ${RealServer1_ADDR}:${RealServer1_PORT} --weight 2 --masq"
+        exit 1
+fi
+
+$L7VSADM --add-server --tcp-service 127.0.0.1:40001 --proto-module ip --real-server ${RealServer2_ADDR}:${RealServer2_PORT} --weight 2 --tproxy
+if [ $? -ne 0 ]
+then
+        echo "Test failed: $L7VSADM --add-server --tcp-service 127.0.0.1:40001 --proto-module ip --real-server ${RealServer2_ADDR}:${RealServer2_PORT} --weight 2 --tproxy"
         exit 1
 fi
 
@@ -41,7 +58,8 @@ EXPECT="Layer-7 Virtual Server version 3.0.0-1
 Prot LocalAddress:Port ProtoMod Scheduler
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
 TCP 127.0.0.1:40001 ip rr
-  -> ${RealServer1_ADDR}:${RealServer1_PORT}              Masq    2      0          0         "
+  -> ${RealServer1_ADDR}:${RealServer1_PORT}              Masq    2      0          0         
+  -> ${RealServer2_ADDR}:${RealServer2_PORT}              Tproxy  2      0          0         "
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM"

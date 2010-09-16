@@ -36,13 +36,12 @@ then
         exit 1
 fi
 
-$L7VSADM --edit-server --tcp-service 127.0.0.1:40001 --proto-module ip --real-server ${RealServer1_ADDR}:${RealServer1_PORT} --weight 2 --tproxy
+$L7VSADM -e -t 127.0.0.1:40001 -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} -w 2 -T
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM --edit-server --tcp-service 127.0.0.1:40001 --proto-module ip --real-server ${RealServer1_ADDR}:${RealServer1_PORT} --weight 2 --tproxy"
+        echo "Test failed: $L7VSADM -e -t 127.0.0.1:40001 -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} -w 2 -T"
         exit 1
 fi
-
 
 RET=`$L7VSADM -l -n`
 EXPECT="Layer-7 Virtual Server version 3.0.0-1
