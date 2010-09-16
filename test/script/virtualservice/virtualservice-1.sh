@@ -95,7 +95,7 @@ Prot LocalAddress:Port ProtoMod Scheduler Protomod_opt_string
      Access_log_rotate option
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
 TCP localhost:40001 sessionless wrr --sorry-uri '/'
-    localhost:50001 10 0
+    localhost:50001(Masq) 10 0
     100000000 0
     100000000 0
     none

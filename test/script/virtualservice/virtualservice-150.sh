@@ -49,7 +49,7 @@ for (( i = 0 ; i < 4; i++ )){
 	fi
 }
 
-RET=`cat ${L7VS_LOG_DIR}/l7vsd.log | grep "SSL session cache information : Session number\[2\]"`
+RET=`cat ${L7VS_LOG_DIR}/l7vsd.log | grep "SSL session cache information: Session number\[2\]"`
 if [ -z "${RET}" ]
 then
         echo "Test failed: cat ${L7VS_LOG_DIR}/l7vsd.log"

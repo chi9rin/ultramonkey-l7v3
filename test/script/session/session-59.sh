@@ -128,14 +128,14 @@ then
         exit 1
 fi
 
-RET=`cat ${L7VS_LOG_DIR}/l7vsd.log | grep "\[DEBUG\] l7vsd_virtualservice VSD10700100 in_function : int virtualservice_tcp::conv_verify_option(std::string opt_string) : opt_string = SSL_VERIFY_NONE"`
+RET=`cat ${L7VS_LOG_DIR}/l7vsd.log | grep "\[DEBUG\] l7vsd_virtualservice VSD10700100 in_function: int virtualservice_tcp::conv_verify_option(std::string opt_string): opt_string = SSL_VERIFY_NONE"`
 if [ -z "${RET}" ]
 then
         echo "Test failed: cat ${L7VS_LOG_DIR}/l7vsd.log"
         exit 1
 fi
 
-RET=`cat ${L7VS_LOG_DIR}/l7vsd.log | grep "\[DEBUG\] l7vsd_virtualservice VSD10700105 out_function : bool virtualservice_tcp::get_ssl_parameter() :" | grep "verify_options = 0"`
+RET=`cat ${L7VS_LOG_DIR}/l7vsd.log | grep "\[DEBUG\] l7vsd_virtualservice VSD10700105 out_function: bool virtualservice_tcp::get_ssl_parameter():" | grep "verify_options = 0"`
 if [ -z "${RET}" ]
 then
         echo "Test failed: cat ${L7VS_LOG_DIR}/l7vsd.log"

@@ -128,7 +128,7 @@ then
         exit 1
 fi
 
-RET=`cat ${L7VS_LOG_DIR}/l7vsd.log | grep "\[DEBUG\] l7vsd_virtualservice VSD10700105 out_function : bool virtualservice_tcp::get_ssl_parameter() :"  | grep "ca_dir = /etc/l7vs/sslproxy/cert/" | grep " ca_file = ,"`
+RET=`cat ${L7VS_LOG_DIR}/l7vsd.log | grep "\[DEBUG\] l7vsd_virtualservice VSD10700105 out_function: bool virtualservice_tcp::get_ssl_parameter():"  | grep "ca_dir = /etc/l7vs/sslproxy/cert/" | grep " ca_file = ,"`
 if [ -z "${RET}" ]
 then
         echo "Test failed: cat ${L7VS_LOG_DIR}/l7vsd.log"

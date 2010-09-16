@@ -180,7 +180,7 @@ Prot LocalAddress:Port ProtoMod Scheduler Protomod_opt_string
      Access_log_rotate option
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
 TCP localhost:40001 ip lc --timeout 3600 --no-reschedule --sorry-uri '/'
-    localhost:50001 200 0
+    localhost:50001(Masq) 200 0
     1000000 0
     1000000 0
     none

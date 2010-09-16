@@ -24,7 +24,7 @@ then
         exit 1
 fi
 
-RET=`cat ${L7VS_LOG_DIR}/l7vsd.log | grep "\[ERROR\] l7vsd_virtualservice VSD40700999 Set private key file and filetype error : Invalid argument."`
+RET=`cat ${L7VS_LOG_DIR}/l7vsd.log | grep "\[ERROR\] l7vsd_virtualservice VSD40700999 Set private key file and filetype error: Invalid argument."`
 if [ -z "${RET}" ]
 then
         echo "Test failed: cat ${L7VS_LOG_DIR}/l7vsd.log"

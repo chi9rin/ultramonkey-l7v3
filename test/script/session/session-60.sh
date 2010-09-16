@@ -130,7 +130,7 @@ then
 fi
 
 
-RET=`cat ${L7VS_LOG_DIR}/l7vsd.log | grep "\[DEBUG\] l7vsd_virtualservice VSD10700105 out_function : bool virtualservice_tcp::get_ssl_parameter() :" | grep "verify_options = 1"`
+RET=`cat ${L7VS_LOG_DIR}/l7vsd.log | grep "\[DEBUG\] l7vsd_virtualservice VSD10700105 out_function: bool virtualservice_tcp::get_ssl_parameter():" | grep "verify_options = 1"`
 if [ -z "${RET}" ]
 then
         echo "Test failed: cat ${L7VS_LOG_DIR}/l7vsd.log"

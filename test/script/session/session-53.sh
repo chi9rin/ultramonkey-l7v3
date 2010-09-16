@@ -124,14 +124,13 @@ fi
 
 RET=`wget -O- https://127.0.0.1:40001/ --certificate=./materials/session-53-newcert.pem --private-key=./materials/session-53-newkey.pem --no-check-certificate`
 EXPECT="${RealServer1}"
-echo "$RET"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: wget -qO- https://127.0.0.1:40001/ --certificate=newcert.pem --private-key=newkey.pem --no-check-certificate"
         exit 1
 fi
 
-RET=`cat ${L7VS_LOG_DIR}/l7vsd.log | grep "\[DEBUG\] l7vsd_virtualservice VSD10700105 out_function : bool virtualservice_tcp::get_ssl_parameter() :" | grep "private_key_dir = /etc/l7vs/sslproxy/cert/, private_key_file = newkey.der, private_key_filetype = 0"`
+RET=`cat ${L7VS_LOG_DIR}/l7vsd.log | grep "\[DEBUG\] l7vsd_virtualservice VSD10700105 out_function: bool virtualservice_tcp::get_ssl_parameter():" | grep "private_key_dir = /etc/l7vs/sslproxy/cert/, private_key_file = newkey.der, private_key_filetype = 0"`
 if [ -z "${RET}" ]
 then
         echo "Test failed: cat ${L7VS_LOG_DIR}/l7vsd.log"

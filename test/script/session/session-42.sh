@@ -38,7 +38,7 @@ then
 fi
 
 #Connect
-RET=`wget -t 1 -T 1 -O- https://127.0.0.1:40001/ --no-check-certificate`
+RET=`wget -t 1 -O- https://127.0.0.1:40001/ --no-check-certificate`
 if [ $? -eq 0 ]
 then
         echo "Test failed: wget -qO- -t 1 http://127.0.0.1:40001/ "
