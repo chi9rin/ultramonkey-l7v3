@@ -100,8 +100,10 @@ l7vs::LoggerImpl &l7vs::LoggerImpl::getInstance()
 
 l7vs::LoggerImpl::LoggerImpl()
         :    initialized(false),
-             snmpSendtrap(NULL)
+             snmpSendtrap(NULL),
+             logtrap_level(LOG_LV_NONE)
 {
+        logtrap = 0;
         levelTable[LOG_LV_NONE]        = log4cxx::Level::DEBUG_INT;
         levelTable[LOG_LV_DEBUG]    = log4cxx::Level::DEBUG_INT;
         levelTable[LOG_LV_INFO]        = log4cxx::Level::INFO_INT;
@@ -230,10 +232,10 @@ l7vs::LoggerImpl::LoggerImpl()
         name_category_map["l7vsd_system_environment"] = LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT;
         category_name_map[LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT] = "l7vsd_system_environment";
 
-        //l7vsd snmpbridge category initialize
-        category_level_map[LOG_CAT_L7VSD_SNMPBRIDGE] = LOG_LV_ERROR;
-        name_category_map["l7vsd_snmpbridge"] = LOG_CAT_L7VSD_SNMPBRIDGE;
-        category_name_map[LOG_CAT_L7VSD_SNMPBRIDGE] = "l7vsd_snmpbridge";
+        //l7vsd snmpagent category initialize
+        category_level_map[LOG_CAT_L7VSD_SNMPAGENT] = LOG_LV_ERROR;
+        name_category_map["l7vsd_snmpagent"] = LOG_CAT_L7VSD_SNMPAGENT;
+        category_name_map[LOG_CAT_L7VSD_SNMPAGENT] = "l7vsd_snmpagent";
 
         //l7vsd protocol module category initialize
         category_level_map[LOG_CAT_PROTOCOL] = LOG_LV_ERROR;
@@ -290,67 +292,6 @@ l7vs::LoggerImpl::LoggerImpl()
         category_level_map[LOG_CAT_SCHEDULE] = LOG_LV_ERROR;
         name_category_map["l7vsadm_schedule"] = LOG_CAT_SCHEDULE;
         category_name_map[LOG_CAT_SCHEDULE] = "l7vsadm_schedule";
-
-#elif defined(LOGGER_PROCESS_SNM)
-        //snmpagent start stop category initialize
-        category_level_map[LOG_CAT_SNMPAGENT_START_STOP] = LOG_LV_ERROR;
-        name_category_map["snmpagent_start_stop"] = LOG_CAT_SNMPAGENT_START_STOP;
-        category_name_map[LOG_CAT_SNMPAGENT_START_STOP] = "snmpagent_start_stop";
-
-        //snmpagent manager recive category initialize
-        category_level_map[LOG_CAT_SNMPAGENT_MANAGER_RECEIVE] = LOG_LV_ERROR;
-        name_category_map["snmpagent_manager_receive"] = LOG_CAT_SNMPAGENT_MANAGER_RECEIVE;
-        category_name_map[LOG_CAT_SNMPAGENT_MANAGER_RECEIVE] = "snmpagent_manager_receive";
-
-        //snmpagent manager send category initialize
-        category_level_map[LOG_CAT_SNMPAGENT_MANAGER_SEND] = LOG_LV_ERROR;
-        name_category_map["snmpagent_manager_send"] = LOG_CAT_SNMPAGENT_MANAGER_SEND;
-        category_name_map[LOG_CAT_SNMPAGENT_MANAGER_SEND] = "snmpagent_manager_send";
-
-        //snmpagent l7vsd recv category initialize
-        category_level_map[LOG_CAT_SNMPAGENT_L7VSD_RECEIVE] = LOG_LV_ERROR;
-        name_category_map["snmpagent_l7vsd_receive"] = LOG_CAT_SNMPAGENT_L7VSD_RECEIVE;
-        category_name_map[LOG_CAT_SNMPAGENT_L7VSD_RECEIVE] = "snmpagent_l7vsd_receive";
-
-        //snmpagent l7vsd recv category initialize
-        category_level_map[LOG_CAT_SNMPAGENT_L7VSD_SEND] = LOG_LV_ERROR;
-        name_category_map["snmpagent_l7vsd_send"] = LOG_CAT_SNMPAGENT_L7VSD_SEND;
-        category_name_map[LOG_CAT_SNMPAGENT_L7VSD_SEND] = "snmpagent_l7vsd_send";
-
-        //snmpagent logger category initialize
-        category_level_map[LOG_CAT_SNMPAGENT_LOGGER] = LOG_LV_ERROR;
-        name_category_map["snmpagent_logger"] = LOG_CAT_SNMPAGENT_LOGGER;
-        category_name_map[LOG_CAT_SNMPAGENT_LOGGER] = "snmpagent_logger";
-
-        //snmpagent parameter category initialize
-        category_level_map[LOG_CAT_SNMPAGENT_PARAMETER] = LOG_LV_ERROR;
-        name_category_map["snmpagent_parameter"] = LOG_CAT_SNMPAGENT_PARAMETER;
-        category_name_map[LOG_CAT_SNMPAGENT_PARAMETER] = "snmpagent_parameter";
-
-        //snmpagent system category initialize
-        category_level_map[LOG_CAT_SNMPAGENT_SYSTEM] = LOG_LV_ERROR;
-        name_category_map["snmpagent_system"] = LOG_CAT_SNMPAGENT_SYSTEM;
-        category_name_map[LOG_CAT_SNMPAGENT_SYSTEM] = "snmpagent_system";
-
-        //snmpagent system category initialize
-        category_level_map[LOG_CAT_SNMPAGENT_SYSTEM_MEMORY] = LOG_LV_ERROR;
-        name_category_map["snmpagent_system_memory"] = LOG_CAT_SNMPAGENT_SYSTEM_MEMORY;
-        category_name_map[LOG_CAT_SNMPAGENT_SYSTEM_MEMORY] = "snmpagent_system_memory";
-
-        //snmpagent system category initialize
-        category_level_map[LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT] = LOG_LV_ERROR;
-        name_category_map["snmpagent_system_endpoint"] = LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT;
-        category_name_map[LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT] = "snmpagent_system_endpoint";
-
-        //snmpagent system category initialize
-        category_level_map[LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL] = LOG_LV_ERROR;
-        name_category_map["snmpagent_system_signal"] = LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL;
-        category_name_map[LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL] = "snmpagent_system_signal";
-
-        //snmpagent system category initialize
-        category_level_map[LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT] = LOG_LV_ERROR;
-        name_category_map["snmpagent_system_environment"] = LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT;
-        category_name_map[LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT] = "snmpagent_system_environment";
 
 #endif
 

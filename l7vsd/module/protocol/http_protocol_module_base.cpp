@@ -1166,3 +1166,133 @@ bool    l7vs::http_protocol_module_base::find_http_header_all(
         return find_result;
 
 }
+
+//! check http get method
+//! @param  const char*            buffer
+//! @return bool                   get method is true. other is false
+bool    l7vs::http_protocol_module_base::is_get_request(const char *buffer)
+{
+        //---------- DEBUG LOG START ------------------------------
+        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+                putLogDebug(24,
+                            "function in  : [is_get_request].",
+                            __FILE__,
+                            __LINE__);
+        }
+        //---------- DEBUG LOG END ------------------------------
+
+        bool    check_result            = false;
+
+        if (likely(buffer != NULL)) {
+                if ( strncmp("GET", buffer, 3) == 0 )
+                {
+                        return true;
+                }
+        }
+
+        //---------- DEBUG LOG START ------------------------------
+        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+                boost::format    outform("function out : [is_get_request] : "
+                                         "check_result = [%d]");
+
+                outform % check_result;
+
+                putLogDebug(25,
+                            outform.str(),
+                            __FILE__,
+                            __LINE__);
+        }
+        //---------- DEBUG LOG END ------------------------------
+
+        return check_result;
+}
+
+//! check http post method
+//! @param  const char*            buffer
+//! @return bool                   post method is true. other is false
+bool    l7vs::http_protocol_module_base::is_post_request(const char *buffer)
+{
+        //---------- DEBUG LOG START ------------------------------
+        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+                putLogDebug(26,
+                            "function in  : [is_post_request].",
+                            __FILE__,
+                            __LINE__);
+        }
+        //---------- DEBUG LOG END ------------------------------
+
+        bool    check_result            = false;
+
+        if (likely(buffer != NULL)) {
+                if ( strncmp("POST", buffer, 4) == 0 )
+                {
+                        return true;
+                }
+        }
+
+        //---------- DEBUG LOG START ------------------------------
+        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+                boost::format    outform("function out : [is_post_request] : "
+                                         "check_result = [%d]");
+
+                outform % check_result;
+
+                putLogDebug(27,
+                            outform.str(),
+                            __FILE__,
+                            __LINE__);
+        }
+        //---------- DEBUG LOG END ------------------------------
+
+        return check_result;
+}
+
+//! increment http statistics
+//! @param  const char*            buffer
+void    l7vs::http_protocol_module_base::increment_stats(const char *buffer)
+{
+        //---------- DEBUG LOG START ------------------------------
+        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+                boost::format    outform("function out : [increment_stats] : "
+                             "http_get_requests = [%d]"
+                             "http_post_requests = [%d]"
+                             "http_requests = [%d]");
+
+                outform % http_stats_info.http_get_requests.get() %
+                          http_stats_info.http_post_requests.get() %
+                          http_stats_info.http_requests.get();
+                putLogDebug(28,
+                            outform.str(),
+                            __FILE__,
+                            __LINE__);
+        }
+        //---------- DEBUG LOG END ------------------------------
+    if (buffer != NULL && statistic != 0) {
+        if (is_get_request(buffer)) {
+        http_stats_info.http_get_requests++;
+        }
+        else if (is_post_request(buffer)) {
+        http_stats_info.http_post_requests++;
+        }
+
+        http_stats_info.http_requests++;
+    }
+
+        //---------- DEBUG LOG START ------------------------------
+        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+                boost::format    outform("function out : [increment_stats] : "
+                                         "http_get_requests = [%d]"
+                                         "http_post_requests = [%d]"
+                                         "http_requests = [%d]");
+
+                outform % http_stats_info.http_get_requests.get() %
+                          http_stats_info.http_post_requests.get() %
+                          http_stats_info.http_requests.get();
+
+                putLogDebug(29,
+                            outform.str(),
+                            __FILE__,
+                            __LINE__);
+        }
+        //---------- DEBUG LOG END ------------------------------
+}

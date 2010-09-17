@@ -113,6 +113,11 @@ public:
                 }
         }
 
+        void    clear_inact() {
+                boost::mutex::scoped_lock lock(*inact_mutex_ptr);
+                ninact = 0;
+        }
+
 protected:
         // nullify function, only effective on realserver_element
         void    set_active(const int in_active) {}

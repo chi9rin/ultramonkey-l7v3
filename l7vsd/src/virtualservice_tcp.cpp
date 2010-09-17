@@ -34,6 +34,7 @@
 #include "logger_enum.h"
 #include "logger.h"
 #include "parameter.h"
+#include "snmpagent.h"
 #include "utility.h"
 #include "logger_access_manager.h"
 
@@ -426,6 +427,29 @@ void l7vs::virtualservice_tcp::handle_accept(const l7vs::session_thread_control 
 
         stc_ptr_noconst->startupstream();
         stc_ptr_noconst->startdownstream();
+
+        //left session is less than the threshold
+        if ((sessionpool_alert_flag == false) &&
+            (pool_sessions.size() < param_data.session_pool_alert_on)) {
+                //create trap message
+                trapmessage trap_msg;
+                trap_msg.type = SESSIONPOOL_ALERT_ON;
+                trap_msg.message = "TRAP00020011,Warning: The left-session has fell below the threshold of left-session warning.";
+                snmpagent::push_trapmessage(trap_msg);
+                //set sessionpool alert flag true
+                sessionpool_alert_flag = true;
+        }
+        //left session is more than the release threshold
+        else if ((sessionpool_alert_flag == true) &&
+                 (pool_sessions.size() > param_data.session_pool_alert_off)) {
+                //create trap message
+                trapmessage trap_msg;
+                trap_msg.type = SESSIONPOOL_ALERT_OFF;
+                trap_msg.message = "TRAP00020012,Warning release: The left-session has exceeded the release threshold of left-session warning.";
+                snmpagent::push_trapmessage(trap_msg);
+                //set sessionpool alert flag true
+                sessionpool_alert_flag = false;
+        }
 
         //waiting, pool_sessions.size become over 1
         //pick up session from pool
@@ -1503,6 +1527,18 @@ void l7vs::virtualservice_tcp::run()
         }
         //start listen
         acceptor_.listen();
+
+        //left session is less than the threshold
+        if ((sessionpool_alert_flag == false) &&
+            (pool_sessions.size() < param_data.session_pool_alert_on)) {
+                //create trap message
+                trapmessage trap_msg;
+                trap_msg.type = SESSIONPOOL_ALERT_ON;
+                trap_msg.message = "TRAP00020011,Warning: The left-session has fell below the threshold of left-session warning.";
+                snmpagent::push_trapmessage(trap_msg);
+                //set sessionpool alert flag true
+                sessionpool_alert_flag = true;
+        }
 
         //switch active a session
         session_thread_control *stc_ptr;

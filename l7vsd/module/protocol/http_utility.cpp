@@ -698,3 +698,38 @@ bool    l7vs::http_utility::find_http_header_all(
         return find_result;
 
 }
+
+//! check http get method
+//! @param  const char*            buffer
+//! @return bool                   get method is true. other is false
+bool    l7vs::http_utility::is_get_request(const char *buffer)
+{
+        bool    check_result            = false;
+
+        if (likely(buffer != NULL)) {
+                if ( strncmp("GET", buffer, 3) == 0 )
+                {
+                        return true;
+                }
+        }
+
+        return check_result;
+}
+
+//! check http post method
+//! @param  const char*            buffer
+//! @return bool                   post method is true. other is false
+bool    l7vs::http_utility::is_post_request(const char *buffer)
+{
+        bool    check_result            = false;
+
+        if (likely(buffer != NULL)) {
+                if ( strncmp("POST", buffer, 4) == 0 )
+                {
+                        return true;
+                }
+        }
+
+        return check_result;
+}
+

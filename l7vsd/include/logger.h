@@ -27,6 +27,7 @@
 
 #include <string>
 #include <logger_enum.h>
+
 namespace l7vs
 {
 
@@ -35,6 +36,7 @@ namespace l7vs
 //! @brief this class create Logger Inmlement class and mediate function.
 class Logger
 {
+
 protected:
         const LOG_CATEGORY_TAG    scopedLogCategory;
         const unsigned int        scopedLogId;
@@ -129,6 +131,18 @@ public:
         //! @param   snmp send trap function object
         //! @retrun  void
         static void    setSnmpSendtrap(const snmpSendtrapFuncType func);
+
+
+        //! set log trap enable flag
+        //! @param   log trap enable flag
+        //! @retrun  void
+        static void set_logtrap(int in_logtrap);
+
+        //! set log trap level
+        //! @param   log trap level
+        //! @retrun  void
+        static void set_logtrap_level(LOG_LEVEL_TAG in_logtrap_level);
+
 };
 }    //namespace l7vs
 

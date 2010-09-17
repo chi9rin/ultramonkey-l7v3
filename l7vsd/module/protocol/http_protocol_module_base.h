@@ -127,6 +127,23 @@ protected:
         //! @return bool                find is true. not find is false
         bool    find_http_header_all(const char *, const size_t, size_t &, size_t &);
 
+        //! check http get method
+        //! @param  const char*            buffer
+        //! @return bool                   get method is true. other is false
+        bool    is_get_request(const char *buffer);
+
+        //! check http post method
+        //! @param  const char*            buffer
+        //! @return bool                   post method is true. other is false
+        bool    is_post_request(const char *buffer);
+
+        //! increment http statistics
+        //! @param  const char*            buffer
+        void    increment_stats(const char *buffer);
+
+        //! http statistic infomation
+        http_stats http_stats_info;
+
 public:
 
         //! constractor
@@ -134,6 +151,13 @@ public:
 
         //! destractor
         virtual    ~http_protocol_module_base() {};
+
+        //! get base statistic object.
+        //! @return                        base statistic object.
+        stats_base& get_stats()
+        {
+                return http_stats_info;
+        }
 };
 
 } // namespace l7vsd

@@ -74,9 +74,8 @@ command_session::command_session(boost::asio::io_service &io_service, l7vsd &par
                       &request_data.log_category,
                       &request_data.log_level, _1);
         command_handler_map[l7vsadm_request::CMD_SNMP]
-        = boost::bind(&l7vsd::snmp_set_loglevel, &vsd,
-                      &request_data.snmp_log_category,
-                      &request_data.snmp_log_level, _1);
+        = boost::bind(&l7vsd::set_snmp_info, &vsd,
+                      &request_data.snmpinfo, _1);
         command_handler_map[l7vsadm_request::CMD_PARAMETER]
         = boost::bind(&l7vsd::reload_parameter, &vsd, &request_data.reload_param, _1);
 
@@ -144,7 +143,7 @@ void    command_session::execute_command()
         // deserialize requestdata
         std::stringstream    ss;
         ss << &(request_buffer[0]);
-        boost::archive::text_iarchive    ia(ss);
+        boost::archive::text_iarchive   ia(ss);
         ia >> request_data;
 
         /*-------- DEBUG LOG --------*/

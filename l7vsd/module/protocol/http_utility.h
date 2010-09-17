@@ -112,6 +112,16 @@ public:
         //! @param size_t&                header length
         //! @return bool                find is true. not find is false
         static bool    find_http_header_all(const char *, const size_t, size_t &, size_t &);
+
+        //! check http get method
+        //! @param  const char*            buffer
+        //! @return bool                   get method is true. other is false
+        static bool    is_get_request(const char *buffer);
+
+        //! check http post method
+        //! @param  const char*            buffer
+        //! @return bool                   post method is true. other is false
+        static bool    is_post_request(const char *buffer);
 };
 
 } // namespace l7vsd

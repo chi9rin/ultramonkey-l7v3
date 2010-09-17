@@ -313,10 +313,15 @@ protected:
         //! log level set function
         bool parse_opt_log_level_func(int &, int, char*[]);
         // snmp option function
-        //! snmp log category set function
-        bool parse_opt_snmp_log_category_func(int &, int, char*[]);
-        //! snmp log level set function
-        bool parse_opt_snmp_log_level_func(int &, int, char*[]);
+        //! snmp refresh set function
+        bool parse_opt_snmp_refresh_func(int &, int, char*[]);
+        //! snmp parse_opt_snmp_vs_target_func
+        bool parse_opt_snmp_vs_target_func(int &, int, char*[]);
+        bool parse_opt_snmp_vs_module_func(int &, int, char*[]);
+        bool parse_opt_snmp_flag_func(int &, int, char*[]);
+        bool parse_opt_snmp_interval_func(int &, int, char*[]);
+        bool parse_opt_snmp_log_trap_func(int &, int, char*[]);
+        bool parse_opt_snmp_log_trap_level_func(int &, int, char*[]);
         // parameter option function
         //! parameter reload component parsing
         bool parse_opt_parameter_reload_func(int &, int, char*[]);
@@ -351,18 +356,15 @@ protected:
         parse_opt_map_type log_option_dic;
         //! snmp option_function map dictionary
         parse_opt_map_type snmp_option_dic;
+        parse_opt_map_type snmp_vs_option_dic;
         //! parameter option function map dictionary
         parse_opt_map_type parameter_option_dic;
 
         //! log category string to log category enum dictionary.
         string_logcategory_map_type string_logcategory_dic;
-        //! snmp log category string to snmp log category enum dictionary.
-        string_logcategory_map_type string_snmp_logcategory_dic;
 
         //! log category enum to log category string dictionary.
         logcategory_string_map_type logcategory_string_dic;
-        //! snmp log category enum to snmp log category string dictionary.
-        logcategory_string_map_type snmp_logcategory_string_dic;
 
         //! log level string to log level enum dictionary
         string_loglevel_map_type string_loglevel_dic;

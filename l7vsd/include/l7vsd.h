@@ -42,12 +42,12 @@
 #include "realserver_element.h"
 #include "realserver.h"
 #include "replication.h"
-#include "snmpbridge.h"
 #include "protocol_module_control.h"
 #include "schedule_module_control.h"
 #include "logger.h"
 #include "logger_access_manager.h"
 #include "parameter.h"
+#include "snmp_info.h"
 
 #ifndef    L7VS_MODULE_PATH
 #define L7VS_MODULE_PATH        "."
@@ -63,7 +63,6 @@ namespace l7vs
 class virtual_service;
 class command_receiver;
 class replication;
-class snmpbridge;
 class protocol_module_control;
 class schedule_module_control;
 
@@ -73,7 +72,6 @@ class l7vsd : private boost::noncopyable
 public:
         typedef boost::shared_ptr< command_receiver >    command_receiver_ptr;    //!< shared_ptr command_receiver typedef
         typedef boost::shared_ptr< replication >        replication_ptr;        //!< shared_ptr replication typedef
-        typedef boost::shared_ptr< snmpbridge >            snmpbridge_ptr;            //!< shared_ptr snmp_bridge typedef
         typedef    boost::shared_ptr< virtual_service >    virtualservice_ptr;        //!< shared_ptr    virtualservice typedef
 
         typedef std::list< virtualservice_ptr >            vslist_type;            //!< virtual service list typedef
@@ -92,14 +90,9 @@ protected:
 
         command_receiver_ptr        receiver;            //!< command_receiver ptr
         replication_ptr                rep;                //!< replication ptr
-        snmpbridge_ptr                bridge;                //!< snmp_bridge ptr
 
         boost::mutex                command_mutex;        //!< command execute mutex
         boost::mutex                vslist_mutex;        //!< virtual service list mutex
-
-        virtual    vslist_type::iterator search_vslist(
-                const virtualservice_element & ,
-                bool find_module_name = false) const; //!< vs_list search function
 
         bool                        help;                //!< help mode
 
@@ -129,12 +122,11 @@ public:
         void    add_real_server(const virtualservice_element *, error_code &);    //!< real_server add command
         void    del_real_server(const virtualservice_element *, error_code &);    //!< real_server del command
         void    edit_real_server(const virtualservice_element *, error_code &);    //!< real_server edit command
-
+        void    set_loglevel(const LOG_CATEGORY_TAG *, const LOG_LEVEL_TAG *, error_code &);       //!< set loglevel command
+        void    set_snmp_info(const snmp_info*, error_code&);
         void    flush_virtual_service(error_code &);     //!< all virtual_service delete command
 
         void    replication_command(const l7vsadm_request::REPLICATION_COMMAND_TAG *, error_code &);    //!< replication command
-        void    set_loglevel(const LOG_CATEGORY_TAG *, const LOG_LEVEL_TAG *, error_code &);       //!< set loglevel command
-        void    snmp_set_loglevel(const LOG_CATEGORY_TAG *, const LOG_LEVEL_TAG *, error_code &);   //!< snmp set loglevel command
         void    reload_parameter(const PARAMETER_COMPONENT_TAG *, error_code &);    //!< reload component parameter command
 
         int        run(int, char*[]);          //!< l7vsd run method
@@ -142,7 +134,11 @@ public:
         void    release_virtual_service(const virtualservice_element &)    const;         //!< virtualservice release from vslist
 
         vslist_type    &get_virtualservice_list();            //!< virtualservice_list getter
-        boost::mutex    &get_virtualservice_list_mutex();    //!< virtualservice_list mutex getter
+        boost::mutex   &get_virtualservice_list_mutex();    //!< virtualservice_list mutex getter
+        replication::REPLICATION_MODE_TAG get_replication_state()   const;
+        virtual    vslist_type::iterator search_vslist(
+                const virtualservice_element & ,
+                bool find_module_name = false) const; //!< vs_list search function
 
 protected:
         bool    check_options(int, char*[]);              //!< check option func

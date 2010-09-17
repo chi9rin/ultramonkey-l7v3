@@ -1,11 +1,17 @@
-[Xxx. xx 2010] 3.0.0-0 Shinya TAKEBAYASHI
+[Sep. 06 2010] 3.0.0-0 Norihisa NAKAI, Hiromasa KANDA, LANG XIJIAN
   - Implimented Multi-threading architecture using Boost::Asio and Boost::Thread library.
   - Implimented IPv6 protocol logic.
   - Implimented SorryURI support.
-  - Change l7vsadm - l7vsd protocol from DGRAM to STREAM. And serialized stream data using Boost::Serializable.
+  - Change protocol between l7vsadm and l7vsd from DGRAM to STREAM.
+    And serialized stream data using Boost::Serializable.
   - Change protocol and schedule module architecture to module event driven model.
   - Fixed algorithm for logger. (Search Log mode logic added.)
   - Fixed algorithm for parameter. (Using boost algorithm template.)
+  - Implimented SNMPAgent function in l7vsd.
+
+/*
+    FIXME add other changes
+*/
 
 [Dec. 17 2008] 2.1.0-0 Shinya TAKEBAYASHI
   - Added option for FAST SCHEDULE to sessionless module
@@ -26,7 +32,6 @@
 
 [Dec. 11 2007] 1.0.0-1 Shinya TAKEBAYASHI
   - Implemented blocking mode switching function
-
 
 [Oct. 11 2007] 1.0.0-0 Shinya TAKEBAYASHI
   - Change liblary from GLib1.2 to GLib2.0 (memory leak fix)
@@ -52,7 +57,6 @@
       Tetsuya TAKATSURU
       Masahiro SAKAMOTO
       Yumi KITANI
-
 
 [May. 9 2007] 0.6.0-0 Shinya TAKEBAYASHI
   - Extended maximum client connections.

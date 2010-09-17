@@ -15,30 +15,31 @@ public:
         explicit atomic() : p(0) {}
 
         T get() {
-                rd_scoped_lock(mutex);
+                rd_scoped_lock lock(mutex);
                 return p;
         }
         atomic &operator=(const T &q) {
-                rw_scoped_lock(mutex);
+                rw_scoped_lock lock(mutex);
+                p = q;
                 return *this;
         }
         atomic &operator++(const int) {
-                rw_scoped_lock(mutex);
+                rw_scoped_lock lock(mutex);
                 p++;
                 return *this;
         }
         atomic &operator--(const int) {
-                rw_scoped_lock(mutex);
+                rw_scoped_lock lock(mutex);
                 p--;
                 return *this;
         }
         atomic &operator+=(const T &q) {
-                rw_scoped_lock(mutex);
+                rw_scoped_lock lock(mutex);
                 p += q;
                 return *this;
         }
         atomic &operator-=(const T &q) {
-                rw_scoped_lock(mutex);
+                rw_scoped_lock lock(mutex);
                 p -= q;
                 return *this;
         }

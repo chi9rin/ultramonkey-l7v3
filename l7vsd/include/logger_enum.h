@@ -28,6 +28,7 @@
 #include <list>
 #include <boost/function.hpp>
 #include <log4cxx/level.h>
+#include "trapmessage.h"
 
 namespace l7vs
 {
@@ -80,7 +81,7 @@ enum LOG_CATEGORY_TAG {
         LOG_CAT_L7VSD_SYSTEM_ENDPOINT,            //!< logcategory is systemcall socket
         LOG_CAT_L7VSD_SYSTEM_SIGNAL,            //!< logcategory is systemcall signal
         LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT,        //!< logcategory is systemcall env
-        LOG_CAT_L7VSD_SNMPBRIDGE,                //!< logcategory is snmp_bridge
+        LOG_CAT_L7VSD_SNMPAGENT,                //!< logcategory is snmp_agent
 
         LOG_CAT_PROTOCOL,                        //!< logcategory is protocol.
         LOG_CAT_SCHEDULE,                        //!< logcategory is schedule
@@ -124,9 +125,8 @@ typedef    std::list< std::pair< LOG_CATEGORY_TAG, LOG_LEVEL_TAG > >
 category_level_list_type;
 
 //! typedef snmp send trap func type
-typedef boost::function<void(const std::string &)>
+typedef boost::function<void(trapmessage&)>
 snmpSendtrapFuncType;
-
 
 } //namespace l7vs
 #endif    //__LOGGER_ENUM_H__

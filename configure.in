@@ -109,7 +109,6 @@ AC_CONFIG_FILES([doc/Makefile]
                 [l7vsd/module/protocol/Makefile]
                 [l7vsd/module/schedule/Makefile]
                 [l7vsd/src/Makefile]
-                [snmpagent/Makefile]
                 [Makefile])
 
 AC_OUTPUT(l7vsd.spec)

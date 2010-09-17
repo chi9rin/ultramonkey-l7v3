@@ -25,20 +25,47 @@
 #define    IP_PROTOCOL_MODULE_BASE_H
 
 #include "protocol_module_base.h"
+#include "http_utility.h"
 
 namespace l7vs
 {
 
-class ip_protocol_module_base : public protocol_module_base
-{
-public:
+        class ip_protocol_module_base : public protocol_module_base
+        {
+        protected:
+                //! http statistic infomation
+                http_stats http_stats_info;
 
-        //! constractor
-        ip_protocol_module_base(std::string in_modulename) : protocol_module_base(in_modulename) {};
+        public:
 
-        //! destractor
-        virtual    ~ip_protocol_module_base() {};
-};
+                //! constractor
+                ip_protocol_module_base(std::string in_modulename) : protocol_module_base(in_modulename) {};
+
+                //! destractor
+                virtual    ~ip_protocol_module_base() {};
+
+
+                //! get base statistic object.
+                //! @return                        base statistic object.
+                stats_base& get_stats() {
+                        return http_stats_info;
+                }
+
+                //! increment http statistics
+                //! @param  const char*            buffer
+                void    increment_stats(const char *buffer) {
+                        if (buffer != NULL && statistic != 0) {
+
+                                if (http_utility::is_get_request(buffer)) {
+                                        http_stats_info.http_get_requests++;
+                                } else if (http_utility::is_post_request(buffer)) {
+                                        http_stats_info.http_post_requests++;
+                                }
+
+                                http_stats_info.http_requests++;
+                        }
+                }
+        };
 
 } // namespace l7vsd
 

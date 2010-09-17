@@ -36,6 +36,7 @@
 #include "parameter_enum.h"
 #include "replication.h"
 #include "virtualservice_element.h"
+#include "snmp_info.h"
 
 namespace l7vs
 {
@@ -80,16 +81,13 @@ public:
         LOG_CATEGORY_TAG            log_category;            //!< use log change mode. target log category
         LOG_LEVEL_TAG                log_level;                //!< use log level change mode target category log level
         PARAMETER_COMPONENT_TAG        reload_param;            //!< set reload param mode
-        LOG_CATEGORY_TAG            snmp_log_category;        //!< use snmp mode. target change log category
-        LOG_LEVEL_TAG                snmp_log_level;            //!< use snmp mode. target log category change to log level
+        snmp_info            snmpinfo;
         //! constractor
         l7vsadm_request() :            command(CMD_NONE),
                 replication_command(REP_NONE),
                 log_category(LOG_CAT_NONE),
                 log_level(LOG_LV_NONE),
-                reload_param(PARAM_COMP_NOCAT),
-                snmp_log_category(LOG_CAT_NONE),
-                snmp_log_level(LOG_LV_NONE) {}
+                reload_param(PARAM_COMP_NOCAT) {}
 
         template <typename Elem, typename Traits>
         friend std::basic_ostream<Elem, Traits>& operator<<(
@@ -103,16 +101,14 @@ public:
                                     "log_category=%d: "
                                     "log_level=%d: "
                                     "reload_param=%d: "
-                                    "snmp_log_category=%d: "
-                                    "snmp_log_level=%d: ")
+                                    "snmpinfo=%s: ")
                    % request.command
                    % request.vs_element
                    % request.replication_command
                    % request.log_category
                    % request.log_level
                    % request.reload_param
-                   % request.snmp_log_category
-                   % request.snmp_log_level;
+           % request.snmpinfo;
                 return os;
         }
 
@@ -128,8 +124,7 @@ private:
                 ar &log_category;
                 ar &log_level;
                 ar &reload_param;
-                ar &snmp_log_category;
-                ar &snmp_log_level;
+                ar &snmpinfo;
         }
 };
 
@@ -176,10 +171,9 @@ public:
         std::list< log_category_level_type >
         log_status_list;    //!< log cateogries statuses.
 
-        bool                    snmp_connection_status;    //!< snmp connection status
+        //bool                    snmp_connection_status;    //!< snmp connection status
 
-        std::list< log_category_level_type >
-        snmp_log_status_list;    //!< snmp log statuses
+        snmp_info   snmpinfo;
 
         unsigned long long        total_bps;                    //!< l7vsd's total bit par sec
         unsigned long long        total_client_recv_byte;        //!< l7vsd's total client recive bytes
@@ -193,7 +187,6 @@ public:
                 status(RESPONSE_NONE),
                 message(""),
                 replication_mode_status(replication::REPLICATION_OUT),
-                snmp_connection_status(false),
                 total_bps(0ULL),
                 total_client_recv_byte(0ULL),
                 total_client_send_byte(0ULL),
@@ -234,20 +227,9 @@ public:
                                 ++i;
                         }
                 }
-                os << boost::format("snmp_connection_status=%d: ")
-                   % response.snmp_connection_status;
-                {
-                        unsigned int i = 0;
-                        BOOST_FOREACH(log_category_level_type log_pair, response.snmp_log_status_list) {
-                                os << boost::format("snmp_log_status_list[%d]={log_category=%d, log_level=%d}")
-                                   % i
-                                   % log_pair.first
-                                   % log_pair.second;
-                                os << ": ";
-                                ++i;
-                        }
-                }
-                os << boost::format("total_bps=%d: "
+        os << "snmpinfo=" << response.snmpinfo;
+
+        os << boost::format("total_bps=%d: "
                                     "total_client_recv_byte=%d: "
                                     "total_client_send_byte=%d: "
                                     "total_realserver_recv_byte=%d: "
@@ -283,8 +265,7 @@ private:
                 ar &virtualservice_status_list;
                 ar &replication_mode_status;
                 ar &log_status_list;
-                ar &snmp_connection_status;
-                ar &snmp_log_status_list;
+                ar &snmpinfo;
                 ar &total_bps;
                 ar &total_client_recv_byte;
                 ar &total_client_send_byte;

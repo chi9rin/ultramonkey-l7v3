@@ -30,6 +30,7 @@
 #include "logger_enum.h"
 #include "module_base.h"
 #include "realserver.h"
+#include "atomic.h"
 #include <boost/format.hpp>
 
 #define VS_CONTACT_CLASS_NORMAL (0)
@@ -37,6 +38,58 @@
 
 namespace l7vs
 {
+
+//!    @class    stats_base
+//! @brief    this class is base class of all statistic infomation classes.
+class stats_base
+{
+public:
+        //! @enum    STATS_MODE_TAG
+        //! @brief    statistic mode type.
+        enum STATS_MODE_TAG {
+          MODE_BASE = 0,
+          MODE_HTTP
+        };
+
+        //!    constructor
+        stats_base() : mode(MODE_BASE) {};
+
+        //!    constructor
+        stats_base(STATS_MODE_TAG m) : mode(m) {};
+
+        //! destractor
+        ~stats_base() {};
+
+        //! get statistic mode
+        //! @return    statistic mode.
+        STATS_MODE_TAG get_mode() {
+                return mode;
+        };
+protected:
+        //! statistic mode
+        STATS_MODE_TAG mode;
+};
+
+//!    @class    stats_base
+//! @brief    this class is a class of http statistic infomation classes.
+class http_stats : public stats_base
+{
+public:
+        //!    constructor
+        http_stats() : stats_base(MODE_HTTP) {};
+
+        //! destractor
+        ~http_stats(){};
+
+        //! http request counts
+        atomic<unsigned long long> http_requests;
+
+        //! http get request counts
+        atomic<unsigned long long> http_get_requests;
+
+        //! http post request counts
+        atomic<unsigned long long> http_post_requests;
+};
 
 //!    @class    protocol_module_base
 //! @brief    this class is base class of all protocol module classes.
@@ -132,9 +185,12 @@ protected:
         tcp_schedule_func_type        schedule_tcp;    //!< tcp_scheduler_function object
         udp_schedule_func_type        schedule_udp;    //!< udp_scheduler function object
 
+        stats_base                    stats;           //!< base statistic object
+        int                           statistic;       //!< collect statistic flag
+
 public:
         //! constractor
-        protocol_module_base(std::string in_modulename) : module_base(in_modulename) {};
+        protocol_module_base(std::string in_modulename) : module_base(in_modulename), statistic(0) {};
         //! destractor
         virtual    ~protocol_module_base() {};
         //! initialize function. called from module control. module loaded call
@@ -406,6 +462,7 @@ public:
         virtual bool        is_exec_OK(unsigned int vs_attr)  {
                 return true;
         }
+
         //! format dump data.
         //! @param[in]    data want to format
         //! @param[in]    data size
@@ -431,6 +488,13 @@ public:
                         data_dump += formatter.str();
                 }
                 data_dump += "\n";
+        }
+
+        //! get base statistic object.
+        //! @return        base statistic object.
+        virtual stats_base& get_stats()
+        {
+                return stats;
         }
 };
 

@@ -147,6 +147,9 @@ public:
         static const int FORWARDED_FOR_OFF;
         static const int FORWARDED_FOR_ON;
 
+        static const int COLLECT_STATS_OFF;
+        static const int COLLECT_STATS_ON;
+
 public:
         protocol_module_sessionless();
         ~protocol_module_sessionless();

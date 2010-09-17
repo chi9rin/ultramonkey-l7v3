@@ -36,9 +36,11 @@
 #include <boost/format.hpp>
 #include <boost/tr1/unordered_map.hpp>
 #include <boost/foreach.hpp>
+#include <boost/thread.hpp>
 #include "logger_enum.h"
 #include "logger_rotation_enum.h"
 #include "appender_property.h"
+#include "atomic.h"
 
 #if !defined(LOGGER_PROCESS_VSD) && !defined(LOGGER_PROCESS_ADM) && !defined(LOGGER_PROCESS_SNM)
 #define LOGGER_PROCESS_VSD
@@ -227,8 +229,21 @@ public:
                                         buf.str(),
                                         log4cxx::spi::LocationInfo(file, "", line));
                         // send_trap
-                        if (snmpSendtrap && (LOG_CAT_L7VSD_SNMPBRIDGE != cat)) {
-                                snmpSendtrap(buf.str());
+                        if (logtrap == 1) {
+                                LOG_LEVEL_TAG tmp_level;
+                                {
+                                        boost::mutex::scoped_lock lock(logtrap_level_mutex);
+                                        tmp_level = logtrap_level;
+                                }
+                                if ( (tmp_level >= LOG_LV_FATAL) &&
+                                      snmpSendtrap               &&
+                                      (LOG_CAT_L7VSD_SNMPAGENT != cat)) {
+                                        trapmessage trap_msg;
+                                        trap_msg.type = FATAL_LOG;
+                                        trap_msg.message = buf.str();
+                                        //send trap message
+                                        snmpSendtrap(trap_msg);
+                                }
                         }
                 } catch (const std::exception &ex) {
                         std::ostringstream oss;
@@ -292,8 +307,21 @@ public:
                                         buf.str(),
                                         log4cxx::spi::LocationInfo(file, "", line));
                         // send_trap
-                        if (snmpSendtrap && (LOG_CAT_L7VSD_SNMPBRIDGE != cat)) {
-                                snmpSendtrap(buf.str());
+                        if (logtrap == 1) {
+                                LOG_LEVEL_TAG tmp_level;
+                                {
+                                        boost::mutex::scoped_lock lock(logtrap_level_mutex);
+                                        tmp_level = logtrap_level;
+                                }
+                                if ( (tmp_level >= LOG_LV_ERROR) &&
+                                      snmpSendtrap               &&
+                                      (LOG_CAT_L7VSD_SNMPAGENT != cat)) {
+                                        trapmessage trap_msg;
+                                        trap_msg.type = ERROR_LOG;
+                                        trap_msg.message = buf.str();
+                                        //send trap message
+                                        snmpSendtrap(trap_msg);
+                                }
                         }
                 } catch (const std::exception &ex) {
                         std::ostringstream oss;
@@ -356,6 +384,23 @@ public:
                         log4cxx::Logger::getLogger(categoryname_itr->second)->forcedLog(log4cxx::Level::getWarn(),
                                         buf.str(),
                                         log4cxx::spi::LocationInfo(file, "", line));
+                        // send_trap
+                        if (logtrap == 1) {
+                                LOG_LEVEL_TAG tmp_level;
+                                {
+                                        boost::mutex::scoped_lock lock(logtrap_level_mutex);
+                                        tmp_level = logtrap_level;
+                                }
+                                if ( (tmp_level >= LOG_LV_WARN) &&
+                                      snmpSendtrap               &&
+                                      (LOG_CAT_L7VSD_SNMPAGENT != cat)) {
+                                        trapmessage trap_msg;
+                                        trap_msg.type = WARN_LOG;
+                                        trap_msg.message = buf.str();
+                                        //send trap message
+                                        snmpSendtrap(trap_msg);
+                                }
+                        }
                 } catch (const std::exception &ex) {
                         std::ostringstream oss;
                         oss << "Logging Error (Warn Log) : " << ex.what();
@@ -417,6 +462,24 @@ public:
                         log4cxx::Logger::getLogger(categoryname_itr->second)->forcedLog(log4cxx::Level::getInfo(),
                                         buf.str(),
                                         log4cxx::spi::LocationInfo(file, "", line));
+
+                        // send_trap
+                        if (logtrap == 1) {
+                                LOG_LEVEL_TAG tmp_level;
+                                {
+                                        boost::mutex::scoped_lock lock(logtrap_level_mutex);
+                                        tmp_level = logtrap_level;
+                                }
+                                if ( (tmp_level >= LOG_LV_INFO) &&
+                                      snmpSendtrap               &&
+                                      (LOG_CAT_L7VSD_SNMPAGENT != cat)) {
+                                        trapmessage trap_msg;
+                                        trap_msg.type = INFO_LOG;
+                                        trap_msg.message = buf.str();
+                                        //send trap message
+                                        snmpSendtrap(trap_msg);
+                                }
+                        }
                 } catch (const std::exception &ex) {
                         std::ostringstream oss;
                         oss << "Logging Error (Info Log) : " << ex.what();
@@ -479,6 +542,23 @@ public:
                         category_name_map_type::iterator categoryname_itr = category_name_map.find(cat);
                         log4cxx::Logger::getLogger(categoryname_itr->second)->forcedLog(log4cxx::Level::getDebug(),
                                         buf.str(), log4cxx::spi::LocationInfo(file, "", line));
+                        // send_trap
+                        if (logtrap == 1) {
+                                LOG_LEVEL_TAG tmp_level;
+                                {
+                                        boost::mutex::scoped_lock lock(logtrap_level_mutex);
+                                        tmp_level = logtrap_level;
+                                }
+                                if ( (tmp_level >= LOG_LV_DEBUG) &&
+                                      snmpSendtrap               &&
+                                      (LOG_CAT_L7VSD_SNMPAGENT != cat)) {
+                                        trapmessage trap_msg;
+                                        trap_msg.type = DEBUG_LOG;
+                                        trap_msg.message = buf.str();
+                                        //send trap message
+                                        snmpSendtrap(trap_msg);
+                                }
+                        }
                 } catch (const std::exception &ex) {
                         std::ostringstream oss;
                         oss << "Logging Error (Debug Log) : " << ex.what();
@@ -495,6 +575,26 @@ public:
         void    setSnmpSendtrap(const snmpSendtrapFuncType func) {
                 snmpSendtrap = func;
         }
+
+        /*!
+         * set log trap enable flag
+         * @param   log trap enable flag
+         * @retrun  void
+         */
+        void    set_logtrap(int in_logtrap) {
+                logtrap = in_logtrap;
+        }
+
+        /*!
+         * set log trap level
+         * @param   log trap level
+         * @retrun  void
+         */
+        void    set_logtrap_level(LOG_LEVEL_TAG in_logtrap_level) {
+                boost::mutex::scoped_lock lock(logtrap_level_mutex);
+                logtrap_level = in_logtrap_level;
+        }
+
 
 protected:
         //! default constructor initialize member variables.
@@ -563,6 +663,15 @@ protected:
 
         //! snmp trap function
         snmpSendtrapFuncType    snmpSendtrap;
+
+        //! snmp log trap enable flag
+        atomic<int>    logtrap;
+
+        //! snmp log trap level
+        LOG_LEVEL_TAG    logtrap_level;
+
+        //! snmp log trap level mutex
+        boost::mutex    logtrap_level_mutex;
 
 };
 

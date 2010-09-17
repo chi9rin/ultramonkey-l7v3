@@ -53,11 +53,19 @@
 #include "atomic.h"
 #include "lockfree_queue.h"
 #include "lockfree_hashmap.h"
+#include "snmp_info.h"
 
 #define PARAM_RS_SIDE_NIC_NAME     "nic_realserver_side"
 #define PARAM_POOLSIZE_KEY_NAME    "session_thread_pool_size"
 #define PARAM_BPS_CALC_INTERVAL    "throughput_calc_interval"
 #define PARAM_REP_INTERVAL         "interval"
+
+#define QOS_UP_ALERT_ON            "qos_up_alert_on"
+#define QOS_UP_ALERT_OFF           "qos_up_alert_off"
+#define QOS_DOWN_ALERT_ON          "qos_down_alert_on"
+#define QOS_DOWN_ALERT_OFF         "qos_down_alert_off"
+#define SESSION_POOL_ALERT_ON       "sessionpool_alert_on"
+#define SESSION_POOL_ALERT_OFF      "sessionpool_alert_off"
 
 //! Default nic of realserver side
 #define RS_SIDE_NIC_NAME_DEFAULT   "eth0"
@@ -167,6 +175,20 @@ public:
         //! wait interval for rs_ref_count check
         const static int  REFCOUNT_WAIT_INTERVAL   = 10; // msec
         const static int  SCHEDULER_PRIORITY       = 20;
+
+        //! Default upstream QoS alert on threshold
+        const static int  UPQOS_ALERT_ON_DEFAULT   = 85;
+        //! Default upstream QoS alert off threshold
+        const static int  UPQOS_ALERT_OFF_DEFAULT  = 50;
+        //! Default downstream QoS alert on threshold
+        const static int  DOWNQOS_ALERT_ON_DEFAULT = 85;
+        //! Default downstream QoS alert off threshold
+        const static int  DOWNQOS_ALERT_OFF_DEFAULT= 50;
+        //! Default session pool alert on threshold
+        const static int  SESSIONPOOL_ALERT_ON_DEFAULT = 5;
+        //! Default session pool alert off threshold
+        const static int  SESSIONPOOL_ALERT_OFF_DEFAULT= 8;
+
 protected:
 
         struct    parameter_data {
@@ -174,10 +196,22 @@ protected:
                 int         session_pool_size;
                 long        bps_interval;
                 long        rep_interval;
+                unsigned long long qos_up_alert_on;
+                unsigned long long qos_up_alert_off;
+                unsigned long long qos_down_alert_on;
+                unsigned long long qos_down_alert_off;
+                unsigned long long session_pool_alert_on;
+                unsigned long long session_pool_alert_off;
                 parameter_data() :  nic_realserver_side(RS_SIDE_NIC_NAME_DEFAULT),
-                        session_pool_size(SESSION_POOL_NUM_DEFAULT),
-                        bps_interval(BPS_INTERVAL_DEFAULT),
-                        rep_interval(REP_INTERVAL_DEFAULT) {}
+                                session_pool_size(SESSION_POOL_NUM_DEFAULT),
+                                bps_interval(BPS_INTERVAL_DEFAULT),
+                                rep_interval(REP_INTERVAL_DEFAULT),
+                                qos_up_alert_on(UPQOS_ALERT_ON_DEFAULT),
+                                qos_up_alert_off(UPQOS_ALERT_OFF_DEFAULT),
+                                qos_down_alert_on(DOWNQOS_ALERT_ON_DEFAULT),
+                                qos_down_alert_off(DOWNQOS_ALERT_OFF_DEFAULT),
+                                session_pool_alert_on(SESSIONPOOL_ALERT_ON_DEFAULT),
+                                session_pool_alert_off(SESSIONPOOL_ALERT_OFF_DEFAULT) {}
         };
 
         boost::thread::id       this_id;
@@ -226,6 +260,10 @@ protected:
 
         // protocol module option string
         std::string             protocol_module_for_indication_options;
+
+        bool upQoS_alert_flag;          //! upstream QoS alert flag
+        bool downQoS_alert_flag;        //! downstream QoS alert flag
+        bool sessionpool_alert_flag;    //! sessionpool alert flag
 
         void         load_parameter(l7vs::error_code &);
 
@@ -370,7 +408,19 @@ public:
         schedule_module_base *get_schedule_module() {
                 return schedmod;
         }
+        virtual int get_pool_sessions_count() {
+                return 0;
+        }
 
+        virtual int get_waiting_sessions_count() {
+                return 0;
+        }
+
+        virtual int get_active_sessions_count() {
+                return 0;
+        }
+
+        virtual void clear_inact();
 };
 
 //!
@@ -482,6 +532,17 @@ public:
         void get_ssl_config(std::stringstream &);
         void get_ssl_session_cache_info(std::stringstream &);
 
+        int get_pool_sessions_count() {
+                return pool_sessions.size();
+        }
+
+        int get_waiting_sessions_count() {
+                return waiting_sessions.size();
+        }
+
+        int get_active_sessions_count() {
+                return active_sessions.size();
+        }
 };
 
 //!
@@ -574,6 +635,22 @@ public:
 
         protocol_module_base *get_protocol_module();
         schedule_module_base *get_schedule_module();
+
+        int get_pool_sessions_count() {
+                return vs->get_pool_sessions_count();
+        }
+
+        int get_waiting_sessions_count() {
+                return vs->get_waiting_sessions_count();
+        }
+
+        int get_active_sessions_count() {
+                return vs->get_active_sessions_count();
+        }
+
+        void clear_inact() {
+                return vs->clear_inact();
+        }
 };
 
 } //namespace l7vs

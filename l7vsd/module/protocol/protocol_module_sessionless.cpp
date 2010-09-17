@@ -59,6 +59,10 @@ const int protocol_module_sessionless::EDIT_DIVISION_EDIT = 1;
 
 const int protocol_module_sessionless::FORWARDED_FOR_OFF = 0;
 const int protocol_module_sessionless::FORWARDED_FOR_ON = 1;
+
+const int protocol_module_sessionless::COLLECT_STATS_OFF = 0;
+const int protocol_module_sessionless::COLLECT_STATS_ON = 1;
+
 //! constractor
 protocol_module_sessionless::protocol_module_sessionless() :
         http_protocol_module_base(MODULE_NAME), forwarded_for(FORWARDED_FOR_OFF)
@@ -295,6 +299,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::check_pa
         check_result.flag = true;
         bool forward_checked = false;
         bool sorryuri_checked = false;
+        bool stats_checked = false;
         sregex    sorry_uri_regex
         =    +('/' >>
                *(alpha |
@@ -391,13 +396,61 @@ protocol_module_base::check_message_result protocol_module_sessionless::check_pa
                                         break;
                                 }
                         }
+                        //option string = "-c/--statistic"
+                        else if (*it == "-c" || *it == "--statistic") {
+                                //statistic flag is OFF
+                                if (!stats_checked) {
+                                        //next item exist
+                                        if(++it != it_end) {
+                                            //collect statistic flag must be 0 or 1
+                                            if(*it == "0" || *it == "1"){
+                                                        //check OK
+                                                        //set statistic flag ON
+                                                        stats_checked = true;                                            }
+                                            else {
+                                                        std::ostringstream ostr;
+                                                        ostr << "'-c/--statistic' option value '" << *it << "' is not a valid value.";
+
+                                                        //set check result flag false
+                                                        check_result.flag = false;
+                                                        //set check result message
+                                                        check_result.message = ostr.str();
+                                                        putLogError(100128, check_result.message, __FILE__, __LINE__);
+                                                        //loop break
+                                                        break;
+                                                }
+                                        }
+                                        //next item is not exist
+                                        else {
+                                                //set check flag false
+                                                check_result.flag = false;
+                                                //set check result message
+                                                check_result.message = "You have to set option value '-c/--statistic'.";
+                                                putLogError(100129, check_result.message, __FILE__,
+                                                            __LINE__);
+                                                //loop break
+                                                break;
+                                        }
+                                }
+                                //statistic flag is ON
+                                else {
+                                        //set check result flag false
+                                        check_result.flag = false;
+                                        //set check result message
+                                        check_result.message = "Cannot set multiple option '-c/--statistic'.";
+                                        putLogError(100130, check_result.message, __FILE__,
+                                                    __LINE__);
+                                        //loop break
+                                        break;
+                                }
+                        }
                         //other option string
                         else {
                                 //set check result flag false
                                 check_result.flag = false;
                                 //set check result message
                                 check_result.message = "Option error.";
-                                putLogError(100005, check_result.message, __FILE__, __LINE__);
+                                putLogError(100131, check_result.message, __FILE__, __LINE__);
                                 //loop break
                                 break;
                         }
@@ -458,6 +511,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::set_para
         check_result.flag = true;
         bool forward_checked = false;
         bool sorryuri_checked = false;
+        bool stats_checked = false;
         sregex    sorry_uri_regex
         =    +('/' >>
                *(alpha |
@@ -559,6 +613,57 @@ protocol_module_base::check_message_result protocol_module_sessionless::set_para
                                         break;
                                 }
                         }
+                        //option string = "-c/--statistic"
+                        else if (*it == "-c" || *it == "--statistic") {
+                                //statistic flag is OFF
+                                if (!stats_checked) {
+                                        //next item exist
+                                        if(++it != it_end) {
+                                            //collect statistic flag must be 0 or 1
+                                            if(*it == "0" || *it == "1"){
+                                                        //check OK
+                                                        //set statistic flag ON
+                                                        stats_checked = true;
+
+                                                        //set collect statistic flag
+                                                        statistic = boost::lexical_cast<int>(*it);                                          }
+                                            else {
+                                                        std::ostringstream ostr;
+                                                        ostr << "'-c/--statistic' option value '" << *it << "' is not a valid value.";
+
+                                                        //set check result flag false
+                                                        check_result.flag = false;
+                                                        //set check result message
+                                                        check_result.message = ostr.str();
+                                                        putLogError(100002, check_result.message, __FILE__, __LINE__);
+                                                        //loop break
+                                                        break;
+                                                }
+                                        }
+                                        //next item is not exist
+                                        else {
+                                                //set check flag false
+                                                check_result.flag = false;
+                                                //set check result message
+                                                check_result.message = "You have to set option value '-c/--statistic'.";
+                                                putLogError(100003, check_result.message, __FILE__,
+                                                            __LINE__);
+                                                //loop break
+                                                break;
+                                        }
+                                }
+                                //statistic flag is ON
+                                else {
+                                        //set check result flag false
+                                        check_result.flag = false;
+                                        //set check result message
+                                        check_result.message = "Cannot set multiple option '-c/--statistic'.";
+                                        putLogError(100004, check_result.message, __FILE__,
+                                                    __LINE__);
+                                        //loop break
+                                        break;
+                                }
+                        }
                         //others
                         else {
                                 //set check result flag false
@@ -577,6 +682,11 @@ protocol_module_base::check_message_result protocol_module_sessionless::set_para
                         //forward flag = OFF
                         if (!forward_checked) {
                                 forwarded_for = FORWARDED_FOR_OFF;
+                        }
+
+                        //collect statistic flag = OFF
+                        if (!stats_checked) {
+                                statistic = COLLECT_STATS_OFF;
                         }
                 }
 
@@ -669,8 +779,9 @@ void protocol_module_sessionless::get_option_info(std::string &option)
         }
         /*------DEBUG LOG END------*/
 
-        boost::format option_formatter("%s--sorry-uri '%s'");
-        option_formatter % (forwarded_for ? "--forwarded-for " : "") % sorry_uri.c_array();
+        boost::format option_formatter("%s--sorry-uri '%s' --statistic '%d'");
+        option_formatter % (forwarded_for ? "--forwarded-for " : "") % sorry_uri.c_array()
+                         % statistic;
         option.assign(option_formatter.str());
 
         /*-------- DEBUG LOG --------*/
@@ -1673,6 +1784,18 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                                                                                 it->send_rest_size = header_offset + header_offset_len + cr_lf_cr_lf_len;
                                                                         }
                                                                 }
+
+                                                                //increment http statistics
+                                                                increment_stats(recv_data.receive_buffer + it->send_offset);
+                                                                /*-------- DEBUG LOG --------*/
+                                                                if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+                                                                        boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                                                                                                "handle_client_recv() : call increment_stats : thread id : %d.");
+                                                                        formatter % boost::this_thread::get_id();
+                                                                        putLogDebug(100263, formatter.str(), __FILE__, __LINE__);
+                                                                }
+                                                                /*------DEBUG LOG END------*/
+
                                                                 //set edit_division flag on
                                                                 it->edit_division = EDIT_DIVISION_EDIT;
                                                         }
@@ -1875,6 +1998,18 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                                                                 }
 
                                                         }
+
+                                                        //increment http statistics
+                                                        increment_stats(recv_data.receive_buffer + new_send_it->send_offset);
+                                                        /*-------- DEBUG LOG --------*/
+                                                        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+                                                                boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sessionless::"
+                                                                                        "handle_client_recv() : call increment_stats : thread id : %d.");
+                                                                formatter % boost::this_thread::get_id();
+                                                                putLogDebug(100264, formatter.str(), __FILE__, __LINE__);
+                                                        }
+                                                        /*------DEBUG LOG END------*/
+
                                                         //set edit_division flag on
                                                         new_send_it->edit_division = EDIT_DIVISION_EDIT;
                                                 }

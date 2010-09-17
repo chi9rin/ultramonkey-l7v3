@@ -33,7 +33,7 @@
 
 #include "l7vsd.h"
 #include "error_code.h"
-
+#include "snmpagent.h"
 #define    PARAM_SCHED_ALGORITHM    "task_scheduler_algorithm"
 #define PARAM_SCHED_PRIORITY    "task_scheduler_priority"
 
@@ -117,12 +117,7 @@ void    l7vsd::list_virtual_service_verbose(l7vsd_response *response, error_code
                 err.setter(true, msg);
                 return;
         }
-        if (!bridge) {
-                std::string msg("bridge pointer is null.");
-                Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 3, msg, __FILE__, __LINE__);
-                err.setter(true, msg);
-                return;
-        }
+
         if (!rep) {
                 std::string msg("rep pointer is null.");
                 Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 4, msg, __FILE__, __LINE__);
@@ -153,18 +148,8 @@ void    l7vsd::list_virtual_service_verbose(l7vsd_response *response, error_code
         // get all category log level
         Logger::getLogLevelAll(response->log_status_list);
 
-        // get snmp connect status
-        response->snmp_connection_status = bridge->get_connectionstate();
-
-        // get snmp all category log level
-        typedef std::map< LOG_CATEGORY_TAG, LOG_LEVEL_TAG > snmplogmap_type;
-        snmplogmap_type snmplogmap;
-        bridge->get_loglevel_allcategory(snmplogmap);
-        for (snmplogmap_type::iterator itr = snmplogmap.begin();
-             itr != snmplogmap.end();
-             ++itr) {
-                response->snmp_log_status_list.push_back(*itr);
-        }
+    //get snmp info
+    response->snmpinfo = snmpagent::get_snmp_info();
 
         // calc total bps
         unsigned long long    total_bytes =
@@ -283,6 +268,32 @@ void    l7vsd::add_virtual_service(const virtualservice_element *in_vselement, e
                 // add to vslist
                 vslist.push_back(vsptr);
 
+                //create trap message
+                trapmessage trap_msg;
+                trap_msg.type = VIRTUALSERVICE_ADD;
+
+                std::ostringstream oss;
+                oss << "TRAP00020001,A virtual service was added.vs:";
+                if (in_vselement->udpmode) {
+                        if (in_vselement->udp_recv_endpoint.address().is_v6()) {
+                                oss << "[" << in_vselement->udp_recv_endpoint.address().to_string() << "]:" << in_vselement->udp_recv_endpoint.port();
+                        } else {
+                                oss << in_vselement->udp_recv_endpoint.address().to_string() << ":" << in_vselement->udp_recv_endpoint.port();
+                        }
+                }
+                else {
+                        if (in_vselement->tcp_accept_endpoint.address().is_v6()) {
+                                oss << "[" << in_vselement->tcp_accept_endpoint.address().to_string() << "]:" << in_vselement->tcp_accept_endpoint.port();
+                        } else {
+                                oss << in_vselement->tcp_accept_endpoint.address().to_string() << ":" << in_vselement->tcp_accept_endpoint.port();
+                        }
+                }
+
+                trap_msg.message = oss.str();
+
+                //push the trap message
+                snmpagent::push_trapmessage(trap_msg);
+
                 // when first vs, replication switch to master
                 if (1U == vslist.size()) {
                         rep->switch_to_master();
@@ -329,6 +340,32 @@ void    l7vsd::del_virtual_service(const virtualservice_element *in_vselement, e
                 // vs finalize
                 (*vsitr)->finalize(err);
 
+                //create trap message
+                trapmessage trap_msg;
+                trap_msg.type = VIRTUALSERVICE_REMOVE;
+
+                std::ostringstream oss;
+                oss << "TRAP00020003,A virtual service was eliminated.vs:";
+                if (in_vselement->udpmode) {
+                        if (in_vselement->udp_recv_endpoint.address().is_v6()) {
+                                oss << "[" << in_vselement->udp_recv_endpoint.address().to_string() << "]:" << in_vselement->udp_recv_endpoint.port();
+                        } else {
+                                oss << in_vselement->udp_recv_endpoint.address().to_string() << ":" << in_vselement->udp_recv_endpoint.port();
+                        }
+                }
+                else {
+                        if (in_vselement->tcp_accept_endpoint.address().is_v6()) {
+                                oss << "[" << in_vselement->tcp_accept_endpoint.address().to_string() << "]:" << in_vselement->tcp_accept_endpoint.port();
+                        } else {
+                                oss << in_vselement->tcp_accept_endpoint.address().to_string() << ":" << in_vselement->tcp_accept_endpoint.port();
+                        }
+                }
+
+                trap_msg.message = oss.str();
+
+                //push the trap message
+                snmpagent::push_trapmessage(trap_msg);
+
                 // when first vs, replication switch to slave
                 if (0U == vslist.size()) {
                         rep->switch_to_slave();
@@ -336,7 +373,6 @@ void    l7vsd::del_virtual_service(const virtualservice_element *in_vselement, e
         } else {
                 std::string msg("virtual service not found.");
                 Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 24, msg, __FILE__, __LINE__);
-
                 err.setter(true, msg);
                 return;
         }
@@ -373,6 +409,32 @@ void    l7vsd::edit_virtual_service(const virtualservice_element *in_vselement, 
                 // edit virtualservice
                 (*vsitr)->edit_virtualservice(*in_vselement, err);
                 if (err)    return;
+
+                //create trap message
+                trapmessage trap_msg;
+                trap_msg.type = VIRTUALSERVICE_CHANGE;
+
+                std::ostringstream oss;
+                oss << "TRAP00020002,The virtual service was changed.vs:";
+                if (in_vselement->udpmode) {
+                        if (in_vselement->udp_recv_endpoint.address().is_v6()) {
+                                oss << "[" << in_vselement->udp_recv_endpoint.address().to_string() << "]:" << in_vselement->udp_recv_endpoint.port();
+                        } else {
+                                oss << in_vselement->udp_recv_endpoint.address().to_string() << ":" << in_vselement->udp_recv_endpoint.port();
+                        }
+                }
+                else {
+                        if (in_vselement->tcp_accept_endpoint.address().is_v6()) {
+                                oss << "[" << in_vselement->tcp_accept_endpoint.address().to_string() << "]:" << in_vselement->tcp_accept_endpoint.port();
+                        } else {
+                                oss << in_vselement->tcp_accept_endpoint.address().to_string() << ":" << in_vselement->tcp_accept_endpoint.port();
+                        }
+                }
+
+                trap_msg.message = oss.str();
+
+                //push the trap message
+                snmpagent::push_trapmessage(trap_msg);
         } else {
                 std::string msg("virtual service not found.");
                 Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 25, msg, __FILE__, __LINE__);
@@ -413,6 +475,51 @@ void    l7vsd::add_real_server(const virtualservice_element *in_vselement, error
                 // add realserver
                 (*vsitr)->add_realserver(*in_vselement, err);
                 if (err)    return;
+
+                //create trap message
+                trapmessage trap_msg;
+                trap_msg.type = VIRTUALSERVICE_CHANGE;
+
+                std::ostringstream oss;
+                oss << "TRAP00020004,A real server was added.vs:";
+                //virtualservice infomation
+                if (in_vselement->udpmode) {
+                        if (in_vselement->udp_recv_endpoint.address().is_v6()) {
+                                oss << "[" << in_vselement->udp_recv_endpoint.address().to_string() << "]:" << in_vselement->udp_recv_endpoint.port();
+                        } else {
+                                oss << in_vselement->udp_recv_endpoint.address().to_string() << ":" << in_vselement->udp_recv_endpoint.port();
+                        }
+                }
+                else {
+                        if (in_vselement->tcp_accept_endpoint.address().is_v6()) {
+                                oss << "[" << in_vselement->tcp_accept_endpoint.address().to_string() << "]:" << in_vselement->tcp_accept_endpoint.port();
+                        } else {
+                                oss << in_vselement->tcp_accept_endpoint.address().to_string() << ":" << in_vselement->tcp_accept_endpoint.port();
+                        }
+                }
+
+                //realserver infomation
+                BOOST_FOREACH(realserver_element elem, in_vselement->realserver_vector) {
+                        if (in_vselement->udpmode) {
+                                if (elem.udp_endpoint.address().is_v6()) {
+                                        oss << ",rs:[" << elem.udp_endpoint.address().to_string() << "]:" << elem.udp_endpoint.port();
+                                } else {
+                                        oss << ",rs:"  << elem.udp_endpoint.address().to_string() << ":" << elem.udp_endpoint.port();
+                                }
+                        }
+                        else {
+                                if (elem.tcp_endpoint.address().is_v6()) {
+                                        oss << ",rs:[" << elem.tcp_endpoint.address().to_string() << "]:" << elem.tcp_endpoint.port();
+                                } else {
+                                        oss << ",rs:"  << elem.tcp_endpoint.address().to_string() << ":" << elem.tcp_endpoint.port();
+                                }
+                        }
+                }
+
+                trap_msg.message = oss.str();
+
+                //push the trap message
+                snmpagent::push_trapmessage(trap_msg);
         } else {
                 std::string msg("virtual service not found.");
                 Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 26, msg, __FILE__, __LINE__);
@@ -453,6 +560,51 @@ void    l7vsd::del_real_server(const virtualservice_element *in_vselement, error
                 // del realserver
                 (*vsitr)->del_realserver(*in_vselement, err);
                 if (err)    return;
+
+                //create trap message
+                trapmessage trap_msg;
+                trap_msg.type = REALSERVER_REMOVE;
+
+                std::ostringstream oss;
+                oss << "TRAP00020006,A real server was eliminated.vs:";
+                //virtualservice infomation
+                if (in_vselement->udpmode) {
+                        if (in_vselement->udp_recv_endpoint.address().is_v6()) {
+                                oss << "[" << in_vselement->udp_recv_endpoint.address().to_string() << "]:" << in_vselement->udp_recv_endpoint.port();
+                        } else {
+                                oss << in_vselement->udp_recv_endpoint.address().to_string() << ":" << in_vselement->udp_recv_endpoint.port();
+                        }
+                }
+                else {
+                        if (in_vselement->tcp_accept_endpoint.address().is_v6()) {
+                                oss << "[" << in_vselement->tcp_accept_endpoint.address().to_string() << "]:" << in_vselement->tcp_accept_endpoint.port();
+                        } else {
+                                oss << in_vselement->tcp_accept_endpoint.address().to_string() << ":" << in_vselement->tcp_accept_endpoint.port();
+                        }
+                }
+
+                //realserver infomation
+                BOOST_FOREACH(realserver_element elem, in_vselement->realserver_vector) {
+                        if (in_vselement->udpmode) {
+                                if (elem.udp_endpoint.address().is_v6()) {
+                                        oss << ",rs:[" << elem.udp_endpoint.address().to_string() << "]:" << elem.udp_endpoint.port();
+                                } else {
+                                        oss << ",rs:"  << elem.udp_endpoint.address().to_string() << ":" << elem.udp_endpoint.port();
+                                }
+                        }
+                        else {
+                                if (elem.tcp_endpoint.address().is_v6()) {
+                                        oss << ",rs:[" << elem.tcp_endpoint.address().to_string() << "]:" << elem.tcp_endpoint.port();
+                                } else {
+                                        oss << ",rs:"  << elem.tcp_endpoint.address().to_string() << ":" << elem.tcp_endpoint.port();
+                                }
+                        }
+                }
+
+                trap_msg.message = oss.str();
+
+                //push the trap message
+                snmpagent::push_trapmessage(trap_msg);
         } else {
                 std::string msg("virtual service not found.");
                 Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 27, msg, __FILE__, __LINE__);
@@ -493,6 +645,51 @@ void    l7vsd::edit_real_server(const virtualservice_element *in_vselement, erro
                 // del realserver
                 (*vsitr)->edit_realserver(*in_vselement, err);
                 if (err)    return;
+
+                //create trap message
+                trapmessage trap_msg;
+                trap_msg.type = REALSERVER_CHANGE;
+
+                std::ostringstream oss;
+                oss << "TRAP00020005,The real server was changed.vs:";
+                //virtualservice infomation
+                if (in_vselement->udpmode) {
+                        if (in_vselement->udp_recv_endpoint.address().is_v6()) {
+                                oss << "[" << in_vselement->udp_recv_endpoint.address().to_string() << "]:" << in_vselement->udp_recv_endpoint.port();
+                        } else {
+                                oss << in_vselement->udp_recv_endpoint.address().to_string() << ":" << in_vselement->udp_recv_endpoint.port();
+                        }
+                }
+                else {
+                        if (in_vselement->tcp_accept_endpoint.address().is_v6()) {
+                                oss << "[" << in_vselement->tcp_accept_endpoint.address().to_string() << "]:" << in_vselement->tcp_accept_endpoint.port();
+                        } else {
+                                oss << in_vselement->tcp_accept_endpoint.address().to_string() << ":" << in_vselement->tcp_accept_endpoint.port();
+                        }
+                }
+
+                //realserver infomation
+                BOOST_FOREACH(realserver_element elem, in_vselement->realserver_vector) {
+                        if (in_vselement->udpmode) {
+                                if (elem.udp_endpoint.address().is_v6()) {
+                                        oss << ",rs:[" << elem.udp_endpoint.address().to_string() << "]:" << elem.udp_endpoint.port();
+                                } else {
+                                        oss << ",rs:"  << elem.udp_endpoint.address().to_string() << ":" << elem.udp_endpoint.port();
+                                }
+                        }
+                        else {
+                                if (elem.tcp_endpoint.address().is_v6()) {
+                                        oss << ",rs:[" << elem.tcp_endpoint.address().to_string() << "]:" << elem.tcp_endpoint.port();
+                                } else {
+                                        oss << ",rs:"  << elem.tcp_endpoint.address().to_string() << ":" << elem.tcp_endpoint.port();
+                                }
+                        }
+                }
+
+                trap_msg.message = oss.str();
+
+                //push the trap message
+                snmpagent::push_trapmessage(trap_msg);
         } else {
                 std::string msg("virtual service not found.");
                 Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 28, msg, __FILE__, __LINE__);
@@ -521,6 +718,32 @@ void    l7vsd::flush_virtual_service(error_code &err)
                         (*itr)->stop();
                         // vs finalize
                         (*itr)->finalize(err);
+
+                        //create trap message
+                        trapmessage trap_msg;
+                        trap_msg.type = VIRTUALSERVICE_REMOVE;
+
+                        std::ostringstream oss;
+                        oss << "TRAP00020003,A virtual service was eliminated.vs:";
+                        if ((*itr)->get_element().udpmode) {
+                                if ((*itr)->get_element().udp_recv_endpoint.address().is_v6()) {
+                                        oss << "[" << (*itr)->get_element().udp_recv_endpoint.address().to_string() << "]:" << (*itr)->get_element().udp_recv_endpoint.port();
+                                } else {
+                                        oss << (*itr)->get_element().udp_recv_endpoint.address().to_string() << ":" << (*itr)->get_element().udp_recv_endpoint.port();
+                                }
+                        }
+                        else {
+                                if ((*itr)->get_element().tcp_accept_endpoint.address().is_v6()) {
+                                        oss << "[" << (*itr)->get_element().tcp_accept_endpoint.address().to_string() << "]:" << (*itr)->get_element().tcp_accept_endpoint.port();
+                                } else {
+                                        oss << (*itr)->get_element().tcp_accept_endpoint.address().to_string() << ":" << (*itr)->get_element().tcp_accept_endpoint.port();
+                                }
+                        }
+
+                        trap_msg.message = oss.str();
+
+                        //push the trap message
+                        snmpagent::push_trapmessage(trap_msg);
                 }
         }
 
@@ -635,63 +858,6 @@ void    l7vsd::set_loglevel(const LOG_CATEGORY_TAG *cat, const LOG_LEVEL_TAG *le
         }
 }
 
-//! snmp loglevel set command
-//! @param[in]    log category
-//! @param[in]    log level
-//! @param[out]    error_code
-void    l7vsd::snmp_set_loglevel(const LOG_CATEGORY_TAG *cat, const LOG_LEVEL_TAG *level, error_code &err)
-{
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 24, "l7vsd::snmp_set_loglevel", __FILE__, __LINE__);
-
-        boost::mutex::scoped_lock command_lock(command_mutex);
-        boost::mutex::scoped_lock vslist_lock(vslist_mutex);
-
-        if (!cat) {
-                std::string msg("cat pointer is null.");
-                Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 16, msg, __FILE__, __LINE__);
-                err.setter(true, msg);
-                return;
-        }
-        if (!level) {
-                std::string msg("level pointer is null.");
-                Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 17, msg, __FILE__, __LINE__);
-                err.setter(true, msg);
-                return;
-        }
-        if (!bridge) {
-                std::string msg("bridge pointer is null.");
-                Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 18, msg, __FILE__, __LINE__);
-                err.setter(true, msg);
-                return;
-        }
-
-        /*-------- DEBUG LOG --------*/
-        if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_MAINTHREAD)) {
-                std::stringstream    debugstr;
-                debugstr << "l7vsd::snmp_set_loglevel arguments:";
-                debugstr << boost::format("*cat=%d, level=%d") % *cat % *level;
-                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 25, debugstr.str(), __FILE__, __LINE__);
-        }
-        /*------ DEBUG LOG END ------*/
-
-        if (LOG_CAT_END == *cat) {
-                // set loglevel all
-                if (0 != bridge->change_loglevel_allcategory(*level)) {
-                        std::string msg("set snmp loglevel all failed.");
-                        Logger::putLogError(LOG_CAT_L7VSD_LOGGER, 124, msg, __FILE__, __LINE__);
-                        err.setter(true, msg);
-                        return;
-                }
-        } else {
-                if (0 != bridge->change_loglevel(*cat, *level)) {
-                        std::string msg("set snmp loglevel failed.");
-                        Logger::putLogError(LOG_CAT_L7VSD_LOGGER, 125, msg, __FILE__, __LINE__);
-                        err.setter(true, msg);
-                        return;
-                }
-        }
-}
-
 //! reload parameter command
 //! @param[in]    reload component
 //! @param[out]    error_code
@@ -711,12 +877,6 @@ void    l7vsd::reload_parameter(const PARAMETER_COMPONENT_TAG *comp, error_code 
         if (!rep) {
                 std::string msg("rep pointer is null.");
                 Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 20, msg, __FILE__, __LINE__);
-                err.setter(true, msg);
-                return;
-        }
-        if (!bridge) {
-                std::string msg("bridge pointer is null.");
-                Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 21, msg, __FILE__, __LINE__);
                 err.setter(true, msg);
                 return;
         }
@@ -761,17 +921,6 @@ void    l7vsd::reload_parameter(const PARAMETER_COMPONENT_TAG *comp, error_code 
                 }
 
                 break;
-        case    PARAM_COMP_SNMPAGENT:
-                if (param.read_file(*comp)) {
-                        bridge->reload_config();
-                } else {
-                        std::string msg("parameter reload failed.");
-                        Logger::putLogError(LOG_CAT_L7VSD_PARAMETER, 7, msg, __FILE__, __LINE__);
-                        err.setter(true, msg);
-                        return;
-                }
-
-                break;
         case    PARAM_COMP_ALL:
                 if (!param.read_file(PARAM_COMP_REPLICATION)) {
                         std::string msg("parameter reload failed.");
@@ -787,19 +936,11 @@ void    l7vsd::reload_parameter(const PARAMETER_COMPONENT_TAG *comp, error_code 
                         return;
                 }
 
-                if (!param.read_file(PARAM_COMP_SNMPAGENT)) {
-                        std::string msg("parameter reload failed.");
-                        Logger::putLogError(LOG_CAT_L7VSD_PARAMETER, 7, msg, __FILE__, __LINE__);
-                        err.setter(true, msg);
-                        return;
-                }
-
                 rep->reset();
                 try {
                         logger_instance.loadConf();
                 } catch (...) {
                 }
-                bridge->reload_config();
 
                 break;
         default:
@@ -809,6 +950,74 @@ void    l7vsd::reload_parameter(const PARAMETER_COMPONENT_TAG *comp, error_code 
                 return;
         }
 
+
+}
+void    l7vsd::set_snmp_info(const snmp_info* info, error_code &err)
+{
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 27, "l7vsd::set_snmp_info", __FILE__, __LINE__);
+
+        boost::mutex::scoped_lock command_lock(command_mutex);
+        boost::mutex::scoped_lock vslist_lock(vslist_mutex);
+
+        if (!info) {
+                std::string msg("info pointer is null.");
+                Logger::putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 21, msg, __FILE__, __LINE__);
+                err.setter(true, msg);
+                return;
+        }
+
+        /*-------- DEBUG LOG --------*/
+        if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_MAINTHREAD)) {
+                std::stringstream    debugstr;
+                debugstr << boost::format("info=%s") % *info;
+                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 42, debugstr.str(), __FILE__, __LINE__);
+        }
+        /*------ DEBUG LOG END ------*/
+
+    if (info->option_set_flag & SNMP_FLAG_OPTION_FLAG)
+    {
+        snmpagent::set_flag(info->flag);
+    }
+
+    if (info->option_set_flag & SNMP_LOGTRAP_OPTION_FLAG)
+    {
+        snmpagent::set_logtrap(info->logtrap);
+    }
+
+    if (info->option_set_flag & SNMP_LOGTRAP_LEVEL_OPTION_FLAG)
+    {
+        snmpagent::set_logtrap_level(info->logtrap_level);
+    }
+
+    if (info->option_set_flag & SNMP_INTERVAL_OPTION_FLAG)
+    {
+        snmpagent::set_interval(info->interval);
+    }
+
+    if (info->option_set_flag & SNMP_REFRESH_OPTION_FLAG)
+    {
+        virtualservice_element element;
+        element.udpmode = false;
+        element.tcp_accept_endpoint = info->vs_endpoint;
+        element.protocol_module_name = info->protocol;
+        vslist_type::iterator it = search_vslist(element, true);
+        if (it == vslist.end())
+        {
+        std::string msg("virtual service not found.");
+        Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 29, msg, __FILE__, __LINE__);
+
+        err.setter(true, msg);
+        } else {
+        snmpagent::refresh_statistics(info->vs_endpoint, info->protocol);
+        }
+
+        return;
+    }
+
+    if (info->option_set_flag & SNMP_REFRESH_ALL_OPTION_FLAG)
+    {
+        snmpagent::refresh_all_statistics();
+    }
 
 }
 
@@ -898,6 +1107,14 @@ boost::mutex    &l7vsd::get_virtualservice_list_mutex()
 
         return vslist_mutex;
 }
+
+//! replication_ptr getter
+//! @return    replication_ptr
+replication::REPLICATION_MODE_TAG l7vsd::get_replication_state() const
+{
+    return rep->get_status();
+}
+
 
 //! l7vsd run method
 //! @param[in]    argument count
@@ -1035,24 +1252,22 @@ int    l7vsd::run(int argc, char *argv[])
                         logger.putLogWarn(LOG_CAT_L7VSD_MAINTHREAD, 3, "replication initialize failed.", __FILE__, __LINE__);
                 }
 
-                // snmp bridge initialize
-                bridge.reset(new snmpbridge(*this, dispatcher));
-                if (NULL ==  bridge) {
-                        logger.putLogFatal(LOG_CAT_L7VSD_MAINTHREAD, 22, "snmpbridge pointer null.", __FILE__, __LINE__);
-                        munlockall();
-                        return -1;
-                }
-                if (0 > bridge->initialize()) {
-                        logger.putLogError(LOG_CAT_L7VSD_MAINTHREAD, 6, "snmpbridge initialize failed.", __FILE__, __LINE__);
-                        munlockall();
-                        return -1;
-                }
+                // snmpagent initialize
+                snmpagent agent(this);
 
-//SNMP is unsupported.
-//
-//        // snmp trap function set
-//        Logger::setSnmpSendtrap( boost::bind( &snmpbridge::send_trap, bridge, _1 ) );
-//
+                // snmp trap function set
+                Logger::setSnmpSendtrap( boost::bind( &snmpagent::push_trapmessage, _1 ) );
+
+                // snmp start
+                agent.start();
+
+                //create trap message
+                trapmessage trap_msg;
+                trap_msg.type = SERVICE_START;
+                trap_msg.message = "TRAP00010001,l7vsd start.";
+
+                //send l7vsd start up trap
+                snmpagent::push_trapmessage(trap_msg);
 
                 // main loop
                 for (;;) {
@@ -1065,16 +1280,23 @@ int    l7vsd::run(int argc, char *argv[])
                         dispatcher.poll();
                         timespec    wait_val;
                         wait_val.tv_sec        = 0;
-                        wait_val.tv_nsec    = 10;
+                        wait_val.tv_nsec    = 1000000;
                         nanosleep(&wait_val, NULL);
                         boost::this_thread::yield();
                 }
 
+                //create trap message
+                trap_msg.type = SERVICE_STOP;
+                trap_msg.message = "TRAP00010002,l7vsd stop.";
+
                 // snmp trap function unset
                 Logger::setSnmpSendtrap(NULL);
 
-                // snmp bridge finalize
-                bridge->finalize();
+                //send l7vsd stop trap
+                snmpagent::push_trapmessage(trap_msg);
+
+                // snmp agent finalize
+                agent.finalize();
 
                 // replication finalize
                 rep->finalize();
@@ -1172,6 +1394,7 @@ void    l7vsd::sig_exit_handler()
         sigaddset(&sigmask, SIGINT);
         sigaddset(&sigmask, SIGQUIT);
         sigaddset(&sigmask, SIGTERM);
+        sigaddset(&sigmask, SIGPIPE);
 
         int    sig;
         sigwait(&sigmask, &sig);
