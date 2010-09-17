@@ -1838,40 +1838,49 @@ void tcp_session::up_thread_realserver_connect(const TCP_PROCESS_TYPE_TAG proces
                 if (fwdmode == realserver_element::FWD_TPROXY && (
                         ( server_endpoint.address().is_v4() && client_endpoint.address().is_v4() ) ||
                         ( server_endpoint.address().is_v6() && client_endpoint.address().is_v6() ) ) ) {
+                        int ip_socket_level;
                         if (client_endpoint.address().is_v4()) {
+                                ip_socket_level = SOL_IP;
                                 new_socket->get_socket().open(boost::asio::ip::tcp::v4(), ec);
                         } else {
+                                ip_socket_level = SOL_IPV6;
                                 new_socket->get_socket().open(boost::asio::ip::tcp::v6(), ec);
                         }
                         if (unlikely(ec)) {
-                                std::stringstream buf;
-                                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                                buf << "realserver socket open error: " << ec.message();
-                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, buf.str(),
-                                        __FILE__, __LINE__);
+                                boost::format formatter("Thread ID[%d] realserver socket open error: %s");
+                                formatter % boost::this_thread::get_id() % ec.message();
+                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, formatter.str(), __FILE__, __LINE__);
                                 goto out_tproxy;
                         }
                         // set IP_TRANSPARENT
                         int on = 1;
                         int err = ::setsockopt(new_socket->get_socket().native(),
-                                SOL_IP, IP_TRANSPARENT, &on, sizeof(on));
+                                ip_socket_level, IP_TRANSPARENT, &on, sizeof(on));
                         if (unlikely(err)) {
                                 ec = boost::system::error_code(errno, boost::asio::error::get_system_category());
-                                std::stringstream buf;
-                                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                                buf << "realserver socket option(IP_TRANSPARENT) set failed: " << ec.message();
-                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, buf.str(),
-                                        __FILE__, __LINE__);
+                                boost::format formatter("Thread ID[%d] realserver socket option(IP_TRANSPARENT) set failed: %s");
+                                formatter % boost::this_thread::get_id() % ec.message();
+                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, formatter.str(), __FILE__, __LINE__);
                                 goto out_tproxy;
                         }
                         // bind client address
                         new_socket->get_socket().bind(client_endpoint, ec);
                         if (unlikely(ec)) {
-                                std::stringstream buf;
-                                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                                buf << "bind client addr to realserver socket failed: " << ec.message();
-                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, buf.str(),
-                                        __FILE__, __LINE__);
+                                if (ec == boost::asio::error::address_in_use) {
+                                        boost::format formatter("Thread ID[%d] bind client address error(%s). retry by other port.");
+                                        formatter % boost::this_thread::get_id() % ec.message();
+                                        Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, /*XXX*/999, formatter.str(), __FILE__, __LINE__);
+
+                                        unsigned short client_port = client_endpoint.port();
+                                        client_endpoint.port(0);
+                                        new_socket->get_socket().bind(client_endpoint, ec);
+                                        client_endpoint.port(client_port);
+                                }
+                                if (unlikely(ec)) {
+                                        boost::format formatter("Thread ID[%d] bind client address to realserver socket failed: %s");
+                                        formatter % boost::this_thread::get_id() % ec.message();
+                                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, formatter.str(), __FILE__, __LINE__);
+                                }
                         }
                 }
 out_tproxy:
@@ -2312,40 +2321,49 @@ void tcp_session::up_thread_sorryserver_connect(const TCP_PROCESS_TYPE_TAG proce
                 if (parent_service.get_element().sorry_fwdmode == virtualservice_element::FWD_TPROXY && (
                         ( sorry_endpoint.address().is_v4() && client_endpoint.address().is_v4() ) ||
                         ( sorry_endpoint.address().is_v6() && client_endpoint.address().is_v6() ) ) ) {
+                        int ip_socket_level;
                         if (client_endpoint.address().is_v4()) {
+                                ip_socket_level = SOL_IP;
                                 sorryserver_socket.second->get_socket().open(boost::asio::ip::tcp::v4(), ec);
                         } else {
+                                ip_socket_level = SOL_IPV6;
                                 sorryserver_socket.second->get_socket().open(boost::asio::ip::tcp::v6(), ec);
                         }
                         if (unlikely(ec)) {
-                                std::stringstream buf;
-                                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                                buf << "sorryserver socket open error: " << ec.message();
-                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, buf.str(),
-                                        __FILE__, __LINE__);
+                                boost::format formatter("Thread ID[%d] sorryserver socket open error: %s");
+                                formatter % boost::this_thread::get_id() % ec.message();
+                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, formatter.str(), __FILE__, __LINE__);
                                 goto out_tproxy;
                         }
                         // set IP_TRANSPARENT
                         int on = 1;
                         int err = ::setsockopt(sorryserver_socket.second->get_socket().native(),
-                                SOL_IP, IP_TRANSPARENT, &on, sizeof(on));
+                                ip_socket_level, IP_TRANSPARENT, &on, sizeof(on));
                         if (unlikely(err)) {
                                 ec = boost::system::error_code(errno, boost::asio::error::get_system_category());
-                                std::stringstream buf;
-                                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                                buf << "sorryserver socket option(IP_TRANSPARENT) set failed: " << ec.message();
-                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, buf.str(),
-                                        __FILE__, __LINE__);
+                                boost::format formatter("Thread ID[%d] sorryserver socket option(IP_TRANSPARENT) set failed: %s");
+                                formatter % boost::this_thread::get_id() % ec.message();
+                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, formatter.str(), __FILE__, __LINE__);
                                 goto out_tproxy;
                         }
                         // bind client address
                         sorryserver_socket.second->get_socket().bind(client_endpoint, ec);
                         if (unlikely(ec)) {
-                                std::stringstream buf;
-                                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                                buf << "bind client addr to sorryserver socket failed: " << ec.message();
-                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, buf.str(),
-                                        __FILE__, __LINE__);
+                                if (ec == boost::asio::error::address_in_use) {
+                                        boost::format formatter("Thread ID[%d] bind client address error(%s). retry by other port.");
+                                        formatter % boost::this_thread::get_id() % ec.message();
+                                        Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, /*XXX*/999, formatter.str(), __FILE__, __LINE__);
+
+                                        unsigned short client_port = client_endpoint.port();
+                                        client_endpoint.port(0);
+                                        sorryserver_socket.second->get_socket().bind(client_endpoint, ec);
+                                        client_endpoint.port(client_port);
+                                }
+                                if (unlikely(ec)) {
+                                        boost::format formatter("Thread ID[%d] bind client address to sorryserver socket failed: %s");
+                                        formatter % boost::this_thread::get_id() % ec.message();
+                                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, formatter.str(), __FILE__, __LINE__);
+                                }
                         }
                 }
 out_tproxy:
