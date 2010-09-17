@@ -908,3 +908,18 @@ namespace l7vs{
     bool tcp_ssl_socket::is_connect = false;
 
 }
+
+int setsockopt_ret;
+int setsockopt_sock;
+int setsockopt_level;
+int setsockopt_optname;
+void* setsockopt_optval;
+socklen_t setsockopt_optlen;
+int setsockopt(int s, int level, int optname, void *optval, socklen_t optlen) {
+    ::setsockopt_sock = s;
+    ::setsockopt_level = level;
+    ::setsockopt_optname = optname;
+    ::setsockopt_optval = optval;
+    ::setsockopt_optlen = optlen;
+    return setsockopt_ret;
+}
