@@ -56,6 +56,9 @@ const int protocol_module_ip::SWITCH_FLAG_ON = 1;
 const int protocol_module_ip::FORWARDED_FOR_OFF = 0;
 const int protocol_module_ip::FORWARDED_FOR_ON = 1;
 
+const int protocol_module_ip::COLLECT_STATS_OFF = 0;
+const int protocol_module_ip::COLLECT_STATS_ON = 1;
+
 using namespace boost::xpressive;
 //! constractor
 protocol_module_ip::protocol_module_ip() :
@@ -323,6 +326,7 @@ protocol_module_base::check_message_result protocol_module_ip::check_parameter(c
         bool no_reschedule_flag = false;
         bool forward_checked = false;
         bool sorryuri_checked = false;
+	bool stats_checked = false;
         sregex    sorry_uri_regex
         =    +('/' >>
                *(alpha |
@@ -492,6 +496,52 @@ protocol_module_base::check_message_result protocol_module_ip::check_parameter(c
                                         break;
                                 }
                         }
+			//option string = "-c/--statistic"
+			else if (*it == "-c" || *it == "--statistic") {
+                                //statistic flag is OFF
+                                if (!stats_checked) {
+                                        //next item exist
+                                        if(++it != it_end) {
+                                            //collect statistic flag must be 0 or 1
+                                            if(*it == "0" || *it == "1"){
+                                                        //check OK
+                                                        //set statistic flag ON
+                                                        stats_checked = true;                                            }
+                                            else {
+                                                        std::ostringstream ostr;
+                                                        ostr << "'-c/--statistic' option value '" << *it << "' is not a valid value.";
+
+                                                        //set check result flag false
+                                                        check_result.flag = false;
+                                                        //set check result message
+                                                        check_result.message = ostr.str();
+		                                        putLogError(600114, check_result.message, __FILE__, __LINE__);
+		                                        //loop break
+		                                        break;
+		                            }
+			                }
+					//next item is not exist
+				        else {
+				        	//set check flag false
+				                check_result.flag = false;
+				                //set check result message
+				                check_result.message = "You have to set option value '-c/--statistic'.";
+				                putLogError(600115, check_result.message, __FILE__,__LINE__);
+				                //loop break
+				                break;
+					}
+				}
+			        //statistic flag is ON
+			        else {
+			        	//set check result flag false
+				        check_result.flag = false;
+				 	//set check result message
+				        check_result.message = "Cannot set multiple option '-c/--statistic'.";
+				        putLogError(600116, check_result.message, __FILE__,__LINE__);
+				        //loop break
+				        break;
+			 	}
+	                }
                         //other option string
                         else {
                                 //set check result flag false
@@ -540,432 +590,486 @@ protocol_module_base::check_message_result protocol_module_ip::check_parameter(c
 //! @return    result.flag true is parameter is noproblem.
 //! @return result.flag false is paramter is problem.
 protocol_module_base::check_message_result protocol_module_ip::set_parameter(const std::vector <
-                std::string > & args)
+		std::string > & args)
 {
-        /*-------- DEBUG LOG --------*/
-        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
-                boost::format formatter("in_function : protocol_module_base::check_message_result "
-                                        "protocol_module_ip::set_parameter("
-                                        "const std::vector<std::string>& args) : args = %s.");
-                std::string argsdump;
-                for (std::vector<std::string>::const_iterator it = args.begin(); it != args.end(); ++it) {
-                        argsdump += *it;
-                        argsdump += " ";
-                }
-                formatter % argsdump;
-                putLogDebug(600017, formatter.str(), __FILE__, __LINE__);
-        }
-        /*------DEBUG LOG END------*/
+	/*-------- DEBUG LOG --------*/
+	if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+		boost::format formatter("in_function : protocol_module_base::check_message_result "
+				"protocol_module_ip::set_parameter("
+				"const std::vector<std::string>& args) : args = %s.");
+		std::string argsdump;
+		for (std::vector<std::string>::const_iterator it = args.begin(); it != args.end(); ++it) {
+			argsdump += *it;
+			argsdump += " ";
+		}
+		formatter % argsdump;
+		putLogDebug(600017, formatter.str(), __FILE__, __LINE__);
+	}
+	/*------DEBUG LOG END------*/
 
-        //set check result flag true
-        check_message_result check_result;
-        check_result.flag = true;
-        bool timeout_flag = false;
-        bool reschedule_flag = false;
-        bool no_reschedule_flag = false;
-        bool forward_checked = false;
-        bool sorryuri_checked = false;
-        boost::format formatter;
-        sregex    sorry_uri_regex
-        =    +('/' >>
-               *(alpha |
-                 digit |
-                 (set = ';', ':', '@', '&', '=') |
-                 (set = '$', '-', '_', '.', '+') |
-                 (set = '!', '*', '\'', '\(', ')', ',') |
-                 '%' >> repeat<2>(xdigit)));
+	//set check result flag true
+	check_message_result check_result;
+	check_result.flag = true;
+	bool timeout_flag = false;
+	bool reschedule_flag = false;
+	bool no_reschedule_flag = false;
+	bool forward_checked = false;
+	bool sorryuri_checked = false;
+	bool stats_checked = false;
+	boost::format formatter;
+	sregex    sorry_uri_regex
+		=    +('/' >>
+				*(alpha |
+					digit |
+					(set = ';', ':', '@', '&', '=') |
+					(set = '$', '-', '_', '.', '+') |
+					(set = '!', '*', '\'', '\(', ')', ',') |
+					'%' >> repeat<2>(xdigit)));
 
-        typedef std::vector<std::string>::const_iterator vec_str_it;
+	typedef std::vector<std::string>::const_iterator vec_str_it;
 
-        //set forwarded flag true
-        forwarded_for = 1;
+	//set forwarded flag true
+	forwarded_for = 1;
 
-        try {
-                vec_str_it it = args.begin();
-                vec_str_it it_end = args.end();
+	try {
+		vec_str_it it = args.begin();
+		vec_str_it it_end = args.end();
 
-                for (; it != it_end;) {
+		for (; it != it_end;) {
 
-                        if (*it == "-T" || *it == "--timeout") {
-                                // timeout
-                                if (!timeout_flag) {
-                                        // not set timeout option
-                                        ++it;
-                                        // next parameter exist check
-                                        if (it != it_end) {
-                                                // next parameter exist
-                                                if ((*it).substr(0, 1) == "-" || (*it).substr(0, 2) == "--") {
-                                                        continue;
-                                                }
+			if (*it == "-T" || *it == "--timeout") {
+				// timeout
+				if (!timeout_flag) {
+					// not set timeout option
+					++it;
+					// next parameter exist check
+					if (it != it_end) {
+						// next parameter exist
+						if ((*it).substr(0, 1) == "-" || (*it).substr(0, 2) == "--") {
+							continue;
+						}
 
-                                                try {
-                                                        unsigned long ultimeout = 0;
-                                                        ultimeout = boost::lexical_cast<unsigned long>(*it);
-                                                        // int maxvalue check
-                                                        if (ultimeout > INT_MAX) {
-                                                                check_result.flag = false;
-                                                                formatter.parse("'-T/--timeout' option value '%s' is too large.");
-                                                                formatter % *it;
-                                                                check_result.message = formatter.str();
-                                                                putLogError(600013, check_result.message, __FILE__, __LINE__);
-                                                                break;
-                                                        } else {
-                                                                timeout_flag = true;
-                                                                timeout = ultimeout;
-                                                                ++it;
-                                                                continue;
-                                                        }
-                                                } catch (boost::bad_lexical_cast &e) {
-                                                        // not numeric character
-                                                        check_result.flag = false;
-                                                        formatter.parse("'-T/--timeout' option value '%s' is not numeric character.");
-                                                        formatter % *it;
-                                                        check_result.message = formatter.str();
-                                                        putLogError(600014, check_result.message, __FILE__, __LINE__);
-                                                        break;
-                                                }
-                                        } else {
-                                                break;
-                                        }
-                                } else {
-                                        // already set timeout
-                                        check_result.flag = false;
-                                        check_result.message = "Cannot set multiple option '-T/--timeout'.";
-                                        putLogError(600015, check_result.message, __FILE__, __LINE__);
-                                        break;
+						try {
+							unsigned long ultimeout = 0;
+							ultimeout = boost::lexical_cast<unsigned long>(*it);
+							// int maxvalue check
+							if (ultimeout > INT_MAX) {
+								check_result.flag = false;
+								formatter.parse("'-T/--timeout' option value '%s' is too large.");
+								formatter % *it;
+								check_result.message = formatter.str();
+								putLogError(600013, check_result.message, __FILE__, __LINE__);
+								break;
+							} else {
+								timeout_flag = true;
+								timeout = ultimeout;
+								++it;
+								continue;
+							}
+						} catch (boost::bad_lexical_cast &e) {
+							// not numeric character
+							check_result.flag = false;
+							formatter.parse("'-T/--timeout' option value '%s' is not numeric character.");
+							formatter % *it;
+							check_result.message = formatter.str();
+							putLogError(600014, check_result.message, __FILE__, __LINE__);
+							break;
+						}
+					} else {
+						break;
+					}
+				} else {
+					// already set timeout
+					check_result.flag = false;
+					check_result.message = "Cannot set multiple option '-T/--timeout'.";
+					putLogError(600015, check_result.message, __FILE__, __LINE__);
+					break;
 
-                                }
-                        } else if (*it == "-R" || *it == "--reschedule") {
-                                // reschedule
-                                if (!no_reschedule_flag) {
-                                        // not set no-reschedule flag
-                                        reschedule_flag = true;
-                                        reschedule = 1;
-                                } else {
-                                        // already set no-reschedule flag
-                                        check_result.flag = false;
-                                        check_result.message = "You have to choose either of reschedule or no-reschedule.";
-                                        putLogError(600016, check_result.message, __FILE__, __LINE__);
-                                        break;
-                                }
-                        } else if (*it == "-N" || *it == "--no-reschedule") {
-                                // no-reschedule
-                                if (!reschedule_flag) {
-                                        // not set reschedule flag
-                                        no_reschedule_flag = true;
-                                        reschedule = 0;
+				}
+			} else if (*it == "-R" || *it == "--reschedule") {
+				// reschedule
+				if (!no_reschedule_flag) {
+					// not set no-reschedule flag
+					reschedule_flag = true;
+					reschedule = 1;
+				} else {
+					// already set no-reschedule flag
+					check_result.flag = false;
+					check_result.message = "You have to choose either of reschedule or no-reschedule.";
+					putLogError(600016, check_result.message, __FILE__, __LINE__);
+					break;
+				}
+			} else if (*it == "-N" || *it == "--no-reschedule") {
+				// no-reschedule
+				if (!reschedule_flag) {
+					// not set reschedule flag
+					no_reschedule_flag = true;
+					reschedule = 0;
 
-                                } else {
-                                        // already set reshcedule flag
-                                        check_result.flag = false;
-                                        check_result.message = "You have to choose either of reschedule or no-reschedule.";
-                                        putLogError(600017, check_result.message, __FILE__, __LINE__);
-                                        break;
-                                }
-                        }
-                        //option string = "-F"
-                        else if (*it == "-F" || *it == "--forwarded-for") {
-                                //set forwarded flag ON
-                                forward_checked = true;
-                                forwarded_for = FORWARDED_FOR_ON;
-                        }
-                        //option string  = "-S"
-                        else if (*it == "-S" || *it == "--sorry-uri") {
-                                //sorryURI flag = OFF
-                                if (!sorryuri_checked) {
-                                        //next item exist
-                                        if (++it != it_end) {
-                                                if (!it->empty() && (it->substr(0, 1) == "-" || it->substr(0, 2) == "--")) {
-                                                        //set check result flag false
-                                                        check_result.flag = false;
-                                                        //set check result message
-                                                        check_result.message = "You have to set option value '-S/--sorry-uri'.";
-                                                        //loop break
-                                                        break;
-                                                }
-                                                //next option string's length > 127
-                                                if (it->size() > MAX_OPTION_SIZE - 1) {
-                                                        std::ostringstream ostr;
-                                                        ostr << "'-S/--sorry-uri' option value '" << *it << "' is too long.";
+				} else {
+					// already set reshcedule flag
+					check_result.flag = false;
+					check_result.message = "You have to choose either of reschedule or no-reschedule.";
+					putLogError(600017, check_result.message, __FILE__, __LINE__);
+					break;
+				}
+			}
+			//option string = "-F"
+			else if (*it == "-F" || *it == "--forwarded-for") {
+				//set forwarded flag ON
+				forward_checked = true;
+				forwarded_for = FORWARDED_FOR_ON;
+			}
+			//option string  = "-S"
+			else if (*it == "-S" || *it == "--sorry-uri") {
+				//sorryURI flag = OFF
+				if (!sorryuri_checked) {
+					//next item exist
+					if (++it != it_end) {
+						if (!it->empty() && (it->substr(0, 1) == "-" || it->substr(0, 2) == "--")) {
+							//set check result flag false
+							check_result.flag = false;
+							//set check result message
+							check_result.message = "You have to set option value '-S/--sorry-uri'.";
+							//loop break
+							break;
+						}
+						//next option string's length > 127
+						if (it->size() > MAX_OPTION_SIZE - 1) {
+							std::ostringstream ostr;
+							ostr << "'-S/--sorry-uri' option value '" << *it << "' is too long.";
 
-                                                        //set check result flag false
-                                                        check_result.flag = false;
-                                                        //set check result message
-                                                        check_result.message = ostr.str();
-                                                        putLogError(600018, check_result.message, __FILE__,
-                                                                    __LINE__);
-                                                        //loop break
-                                                        break;
-                                                }
-                                                //next option string's length <= 127
-                                                else {
-                                                        //regex check
-                                                        //check OK
-                                                        if (regex_match(*it, sorry_uri_regex)) {
-                                                                sorryuri_checked = true;
-                                                                memcpy(sorry_uri.data(), it->c_str(), it->size());
-                                                        }
-                                                        //check NG
-                                                        else {
-                                                                std::ostringstream ostr;
-                                                                ostr << "'-S/--sorry-uri' option value '" << *it << "' is not a valid URI.";
+							//set check result flag false
+							check_result.flag = false;
+							//set check result message
+							check_result.message = ostr.str();
+							putLogError(600018, check_result.message, __FILE__,
+									__LINE__);
+							//loop break
+							break;
+						}
+						//next option string's length <= 127
+						else {
+							//regex check
+							//check OK
+							if (regex_match(*it, sorry_uri_regex)) {
+								sorryuri_checked = true;
+								memcpy(sorry_uri.data(), it->c_str(), it->size());
+							}
+							//check NG
+							else {
+								std::ostringstream ostr;
+								ostr << "'-S/--sorry-uri' option value '" << *it << "' is not a valid URI.";
 
-                                                                //set check result flag false
-                                                                check_result.flag = false;
-                                                                //set check result message
-                                                                check_result.message = ostr.str();
-                                                                putLogError(600019, check_result.message, __FILE__,
-                                                                            __LINE__);
-                                                                break;
-                                                        }
-                                                }
-                                        }
-                                        //next item not exist
-                                        else {
-                                                //set check result flag false
-                                                check_result.flag = false;
-                                                //set check result message
-                                                check_result.message = "You have to set option value '-S/--sorry-uri'.";
-                                                putLogError(600020, check_result.message, __FILE__,
-                                                            __LINE__);
-                                                break;
-                                        }
-                                }
-                                //sorryURI flag = ON
-                                else {
-                                        //set check result flag false
-                                        check_result.flag = false;
-                                        //set check result message
-                                        check_result.message = "Cannot set multiple option '-S/--sorry-uri'.";
-                                        putLogError(600021, check_result.message, __FILE__,
-                                                    __LINE__);
-                                        break;
-                                }
-                        }
-                        //others
-                        else {
-                                //set check result flag false
-                                check_result.flag = false;
-                                //set check result message
-                                check_result.message = "Option error.";
-                                putLogError(600022, check_result.message, __FILE__, __LINE__);
+								//set check result flag false
+								check_result.flag = false;
+								//set check result message
+								check_result.message = ostr.str();
+								putLogError(600019, check_result.message, __FILE__,
+										__LINE__);
+								break;
+							}
+						}
+					}
+					//next item not exist
+					else {
+						//set check result flag false
+						check_result.flag = false;
+						//set check result message
+						check_result.message = "You have to set option value '-S/--sorry-uri'.";
+						putLogError(600020, check_result.message, __FILE__,
+								__LINE__);
+						break;
+					}
+				}
 
-                                break;
-                        }
-                        ++it;
-                }
+				//sorryURI flag = ON
+				else {
+					//set check result flag false
+					check_result.flag = false;
+					//set check result message
+					check_result.message = "Cannot set multiple option '-S/--sorry-uri'.";
+					putLogError(600021, check_result.message, __FILE__,__LINE__);
+					break;
+				}
+			}
 
-                // result check
-                if (check_result.flag) {
-                        // set timeout's default value
-                        if (!timeout_flag) {
-                                timeout = 3600;
-                        }
+			//option string = "-c/--statistic"
+			else if (*it == "-c" || *it == "--statistic") {
+				//statistic flag is OFF
+				if (!stats_checked) {
+					//next item exist
+					if(++it != it_end) {
+						//collect statistic flag must be 0 or 1
+						if(*it == "0" || *it == "1"){
+							//check OK
+							//set statistic flag ON
+							stats_checked = true;
 
-                        // set reschedule's default value
-                        if (!reschedule_flag) {
-                                reschedule = 0;
-                        }
-                        //forward flag = OFF
-                        if (!forward_checked) {
-                                forwarded_for = 0;
-                        }
+							//set collect statistic flag
+							statistic = boost::lexical_cast<int>(*it);                                          }
+						else {
+							std::ostringstream ostr;
+							ostr << "'-c/--statistic' option value '" << *it << "' is not a valid value.";
 
-                }
-                /*-------- DEBUG LOG --------*/
-                if (unlikely(LOG_LV_DEBUG == getloglevel())) {
-                        boost::format formatter("function : protocol_module_ip::check_message_result "
-                                                "protocol_module_ip::set_parameter(const std::vector<std::string>& args) : "
-                                                "timeout = %d, reschedule = %d.");
-                        formatter % timeout  % reschedule;
-                        putLogDebug(600018, formatter.str(), __FILE__, __LINE__);
-                }
-                /*------DEBUG LOG END------*/
+							//set check result flag false
+							check_result.flag = false;
+							//set check result message
+							check_result.message = ostr.str();
+							putLogError(600117, check_result.message, __FILE__, __LINE__);
+							//loop break
+							break;
+						}
+					}
+					//next item is not exist
+					else {
+						//set check flag false
+						check_result.flag = false;
+						//set check result message
+						check_result.message = "You have to set option value '-c/--statistic'.";
+						putLogError(600118, check_result.message, __FILE__,__LINE__);
+						//loop break
+						break;
+					}
+				}
+				//statistic flag is ON
+				else {
+					//set check result flag false
+					check_result.flag = false;
+					//set check result message
+					check_result.message = "Cannot set multiple option '-c/--statistic'.";
+					putLogError(600119, check_result.message, __FILE__,__LINE__);
+					//loop break
+					break;
+				}
+			}
+			//others
+			else {
+				//set check result flag false
+				check_result.flag = false;
+				//set check result message
+				check_result.message = "Option error.";
+				putLogError(600022, check_result.message, __FILE__, __LINE__);
 
-                unsigned int data_size = 0;
-                void *data_addr = NULL;
-                data_addr = replication_pay_memory(get_name(), &data_size);
+				break;
+			}
+			++it;
+		}
 
-                /*-------- DEBUG LOG --------*/
-                if (unlikely(LOG_LV_DEBUG == getloglevel())) {
-                        putLogDebug(600019, "function : protocol_module_ip::check_message_result protocol_module_ip::"
-                                    "set_parameter() : replication_pay_memory() end.", __FILE__, __LINE__);
-                        boost::format formatter("function : protocol_module_ip::check_message_result protocol_module_ip::"
-                                                "set_parameter() : data_addr = &(%d), data_size = %d.");
-                        formatter % data_addr % data_size;
-                        putLogDebug(600020, formatter.str(), __FILE__, __LINE__);
-                }
+		// result check
+		if (check_result.flag) {
+			// set timeout's default value
+			if (!timeout_flag) {
+				timeout = 3600;
+			}
 
-                /*------DEBUG LOG END------*/
-                if (data_addr == NULL || data_size <= 0) {
-                        // replication area is null
-                        putLogInfo(600000, "Replication area is null.", __FILE__, __LINE__);
+			// set reschedule's default value
+			if (!reschedule_flag) {
+				reschedule = 0;
+			}
+			//forward flag = OFF
+			if (!forward_checked) {
+				forwarded_for = 0;
+			}
+			//collect statistic flag = OFF
+			if (!stats_checked) {
+				statistic = COLLECT_STATS_OFF;
+			}
+		}
+		/*-------- DEBUG LOG --------*/
+		if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+			boost::format formatter("function : protocol_module_ip::check_message_result "
+					"protocol_module_ip::set_parameter(const std::vector<std::string>& args) : "
+					"timeout = %d, reschedule = %d.");
+			formatter % timeout  % reschedule;
+			putLogDebug(600018, formatter.str(), __FILE__, __LINE__);
+		}
+		/*------DEBUG LOG END------*/
 
-                        /*-------- DEBUG LOG --------*/
-                        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
-                                putLogDebug(600021, "function : protocol_module_ip::check_message_result "
-                                            "protocol_module_ip::set_parameter() : "
-                                            "Replication area is null.", __FILE__, __LINE__);
-                        }
-                        /*------DEBUG LOG END------*/
-                }
+		unsigned int data_size = 0;
+		void *data_addr = NULL;
+		data_addr = replication_pay_memory(get_name(), &data_size);
 
-                // create ip_replication_data_processor
-                replication_data_processor = new ip_replication_data_processor(
-                        static_cast<char *>(data_addr),
-                        data_size,
-                        virtual_service_endpoint_tcp,
-                        getloglevel,
-                        putLogFatal,
-                        putLogError,
-                        putLogWarn,
-                        putLogInfo,
-                        putLogDebug);
+		/*-------- DEBUG LOG --------*/
+		if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+			putLogDebug(600019, "function : protocol_module_ip::check_message_result protocol_module_ip::"
+					"set_parameter() : replication_pay_memory() end.", __FILE__, __LINE__);
+			boost::format formatter("function : protocol_module_ip::check_message_result protocol_module_ip::"
+					"set_parameter() : data_addr = &(%d), data_size = %d.");
+			formatter % data_addr % data_size;
+			putLogDebug(600020, formatter.str(), __FILE__, __LINE__);
+		}
 
-                /*-------- DEBUG LOG --------*/
-                if (unlikely(LOG_LV_DEBUG == getloglevel())) {
-                        boost::format formatter("new : address = &(%d), size = %lu.");
-                        formatter % static_cast<void *>(replication_data_processor)
-                        % sizeof(ip_replication_data_processor);
-                        putLogDebug(600022, formatter.str(), __FILE__, __LINE__);
-                }
-                /*------DEBUG LOG END------*/
+		/*------DEBUG LOG END------*/
+		if (data_addr == NULL || data_size <= 0) {
+			// replication area is null
+			putLogInfo(600000, "Replication area is null.", __FILE__, __LINE__);
 
-                replication_data_processor->register_replication_area_lock(replication_area_lock);
+			/*-------- DEBUG LOG --------*/
+			if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+				putLogDebug(600021, "function : protocol_module_ip::check_message_result "
+						"protocol_module_ip::set_parameter() : "
+						"Replication area is null.", __FILE__, __LINE__);
+			}
+			/*------DEBUG LOG END------*/
+		}
 
-                /*-------- DEBUG LOG --------*/
-                if (unlikely(LOG_LV_DEBUG == getloglevel())) {
-                        putLogDebug(600023, "function : protocol_module_ip::check_message_result protocol_module_ip::"
-                                    "set_parameter() : register_replication_area_lock() end.", __FILE__, __LINE__);
-                }
-                /*------DEBUG LOG END------*/
+		// create ip_replication_data_processor
+		replication_data_processor = new ip_replication_data_processor(
+				static_cast<char *>(data_addr),
+				data_size,
+				virtual_service_endpoint_tcp,
+				getloglevel,
+				putLogFatal,
+				putLogError,
+				putLogWarn,
+				putLogInfo,
+				putLogDebug);
 
-                replication_data_processor->register_replication_area_unlock(replication_area_unlock);
+		/*-------- DEBUG LOG --------*/
+		if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+			boost::format formatter("new : address = &(%d), size = %lu.");
+			formatter % static_cast<void *>(replication_data_processor)
+				% sizeof(ip_replication_data_processor);
+			putLogDebug(600022, formatter.str(), __FILE__, __LINE__);
+		}
+		/*------DEBUG LOG END------*/
 
-                /*-------- DEBUG LOG --------*/
-                if (unlikely(LOG_LV_DEBUG == getloglevel())) {
-                        putLogDebug(600024, "function : protocol_module_ip::check_message_result protocol_module_ip::"
-                                    "set_parameter() : register_replication_area_unlock() end.", __FILE__, __LINE__);
-                }
-                /*------DEBUG LOG END------*/
+		replication_data_processor->register_replication_area_lock(replication_area_lock);
 
-                // create ip_session_data_processor
-                ip_data_processor = new ip_session_data_processor(
-                        timeout,
-                        replication_data_processor,
-                        getloglevel,
-                        putLogFatal,
-                        putLogError,
-                        putLogWarn,
-                        putLogInfo,
-                        putLogDebug);
+		/*-------- DEBUG LOG --------*/
+		if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+			putLogDebug(600023, "function : protocol_module_ip::check_message_result protocol_module_ip::"
+					"set_parameter() : register_replication_area_lock() end.", __FILE__, __LINE__);
+		}
+		/*------DEBUG LOG END------*/
 
-                /*-------- DEBUG LOG --------*/
-                if (unlikely(LOG_LV_DEBUG == getloglevel())) {
-                        boost::format formatter("new : address = &(%d), size = %lu.");
-                        formatter % static_cast<void *>(ip_data_processor)
-                        % sizeof(ip_session_data_processor);
-                        putLogDebug(600025, formatter.str(), __FILE__, __LINE__);
-                }
-                /*------DEBUG LOG END------*/
+		replication_data_processor->register_replication_area_unlock(replication_area_unlock);
 
-                // restore data from replication area
-                ip_replication_data *redata = replication_data_processor->get_replication_area();
+		/*-------- DEBUG LOG --------*/
+		if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+			putLogDebug(600024, "function : protocol_module_ip::check_message_result protocol_module_ip::"
+					"set_parameter() : register_replication_area_unlock() end.", __FILE__, __LINE__);
+		}
+		/*------DEBUG LOG END------*/
 
-                /*-------- DEBUG LOG --------*/
-                if (unlikely(LOG_LV_DEBUG == getloglevel())) {
-                        putLogDebug(600026, "function : protocol_module_ip::check_message_result protocol_module_ip::"
-                                    "set_parameter() : get_replication_area() end.", __FILE__, __LINE__);
-                }
-                /*------DEBUG LOG END------*/
+		// create ip_session_data_processor
+		ip_data_processor = new ip_session_data_processor(
+				timeout,
+				replication_data_processor,
+				getloglevel,
+				putLogFatal,
+				putLogError,
+				putLogWarn,
+				putLogInfo,
+				putLogDebug);
 
-                if (data_addr) {
-                        replication_area_lock();
+		/*-------- DEBUG LOG --------*/
+		if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+			boost::format formatter("new : address = &(%d), size = %lu.");
+			formatter % static_cast<void *>(ip_data_processor)
+				% sizeof(ip_session_data_processor);
+			putLogDebug(600025, formatter.str(), __FILE__, __LINE__);
+		}
+		/*------DEBUG LOG END------*/
 
-                        /*-------- DEBUG LOG --------*/
-                        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
-                                putLogDebug(600027, "function : protocol_module_ip::check_message_result protocol_module_ip::"
-                                            "set_parameter() : replication_area_lock() end.", __FILE__, __LINE__);
-                        }
-                        /*------DEBUG LOG END------*/
+		// restore data from replication area
+		ip_replication_data *redata = replication_data_processor->get_replication_area();
 
-                        ip_data_processor->read_session_data_from_replication_area(redata);
+		/*-------- DEBUG LOG --------*/
+		if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+			putLogDebug(600026, "function : protocol_module_ip::check_message_result protocol_module_ip::"
+					"set_parameter() : get_replication_area() end.", __FILE__, __LINE__);
+		}
+		/*------DEBUG LOG END------*/
 
-                        /*-------- DEBUG LOG --------*/
-                        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
-                                putLogDebug(600028, "function : protocol_module_ip::check_message_result protocol_module_ip::"
-                                            "set_parameter() : read_session_data_from_replication_area() end.", __FILE__, __LINE__);
-                        }
-                        /*------DEBUG LOG END------*/
+		if (data_addr) {
+			replication_area_lock();
 
-                        replication_area_unlock();
+			/*-------- DEBUG LOG --------*/
+			if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+				putLogDebug(600027, "function : protocol_module_ip::check_message_result protocol_module_ip::"
+						"set_parameter() : replication_area_lock() end.", __FILE__, __LINE__);
+			}
+			/*------DEBUG LOG END------*/
 
-                        /*-------- DEBUG LOG --------*/
-                        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
-                                putLogDebug(600029, "function : protocol_module_ip::check_message_result protocol_module_ip::"
-                                            "set_parameter() : replication_area_unlock() end.", __FILE__, __LINE__);
-                        }
-                        /*------DEBUG LOG END------*/
-                }
-        } catch (const std::bad_alloc &ba) {
-                if (replication_data_processor) {
-                        delete replication_data_processor;
-                        replication_data_processor = NULL;
-                }
+			ip_data_processor->read_session_data_from_replication_area(redata);
 
-                if (ip_data_processor) {
-                        delete ip_data_processor;
-                        ip_data_processor = NULL;
-                }
+			/*-------- DEBUG LOG --------*/
+			if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+				putLogDebug(600028, "function : protocol_module_ip::check_message_result protocol_module_ip::"
+						"set_parameter() : read_session_data_from_replication_area() end.", __FILE__, __LINE__);
+			}
+			/*------DEBUG LOG END------*/
 
-                std::cerr << "protocol_module_ip::set_parameter() : exception : Could not allocate memory." << std::endl;
-                check_result.flag = false;
-                check_result.message = "Could not allocate memory.";
-                putLogError(600023, check_result.message, __FILE__, __LINE__);
-        } catch (const std::exception &ex) {
-                if (replication_data_processor) {
-                        delete replication_data_processor;
-                        replication_data_processor = NULL;
-                }
+			replication_area_unlock();
 
-                if (ip_data_processor) {
-                        delete ip_data_processor;
-                        ip_data_processor = NULL;
-                }
+			/*-------- DEBUG LOG --------*/
+			if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+				putLogDebug(600029, "function : protocol_module_ip::check_message_result protocol_module_ip::"
+						"set_parameter() : replication_area_unlock() end.", __FILE__, __LINE__);
+			}
+			/*------DEBUG LOG END------*/
+		}
+	} catch (const std::bad_alloc &ba) {
+		if (replication_data_processor) {
+			delete replication_data_processor;
+			replication_data_processor = NULL;
+		}
 
-                check_result.flag = false;
-                std::cerr << "protocol_module_ip::set_parameter() : exception : error = " << ex.what() << std::endl;
-                boost::format formatter("function : protocol_module_ip::check_message_result "
-                                        "protocol_module_ip::set_parameter() : exception : error = %s.");
-                formatter % ex.what();
-                putLogError(600024, formatter.str(), __FILE__, __LINE__);
-        } catch (...) {
-                if (replication_data_processor) {
-                        delete replication_data_processor;
-                        replication_data_processor = NULL;
-                }
+		if (ip_data_processor) {
+			delete ip_data_processor;
+			ip_data_processor = NULL;
+		}
 
-                if (ip_data_processor) {
-                        delete ip_data_processor;
-                        ip_data_processor = NULL;
-                }
+		std::cerr << "protocol_module_ip::set_parameter() : exception : Could not allocate memory." << std::endl;
+		check_result.flag = false;
+		check_result.message = "Could not allocate memory.";
+		putLogError(600023, check_result.message, __FILE__, __LINE__);
+	} catch (const std::exception &ex) {
+		if (replication_data_processor) {
+			delete replication_data_processor;
+			replication_data_processor = NULL;
+		}
 
-                check_result.flag = false;
-                std::cerr << "protocol_module_ip::set_parameter() : Unknown exception." << std::endl;
-                putLogError(600025, "function : protocol_module_ip::check_message_result protocol_module_ip::"
-                            "set_parameter() : Unknown exception.", __FILE__, __LINE__);
-        }
-        /*-------- DEBUG LOG --------*/
-        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
-                boost::format formatter("out_function : protocol_module_ip::check_message_result "
-                                        "protocol_module_ip::set_parameter("
-                                        "const std::vector<std::string>& args) : return_value = ("
-                                        "check_message_result.flag = %d, check_message_result.message = %s).");
-                formatter % check_result.flag % check_result.message;
-                putLogDebug(600030, formatter.str(), __FILE__, __LINE__);
-        }
-        /*------DEBUG LOG END------*/
-        return check_result;
+		if (ip_data_processor) {
+			delete ip_data_processor;
+			ip_data_processor = NULL;
+		}
+
+		check_result.flag = false;
+		std::cerr << "protocol_module_ip::set_parameter() : exception : error = " << ex.what() << std::endl;
+		boost::format formatter("function : protocol_module_ip::check_message_result "
+				"protocol_module_ip::set_parameter() : exception : error = %s.");
+		formatter % ex.what();
+		putLogError(600024, formatter.str(), __FILE__, __LINE__);
+	} catch (...) {
+		if (replication_data_processor) {
+			delete replication_data_processor;
+			replication_data_processor = NULL;
+		}
+
+		if (ip_data_processor) {
+			delete ip_data_processor;
+			ip_data_processor = NULL;
+		}
+
+		check_result.flag = false;
+		std::cerr << "protocol_module_ip::set_parameter() : Unknown exception." << std::endl;
+		putLogError(600025, "function : protocol_module_ip::check_message_result protocol_module_ip::"
+				"set_parameter() : Unknown exception.", __FILE__, __LINE__);
+	}
+	/*-------- DEBUG LOG --------*/
+	if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+		boost::format formatter("out_function : protocol_module_ip::check_message_result "
+				"protocol_module_ip::set_parameter("
+				"const std::vector<std::string>& args) : return_value = ("
+				"check_message_result.flag = %d, check_message_result.message = %s).");
+		formatter % check_result.flag % check_result.message;
+		putLogDebug(600030, formatter.str(), __FILE__, __LINE__);
+	}
+	/*------DEBUG LOG END------*/
+	return check_result;
 }
 
 //! parameter add
@@ -1023,8 +1127,9 @@ void protocol_module_ip::get_option_info(std::string &option)
         }
         /*------DEBUG LOG END------*/
 
-        boost::format option_formatter("--timeout %d%s %s --sorry-uri '%s'");
-        option_formatter % timeout % (forwarded_for ? " --forwarded-for" : "") % (reschedule ? "--reschedule" : "--no-reschedule") % sorry_uri.c_array();
+	boost::format option_formatter("--timeout %d%s %s --sorry-uri '%s' --statistic '%d'");
+        option_formatter % timeout % (forwarded_for ? " --forwarded-for" : "") % (reschedule ? "--reschedule" : "--no-reschedule")
+                         % sorry_uri.c_array() % statistic;
         option.assign(option_formatter.str());
 
         /*-------- DEBUG LOG --------*/
@@ -1664,6 +1769,17 @@ protocol_module_base::EVENT_TAG protocol_module_ip::handle_client_recv(const boo
                                                                 }
 
                                                         }
+
+							//increment http statistics
+						        increment_stats(session_data_ptr->data_buffer + session_data_ptr->data_offset);
+						        /*-------- DEBUG LOG --------*/
+							if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+								boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
+						                                        "handle_client_recv() : call increment_stats : thread id : %d.");
+							        formatter % boost::this_thread::get_id();
+							        putLogDebug(600228, formatter.str(), __FILE__, __LINE__);
+							}
+							/*------DEBUG LOG END------*/
 
                                                         //set data state HTTP_HEADER
                                                         session_data_ptr->data_state = HTTP_HEADER;
@@ -2495,7 +2611,18 @@ protocol_module_base::EVENT_TAG protocol_module_ip::handle_realserver_send(
                                                                 }
 
                                                         }
-
+							
+							//increment http statistics
+						        increment_stats(session_data_ptr->data_buffer + session_data_ptr->data_offset);
+							/*-------- DEBUG LOG --------*/
+							if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+							        boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_ip::"
+							                                "handle_realserver_send() : call increment_stats : thread id : %d.");
+							        formatter % boost::this_thread::get_id();
+							        putLogDebug(600229, formatter.str(), __FILE__, __LINE__);
+							}
+							/*------DEBUG LOG END------*/
+	
                                                         //set data state HTTP_HEADER
                                                         session_data_ptr->data_state = HTTP_HEADER;
                                                 }

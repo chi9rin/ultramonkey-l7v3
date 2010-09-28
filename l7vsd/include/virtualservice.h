@@ -60,12 +60,13 @@
 #define PARAM_BPS_CALC_INTERVAL    "throughput_calc_interval"
 #define PARAM_REP_INTERVAL         "interval"
 
-#define QOS_UP_ALERT_ON            "qos_up_alert_on"
-#define QOS_UP_ALERT_OFF           "qos_up_alert_off"
-#define QOS_DOWN_ALERT_ON          "qos_down_alert_on"
-#define QOS_DOWN_ALERT_OFF         "qos_down_alert_off"
-#define SESSION_POOL_ALERT_ON       "sessionpool_alert_on"
-#define SESSION_POOL_ALERT_OFF      "sessionpool_alert_off"
+#define QOS_UP_ALERT_ON_SIZE        "qos_up_alert_on"
+#define QOS_UP_ALERT_OFF_SIZE       "qos_up_alert_off"
+#define QOS_DOWN_ALERT_ON_SIZE      "qos_down_alert_on"
+#define QOS_DOWN_ALERT_OFF_SIZE     "qos_down_alert_off"
+#define SESSION_POOL_ALERT_ON_SIZE  "sessionpool_alert_on"
+#define SESSION_POOL_ALERT_OFF_SIZE "sessionpool_alert_off"
+
 
 //! Default nic of realserver side
 #define RS_SIDE_NIC_NAME_DEFAULT   "eth0"
@@ -177,17 +178,17 @@ public:
         const static int  SCHEDULER_PRIORITY       = 20;
 
         //! Default upstream QoS alert on threshold
-        const static int  UPQOS_ALERT_ON_DEFAULT   = 85;
+	const static int  UPQOS_ALERT_ON_SIZE_DEFAULT       = 85;
         //! Default upstream QoS alert off threshold
-        const static int  UPQOS_ALERT_OFF_DEFAULT  = 50;
+        const static int  UPQOS_ALERT_OFF_SIZE_DEFAULT      = 50;
         //! Default downstream QoS alert on threshold
-        const static int  DOWNQOS_ALERT_ON_DEFAULT = 85;
+        const static int  DOWNQOS_ALERT_ON_SIZE_DEFAULT     = 85;
         //! Default downstream QoS alert off threshold
-        const static int  DOWNQOS_ALERT_OFF_DEFAULT= 50;
+        const static int  DOWNQOS_ALERT_OFF_SIZE_DEFAULT    = 50;
         //! Default session pool alert on threshold
-        const static int  SESSIONPOOL_ALERT_ON_DEFAULT = 5;
+        const static int  SESSIONPOOL_ALERT_ON_SIZE_DEFAULT = 5;
         //! Default session pool alert off threshold
-        const static int  SESSIONPOOL_ALERT_OFF_DEFAULT= 8;
+        const static int  SESSIONPOOL_ALERT_OFF_SIZE_DEFAULT= 8;
 
 protected:
 
@@ -206,12 +207,12 @@ protected:
                                 session_pool_size(SESSION_POOL_NUM_DEFAULT),
                                 bps_interval(BPS_INTERVAL_DEFAULT),
                                 rep_interval(REP_INTERVAL_DEFAULT),
-                                qos_up_alert_on(UPQOS_ALERT_ON_DEFAULT),
-                                qos_up_alert_off(UPQOS_ALERT_OFF_DEFAULT),
-                                qos_down_alert_on(DOWNQOS_ALERT_ON_DEFAULT),
-                                qos_down_alert_off(DOWNQOS_ALERT_OFF_DEFAULT),
-                                session_pool_alert_on(SESSIONPOOL_ALERT_ON_DEFAULT),
-                                session_pool_alert_off(SESSIONPOOL_ALERT_OFF_DEFAULT) {}
+				qos_up_alert_on(UPQOS_ALERT_ON_SIZE_DEFAULT),
+                                qos_up_alert_off(UPQOS_ALERT_OFF_SIZE_DEFAULT),
+                                qos_down_alert_on(DOWNQOS_ALERT_ON_SIZE_DEFAULT),
+                                qos_down_alert_off(DOWNQOS_ALERT_OFF_SIZE_DEFAULT),
+                                session_pool_alert_on(SESSIONPOOL_ALERT_ON_SIZE_DEFAULT),
+                                session_pool_alert_off(SESSIONPOOL_ALERT_OFF_SIZE_DEFAULT) {}
         };
 
         boost::thread::id       this_id;
@@ -261,8 +262,8 @@ protected:
         // protocol module option string
         std::string             protocol_module_for_indication_options;
 
-        bool upQoS_alert_flag;          //! upstream QoS alert flag
-        bool downQoS_alert_flag;        //! downstream QoS alert flag
+	bool upqos_alert_flag;          //! upstream QoS alert flag
+        bool downqos_alert_flag;        //! downstream QoS alert flag
         bool sessionpool_alert_flag;    //! sessionpool alert flag
 
         void         load_parameter(l7vs::error_code &);

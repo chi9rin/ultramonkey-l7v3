@@ -62,7 +62,7 @@ public:
 
         //! get statistic mode
         //! @return    statistic mode.
-        STATS_MODE_TAG get_mode() {
+        STATS_MODE_TAG get_mode() const {
                 return mode;
         };
 protected:
@@ -186,11 +186,11 @@ protected:
         udp_schedule_func_type        schedule_udp;    //!< udp_scheduler function object
 
         stats_base                    stats;           //!< base statistic object
-        int                           statistic;       //!< collect statistic flag
+        bool                           statistic;       //!< collect statistic flag
 
 public:
         //! constractor
-        protocol_module_base(std::string in_modulename) : module_base(in_modulename), statistic(0) {};
+        protocol_module_base(std::string in_modulename) : module_base(in_modulename), statistic(false) {};
         //! destractor
         virtual    ~protocol_module_base() {};
         //! initialize function. called from module control. module loaded call

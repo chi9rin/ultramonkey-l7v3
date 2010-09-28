@@ -38,6 +38,7 @@
 #include "parameter.h"
 
 #include "utility.h"
+#include "snmpagent.h"
 
 #define    BPS_DEFAULT_INTERVAL_USEC    500000ULL
 
@@ -65,6 +66,9 @@ l7vs::virtualservice_base::virtualservice_base(const l7vs::l7vsd &invsd,
         wait_count_down    = 0;
         interrupt_running_flag = 0;
         virtualservice_stop_flag = 0;
+	upqos_alert_flag = false;
+        downqos_alert_flag = false;
+        sessionpool_alert_flag = false;
 
         calc_bps_timer.reset(new boost::asio::deadline_timer(dispatcher));
         replication_timer.reset(new boost::asio::deadline_timer(dispatcher));
@@ -132,13 +136,78 @@ void    l7vs::virtualservice_base::load_parameter(l7vs::error_code &err)
         if (!vs_err)
                 param_data.rep_interval = int_val;
 
+	//get upstream QoS alert on threshold
+        int_val    = param.get_int(l7vs::PARAM_COMP_SNMPAGENT, QOS_UP_ALERT_ON_SIZE, vs_err);
+        if (!vs_err) {
+                if (int_val > 0 && int_val <= 100 ) {
+                        param_data.qos_up_alert_on = int_val;
+                } else {
+			param_data.qos_up_alert_on = virtualservice_base::UPQOS_ALERT_ON_SIZE_DEFAULT;
+                }
+        }
+        //get upstream QoS alert off threshold
+        int_val    = param.get_int(l7vs::PARAM_COMP_SNMPAGENT, QOS_UP_ALERT_OFF_SIZE, vs_err);
+        if (!vs_err) {
+                if (int_val > 0 && int_val <= 100 ) {
+                        param_data.qos_up_alert_off = int_val;
+                } else {
+                        param_data.qos_up_alert_off = virtualservice_base::UPQOS_ALERT_OFF_SIZE_DEFAULT;
+		}
+	}
+
+	//get downstream QoS alert on threshold
+        int_val    = param.get_int(l7vs::PARAM_COMP_SNMPAGENT, QOS_DOWN_ALERT_ON_SIZE, vs_err);
+        if (!vs_err) {
+                if (int_val > 0 && int_val <= 100 ) {
+                        param_data.qos_down_alert_on = int_val;
+                } else {
+                        param_data.qos_down_alert_on = virtualservice_base::DOWNQOS_ALERT_ON_SIZE_DEFAULT;
+                }
+        }
+
+	//get downstream QoS alert off threshold
+        int_val    = param.get_int(l7vs::PARAM_COMP_SNMPAGENT, QOS_DOWN_ALERT_OFF_SIZE, vs_err);
+        if (!vs_err) {
+                if (int_val > 0 && int_val <= 100 ) {
+                        param_data.qos_down_alert_off = int_val;
+                } else {
+                        param_data.qos_down_alert_off = virtualservice_base::DOWNQOS_ALERT_OFF_SIZE_DEFAULT;
+                }
+        }
+
+        //get session pool alert on threshold
+	int_val    = param.get_int(l7vs::PARAM_COMP_SNMPAGENT, SESSION_POOL_ALERT_ON_SIZE, vs_err);
+        if (!vs_err) {
+                if (int_val > 0) {
+                        param_data.session_pool_alert_on = int_val;
+                } else {
+                        param_data.session_pool_alert_on = virtualservice_base::SESSIONPOOL_ALERT_ON_SIZE_DEFAULT;
+                }
+        }
+
+        //get session pool alert off threshold
+        int_val    = param.get_int(l7vs::PARAM_COMP_SNMPAGENT, SESSION_POOL_ALERT_OFF_SIZE, vs_err);
+        if (!vs_err) {
+                if (int_val > 0) {
+                        param_data.session_pool_alert_off = int_val;
+                } else {
+                        param_data.session_pool_alert_off = virtualservice_base::SESSIONPOOL_ALERT_OFF_SIZE_DEFAULT;
+                }
+        }
+
         if (unlikely(LOG_LV_DEBUG == l7vs::Logger::getLogLevel(l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD))) {
                 std::stringstream buf;
                 buf << "out_function : void virtualservice_base::load_parameter() : ";
-                buf << "param_data.nic_realserver_side = [" << param_data.nic_realserver_side  << "], ";
-                buf << "param_data.session_pool_size = ["   << param_data.session_pool_size    << "], ";
-                buf << "param_data.bps_interval = ["        << param_data.bps_interval         << "], ";
-                buf << "param_data.rep_interval = ["        << param_data.rep_interval         << "]";
+		buf << "param_data.nic_realserver_side = ["   << param_data.nic_realserver_side    << "], ";
+                buf << "param_data.session_pool_size = ["     << param_data.session_pool_size      << "], ";
+                buf << "param_data.bps_interval = ["          << param_data.bps_interval           << "], ";
+                buf << "param_data.rep_interval = ["          << param_data.rep_interval           << "], ";
+                buf << "param_data.qos_up_alert_on = ["       << param_data.qos_up_alert_on        << "], ";
+                buf << "param_data.qos_up_alert_off = ["      << param_data.qos_up_alert_off       << "], ";
+                buf << "param_data.qos_down_alert_on = ["     << param_data.qos_down_alert_on      << "], ";
+                buf << "param_data.qos_down_alert_off = ["    << param_data.qos_down_alert_off     << "], ";
+                buf << "param_data.session_pool_alert_on = [" << param_data.session_pool_alert_on  << "], ";
+                buf << "param_data.session_pool_alert_off = ["<< param_data.session_pool_alert_off << "]";
 
                 l7vs::Logger::putLogDebug(l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 2, buf.str(), __FILE__, __LINE__);
         }
@@ -258,6 +327,46 @@ void    l7vs::virtualservice_base::handle_throughput_update(const boost::system:
                                 wait_count_up = (unsigned long long)((byte_sec_up_val * 1000) / element.qos_upstream);
 
                                 if (wait_count_up > 0)    wait_count_up--;
+
+				//calc upstream alert on throughput
+                                unsigned long long upqos_alert_on_throughput =  element.qos_upstream * param_data.qos_up_alert_on / 100;
+                                //calc upstream alert off throughput
+                                unsigned long long upqos_alert_off_throughput =  element.qos_upstream * param_data.qos_up_alert_off / 100;
+                                if ((upqos_alert_flag == false) && ((byte_sec_up_val * 1000) > upqos_alert_on_throughput)) {
+                                        //create trap message
+			                trapmessage trap_msg;
+			                trap_msg.message = "TRAP00020007,Warning: The up-throughput has exceeded the threshold of QoS warning.";
+			                
+					trap_msg.type = trapmessage::UPQOS_ALERT_ON;
+                                        error_code err_code;
+                                        //push the trap message
+                                        snmpagent::push_trapmessage(trap_msg, err_code);
+                                        if (err_code) {
+                                                std::string msg("Push trap message failed.");
+                                                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 41, msg, __FILE__, __LINE__);
+                                        }
+
+                                        //set upstream QoS alert flag true
+                                        upqos_alert_flag = true;
+                                } else if ((upqos_alert_flag == true) && ((byte_sec_up_val * 1000) < upqos_alert_off_throughput)) {
+                                        //create trap message
+                                        trapmessage trap_msg;
+                                        trap_msg.message = "TRAP00020008,Warning release: The up-throughput has fell below the release threshold of up-QoS warning.";
+                                        trap_msg.type = trapmessage::UPQOS_ALERT_OFF;
+
+                                        error_code err_code;
+
+                                        //push the trap message
+                                        snmpagent::push_trapmessage(trap_msg, err_code);
+                                        if (err_code) {
+                                                std::string msg("Push trap message failed.");
+                                                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 42, msg, __FILE__, __LINE__);
+                                        }
+
+                                        //set upstream QoS alert flag true
+                                        upqos_alert_flag = false;
+                                }
+
                         }
                         // throughput = recvsize / ( (thistime(1) + all_wait_time) * interval(ms) ) * 1000
                         //throughput_up = ( current_up_recvsize.get() / ( param_data.bps_interval * ( wait_count_up.get() + 1 ) ) ) * 1000;
@@ -279,6 +388,44 @@ void    l7vs::virtualservice_base::handle_throughput_update(const boost::system:
                                 wait_count_down = (unsigned long long)((byte_sec_down_val * 1000) / element.qos_downstream);
 
                                 if (wait_count_down > 0)    wait_count_down--;
+
+				//calc downstream alert on throughput
+                                unsigned long long downqos_alert_on_throughput =  element.qos_downstream * param_data.qos_down_alert_on / 100;
+                                //calc downstream alert off throughput
+                                unsigned long long downqos_alert_off_throughput =  element.qos_upstream * param_data.qos_down_alert_off / 100;
+                                if ((downqos_alert_flag == false) && ((byte_sec_down_val * 1000) > downqos_alert_on_throughput)) {
+                                        //create trap message
+                                        trapmessage trap_msg;
+                                        trap_msg.message = "TRAP00020009,Warning: The down-throughput has exceeded the threshold of down-QoS warning.";
+                                        trap_msg.type = trapmessage::DOWNQOS_ALERT_ON;
+
+					error_code err_code;
+                                        //push the trap message
+                                        snmpagent::push_trapmessage(trap_msg, err_code);
+                                        if (err_code) {
+                                                std::string msg("Push trap message failed.");
+                                                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 43, msg, __FILE__, __LINE__);
+                                        }
+                                        //set upstream QoS alert flag true
+                                        downqos_alert_flag = true;
+                                } else if ((downqos_alert_flag == true) && ((byte_sec_down_val * 1000) < downqos_alert_off_throughput)) {
+                                        //create trap message
+                                        trapmessage trap_msg;
+                                        trap_msg.message = "TRAP00020010,Warning release: The down-throughput has fell below the release threshold of down-QoS warning.";
+                                        trap_msg.type = trapmessage::DOWNQOS_ALERT_OFF;
+					
+					error_code err_code;
+                                        //push the trap message
+                                        snmpagent::push_trapmessage(trap_msg, err_code);
+                                        if (err_code) {
+                                                std::string msg("Push trap message failed.");
+                                                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 44, msg, __FILE__, __LINE__);
+                                        }
+
+                                        //set upstream QoS alert flag true
+                                        downqos_alert_flag = false;
+                                }
+
                         }
                         // throughput = recvsize / ( (thistime(1) + all_wait_time) * interval(ms) ) * 1000
                         //throughput_down = ( current_down_recvsize.get() / ( param_data.bps_interval * ( wait_count_down.get() + 1 ) ) ) * 1000;
@@ -460,6 +607,16 @@ l7vs::virtualservice_element        &l7vs::virtualservice_base::get_element()
         element.throughput_upstream        = throughput_up.get();
         element.throughput_downstream    = throughput_down.get();
 
+	if (protomod != NULL) {
+                stats_base& sbase = protomod->get_stats();
+                if (sbase.get_mode() == stats_base::MODE_HTTP) {
+                        http_stats& hstats = static_cast<http_stats&>(sbase);
+                        element.http_total_count = hstats.http_requests.get();
+                        element.http_get_count = hstats.http_get_requests.get();
+                        element.http_post_count = hstats.http_post_requests.get();
+                }
+        }
+
         if (unlikely(LOG_LV_DEBUG == l7vs::Logger::getLogLevel(l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                 boost::format element_dump("element struct data, "
                                            "udpmode = %s, tcp_accept_endpoint = %s, "
@@ -469,16 +626,43 @@ l7vs::virtualservice_element        &l7vs::virtualservice_base::get_element()
                                            "protocol_args.size = %d, sorry_maxconnection = %d, "
                                            "sorry_endpoint = %s, sorry_flag = %d, qos_upstream = %d, "
                                            "qos_downstream = %d, throughput_upstream = %d, throughput_downstream = %d, "
-                                           "ssl_file_name = %s");
+                                           "ssl_file_name = %s, http_total_count = %d, http_get_count = %d, http_post_count = %d");
                 element_dump % ((element.udpmode == 0) ? "TCP" : "UDP") % element.tcp_accept_endpoint \
                 % element.udp_recv_endpoint % element.realserver_vector.size() % element.protocol_module_name \
                 % element.schedule_module_name % element.protocol_args.size() % element.sorry_maxconnection \
                 % element.sorry_endpoint % element.sorry_flag % element.qos_upstream % element.qos_downstream \
                 % element.throughput_upstream % element.throughput_downstream \
-                % element.ssl_file_name;
+                % element.ssl_file_name \
+                % element.http_total_count % element.http_get_count % element.http_post_count;
                 l7vs::Logger::putLogDebug(l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 18, element_dump.str(), __FILE__, __LINE__);
                 l7vs::Logger::putLogDebug(l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 19, "out_function : l7vs::virtualservice_element& virtualservice_base::get_element()", __FILE__, __LINE__);
         }
         return element;
 }
+
+/*!
+ * clear real service's inact.
+ *
+ * @param   void
+ * @return  void
+ */
+void l7vs::virtualservice_base::clear_inact()
+{
+        if (unlikely(LOG_LV_DEBUG == l7vs::Logger::getLogLevel(l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+                l7vs::Logger::putLogDebug(l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 118, "in_function : void virtualservice_base::clear_inact()", __FILE__, __LINE__);
+        }
+
+        rs_list_lock();
+        for (std::list<realserver>::iterator itr = rs_list.begin();
+                        itr != rs_list.end(); ++itr) {
+                itr->clear_inact();
+        }
+        rs_list_unlock();
+
+
+        if (unlikely(LOG_LV_DEBUG == l7vs::Logger::getLogLevel(l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+                l7vs::Logger::putLogDebug(l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE, 119, "out_function : void virtualservice_base::clear_inact()", __FILE__, __LINE__);
+        }
+}
+
 

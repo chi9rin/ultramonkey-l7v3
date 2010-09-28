@@ -3,10 +3,8 @@ AUTOMAKE_OPTIONS = foreign
 noinst_LIBRARIES = \
 	libl7vsd_parameter.a \
 	libl7vsadm_parameter.a \
-	libsnmpagent_parameter.a \
 	libl7vsd_logger.a \
-	libl7vsadm_logger.a \
-	libsnmpagent_logger.a 
+	libl7vsadm_logger.a
 
 PARAMETER_FILE = @l7vs_config@
 
@@ -36,21 +34,7 @@ libl7vsadm_parameter_a_CPPFLAGS = \
 	-I../include \
 	-DPARAMETER_FILE="\"$(PARAMETER_FILE)\"" \
 	-DVERSION=\"$(VERSION)\" \
-	-DLOGGER_PROCESS_ADM 
-
-libsnmpagent_parameter_a_SOURCES = \
-	../include/parameter_enum.h \
-	../include/parameter.h \
-	../include/parameter_impl.h \
-	parameter.cpp \
-	parameter_impl.cpp
-
-libsnmpagent_parameter_a_CPPFLAGS = \
-	-O2 -fno-strict-aliasing -g -Wall -Werror \
-	-I../include \
-	-DPARAMETER_FILE="\"$(PARAMETER_FILE)\"" \
-	-DVERSION=\"$(VERSION)\" \
-	-DLOGGER_PROCESS_SNM
+	-DLOGGER_PROCESS_ADM
 
 libl7vsd_logger_a_SOURCES = \
 	../include/logger_enum.h \
@@ -61,6 +45,7 @@ libl7vsd_logger_a_SOURCES = \
 	../include/logger_implement_access.h \
 	../include/logger_access_manager.h \
 	../include/logger_logrotate_utility.h \
+	../include/trapmessage.h \
 	logger.cpp \
 	logger_impl.cpp \
 	logger_implement_access.cpp \
@@ -85,6 +70,7 @@ libl7vsadm_logger_a_SOURCES = \
 	../include/logger_implement_access.h \
 	../include/logger_access_manager.h \
 	../include/logger_logrotate_utility.h \
+	../include/trapmessage.h \
 	logger.cpp \
 	logger_impl.cpp \
 	logger_implement_access.cpp \
@@ -100,30 +86,6 @@ libl7vsadm_logger_a_CPPFLAGS = \
 	-DLOGGER_PROCESS_ADM \
 	-DVERSION=\"$(VERSION)\"
 
-libsnmpagent_logger_a_SOURCES = \
-	../include/logger_enum.h \
-	../include/logger_rotation_enum.h \
-	../include/logger.h \
-	../include/appender_property.h \
-	../include/logger_implement_access.h \
-	../include/logger_access_manager.h \
-	../include/logger_logrotate_utility.h \
-	logger_impl.h \
-	logger.cpp \
-	logger_impl.cpp \
-	logger_implement_access.cpp \
-	logger_access_manager.cpp \
-	logger_logrotate_utility.cpp \
-	../include/strict_time_based_rolling_policy.h \
-	strict_time_based_rolling_policy.cpp \
-	../include/time_and_size_based_rolling_policy.h \
-	time_and_size_based_rolling_policy.cpp
-
-libsnmpagent_logger_a_CPPFLAGS = \
-	-O2 -fno-strict-aliasing -g -Wall -Werror -pthread -I../include \
-	-DLOGGER_PROCESS_SNM \
-	-DVERSION=\"$(VERSION)\"
-
 sbin_PROGRAMS    = l7vsd l7vsadm
 PKGLIBDIR        = @l7vs_moddir@
 CONFIG_SOCK_PATH = @l7vsadm_sockdir@
@@ -133,13 +95,14 @@ L7VS_SBINDIR     = @sbindir@
 l7vsd_CPPFLAGS = \
 	-O2 -fno-strict-aliasing -g -Wall -Werror -pthread \
 	-I../include \
-	-I../../snmpagent \
+	-I../include \
 	-DL7VS_MODULE_PATH="\"$(PKGLIBDIR)\"" \
 	-DMAX_BUFFER_SIZE=$(MAX_BUFFER_SIZE) \
 	-DPARAMETER_FILE="\"$(PARAMETER_FILE)\"" \
 	-DL7VS_CONFIG_SOCK_PATH="\"$(CONFIG_SOCK_PATH)\"" \
 	-DLOGGER_PROCESS_VSD \
-	-DVERSION=\"$(VERSION)\"
+	-DNETSNMP_NO_INLINE \
+	-DVERSION=\"$(VERSION)\"  
 
 l7vsd_SOURCES = \
 	../include/logger.h \
@@ -174,7 +137,12 @@ l7vsd_SOURCES = \
 	../include/udp_request.h \
 	../include/udp_request_thread_control.h \
 	../include/udp_session.h \
-	../include/snmpbridge.h \
+	../include/snmp_info.h \
+	../include/mibdata.h \
+	../include/snmpagent.h \
+	../include/snmpagent_impl.h \
+	../include/trapmessage.h \
+	../include/snmpfunc.h \
 	l7vsd.cpp \
 	virtualservice_base.cpp \
 	virtualservice_tcp.cpp \
@@ -186,7 +154,6 @@ l7vsd_SOURCES = \
 	command_receiver.cpp \
 	command_session.cpp \
 	replication.cpp \
-	snmpbridge.cpp \
 	data_buff_base.cpp \
 	tcp_data.cpp \
 	tcp_socket.cpp \
@@ -196,7 +163,11 @@ l7vsd_SOURCES = \
 	udp_request_thread_control.cpp \
 	udp_request.cpp \
 	tcp_session.cpp \
-	udp_session.cpp
+	udp_session.cpp \
+	mibdata.cpp \
+	snmpagent.cpp \
+	snmpagent_impl.cpp \
+	snmpfunc.cpp
 
 l7vsd_LDADD = \
 	libl7vsd_logger.a \
@@ -206,12 +177,13 @@ l7vsd_LDADD = \
 	-lssl \
 	-lboost_thread-mt \
 	-lboost_system-mt \
-	-lboost_serialization-mt
+	-lboost_serialization-mt \
+	-lnetsnmpmibs -lnetsnmpagent -lnetsnmphelpers -lnetsnmp \
+	@external_agent_libs@
 
 l7vsadm_CPPFLAGS = \
 	-O2 -fno-strict-aliasing -g -Wall -Werror \
 	-I../include \
-	-I../../snmpagent \
 	-DL7VS_MODULE_PATH="\"$(PKGLIBDIR)\"" \
 	-DMAX_BUFFER_SIZE=$(MAX_BUFFER_SIZE) \
 	-DPARAMETER_FILE="\"$(PARAMETER_FILE)\"" \

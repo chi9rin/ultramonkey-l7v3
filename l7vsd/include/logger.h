@@ -130,13 +130,15 @@ public:
         //! set snmp sendtrap function
         //! @param   snmp send trap function object
         //! @retrun  void
-        static void    setSnmpSendtrap(const snmpSendtrapFuncType func);
+        static void set_snmp_send_trap_func(const snmp_send_trap_func_type func);
 
-
-        //! set log trap enable flag
-        //! @param   log trap enable flag
+        //! set log trap enable.
         //! @retrun  void
-        static void set_logtrap(int in_logtrap);
+        static void logtrap_enable();
+	
+	//! set log trap disable.
+        //! @retrun  void
+	static void logtrap_disable();
 
         //! set log trap level
         //! @param   log trap level

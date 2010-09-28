@@ -135,7 +135,7 @@ bool l7vs::l7vsadm::parse_vs_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, i
         std::map<std::string, int> count_map;
 
         for (parse_opt_map_type::iterator itr = vs_option_dic.begin() ;
-             itr != vs_option_dic.end() ; ++itr) {
+			itr != vs_option_dic.end() ; ++itr) {
                 count_map[ itr->first ] = 0;
         }
 
@@ -226,7 +226,7 @@ bool l7vs::l7vsadm::parse_vs_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, i
         }
 
         if ((l7vsadm_request::CMD_ADD_VS == cmd) &&
-            (request.vs_element.access_log_flag == 1) && (request.vs_element.access_log_file_name.length() == 0)) {
+		(request.vs_element.access_log_flag == 1) && (request.vs_element.access_log_file_name.length() == 0)) {
                 std::string buf("access log file is not specified.(--access-log-name)");
                 l7vsadm_err.setter(true, buf);
                 Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 89, buf, __FILE__, __LINE__);
@@ -1783,7 +1783,8 @@ bool l7vs::l7vsadm::parse_snmp_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd,
 {
         Logger logger(LOG_CAT_L7VSADM_COMMON, 25, "l7vsadm::parse_snmp_func", __FILE__, __LINE__);
 
-        if (argc != 6) {
+	//Argument argc is illegal
+        if (argc < 3) {
                 //argument num err
                 std::stringstream buf;
                 buf << "Argument argc is illegal for ";
@@ -1791,7 +1792,7 @@ bool l7vs::l7vsadm::parse_snmp_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd,
                 buf << " command.";
 
                 l7vsadm_err.setter(true, buf.str());
-                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 125, buf.str(), __FILE__, __LINE__);
+                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 127, buf.str(), __FILE__, __LINE__);
                 return false;
         }
 
@@ -1804,37 +1805,25 @@ bool l7vs::l7vsadm::parse_snmp_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd,
                 } else { //option string function not found.
                         // print option not found message.
                         std::stringstream buf;
-                        buf << "snmp log option not found(--snmp): " << argv[pos];
+                        buf << "snmp option not found(--snmp): " << argv[pos];
                         l7vsadm_err.setter(true, buf.str());
-                        Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 75, buf.str(), __FILE__, __LINE__);
+                        Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 128, buf.str(), __FILE__, __LINE__);
                         return false;
                 }
         }
-        if (LOG_CAT_NONE == request.snmp_log_category) {
-                // not specified logcategory
-                std::string buf("snmp log category not specified.(--category)");
-                l7vsadm_err.setter(true, buf);
-                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 76, buf, __FILE__, __LINE__);
-                return false;
-        }
-        if (LOG_LV_NONE == request.snmp_log_level) {
-                // not specified loglevel
-                std::string buf("snmp log level not specified.(--level)");
-                l7vsadm_err.setter(true, buf);
-                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 77, buf, __FILE__, __LINE__);
-                return false;
-        }
-        return true;
-}
-//! snmp log category set function
-//! @param[in] argument position
-//! @param[in] argument count
-//! @param[in] argument value
-bool l7vs::l7vsadm::parse_opt_snmp_log_category_func(int &pos, int argc, char *argv[])
-{
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 26, "l7vsadm::parse_opt_snmp_log_category_func", __FILE__, __LINE__);
 
-        if (request.snmp_log_category != LOG_CAT_NONE) {
+        return true;
+
+}
+//! snmp refresh set function
+//! @param[in]    argument position
+//! @param[in]    argument count
+//! @param[in]    argument value
+bool    l7vs::l7vsadm::parse_opt_snmp_refresh_func(int &pos, int argc, char *argv[])
+{
+        Logger    logger(LOG_CAT_L7VSADM_COMMON, 42, "l7vsadm::parse_opt_snmp_refresh_func", __FILE__, __LINE__);
+        if (request.snmpinfo.option_set_flag & snmp_info::SNMP_REFRESH_ALL_OPTION_FLAG
+                        ||request.snmpinfo.option_set_flag & snmp_info::SNMP_REFRESH_OPTION_FLAG) {
                 // double target commands.
                 std::stringstream buf;
                 buf << "Option ";
@@ -1842,63 +1831,335 @@ bool l7vs::l7vsadm::parse_opt_snmp_log_category_func(int &pos, int argc, char *a
                 buf << " conflict.";
 
                 l7vsadm_err.setter(true, buf.str());
-                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 78, buf.str(), __FILE__, __LINE__);
+                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 129, buf.str(), __FILE__, __LINE__);
                 return false;
         }
-        if (++pos >= argc) {
-                // log category is not specified.
-                std::string buf("snmp log category is not specified.(--category)");
+
+        if (pos != 2) {
+                // don't target logcategory
+                std::string    buf("Invalid option for -S command.");
+                 l7vsadm_err.setter(true, buf);
+                 Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 130, buf, __FILE__, __LINE__);
+                 return false;
+        }
+
+        if (argc == 3) {
+                request.snmpinfo.option_set_flag |= snmp_info::SNMP_REFRESH_ALL_OPTION_FLAG;
+                return true;
+        } else if (argc == 7) {
+                for (pos = 3; pos < argc; ++pos) {
+                        parse_opt_map_type::iterator itr = snmp_vs_option_dic.find(argv[pos]);
+                        if (itr != snmp_vs_option_dic.end()) {
+                                if (!itr->second(pos, argc, argv)) {
+                                        return false;
+                                }
+                        } else {
+                                std::string    buf("Invalid option value for -r option.");
+                                l7vsadm_err.setter(true, buf);
+                                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 79, buf, __FILE__, __LINE__);
+                                return false;
+                        }
+                }
+        } else {
+                std::string    buf("Argument argc is illegal for -S command.");
                 l7vsadm_err.setter(true, buf);
                 Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 79, buf, __FILE__, __LINE__);
                 return false;
         }
-        string_logcategory_map_type::iterator itr = string_snmp_logcategory_dic.find(argv[pos]);
-        if (itr != string_snmp_logcategory_dic.end()) {
-                request.snmp_log_category = itr->second;
-                return true;
-        }
-        std::stringstream buf;
-        buf << "snmp log category not found(--category): " << argv[pos];
-        l7vsadm_err.setter(true, buf.str());
-        Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 80, buf.str(), __FILE__, __LINE__);
-        return false;
+
+        return true;
 }
-//! snmp log level set function
+
+//! snmp virtualservice set function
 //! @param[in] argument position
 //! @param[in] argument count
 //! @param[in] argument value
-bool l7vs::l7vsadm::parse_opt_snmp_log_level_func(int &pos, int argc, char *argv[])
+bool    l7vs::l7vsadm::parse_opt_snmp_vs_target_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 27, "l7vsadm::parse_opt_snmp_log_level_func", __FILE__, __LINE__);
+	Logger    logger(LOG_CAT_L7VSADM_COMMON, 43, "l7vsadm::parse_opt_vs_target_func", __FILE__, __LINE__);
+        if (++pos >= argc) {
+                //don't target recvaddress:port
+                std::string    buf("target endpoint is not specified.");
+                l7vsadm_err.setter(true, buf);
+                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 131, buf, __FILE__, __LINE__);
+                return false;
+        }
 
-        if (request.snmp_log_level != LOG_LV_NONE) {
-                // double target commands.
+        if (request.snmpinfo.option_set_flag & snmp_info::SNMP_TCP_SERVICE_OPTION_FLAG ) {
                 std::stringstream buf;
                 buf << "Option ";
                 buf << argv[pos];
                 buf << " conflict.";
 
                 l7vsadm_err.setter(true, buf.str());
-                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 81, buf.str(), __FILE__, __LINE__);
+                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 132, buf.str(), __FILE__, __LINE__);
                 return false;
         }
+
+        // get host endpoint from string
+        std::string
+	src_str = argv[pos];
+        error_code    err;
+        boost::asio::ip::tcp::endpoint tmp_endpoint;
+        tmp_endpoint = string_to_endpoint<boost::asio::ip::tcp>(src_str, err);
+        if (err) {
+                std::stringstream buf;
+                buf << "target endpoint parse error:" << err.get_message() << src_str;
+                l7vsadm_err.setter(true, buf.str());
+                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 12, buf.str(), __FILE__, __LINE__);
+                return false;
+        }
+
+        request.snmpinfo.vs_endpoint = tmp_endpoint;
+        request.snmpinfo.option_set_flag |= snmp_info::SNMP_TCP_SERVICE_OPTION_FLAG;
+
+
+        return true;
+}
+//! snmp module set function
+//! @param[in]    argument position
+//! @param[in]    argument count
+//! @param[in]    argument value
+bool    l7vs::l7vsadm::parse_opt_snmp_vs_module_func(int &pos, int argc, char *argv[])
+{
+        Logger    logger(LOG_CAT_L7VSADM_COMMON, 44, "l7vsadm::parse_opt_snmp_vs_module_func", __FILE__, __LINE__);
+
         if (++pos >= argc) {
-                // log category is not specified.
-                std::string buf("snmp log level is not specified.(--level)");
+		//don't target protomod name.
+                std::string    buf("protomod name is not specified.");
                 l7vsadm_err.setter(true, buf);
-                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 82, buf, __FILE__, __LINE__);
+                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 134, buf, __FILE__, __LINE__);
                 return false;
         }
-        string_loglevel_map_type::iterator itr = string_loglevel_dic.find(argv[pos]);
-        if (itr != string_loglevel_dic.end()) {
-                request.snmp_log_level = itr->second;
-                return true;
+	if (request.snmpinfo.option_set_flag & snmp_info::SNMP_PROTOCOL_MODULE_OPTION_FLAG ) {
+                std::stringstream buf;
+                buf << "Option ";
+                buf << argv[pos];
+                buf << " conflict.";
+
+                l7vsadm_err.setter(true, buf.str());
+                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 135, buf.str(), __FILE__, __LINE__);
+                return false;
         }
-        std::stringstream buf;
-        buf << "snmp loglevel not found(--level): " << argv[pos];
-        l7vsadm_err.setter(true, buf.str());
-        Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 83, buf.str(), __FILE__, __LINE__);
-        return false;
+
+
+	std::string    module_name = argv[pos];
+        if (L7VS_MODNAME_LEN < module_name.length()) {
+                std::string    buf("protomod name is too long.");
+                l7vsadm_err.setter(true, buf);
+                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 136, buf, __FILE__, __LINE__);
+                return false;
+        }
+
+        protocol_module_control    &ctrl = protocol_module_control::getInstance();
+        ctrl.initialize(L7VS_MODULE_PATH);
+        protocol_module_base *module;
+
+        module = ctrl.load_module(module_name);
+        if (!module) {
+                //don't find protocol module.
+                std::stringstream buf;
+                buf << "protocol module not found:" << module_name;
+                l7vsadm_err.setter(true, buf.str());
+                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 137, buf.str(), __FILE__, __LINE__);
+                return false;
+        }
+
+
+        ctrl.unload_module(module);
+
+	request.snmpinfo.option_set_flag |= snmp_info::SNMP_PROTOCOL_MODULE_OPTION_FLAG ;
+        request.snmpinfo.protocol = module_name;
+
+
+        return true;
+}
+//! snmp flag set function
+//! @param[in] argument position
+//! @param[in] argument count
+//! @param[in] argument value
+bool    l7vs::l7vsadm::parse_opt_snmp_flag_func(int &pos, int argc, char *argv[])
+{
+	int tmp = 0;
+        Logger    logger(LOG_CAT_L7VSADM_COMMON, 45, "l7vsadm::parse_opt_snmp_flag_func", __FILE__, __LINE__);
+	if (request.snmpinfo.option_set_flag & snmp_info::SNMP_ENABLE_OPTION_FLAG ) {
+                std::stringstream buf;
+                buf << "Option ";
+                buf << argv[pos];
+                buf << " conflict.";
+
+                l7vsadm_err.setter(true, buf.str());
+                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 138, buf.str(), __FILE__, __LINE__);
+                return false;
+        }
+	if (++pos < argc) {
+                try {
+                        tmp = boost::lexical_cast< int >(argv[pos]);
+                } catch (const boost::bad_lexical_cast& ex) {
+                        std::string    buf("Invalid option value for -f option.");
+                        l7vsadm_err.setter(true, buf);
+                        Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 139, buf, __FILE__, __LINE__);
+                        return false;
+                }
+
+                if (tmp == 0 || tmp == 1) {
+
+			request.snmpinfo.enabled = tmp;
+                        request.snmpinfo.option_set_flag |= snmp_info::SNMP_ENABLE_OPTION_FLAG;
+
+                        return true;
+                } else {
+                        std::string    buf("Invalid option value for -f option.");
+                        l7vsadm_err.setter(true, buf);
+                        Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 140, buf, __FILE__, __LINE__);
+                        return false;
+                }
+        } else {
+                std::string    buf("Need option value for -f option");
+                l7vsadm_err.setter(true, buf);
+                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 141, buf, __FILE__, __LINE__);
+                return false;
+        }
+}
+//! snmp interval set function
+//! @param[in]    argument position
+//! @param[in]    argument count
+//! @param[in]    argument value
+bool    l7vs::l7vsadm::parse_opt_snmp_interval_func(int &pos, int argc, char *argv[])
+{
+        int tmp = 0;
+        Logger    logger(LOG_CAT_L7VSADM_COMMON, 46, "l7vs::l7vsadm::parse_opt_snmp_interval_func", __FILE__, __LINE__);
+
+        if (request.snmpinfo.option_set_flag & snmp_info::SNMP_INTERVAL_OPTION_FLAG ) {
+                std::stringstream buf;
+                buf << "Option ";
+                buf << argv[pos];
+                buf << " conflict.";
+
+                l7vsadm_err.setter(true, buf.str());
+                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 142, buf.str(), __FILE__, __LINE__);
+                return false;
+        }
+
+	if (++pos < argc) {
+                try {
+                        tmp = boost::lexical_cast< int >(argv[pos]);
+                } catch (const boost::bad_lexical_cast&) {
+                        std::string    buf("Invalid option value for -i option.");
+                        l7vsadm_err.setter(true, buf);
+                        Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 143, buf, __FILE__, __LINE__);
+                        return false;
+                }
+
+                if (tmp >= 0) {
+                        request.snmpinfo.interval = tmp;
+                        request.snmpinfo.option_set_flag |= snmp_info::SNMP_INTERVAL_OPTION_FLAG;
+
+                        return true;
+                } else {
+                        std::string    buf("Invalid option value for -i option.");
+                        l7vsadm_err.setter(true, buf);
+                        Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 144, buf, __FILE__, __LINE__);
+                        return false;
+                }
+        } else    {
+                std::string    buf("Need option value for -i option");
+                l7vsadm_err.setter(true, buf);
+                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 145, buf, __FILE__, __LINE__);
+                return false;
+        }
+}
+
+//! snmp logtrap set function
+//! @param[in]    argument position
+//! @param[in]    argument count
+//! @param[in]    argument value
+bool    l7vs::l7vsadm::parse_opt_snmp_log_trap_func(int &pos, int argc, char *argv[])
+{
+        int tmp = 0;
+        Logger    logger(LOG_CAT_L7VSADM_COMMON, 47, "l7vs::l7vsadm::parse_opt_snmp_log_trap_func", __FILE__, __LINE__);
+
+        if (request.snmpinfo.option_set_flag & snmp_info::SNMP_LOGTRAP_OPTION_FLAG ) {
+                std::stringstream buf;
+                buf << "Option ";
+                buf << argv[pos];
+                buf << " conflict.";
+
+                l7vsadm_err.setter(true, buf.str());
+                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 146, buf.str(), __FILE__, __LINE__);
+                return false;
+        }
+        if (++pos < argc) {
+                try {
+                        tmp = boost::lexical_cast< int >(argv[pos]);
+                } catch (const boost::bad_lexical_cast&) {
+                        std::string    buf("Invalid option value for -t option.");
+                        l7vsadm_err.setter(true, buf);
+                        Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 147, buf, __FILE__, __LINE__);
+                        return false;
+                }
+                if (tmp == 0 || tmp == 1) {
+
+			request.snmpinfo.logtrap_enabled = tmp;
+                        request.snmpinfo.option_set_flag |= snmp_info::SNMP_LOGTRAP_OPTION_FLAG;
+
+
+                        return true;
+                } else {
+                        std::string    buf("Invalid option value for -t option.");
+                        l7vsadm_err.setter(true, buf);
+                        Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 148, buf, __FILE__, __LINE__);
+                        return false;
+                }
+        } else    {
+                std::string    buf("Need option value for -t option");
+                l7vsadm_err.setter(true, buf);
+                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 149, buf, __FILE__, __LINE__);
+                return false;
+        }
+
+}
+
+//! snmp logtrap_level set function
+//! @param[in]    argument position
+//! @param[in]    argument count
+//! @param[in]    argument value
+bool    l7vs::l7vsadm::parse_opt_snmp_log_trap_level_func(int &pos, int argc, char *argv[])
+{
+        Logger    logger(LOG_CAT_L7VSADM_COMMON, 48, "l7vs::l7vsadm::parse_opt_snmp_log_trap_level_func", __FILE__, __LINE__);
+
+        if (request.snmpinfo.option_set_flag & snmp_info::SNMP_LOGTRAP_LEVEL_OPTION_FLAG) {
+                std::stringstream buf;
+                buf << "Option ";
+                buf << argv[pos];
+                buf << " conflict.";
+
+                l7vsadm_err.setter(true, buf.str());
+                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 150, buf.str(), __FILE__, __LINE__);
+                return false;
+        }
+
+        if (++pos < argc) {
+                string_loglevel_map_type::iterator itr = string_loglevel_dic.find(argv[pos]);
+                if (itr != string_loglevel_dic.end()) {
+                        request.snmpinfo.logtrap_level = itr->second;
+                        request.snmpinfo.option_set_flag |= snmp_info::SNMP_LOGTRAP_LEVEL_OPTION_FLAG;
+
+                        return true;
+                } else {
+                        std::string    buf("logtrap_level not found.");
+                        l7vsadm_err.setter(true, buf);
+                        Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 151, buf, __FILE__, __LINE__);
+                        return false;
+                }
+        } else {
+                std::string    buf("Need option value for -l option");
+                l7vsadm_err.setter(true, buf);
+                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 152, buf, __FILE__, __LINE__);
+                return false;
+
+        }
+
 }
 
 //! parameter command parsing
@@ -2038,6 +2299,11 @@ bool l7vs::l7vsadm::parse_help_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd,
                   "  --level            -l log-level           set log level for l7vsd or SNMP Agent\n"
                   "  --reload           -r reload-parameter    reload specified config parameter\n"
                   "  --numeric          -n                     list the table in numeric\n"
+  	          "  --flag              -f snmp-flag           start or stop snmp function 0(off) 1(on)\n"
+	          "  --interval          -i update-interval     set collect snmp cache collect interval(s)\n"
+	          "  --logtrap           -t log-trap-flag       start or stop log trap function 0(off) 1(on)\n"
+	          "  --logtraplevel      -l log-trap-level      set log trap level for snmp\n"
+	          "  --refresh           -r                     clear statistic info for snmp\n"
                   << std::endl;
 
         return true;
@@ -2068,12 +2334,13 @@ std::string l7vs::l7vsadm::usage()
                "  l7vsadm -R -f\n"
                "  l7vsadm -R -d\n"
                "  l7vsadm -L -c log-category -l log-level\n"
-               "  l7vsadm -S -c log-category -l log-level\n"
-               "  l7vsadm -P -r reload-parameter\n"
-               "  l7vsadm -l [-n]\n"
-               "  l7vsadm -V [-n]\n"
-               "  l7vsadm -K [-n]\n"
-               "  l7vsadm -h\n"
+               "  l7vsadm -S [-f snmp-flag] [-i update-interval] [-t log-trap-flag] [-l log-trap-level]\n"
+	       "  l7vsadm -S -r [-t service-address -m proto-module]\n"
+	       "  l7vsadm -P -r reload-parameter\n"
+	       "  l7vsadm -l [-n]\n"
+	       "  l7vsadm -V [-n]\n"
+	       "  l7vsadm -K [-n]\n"
+	       "  l7vsadm -h\n"
                << std::endl;
         return stream.str();
 }
@@ -2177,6 +2444,10 @@ void l7vs::l7vsadm::disp_list_verbose()
 
         unsigned long long output_qos_upstream_value;
         unsigned long long output_qos_downstream_value;
+	const int MAX_TIME_FORMAT_LEN = 20;
+        char snmp_start_date[MAX_TIME_FORMAT_LEN] = {0};
+        char snmp_last_request_date[MAX_TIME_FORMAT_LEN] = {0};
+        char snmp_last_trap_date[MAX_TIME_FORMAT_LEN] = {0};
 
         std::stringstream buf;
         buf << boost::format("Layer-7 Virtual Server version %s\n") % VERSION;
@@ -2197,34 +2468,68 @@ void l7vs::l7vsadm::disp_list_verbose()
         buf << boost::format("%s\n") % replication_mode_string_dic[response.replication_mode_status];
         buf << "\n";
 
-        //disp snmp connection status
-        buf << "SNMPAgent Connection Status:\n";
-        if (response.snmp_connection_status)
-                buf << "connecting\n";
-        else
-                buf << "non-connecting\n";
-        buf << "\n";
+	//disp snmp agent status
+	buf << "SNMPAgent:\n";
+	if (!response.snmpinfo.enabled) {
+		boost::format fmtter("%-30s inactive\n"
+				     "%-30s none\n"
+                        	     "%-30s none\n"
+	                             "%-30s none\n"
+        	                     "%-30s none\n"
+                	             "%-30s none\n"
+                        	     "%-30s none\n"
+                	             "%-30s none\n"
+	                             "%-30s none\n"
+        	                     "%-30s none\n");
 
-        //disp snmp loglevel
-        buf << "SNMPAgent Log Level:\n";
-        buf << "Category                       Level\n";
-        BOOST_FOREACH(logstatus_type snmplogstatus, response.snmp_log_status_list) {
-                buf << boost::format("%-30s %s\n")
-                    % snmp_logcategory_string_dic[snmplogstatus.first]
-                    % loglevel_string_dic[snmplogstatus.second];
+               fmtter % "Agent Status";
+               fmtter % "log trap status";
+               fmtter % "log trap level";
+               fmtter % "cache update interval";
+               fmtter % "start date";
+               fmtter % "last request date";
+               fmtter % "last trap date";
+               fmtter % "total GET requests";
+               fmtter % "total SET requests";
+               fmtter % "total trap counts";	
+
+               buf << fmtter.str();
+        } else {
+               strftime(snmp_start_date, sizeof(snmp_start_date), "%Y-%m-%d %H-%M-%S", localtime(&response.snmpinfo.start_date));
+               strftime(snmp_last_request_date, sizeof(snmp_start_date), "%Y-%m-%d %H-%M-%S", localtime(&response.snmpinfo.request_last_date));
+               strftime(snmp_last_trap_date, sizeof(snmp_start_date), "%Y-%m-%d %H-%M-%S", localtime(&response.snmpinfo.trap_last_date));
+
+               boost::format fmtter("%-30s active\n"
+                                    "%-30s %s\n"
+                                    "%-30s %s\n"
+                                    "%-30s %d\n"
+                                    "%-30s %s\n"
+                                    "%-30s %s\n"
+                                    "%-30s %s\n"
+                                    "%-30s %u\n"
+                                    "%-30s %u\n"
+                                    "%-30s %u\n");
+
+               fmtter % "Agent Status";
+               fmtter % "log trap status";
+               fmtter % (response.snmpinfo.logtrap_enabled ? "on" : "off");
+               fmtter % "log trap level";
+               fmtter % (response.snmpinfo.logtrap_enabled ? loglevel_string_dic[response.snmpinfo.logtrap_level] : "none" );
+               fmtter % "cache update interval" % response.snmpinfo.interval;
+               fmtter % "start date" %  (response.snmpinfo.start_date == 0 ? "none" : snmp_start_date);
+               fmtter % "last request date" % (response.snmpinfo.request_last_date == 0 ? "none" : snmp_last_request_date);
+               fmtter % "last trap date" % (response.snmpinfo.trap_last_date == 0 ? "none" : snmp_last_trap_date);
+               fmtter % "total GET requests" % response.snmpinfo.snmp_get_requests;
+               fmtter % "total SET requests" % response.snmpinfo.snmp_set_requests;
+               fmtter % "total trap counts" % response.snmpinfo.snmp_trap_count;
+               buf << fmtter.str();
         }
+
+
         buf << "\n";
 
         // disp vs
         buf << "Prot LocalAddress:Port ProtoMod Scheduler Protomod_opt_string\n";
-        buf << "     SorryAddress:Port Sorry_cc Sorry_flag\n";
-        buf << "     QoS-up   Throughput-up\n";
-        buf << "     QoS-down Throughput-down\n";
-        buf << "     SSL_config_file\n";
-        buf << "     Socket option\n";
-        buf << "     Access_log_flag\n";
-        buf << "     Access_log_file\n";
-        buf << "     Access_log_rotate option\n";
         buf << "  -> RemoteAddress:Port           Forward Weight ActiveConn InactConn\n";
         BOOST_FOREACH(virtualservice_element vse, response.virtualservice_status_list) {
                 std::string vsepstr;
@@ -2247,42 +2552,11 @@ void l7vs::l7vsadm::disp_list_verbose()
                 }
 
                 buf << boost::format("%s %s %s %s %s\n")
-                    % (vse.udpmode ? "UDP" : "TCP")
-                    % vsepstr
-                    % vse.protocol_module_name
-                    % vse.schedule_module_name
-                    % vse.protocol_module_for_indication_options;
-                if (!vse.udpmode) {
-                        std::stringstream sorry_ep;
-                        boost::asio::ip::tcp::endpoint zeropoint;
-                        if (zeropoint == vse.sorry_endpoint) {
-                                sorry_ep << "none";
-                        } else {
-                                sorry_ep << endpoint_to_string<boost::asio::ip::tcp>(
-                                                vse.sorry_endpoint, numeric_flag);
-                                sorry_ep << boost::format("(%s)") % vse.get_fwdmode_str();
-                        }
-                        buf << boost::format("    %s %d %d\n")
-                            % sorry_ep.str()
-                            % vse.sorry_maxconnection
-                            % vse.sorry_flag;
-                }
-                // QoS value and throughput convert from byte/s to bps.
-                buf << boost::format("    %lld %lld\n")
-                    % (output_qos_upstream_value)
-                    % (vse.throughput_upstream * 8);
-                buf << boost::format("    %lld %lld\n")
-                    % (output_qos_downstream_value)
-                    % (vse.throughput_downstream * 8);
-                buf << boost::format("    %s\n")
-                    % ((0 == vse.ssl_file_name.length()) ? "none" : vse.ssl_file_name);
-                buf << boost::format("    %s\n")
-                    % ((0 == vse.socket_option_string.length()) ? "none" : vse.socket_option_string);
-                buf << boost::format("    %d\n") % vse.access_log_flag;
-                buf << boost::format("    %s\n")
-                    % ((0 == vse.access_log_file_name.length()) ? "none" : vse.access_log_file_name);
-                buf << boost::format("    %s\n")
-                    % ((0 == vse.access_log_rotate_verbose_info.length()) ? "none" : vse.access_log_rotate_verbose_info);
+                % (vse.udpmode ? "UDP" : "TCP")
+                % vsepstr
+                % vse.protocol_module_name
+                % vse.schedule_module_name
+                % vse.protocol_module_for_indication_options;
 
                 BOOST_FOREACH(realserver_element rse, vse.realserver_vector) {
                         std::string rsepstr;
@@ -2298,16 +2572,77 @@ void l7vs::l7vsadm::disp_list_verbose()
                             % rse.get_active()
                             % rse.get_inact();
                 }
+
+                if (!vse.udpmode) {
+                        std::string    sorryepstr;
+                        std::string    sorry_flag_str;
+                        boost::asio::ip::tcp::endpoint    zeropoint;
+                        if (zeropoint == vse.sorry_endpoint) {
+                                sorryepstr = "none";
+                        } else {
+                                sorryepstr = endpoint_to_string<boost::asio::ip::tcp>(vse.sorry_endpoint, numeric_flag);
+                        }
+
+                        if (vse.sorry_flag) {
+                                sorry_flag_str = "on";
+                        } else {
+                                sorry_flag_str = "off";
+                        }
+
+                        buf << boost::format("  Bypass Settings:\n"
+                                             "    Sorry Server                  %s\n"
+                                             "    Max Connection                %lld\n"
+                                             "    Sorry Flag                    %s\n")
+                        % sorryepstr
+                        % vse.sorry_maxconnection
+                        % sorry_flag_str;
+                }
+
+                buf << boost::format("  SSL Settings:\n"
+                                     "    SSL Config File               %s\n")
+                % ((0 == vse.ssl_file_name.length()) ? "none" : vse.ssl_file_name);
+
+                buf << boost::format("  Logging Settings:\n"
+                                     "    Access Log                    %s\n"
+                                     "    Access Log File               %s\n"
+                                     "    Access Log Rotate             %s\n")
+                % ((0 == vse.access_log_flag) ? "off" : "on")
+                % ((0 == vse.socket_option_string.length()) ? "none" : vse.socket_option_string)
+                % ((0 == vse.access_log_rotate_verbose_info.length()) ? "none" :  vse.access_log_rotate_verbose_info);
+
+                buf << boost::format("  Socket Settings:\n"
+                                     "    TCP_DEFER_ACCEPT              %s\n"
+                                     "    TCP_NODELAY                   %s\n"
+                                     "    TCP_CORK                      %s\n"
+                                     "    TCP_QUICKACK                  %s\n")
+                % ((0 == vse.socket_option_tcp_defer_accept) ? "disable" : "enable")
+                % ((0 == vse.socket_option_tcp_nodelay) ? "disable" : "enable")
+                % ((0 == vse.socket_option_tcp_cork) ? "disable" : "enable")
+                % ((0 == vse.socket_option_tcp_quickack) ? "disable" : "enable");
+
+
+                buf << boost::format("  Throughput:\n"
+                                     "    Current Upload / Limit        %f Mbps / %f Mbps\n"
+                                     "    Current Download / Limit      %f Mbps / %f Mbps\n")
+                % ((double)vse.throughput_upstream * 8 / (1000 * 1000)) % ((double)output_qos_upstream_value * 8 / (1000 * 1000) )
+                % ((double)vse.throughput_downstream * 8 / (1000 * 1000)) % ((double)output_qos_downstream_value * 8 / (1000 * 1000));
+
+                buf << boost::format("  Statistics:\n"
+                                     "    HTTP Total Requests           %lld\n"
+                                     "    HTTP GET Requests             %lld\n"
+                                     "    HTTP POST Requests            %lld\n")
+                % vse.http_total_count % vse.http_get_count % vse.http_post_count;
+
+
         }
         std::cout << buf.str();
 }
 //! l7vsadm constractor.
 //! create including all dictionary.
 l7vs::l7vsadm::l7vsadm()
-        :
-        numeric_flag(false),
-        command_wait_interval(L7VSADM_DEFAULT_WAIT_INTERVAL),
-        command_wait_count(L7VSADM_DEFAULT_WAIT_COUNT)
+        :   numeric_flag(false),
+            command_wait_interval(L7VSADM_DEFAULT_WAIT_INTERVAL),
+            command_wait_count(L7VSADM_DEFAULT_WAIT_COUNT)
 {
         Logger logger(LOG_CAT_L7VSADM_COMMON, 35, "l7vsadm::l7vsadm(constructor)", __FILE__, __LINE__);
 
@@ -2412,11 +2747,20 @@ l7vs::l7vsadm::l7vsadm()
         log_option_dic["--level"]    = boost::bind(&l7vsadm::parse_opt_log_level_func, this, _1, _2, _3);
 
         // snmp agent option function dictionary create
-        snmp_option_dic["-c"]         = boost::bind(&l7vsadm::parse_opt_snmp_log_category_func, this, _1, _2, _3);
-        snmp_option_dic["--category"] = boost::bind(&l7vsadm::parse_opt_snmp_log_category_func, this, _1, _2, _3);
-        snmp_option_dic["-l"]         = boost::bind(&l7vsadm::parse_opt_snmp_log_level_func, this, _1, _2, _3);
-        snmp_option_dic["--level"]    = boost::bind(&l7vsadm::parse_opt_snmp_log_level_func, this, _1, _2, _3);
-
+	snmp_option_dic["-r"]               = boost::bind(&l7vsadm::parse_opt_snmp_refresh_func, this, _1, _2, _3);
+        snmp_option_dic["--refresh"]        = boost::bind(&l7vsadm::parse_opt_snmp_refresh_func, this, _1, _2, _3);
+        snmp_option_dic["-f"]            = boost::bind(&l7vsadm::parse_opt_snmp_flag_func, this, _1, _2, _3);
+        snmp_option_dic["--flag"]        = boost::bind(&l7vsadm::parse_opt_snmp_flag_func, this, _1, _2, _3);
+        snmp_option_dic["-i"]            = boost::bind(&l7vsadm::parse_opt_snmp_interval_func, this, _1, _2, _3);
+        snmp_option_dic["--interval"]        = boost::bind(&l7vsadm::parse_opt_snmp_interval_func, this, _1, _2, _3);
+        snmp_option_dic["-t"]            = boost::bind(&l7vsadm::parse_opt_snmp_log_trap_func, this, _1, _2, _3);
+        snmp_option_dic["--logtrap"]        = boost::bind(&l7vsadm::parse_opt_snmp_log_trap_func, this, _1, _2, _3);
+        snmp_option_dic["-l"]            = boost::bind(&l7vsadm::parse_opt_snmp_log_trap_level_func, this, _1, _2, _3);
+        snmp_option_dic["--logtraplevel"]     = boost::bind(&l7vsadm::parse_opt_snmp_log_trap_level_func, this, _1, _2, _3);
+        snmp_vs_option_dic["-t"]        = boost::bind(&l7vsadm::parse_opt_snmp_vs_target_func, this, _1, _2, _3);
+        snmp_vs_option_dic["--tcp-service"]    = boost::bind(&l7vsadm::parse_opt_snmp_vs_target_func, this, _1, _2, _3);
+        snmp_vs_option_dic["-m"]        = boost::bind(&l7vsadm::parse_opt_snmp_vs_module_func, this, _1, _2, _3);
+        snmp_vs_option_dic["--proto-module"]    = boost::bind(&l7vsadm::parse_opt_snmp_vs_module_func, this, _1, _2, _3);
         // parameter option function dictionary create
         parameter_option_dic["-r"]       = boost::bind(&l7vsadm::parse_opt_parameter_reload_func, this, _1, _2, _3);
         parameter_option_dic["--reload"] = boost::bind(&l7vsadm::parse_opt_parameter_reload_func, this, _1, _2, _3);
@@ -2494,9 +2838,9 @@ l7vs::l7vsadm::l7vsadm()
         string_logcategory_dic["l7vsd_system_environment"]           = LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT;
         string_logcategory_dic["sys_env"]                            = LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT;
         logcategory_string_dic[LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT]     = "l7vsd_system_environment";
-        string_logcategory_dic["l7vsd_snmpbridge"]                   = LOG_CAT_L7VSD_SNMPBRIDGE;
-        string_logcategory_dic["bridge"]                             = LOG_CAT_L7VSD_SNMPBRIDGE;
-        logcategory_string_dic[LOG_CAT_L7VSD_SNMPBRIDGE]             = "l7vsd_snmpbridge";
+	string_logcategory_dic["l7vsd_snmpagent"]              	     = LOG_CAT_L7VSD_SNMPAGENT;
+        string_logcategory_dic["agent"]                              = LOG_CAT_L7VSD_SNMPAGENT;
+        logcategory_string_dic[LOG_CAT_L7VSD_SNMPAGENT]              = "l7vsd_snmpagent";
         string_logcategory_dic["l7vsd_protocol"]                     = LOG_CAT_PROTOCOL;
         string_logcategory_dic["prot"]                               = LOG_CAT_PROTOCOL;
         logcategory_string_dic[LOG_CAT_PROTOCOL]                     = "l7vsd_protocol";
@@ -2504,46 +2848,6 @@ l7vs::l7vsadm::l7vsadm()
         string_logcategory_dic["sched"]                              = LOG_CAT_SCHEDULE;
         logcategory_string_dic[LOG_CAT_SCHEDULE]                     = "l7vsd_schedule";
         string_logcategory_dic["all"]                                = LOG_CAT_END;
-
-        // string snmp logcategory dictionary create
-        string_snmp_logcategory_dic["snmpagent_start_stop"]               = LOG_CAT_SNMPAGENT_START_STOP;
-        string_snmp_logcategory_dic["snmp_stastp"]                        = LOG_CAT_SNMPAGENT_START_STOP;
-        snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_START_STOP]         = "snmpagent_start_stop";
-        string_snmp_logcategory_dic["snmpagent_manager_receive"]          = LOG_CAT_SNMPAGENT_MANAGER_RECEIVE;
-        string_snmp_logcategory_dic["snmp_mngrcv"]                        = LOG_CAT_SNMPAGENT_MANAGER_RECEIVE;
-        snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_MANAGER_RECEIVE]    = "snmpagent_manager_receive";
-        string_snmp_logcategory_dic["snmpagent_manager_send"]             = LOG_CAT_SNMPAGENT_MANAGER_SEND;
-        string_snmp_logcategory_dic["snmp_mngsnd"]                        = LOG_CAT_SNMPAGENT_MANAGER_SEND;
-        snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_MANAGER_SEND]       = "snmpagent_manager_send";
-        string_snmp_logcategory_dic["snmpagent_l7vsd_receive"]            = LOG_CAT_SNMPAGENT_L7VSD_RECEIVE;
-        string_snmp_logcategory_dic["snmp_vsdrcv"]                        = LOG_CAT_SNMPAGENT_L7VSD_RECEIVE;
-        snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_L7VSD_RECEIVE]      = "snmpagent_l7vsd_receive";
-        string_snmp_logcategory_dic["snmpagent_l7vsd_send"]               = LOG_CAT_SNMPAGENT_L7VSD_SEND;
-        string_snmp_logcategory_dic["snmp_vsdsnd"]                        = LOG_CAT_SNMPAGENT_L7VSD_SEND;
-        snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_L7VSD_SEND]         = "snmpagent_l7vsd_send";
-        string_snmp_logcategory_dic["snmpagent_logger"]                   = LOG_CAT_SNMPAGENT_LOGGER;
-        string_snmp_logcategory_dic["snmp_logger"]                        = LOG_CAT_SNMPAGENT_LOGGER;
-        snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_LOGGER]             = "snmpagent_logger";
-        string_snmp_logcategory_dic["snmpagent_parameter"]                = LOG_CAT_SNMPAGENT_PARAMETER;
-        string_snmp_logcategory_dic["snmp_para"]                          = LOG_CAT_SNMPAGENT_PARAMETER;
-        snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_PARAMETER]          = "snmpagent_parameter";
-        string_snmp_logcategory_dic["snmpagent_system"]                   = LOG_CAT_SNMPAGENT_SYSTEM;
-        string_snmp_logcategory_dic["snmp_sys"]                           = LOG_CAT_SNMPAGENT_SYSTEM;
-        snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_SYSTEM]             = "snmpagent_system";
-        string_snmp_logcategory_dic["snmpagent_system_memory"]            = LOG_CAT_SNMPAGENT_SYSTEM_MEMORY;
-        string_snmp_logcategory_dic["snmp_sys_mem"]                       = LOG_CAT_SNMPAGENT_SYSTEM_MEMORY;
-        snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_SYSTEM_MEMORY]      = "snmpagent_system_memory";
-        string_snmp_logcategory_dic["snmpagent_system_endpoint"]          = LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT;
-        string_snmp_logcategory_dic["snmp_sys_ep"]                        = LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT;
-        snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT]    = "snmpagent_system_endpoint";
-        string_snmp_logcategory_dic["snmpagent_system_signal"]            = LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL;
-        string_snmp_logcategory_dic["snmp_sys_sig"]                       = LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL;
-        snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL]      = "snmpagent_system_signal";
-        string_snmp_logcategory_dic["snmpagent_system_environment"]       = LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT;
-        string_snmp_logcategory_dic["snmp_sys_env"]                       = LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT;
-        snmp_logcategory_string_dic[LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT] = "snmpagent_system_environment";
-
-        string_snmp_logcategory_dic["all"] = LOG_CAT_END;
 
         // string log level dictionary create.
         string_loglevel_dic["debug"]      = LOG_LV_DEBUG;

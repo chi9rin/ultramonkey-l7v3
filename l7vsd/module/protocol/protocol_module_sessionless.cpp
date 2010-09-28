@@ -450,7 +450,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::check_pa
                                 check_result.flag = false;
                                 //set check result message
                                 check_result.message = "Option error.";
-                                putLogError(100131, check_result.message, __FILE__, __LINE__);
+                                putLogError(100005, check_result.message, __FILE__, __LINE__);
                                 //loop break
                                 break;
                         }
@@ -635,7 +635,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::set_para
                                                         check_result.flag = false;
                                                         //set check result message
                                                         check_result.message = ostr.str();
-                                                        putLogError(100002, check_result.message, __FILE__, __LINE__);
+                                                        putLogError(100131, check_result.message, __FILE__, __LINE__);
                                                         //loop break
                                                         break;
                                                 }
@@ -646,7 +646,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::set_para
                                                 check_result.flag = false;
                                                 //set check result message
                                                 check_result.message = "You have to set option value '-c/--statistic'.";
-                                                putLogError(100003, check_result.message, __FILE__,
+                                                putLogError(100132, check_result.message, __FILE__,
                                                             __LINE__);
                                                 //loop break
                                                 break;
@@ -658,7 +658,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::set_para
                                         check_result.flag = false;
                                         //set check result message
                                         check_result.message = "Cannot set multiple option '-c/--statistic'.";
-                                        putLogError(100004, check_result.message, __FILE__,
+                                        putLogError(100133, check_result.message, __FILE__,
                                                     __LINE__);
                                         //loop break
                                         break;

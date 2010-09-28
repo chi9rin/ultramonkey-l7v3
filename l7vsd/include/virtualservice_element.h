@@ -85,10 +85,13 @@ public:
         int socket_option_tcp_quickack;
         std::string socket_option_string;
 
+	unsigned long long    http_total_count;
+        unsigned long long    http_get_count;
+        unsigned long long    http_post_count;
+
         // constructor
         virtualservice_element()
-                :
-                udpmode(false),
+		:  udpmode(false),
                 sorry_maxconnection(0LL),
                 sorry_flag(0),
                 sorry_fwdmode(FWD_NONE),
@@ -100,12 +103,13 @@ public:
                 socket_option_tcp_defer_accept(0),
                 socket_option_tcp_nodelay(0),
                 socket_option_tcp_cork(0),
-                socket_option_tcp_quickack(0)
-        {}
+                socket_option_tcp_quickack(0),
+		http_total_count(0ULL),
+                http_get_count(0ULL),
+                http_post_count(0ULL) {}
 
         virtualservice_element(const virtualservice_element &in)
-                :
-                udpmode(in.udpmode),
+                :  udpmode(in.udpmode),
                 tcp_accept_endpoint(in.tcp_accept_endpoint),
                 udp_recv_endpoint(in.udp_recv_endpoint),
                 protocol_module_name(in.protocol_module_name),
@@ -128,7 +132,10 @@ public:
                 socket_option_tcp_nodelay(in.socket_option_tcp_nodelay),
                 socket_option_tcp_cork(in.socket_option_tcp_cork),
                 socket_option_tcp_quickack(in.socket_option_tcp_quickack),
-                socket_option_string(in.socket_option_string)
+                socket_option_string(in.socket_option_string),
+		http_total_count(in.http_total_count),
+                http_get_count(in.http_get_count),
+                http_post_count(in.http_post_count)
         {
                 protocol_args.clear();
                 BOOST_FOREACH(std::string str, in.protocol_args) {
@@ -170,6 +177,9 @@ public:
                 socket_option_tcp_cork = in.socket_option_tcp_cork;
                 socket_option_tcp_quickack = in.socket_option_tcp_quickack;
                 socket_option_string = in.socket_option_string;
+		http_total_count = in.http_total_count;
+                http_get_count = in.http_get_count;
+                http_post_count = in.http_post_count;
                 protocol_args.clear();
                 BOOST_FOREACH(std::string str, in.protocol_args) {
                         protocol_args.push_back(str);
@@ -208,7 +218,10 @@ public:
                     elem1.socket_option_tcp_nodelay == elem2.socket_option_tcp_nodelay &&
                     elem1.socket_option_tcp_cork == elem2.socket_option_tcp_cork &&
                     elem1.socket_option_tcp_quickack == elem2.socket_option_tcp_quickack &&
-                    elem1.socket_option_string == elem2.socket_option_string) {
+                    elem1.socket_option_string == elem2.socket_option_string &&
+		    elem1.http_total_count == elem2.http_total_count &&
+                    elem1.http_get_count == elem2.http_get_count &&
+                    elem1.http_post_count == elem2.http_post_count) {
 
                         if (elem1.realserver_vector.size() != elem2.realserver_vector.size()) {
                                 return false;
@@ -266,7 +279,10 @@ public:
                     elem1.socket_option_tcp_nodelay == elem2.socket_option_tcp_nodelay &&
                     elem1.socket_option_tcp_cork == elem2.socket_option_tcp_cork &&
                     elem1.socket_option_tcp_quickack == elem2.socket_option_tcp_quickack &&
-                    elem1.socket_option_string == elem2.socket_option_string) {
+                    elem1.socket_option_string == elem2.socket_option_string &&
+		    elem1.http_total_count == elem2.http_total_count &&
+                    elem1.http_get_count == elem2.http_get_count &&
+                    elem1.http_post_count == elem2.http_post_count ) {
 
                         if (elem1.realserver_vector.size() != elem2.realserver_vector.size()) {
                                 return true;
@@ -369,7 +385,10 @@ public:
                                     "socket_option_tcp_nodelay=%d, "
                                     "socket_option_tcp_cork=%d, "
                                     "socket_option_tcp_quickack=%d, "
-                                    "socket_option_string=%s}")
+                                    "socket_option_string=%s; "
+				    "http_total_count=%d; "
+                                    "http_get_count=%d; "
+                                    "http_post_count=%d; }")
                    % args
                    % elem.sorry_maxconnection
                    % elem.sorry_endpoint
@@ -390,7 +409,10 @@ public:
                    % elem.socket_option_tcp_nodelay
                    % elem.socket_option_tcp_cork
                    % elem.socket_option_tcp_quickack
-                   % elem.socket_option_string;
+                   % elem.socket_option_string
+		   % elem.http_total_count
+                   % elem.http_get_count
+                   % elem.http_post_count;
 
                 return os;
         }
@@ -437,6 +459,9 @@ private:
                 ar &socket_option_tcp_cork;
                 ar &socket_option_tcp_quickack;
                 ar &socket_option_string;
+		ar &http_total_count;
+                ar &http_get_count;
+                ar &http_post_count;
         }
 };
 

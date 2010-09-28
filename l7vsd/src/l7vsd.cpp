@@ -270,7 +270,7 @@ void    l7vsd::add_virtual_service(const virtualservice_element *in_vselement, e
 
                 //create trap message
                 trapmessage trap_msg;
-                trap_msg.type = VIRTUALSERVICE_ADD;
+                trap_msg.type = trapmessage::VIRTUALSERVICE_ADD;
 
                 std::ostringstream oss;
                 oss << "TRAP00020001,A virtual service was added.vs:";
@@ -291,8 +291,15 @@ void    l7vsd::add_virtual_service(const virtualservice_element *in_vselement, e
 
                 trap_msg.message = oss.str();
 
+		error_code err_code;
+
                 //push the trap message
-                snmpagent::push_trapmessage(trap_msg);
+                snmpagent::push_trapmessage(trap_msg, err_code);
+
+                if (err_code) {
+                        std::string msg("Push trap message failed.");
+                        Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 124, msg, __FILE__, __LINE__);
+                }
 
                 // when first vs, replication switch to master
                 if (1U == vslist.size()) {
@@ -342,7 +349,7 @@ void    l7vsd::del_virtual_service(const virtualservice_element *in_vselement, e
 
                 //create trap message
                 trapmessage trap_msg;
-                trap_msg.type = VIRTUALSERVICE_REMOVE;
+                trap_msg.type = trapmessage::VIRTUALSERVICE_REMOVE;
 
                 std::ostringstream oss;
                 oss << "TRAP00020003,A virtual service was eliminated.vs:";
@@ -363,8 +370,15 @@ void    l7vsd::del_virtual_service(const virtualservice_element *in_vselement, e
 
                 trap_msg.message = oss.str();
 
+		error_code err_code;
+
                 //push the trap message
-                snmpagent::push_trapmessage(trap_msg);
+                snmpagent::push_trapmessage(trap_msg, err_code);
+
+                if (err_code) {
+                        std::string msg("Push trap message failed.");
+                        Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 125, msg, __FILE__, __LINE__);
+                }
 
                 // when first vs, replication switch to slave
                 if (0U == vslist.size()) {
@@ -412,7 +426,7 @@ void    l7vsd::edit_virtual_service(const virtualservice_element *in_vselement, 
 
                 //create trap message
                 trapmessage trap_msg;
-                trap_msg.type = VIRTUALSERVICE_CHANGE;
+                trap_msg.type = trapmessage::VIRTUALSERVICE_CHANGE;
 
                 std::ostringstream oss;
                 oss << "TRAP00020002,The virtual service was changed.vs:";
@@ -433,8 +447,16 @@ void    l7vsd::edit_virtual_service(const virtualservice_element *in_vselement, 
 
                 trap_msg.message = oss.str();
 
+		error_code err_code;
+
                 //push the trap message
-                snmpagent::push_trapmessage(trap_msg);
+		snmpagent::push_trapmessage(trap_msg, err_code);
+
+                if (err_code) {
+                        std::string msg("Push trap message failed.");
+                        Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 126, msg, __FILE__, __LINE__);
+                }                
+
         } else {
                 std::string msg("virtual service not found.");
                 Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 25, msg, __FILE__, __LINE__);
@@ -478,7 +500,7 @@ void    l7vsd::add_real_server(const virtualservice_element *in_vselement, error
 
                 //create trap message
                 trapmessage trap_msg;
-                trap_msg.type = VIRTUALSERVICE_CHANGE;
+                trap_msg.type = trapmessage::VIRTUALSERVICE_CHANGE;
 
                 std::ostringstream oss;
                 oss << "TRAP00020004,A real server was added.vs:";
@@ -518,8 +540,17 @@ void    l7vsd::add_real_server(const virtualservice_element *in_vselement, error
 
                 trap_msg.message = oss.str();
 
+		error_code err_code;
+
                 //push the trap message
-                snmpagent::push_trapmessage(trap_msg);
+		snmpagent::push_trapmessage(trap_msg, err_code);
+
+                if (err_code) {
+                        std::string msg("Push trap message failed.");
+                        Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 127, msg, __FILE__, __LINE__);
+                }                
+
+
         } else {
                 std::string msg("virtual service not found.");
                 Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 26, msg, __FILE__, __LINE__);
@@ -563,7 +594,7 @@ void    l7vsd::del_real_server(const virtualservice_element *in_vselement, error
 
                 //create trap message
                 trapmessage trap_msg;
-                trap_msg.type = REALSERVER_REMOVE;
+                trap_msg.type = trapmessage::REALSERVER_REMOVE;
 
                 std::ostringstream oss;
                 oss << "TRAP00020006,A real server was eliminated.vs:";
@@ -603,8 +634,15 @@ void    l7vsd::del_real_server(const virtualservice_element *in_vselement, error
 
                 trap_msg.message = oss.str();
 
+		error_code err_code;
+
                 //push the trap message
-                snmpagent::push_trapmessage(trap_msg);
+                snmpagent::push_trapmessage(trap_msg, err_code);
+
+                if (err_code) {
+                        std::string msg("Push trap message failed.");
+                        Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 128, msg, __FILE__, __LINE__);
+                }
         } else {
                 std::string msg("virtual service not found.");
                 Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 27, msg, __FILE__, __LINE__);
@@ -648,7 +686,7 @@ void    l7vsd::edit_real_server(const virtualservice_element *in_vselement, erro
 
                 //create trap message
                 trapmessage trap_msg;
-                trap_msg.type = REALSERVER_CHANGE;
+                trap_msg.type = trapmessage::REALSERVER_CHANGE;
 
                 std::ostringstream oss;
                 oss << "TRAP00020005,The real server was changed.vs:";
@@ -688,8 +726,17 @@ void    l7vsd::edit_real_server(const virtualservice_element *in_vselement, erro
 
                 trap_msg.message = oss.str();
 
+		error_code err_code;
+
                 //push the trap message
-                snmpagent::push_trapmessage(trap_msg);
+                snmpagent::push_trapmessage(trap_msg, err_code);
+
+                if (err_code) {
+                        std::string msg("Push trap message failed.");
+                        Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 129, msg, __FILE__, __LINE__);
+                }
+
+
         } else {
                 std::string msg("virtual service not found.");
                 Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 28, msg, __FILE__, __LINE__);
@@ -721,7 +768,7 @@ void    l7vsd::flush_virtual_service(error_code &err)
 
                         //create trap message
                         trapmessage trap_msg;
-                        trap_msg.type = VIRTUALSERVICE_REMOVE;
+			trap_msg.type = trapmessage::VIRTUALSERVICE_REMOVE;
 
                         std::ostringstream oss;
                         oss << "TRAP00020003,A virtual service was eliminated.vs:";
@@ -742,8 +789,15 @@ void    l7vsd::flush_virtual_service(error_code &err)
 
                         trap_msg.message = oss.str();
 
+			error_code err_code;
+
                         //push the trap message
-                        snmpagent::push_trapmessage(trap_msg);
+                        snmpagent::push_trapmessage(trap_msg, err_code);
+
+                        if (err_code) {
+                                std::string msg("Push trap message failed.");
+                                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 130, msg, __FILE__, __LINE__);
+                        }
                 }
         }
 
@@ -974,27 +1028,37 @@ void    l7vsd::set_snmp_info(const snmp_info* info, error_code &err)
         }
         /*------ DEBUG LOG END ------*/
 
-    if (info->option_set_flag & SNMP_FLAG_OPTION_FLAG)
+    if (info->option_set_flag & snmp_info::SNMP_ENABLE_OPTION_FLAG)
     {
-        snmpagent::set_flag(info->flag);
+        if(info->enabled) {
+            snmpagent::enable();
+        }
+        else {
+            snmpagent::disable();
+        }
     }
 
-    if (info->option_set_flag & SNMP_LOGTRAP_OPTION_FLAG)
+    if (info->option_set_flag & snmp_info::SNMP_LOGTRAP_OPTION_FLAG)
     {
-        snmpagent::set_logtrap(info->logtrap);
+        if(info->logtrap_enabled) {
+            snmpagent::logtrap_enable();
+        }
+        else {
+            snmpagent::logtrap_disable();
+        }
     }
 
-    if (info->option_set_flag & SNMP_LOGTRAP_LEVEL_OPTION_FLAG)
+    if (info->option_set_flag & snmp_info::SNMP_LOGTRAP_LEVEL_OPTION_FLAG)
     {
         snmpagent::set_logtrap_level(info->logtrap_level);
     }
 
-    if (info->option_set_flag & SNMP_INTERVAL_OPTION_FLAG)
+    if (info->option_set_flag & snmp_info::SNMP_INTERVAL_OPTION_FLAG)
     {
         snmpagent::set_interval(info->interval);
     }
 
-    if (info->option_set_flag & SNMP_REFRESH_OPTION_FLAG)
+    if (info->option_set_flag & snmp_info::SNMP_REFRESH_OPTION_FLAG)
     {
         virtualservice_element element;
         element.udpmode = false;
@@ -1008,13 +1072,13 @@ void    l7vsd::set_snmp_info(const snmp_info* info, error_code &err)
 
         err.setter(true, msg);
         } else {
-        snmpagent::refresh_statistics(info->vs_endpoint, info->protocol);
+        	snmpagent::refresh_statistics(info->vs_endpoint, info->protocol);
         }
 
         return;
     }
 
-    if (info->option_set_flag & SNMP_REFRESH_ALL_OPTION_FLAG)
+    if (info->option_set_flag & snmp_info::SNMP_REFRESH_ALL_OPTION_FLAG)
     {
         snmpagent::refresh_all_statistics();
     }
@@ -1256,18 +1320,31 @@ int    l7vsd::run(int argc, char *argv[])
                 snmpagent agent(this);
 
                 // snmp trap function set
-                Logger::setSnmpSendtrap( boost::bind( &snmpagent::push_trapmessage, _1 ) );
+                Logger::set_snmp_send_trap_func( boost::bind( &snmpagent::push_trapmessage, _1, _2 ) );
+
+                error_code err_code;
 
                 // snmp start
-                agent.start();
+                agent.start(err_code);
+
+                if (err_code) {
+                        logger.putLogError(LOG_CAT_L7VSD_MAINTHREAD, 8, "snmp function start failed.", __FILE__, __LINE__);
+                }
+
+                err_code.setter(true, "");
 
                 //create trap message
                 trapmessage trap_msg;
-                trap_msg.type = SERVICE_START;
+                trap_msg.type = trapmessage::SERVICE_START;
                 trap_msg.message = "TRAP00010001,l7vsd start.";
 
-                //send l7vsd start up trap
-                snmpagent::push_trapmessage(trap_msg);
+                //push the trap message
+                snmpagent::push_trapmessage(trap_msg, err_code);
+
+                if (err_code) {
+                        std::string msg("Push trap message failed.");
+                        Logger::putLogError(LOG_CAT_L7VSD_MAINTHREAD, 9, msg, __FILE__, __LINE__);
+                }
 
                 // main loop
                 for (;;) {
@@ -1285,15 +1362,23 @@ int    l7vsd::run(int argc, char *argv[])
                         boost::this_thread::yield();
                 }
 
+		// snmp trap function unset
+		Logger::set_snmp_send_trap_func(NULL);
+
                 //create trap message
-                trap_msg.type = SERVICE_STOP;
+                trap_msg.type = trapmessage::SERVICE_STOP;
                 trap_msg.message = "TRAP00010002,l7vsd stop.";
 
                 // snmp trap function unset
-                Logger::setSnmpSendtrap(NULL);
+                err_code.setter(false, "");
 
-                //send l7vsd stop trap
-                snmpagent::push_trapmessage(trap_msg);
+		//push the trap message
+		snmpagent::push_trapmessage(trap_msg, err_code);
+
+                if (err_code) {
+                        std::string msg("Push trap message failed.");
+                        Logger::putLogError(LOG_CAT_L7VSD_MAINTHREAD, 10, msg, __FILE__, __LINE__);
+                }
 
                 // snmp agent finalize
                 agent.finalize();

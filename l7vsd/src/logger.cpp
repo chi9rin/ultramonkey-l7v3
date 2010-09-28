@@ -227,18 +227,25 @@ void l7vs::Logger::loadConf()
  * @param   snmp send trap function object
  * @retrun  void
  */
-void    l7vs::Logger::setSnmpSendtrap(const snmpSendtrapFuncType func)
+void    l7vs::Logger::set_snmp_send_trap_func(const snmp_send_trap_func_type func)
 {
-        LoggerImpl::getInstance().setSnmpSendtrap(func);
+        LoggerImpl::getInstance().set_snmp_send_trap_func(func);
 }
 
 /*!
- * set log trap enable flag.
- * @param   log trap enable flag
+ * set log trap enable.
  * @retrun  void
  */
-void    l7vs::Logger::set_logtrap(int in_logtrap) {
-        LoggerImpl::getInstance().set_logtrap(in_logtrap);
+void    l7vs::Logger::logtrap_enable() {
+        LoggerImpl::getInstance().logtrap_enable();
+}
+
+/*!
+ * set log trap disable.
+ * @retrun  void
+ */
+void    l7vs::Logger::logtrap_disable() {
+        LoggerImpl::getInstance().logtrap_disable();
 }
 
 /*!

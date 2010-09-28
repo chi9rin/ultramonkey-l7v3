@@ -433,9 +433,15 @@ void l7vs::virtualservice_tcp::handle_accept(const l7vs::session_thread_control 
             (pool_sessions.size() < param_data.session_pool_alert_on)) {
                 //create trap message
                 trapmessage trap_msg;
-                trap_msg.type = SESSIONPOOL_ALERT_ON;
+                trap_msg.type = trapmessage::SESSIONPOOL_ALERT_ON;
                 trap_msg.message = "TRAP00020011,Warning: The left-session has fell below the threshold of left-session warning.";
-                snmpagent::push_trapmessage(trap_msg);
+                error_code err_code;
+                //push the trap message
+                snmpagent::push_trapmessage(trap_msg, err_code);
+                if (err_code) {
+                        std::string msg("Push trap message failed.");
+                        Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 38, msg, __FILE__, __LINE__);
+                }
                 //set sessionpool alert flag true
                 sessionpool_alert_flag = true;
         }
@@ -444,9 +450,16 @@ void l7vs::virtualservice_tcp::handle_accept(const l7vs::session_thread_control 
                  (pool_sessions.size() > param_data.session_pool_alert_off)) {
                 //create trap message
                 trapmessage trap_msg;
-                trap_msg.type = SESSIONPOOL_ALERT_OFF;
+                trap_msg.type = trapmessage::SESSIONPOOL_ALERT_OFF;
                 trap_msg.message = "TRAP00020012,Warning release: The left-session has exceeded the release threshold of left-session warning.";
-                snmpagent::push_trapmessage(trap_msg);
+                error_code err_code;
+                //push the trap message
+                snmpagent::push_trapmessage(trap_msg, err_code);
+                if (err_code) {
+                        std::string msg("Push trap message failed.");
+                        Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 39, msg, __FILE__, __LINE__);
+                }
+
                 //set sessionpool alert flag true
                 sessionpool_alert_flag = false;
         }
@@ -1533,9 +1546,16 @@ void l7vs::virtualservice_tcp::run()
             (pool_sessions.size() < param_data.session_pool_alert_on)) {
                 //create trap message
                 trapmessage trap_msg;
-                trap_msg.type = SESSIONPOOL_ALERT_ON;
+                trap_msg.type = trapmessage::SESSIONPOOL_ALERT_ON;
                 trap_msg.message = "TRAP00020011,Warning: The left-session has fell below the threshold of left-session warning.";
-                snmpagent::push_trapmessage(trap_msg);
+                error_code err_code;
+                //push the trap message
+                snmpagent::push_trapmessage(trap_msg, err_code);
+                if (err_code) {
+                        std::string msg("Push trap message failed.");
+                        Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 40, msg, __FILE__, __LINE__);
+                }
+
                 //set sessionpool alert flag true
                 sessionpool_alert_flag = true;
         }

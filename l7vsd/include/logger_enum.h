@@ -29,6 +29,7 @@
 #include <boost/function.hpp>
 #include <log4cxx/level.h>
 #include "trapmessage.h"
+#include "error_code.h"
 
 namespace l7vs
 {
@@ -94,19 +95,6 @@ enum LOG_CATEGORY_TAG {
         LOG_CAT_L7VSADM_PARAMETER,                //!< logcategory is parameter
         LOG_CAT_L7VSADM_MODULE,                    //!< logcategory is module control
 
-        LOG_CAT_SNMPAGENT_START_STOP,            //!< logcategory is snmpagent main
-        LOG_CAT_SNMPAGENT_MANAGER_RECEIVE,        //!< logcategory is manager send
-        LOG_CAT_SNMPAGENT_MANAGER_SEND,            //!< logcategory is manager recv
-        LOG_CAT_SNMPAGENT_L7VSD_RECEIVE,        //!< logcategory is snmpbrigde recv
-        LOG_CAT_SNMPAGENT_L7VSD_SEND,            //!< logcategory is snmpbrigre send
-        LOG_CAT_SNMPAGENT_LOGGER,                //!< logcategory is manager logger
-        LOG_CAT_SNMPAGENT_PARAMETER,            //!< logcategory is manager parameter
-        LOG_CAT_SNMPAGENT_SYSTEM,                //!< logcategory is snmpagent systemcall other
-        LOG_CAT_SNMPAGENT_SYSTEM_MEMORY,        //!< logcategory is snmpagent systemcall memory
-        LOG_CAT_SNMPAGENT_SYSTEM_ENDPOINT,        //!< logcategory is snmpagent systemcall socket
-        LOG_CAT_SNMPAGENT_SYSTEM_SIGNAL,        //!< logcategory is snmpagent systemcall signal
-        LOG_CAT_SNMPAGENT_SYSTEM_ENVIRONMENT,    //!< logcategory is snmpagent systemcall env
-
         LOG_CAT_END,                                //!< end of logcategory
 };
 
@@ -123,10 +111,6 @@ inline LOG_CATEGORY_TAG &operator++(LOG_CATEGORY_TAG &cat)
 //! typedef category level pair list
 typedef    std::list< std::pair< LOG_CATEGORY_TAG, LOG_LEVEL_TAG > >
 category_level_list_type;
-
-//! typedef snmp send trap func type
-typedef boost::function<void(trapmessage&)>
-snmpSendtrapFuncType;
 
 } //namespace l7vs
 #endif    //__LOGGER_ENUM_H__
