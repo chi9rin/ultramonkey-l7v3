@@ -1856,10 +1856,12 @@ bool    l7vs::l7vsadm::parse_opt_snmp_refresh_func(int &pos, int argc, char *arg
                         } else {
                                 std::string    buf("Invalid option value for -r option.");
                                 l7vsadm_err.setter(true, buf);
-                                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 79, buf, __FILE__, __LINE__);
+                                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 78, buf, __FILE__, __LINE__);
                                 return false;
                         }
                 }
+                request.snmpinfo.option_set_flag |= snmp_info::SNMP_REFRESH_OPTION_FLAG;
+
         } else {
                 std::string    buf("Argument argc is illegal for -S command.");
                 l7vsadm_err.setter(true, buf);
@@ -1877,14 +1879,6 @@ bool    l7vs::l7vsadm::parse_opt_snmp_refresh_func(int &pos, int argc, char *arg
 bool    l7vs::l7vsadm::parse_opt_snmp_vs_target_func(int &pos, int argc, char *argv[])
 {
 	Logger    logger(LOG_CAT_L7VSADM_COMMON, 43, "l7vsadm::parse_opt_vs_target_func", __FILE__, __LINE__);
-        if (++pos >= argc) {
-                //don't target recvaddress:port
-                std::string    buf("target endpoint is not specified.");
-                l7vsadm_err.setter(true, buf);
-                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 131, buf, __FILE__, __LINE__);
-                return false;
-        }
-
         if (request.snmpinfo.option_set_flag & snmp_info::SNMP_TCP_SERVICE_OPTION_FLAG ) {
                 std::stringstream buf;
                 buf << "Option ";
@@ -1892,7 +1886,15 @@ bool    l7vs::l7vsadm::parse_opt_snmp_vs_target_func(int &pos, int argc, char *a
                 buf << " conflict.";
 
                 l7vsadm_err.setter(true, buf.str());
-                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 132, buf.str(), __FILE__, __LINE__);
+                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 131, buf.str(), __FILE__, __LINE__);
+                return false;
+        }
+
+        if (++pos >= argc) {
+                //don't target recvaddress:port
+                std::string    buf("target endpoint is not specified.");
+                l7vsadm_err.setter(true, buf);
+                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 132, buf, __FILE__, __LINE__);
                 return false;
         }
 
@@ -1906,7 +1908,7 @@ bool    l7vs::l7vsadm::parse_opt_snmp_vs_target_func(int &pos, int argc, char *a
                 std::stringstream buf;
                 buf << "target endpoint parse error:" << err.get_message() << src_str;
                 l7vsadm_err.setter(true, buf.str());
-                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 12, buf.str(), __FILE__, __LINE__);
+                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 133, buf.str(), __FILE__, __LINE__);
                 return false;
         }
 
@@ -1924,13 +1926,6 @@ bool    l7vs::l7vsadm::parse_opt_snmp_vs_module_func(int &pos, int argc, char *a
 {
         Logger    logger(LOG_CAT_L7VSADM_COMMON, 44, "l7vsadm::parse_opt_snmp_vs_module_func", __FILE__, __LINE__);
 
-        if (++pos >= argc) {
-		//don't target protomod name.
-                std::string    buf("protomod name is not specified.");
-                l7vsadm_err.setter(true, buf);
-                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 134, buf, __FILE__, __LINE__);
-                return false;
-        }
 	if (request.snmpinfo.option_set_flag & snmp_info::SNMP_PROTOCOL_MODULE_OPTION_FLAG ) {
                 std::stringstream buf;
                 buf << "Option ";
@@ -1938,10 +1933,17 @@ bool    l7vs::l7vsadm::parse_opt_snmp_vs_module_func(int &pos, int argc, char *a
                 buf << " conflict.";
 
                 l7vsadm_err.setter(true, buf.str());
-                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 135, buf.str(), __FILE__, __LINE__);
+                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 134, buf.str(), __FILE__, __LINE__);
                 return false;
         }
 
+        if (++pos >= argc) {
+                //don't target protomod name.
+                std::string    buf("protomod name is not specified.");
+                l7vsadm_err.setter(true, buf);
+                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 135, buf, __FILE__, __LINE__);
+                return false;
+        }
 
 	std::string    module_name = argv[pos];
         if (L7VS_MODNAME_LEN < module_name.length()) {

@@ -89,7 +89,7 @@ namespace l7vs
         void    snmpagent::disable() {
                 Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 5, "snmpagent::disable", __FILE__, __LINE__);
 
-                snmpagent_impl::get_instance().enable();
+                snmpagent_impl::get_instance().disable();
         }
 
         /*!

@@ -24,6 +24,11 @@
 #include "mibdata.h"
 #include "snmpfunc.h"
 
+#define SNMP_IPPROTO_TCP        (1)
+#define SNMP_IPPROTO_UDP        (2)
+#define SNMP_IPV4               (1)
+#define SNMP_IPV6               (2)
+
 
 namespace l7vs
 {
@@ -71,10 +76,11 @@ namespace l7vs
                 int protocol = 0;
                 char vs_ipaddress[L7VS_IPADDR_LEN] = {0};
                 char sorry_ipaddress[L7VS_IPADDR_LEN] = {0};
-                int vs_ipaddress_type = 1;
-                int sorry_ipaddress_type = 1;
+                int vs_ipaddress_type = SNMP_IPV4;
+                int sorry_ipaddress_type = SNMP_IPV4;
                 int vs_port = 0;
                 int sorry_port = 0;
+                int sorry_flag = 0;
 
                 struct counter64 sorry_maxconnection = {
                         0
@@ -128,6 +134,8 @@ namespace l7vs
                         //update virtual service table
                         for (l7vsd::vslist_type::iterator it = virtualservice_list.begin();
                                         it != virtualservice_list.end(); it++) {
+                                //increment virtual service index
+                                vs_index++;
                                 index[0] = vs_index;
 
                                 //get row pointer
@@ -160,21 +168,21 @@ namespace l7vs
 
                                 //get virtual service IP address infomation
                                 if (srv.udpmode) {
-                                        protocol = IPPROTO_UDP;
+                                        protocol = SNMP_IPPROTO_UDP;
                                         if (srv.udp_recv_endpoint.address().is_v4()) {
                                                 strncpy(vs_ipaddress, srv.udp_recv_endpoint.address().to_v4().to_string().c_str(), L7VS_IPADDR_LEN);
                                         } else {
                                                 strncpy(vs_ipaddress, srv.udp_recv_endpoint.address().to_v6().to_string().c_str(), L7VS_IPADDR_LEN);
-                                                vs_ipaddress_type = 2;
+                                                vs_ipaddress_type = SNMP_IPV6;
                                         }
                                         vs_port = srv.udp_recv_endpoint.port();
                                 } else {
-                                        protocol = IPPROTO_TCP;
+                                        protocol = SNMP_IPPROTO_TCP;
                                         if (srv.tcp_accept_endpoint.address().is_v4()) {
-                                                strncpy(vs_ipaddress, srv.udp_recv_endpoint.address().to_v4().to_string().c_str(), L7VS_IPADDR_LEN);
+                                                strncpy(vs_ipaddress, srv.tcp_accept_endpoint.address().to_v4().to_string().c_str(), L7VS_IPADDR_LEN);
                                         } else {
-                                                strncpy(vs_ipaddress, srv.udp_recv_endpoint.address().to_v6().to_string().c_str(), L7VS_IPADDR_LEN);
-                                                vs_ipaddress_type = 2;
+                                                strncpy(vs_ipaddress, srv.tcp_accept_endpoint.address().to_v6().to_string().c_str(), L7VS_IPADDR_LEN);
+                                                vs_ipaddress_type = SNMP_IPV6;
                                         }
                                         vs_port = srv.tcp_accept_endpoint.port();
                                 }
@@ -184,9 +192,11 @@ namespace l7vs
                                         strncpy(sorry_ipaddress, srv.sorry_endpoint.address().to_v4().to_string().c_str(), L7VS_IPADDR_LEN);
                                 } else {
                                         strncpy(sorry_ipaddress, srv.sorry_endpoint.address().to_v6().to_string().c_str(), L7VS_IPADDR_LEN);
-                                        sorry_ipaddress_type = 2;
+                                        sorry_ipaddress_type = SNMP_IPV6;
                                 }
                                 sorry_port = srv.sorry_endpoint.port();
+
+                                sorry_flag = (srv.sorry_flag == 1) ? 1 : 2;
 
                                 //get protocol mudule option string
                                 std::stringstream protocol_module_arg;
@@ -219,8 +229,8 @@ namespace l7vs
                                 //set throughput infomation
                                 throughput_upstream.low = srv.throughput_upstream;
                                 throughput_downstream.low = srv.throughput_downstream;
-                                qos_upstream.low = srv.qos_upstream;
-                                qos_downstream.low = srv.qos_downstream;
+                                qos_upstream.low = srv.qos_upstream * 8;
+                                qos_downstream.low = srv.qos_downstream * 8;
 
                                 //set session infomation
                                 pool_session_count = (*it)->get_pool_sessions_count();
@@ -239,9 +249,9 @@ namespace l7vs
                                 netsnmp_set_row_column(row, COLUMN_L7VSVSSCHEDULEMODULEOPTIONS, ASN_OCTET_STR, (char *)schedule_module_arg.c_str(), schedule_module_arg.length());
                                 netsnmp_set_row_column(row, COLUMN_L7VSVSSORRYADDRTYPE, ASN_INTEGER, (char *)&sorry_ipaddress_type,sizeof(int));
                                 netsnmp_set_row_column(row, COLUMN_L7VSVSSORRYADDR, ASN_OCTET_STR, (char *)sorry_ipaddress, strnlen(sorry_ipaddress, L7VS_IPADDR_LEN));
-                                netsnmp_set_row_column(row, COLUMN_L7VSVSSORRYPORT, ASN_INTEGER, (char *)&sorry_port, sizeof(int));
+                                netsnmp_set_row_column(row, COLUMN_L7VSVSSORRYPORT, ASN_UNSIGNED, (char *)&sorry_port, sizeof(int));
                                 netsnmp_set_row_column(row, COLUMN_L7VSVSSORRYCONNLIMIT, ASN_COUNTER64, (char *)&sorry_maxconnection, sizeof(struct counter64));
-                                netsnmp_set_row_column(row, COLUMN_L7VSVSSORRYFORCEENABLED, ASN_INTEGER, (char *)&srv.sorry_flag, sizeof(int));
+                                netsnmp_set_row_column(row, COLUMN_L7VSVSSORRYFORCEENABLED, ASN_INTEGER, (char *)&sorry_flag, sizeof(int));
                                 netsnmp_set_row_column(row, COLUMN_L7VSVSTHROUGHPUTUP, ASN_COUNTER64, (char *)&throughput_upstream, sizeof(struct counter64));
                                 netsnmp_set_row_column(row, COLUMN_L7VSVSTHROUGHPUTDOWN, ASN_COUNTER64, (char *)&throughput_downstream, sizeof(struct counter64));
                                 netsnmp_set_row_column(row, COLUMN_L7VSVSTHROUGHPUTUPQOS, ASN_COUNTER64, (char *)&qos_upstream, sizeof(struct counter64));
@@ -253,31 +263,34 @@ namespace l7vs
                                 netsnmp_set_row_column(row, COLUMN_L7VSVSHTTPTOTALCOUNT, ASN_COUNTER64, (char *)&http_requests, sizeof(struct counter64));
                                 netsnmp_set_row_column(row, COLUMN_L7VSVSHTTPGETCOUNT, ASN_COUNTER64, (char *)&http_get_requests, sizeof(struct counter64));
                                 netsnmp_set_row_column(row, COLUMN_L7VSVSHTTPPOSTCOUNT, ASN_COUNTER64, (char *)&http_post_requests, sizeof(struct counter64));
-                                netsnmp_set_row_column(row, COLUMN_L7VSVSRSNUMBER, ASN_INTEGER, (char *)&rs_size, sizeof(size_t));
+                                netsnmp_set_row_column(row, COLUMN_L7VSVSRSNUMBER, ASN_INTEGER, (char *)&rs_size, sizeof(int));
 
                                 //create temporary realserver data list
                                 int rs_index = 0;
                                 for (std::vector<realserver_element>::iterator rs_it = srv.realserver_vector.begin();
                                                 rs_it != srv.realserver_vector.end(); rs_it++) {
+                                        //increment realserver index
+                                        rs_index++;
+
                                         rsdata data;
 
                                         //set realserver infomation
                                         if (srv.udpmode) {
                                                 if ((*rs_it).udp_endpoint.address().is_v4()) {
                                                         strncpy(data.address, (*rs_it).udp_endpoint.address().to_v4().to_string().c_str(), L7VS_IPADDR_LEN);
-                                                        data.address_type = 1;
+                                                        data.address_type = SNMP_IPV4;
                                                 } else {
                                                         strncpy(data.address,(*rs_it).udp_endpoint.address().to_v6().to_string().c_str(), L7VS_IPADDR_LEN);
-                                                        data.address_type = 2;
+                                                        data.address_type = SNMP_IPV6;
                                                 }
                                                 data.port  = (*rs_it).udp_endpoint.port();
                                         } else {
                                                 if ((*rs_it).tcp_endpoint.address().is_v4()) {
                                                         strncpy(data.address, (*rs_it).tcp_endpoint.address().to_v4().to_string().c_str(), L7VS_IPADDR_LEN);
-                                                        data.address_type = 1;
+                                                        data.address_type = SNMP_IPV4;
                                                 } else {
                                                         strncpy(data.address, (*rs_it).tcp_endpoint.address().to_v6().to_string().c_str(), L7VS_IPADDR_LEN);
-                                                        data.address_type = 2;
+                                                        data.address_type = SNMP_IPV6;
                                                 }
                                                 data.port  = (*rs_it).tcp_endpoint.port();
                                         }
@@ -291,9 +304,7 @@ namespace l7vs
 
                                         //push into realserver data list
                                         rs_vector.push_back(data);
-                                        rs_index++;
                                 }
-                                vs_index++;
                         }
                 }
 
@@ -331,7 +342,7 @@ namespace l7vs
                         for (size_t i = rs_table_size; i > rs_table_tmp.size(); i--) {
                                 index[0] = i;
                                 row = netsnmp_table_data_get_from_oid(rs_table->table, index, 1);
-                                if (row) continue;
+                                if (row == NULL) continue;
                                 netsnmp_table_dataset_remove_and_delete_row(rs_table, row);
                         }
                 }

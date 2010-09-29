@@ -779,7 +779,7 @@ void protocol_module_sessionless::get_option_info(std::string &option)
         }
         /*------DEBUG LOG END------*/
 
-        boost::format option_formatter("%s--sorry-uri '%s' --statistic '%d'");
+        boost::format option_formatter("%s--sorry-uri '%s' --statistic %d");
         option_formatter % (forwarded_for ? "--forwarded-for " : "") % sorry_uri.c_array()
                          % statistic;
         option.assign(option_formatter.str());

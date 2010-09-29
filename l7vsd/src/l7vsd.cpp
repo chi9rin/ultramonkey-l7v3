@@ -500,7 +500,7 @@ void    l7vsd::add_real_server(const virtualservice_element *in_vselement, error
 
                 //create trap message
                 trapmessage trap_msg;
-                trap_msg.type = trapmessage::VIRTUALSERVICE_CHANGE;
+                trap_msg.type = trapmessage::REALSERVER_ADD;
 
                 std::ostringstream oss;
                 oss << "TRAP00020004,A real server was added.vs:";
@@ -761,11 +761,6 @@ void    l7vsd::flush_virtual_service(error_code &err)
                 if (vslist.end() == itr) {
                         break;
                 } else {
-                        // vs stop
-                        (*itr)->stop();
-                        // vs finalize
-                        (*itr)->finalize(err);
-
                         //create trap message
                         trapmessage trap_msg;
 			trap_msg.type = trapmessage::VIRTUALSERVICE_REMOVE;
@@ -798,6 +793,11 @@ void    l7vsd::flush_virtual_service(error_code &err)
                                 std::string msg("Push trap message failed.");
                                 Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 130, msg, __FILE__, __LINE__);
                         }
+
+                        // vs stop
+                        (*itr)->stop();
+                        // vs finalize
+                        (*itr)->finalize(err);
                 }
         }
 
@@ -1008,10 +1008,9 @@ void    l7vsd::reload_parameter(const PARAMETER_COMPONENT_TAG *comp, error_code 
 }
 void    l7vsd::set_snmp_info(const snmp_info* info, error_code &err)
 {
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 27, "l7vsd::set_snmp_info", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 42, "l7vsd::set_snmp_info", __FILE__, __LINE__);
 
         boost::mutex::scoped_lock command_lock(command_mutex);
-        boost::mutex::scoped_lock vslist_lock(vslist_mutex);
 
         if (!info) {
                 std::string msg("info pointer is null.");
@@ -1024,7 +1023,7 @@ void    l7vsd::set_snmp_info(const snmp_info* info, error_code &err)
         if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_MAINTHREAD)) {
                 std::stringstream    debugstr;
                 debugstr << boost::format("info=%s") % *info;
-                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 42, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 43, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 
@@ -1060,22 +1059,24 @@ void    l7vsd::set_snmp_info(const snmp_info* info, error_code &err)
 
     if (info->option_set_flag & snmp_info::SNMP_REFRESH_OPTION_FLAG)
     {
-        virtualservice_element element;
-        element.udpmode = false;
-        element.tcp_accept_endpoint = info->vs_endpoint;
-        element.protocol_module_name = info->protocol;
-        vslist_type::iterator it = search_vslist(element, true);
-        if (it == vslist.end())
         {
-        std::string msg("virtual service not found.");
-        Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 29, msg, __FILE__, __LINE__);
+            boost::mutex::scoped_lock vslist_lock(vslist_mutex);
+            virtualservice_element element;
+            element.udpmode = false;
+            element.tcp_accept_endpoint = info->vs_endpoint;
+            element.protocol_module_name = info->protocol;
+            vslist_type::iterator it = search_vslist(element, true);
+            if (it == vslist.end())
+            {
+                std::string msg("virtual service not found.");
+                Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 29, msg, __FILE__, __LINE__);
 
-        err.setter(true, msg);
-        } else {
-        	snmpagent::refresh_statistics(info->vs_endpoint, info->protocol);
+                err.setter(true, msg);
+                return;
+            }
         }
 
-        return;
+        snmpagent::refresh_statistics(info->vs_endpoint, info->protocol);
     }
 
     if (info->option_set_flag & snmp_info::SNMP_REFRESH_ALL_OPTION_FLAG)
@@ -1331,7 +1332,7 @@ int    l7vsd::run(int argc, char *argv[])
                         logger.putLogError(LOG_CAT_L7VSD_MAINTHREAD, 8, "snmp function start failed.", __FILE__, __LINE__);
                 }
 
-                err_code.setter(true, "");
+                err_code.setter(false, "");
 
                 //create trap message
                 trapmessage trap_msg;

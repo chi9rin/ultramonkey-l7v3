@@ -76,7 +76,11 @@ class http_stats : public stats_base
 {
 public:
         //!    constructor
-        http_stats() : stats_base(MODE_HTTP) {};
+        http_stats() : stats_base(MODE_HTTP) {
+                http_requests = 0;
+                http_get_requests = 0;
+                http_post_requests = 0;
+        };
 
         //! destractor
         ~http_stats(){};

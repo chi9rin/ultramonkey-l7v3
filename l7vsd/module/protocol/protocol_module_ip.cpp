@@ -1127,7 +1127,7 @@ void protocol_module_ip::get_option_info(std::string &option)
         }
         /*------DEBUG LOG END------*/
 
-	boost::format option_formatter("--timeout %d%s %s --sorry-uri '%s' --statistic '%d'");
+	boost::format option_formatter("--timeout %d%s %s --sorry-uri '%s' --statistic %d");
         option_formatter % timeout % (forwarded_for ? " --forwarded-for" : "") % (reschedule ? "--reschedule" : "--no-reschedule")
                          % sorry_uri.c_array() % statistic;
         option.assign(option_formatter.str());

@@ -54,8 +54,7 @@ namespace l7vs
                 //! increment http statistics
                 //! @param  const char*            buffer
                 void    increment_stats(const char *buffer) {
-                        if (buffer != NULL && statistic != 0) {
-
+                        if (buffer != NULL && statistic == true) {
                                 if (http_utility::is_get_request(buffer)) {
                                         http_stats_info.http_get_requests++;
                                 } else if (http_utility::is_post_request(buffer)) {

@@ -139,7 +139,7 @@ namespace l7vs
                         return false;
                 } else {
                         //get current time
-                        boost::posix_time::ptime  now_time(boost::posix_time::second_clock::universal_time());
+                        boost::posix_time::ptime  now_time(boost::posix_time::second_clock::local_time());
 
                         //calc time interval
                         boost::posix_time::time_duration td = boost::posix_time::seconds(interval.get());
@@ -195,7 +195,7 @@ namespace l7vs
                         std::stringstream    debugstr;
                         debugstr << "snmpagent_impl::init arguments:";
                         debugstr << boost::format("err=%d") % (err ? true : false);
-                        debugstr << boost::format("err.message=%s") % err.get_message();
+                        debugstr << boost::format(", err.message=%s") % err.get_message();
                         Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 27, debugstr.str(), __FILE__, __LINE__);
                 }
                 /*------ DEBUG LOG END ------*/
@@ -307,9 +307,9 @@ namespace l7vs
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SNMPAGENT)) {
                         std::stringstream    debugstr;
-                        debugstr << "snmpagent_impl::push_trapmessage arguments:";
+                        debugstr << "snmpagent_impl::push_trapmessage arguments : ";
                         debugstr << boost::format("trapmessage.type=%d") % trapmessage.type;
-                        debugstr << boost::format("trapmessage.message=%s") % trapmessage.message;
+                        debugstr << boost::format(", trapmessage.message=%s") % trapmessage.message;
                         Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 31, debugstr.str(), __FILE__, __LINE__);
                 }
                 /*------ DEBUG LOG END ------*/
@@ -337,7 +337,7 @@ namespace l7vs
                                         boost::mutex::scoped_lock lock(trap_msg_queue_condition_mutex);
 
                                         //drap the message when the trap message queue is too large
-                                        if( trap_msg_queue.size() <= trap_queue_max_size.get())
+                                        if( trap_msg_queue.size() < trap_queue_max_size.get())
                                         {
                                                 //push the message into trap message queue
                                                 trap_msg_queue.push_back(trapmessage);
@@ -346,7 +346,7 @@ namespace l7vs
                                                         std::stringstream    debugstr;
                                                         debugstr << "function : snmpagent_impl::push_trapmessage : trap message push back.";
                                                         debugstr << boost::format("trapmessage.type=%d") % trapmessage.type;
-                                                        debugstr << boost::format("trapmessage.message=%s") % trapmessage.message;
+                                                        debugstr << boost::format(", trapmessage.message=%s") % trapmessage.message;
                                                         Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 32, debugstr.str(), __FILE__, __LINE__);
                                                 }
                                                 /*------ DEBUG LOG END ------*/
@@ -664,7 +664,7 @@ namespace l7vs
                         } else {
                                 debugstr << boost::format("vs_endpoint=%s:%d") % vs_endpoint.address().to_string() % vs_endpoint.port();
                         }
-                        debugstr << boost::format("protocol=%s") % protocol;
+                        debugstr << boost::format(", protocol=%s") % protocol;
                         Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 49, debugstr.str(), __FILE__, __LINE__);
                 }
 
@@ -844,6 +844,8 @@ namespace l7vs
                 if (!err) {
                         if (tmp_str == "true") {
                                 logtrap_enable();
+                        } else if (tmp_str == "false") {
+                                logtrap_disable();
                         } else {
                                 logtrap_disable();
                                 std::string msg("logtrap parameter value is invalid. Use default value.");

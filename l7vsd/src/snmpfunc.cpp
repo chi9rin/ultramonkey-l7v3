@@ -450,18 +450,34 @@ handle_get_vstable(netsnmp_mib_handler *handler,
          * this gives you chance to act on the request in some other way
          * if need be.
          */
-        error_code err;
-        //collect mibdata
-        l7vs::snmpagent_impl::get_instance().collect_mibdata(err);
+        switch (reqinfo->mode) {
 
-        if (err) {
-                std::string msg("collect mib data failed.");
-                Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 27, msg, __FILE__, __LINE__);
+        case MODE_GET: {
+                error_code err;
+                //collect mibdata
+                l7vs::snmpagent_impl::get_instance().collect_mibdata(err);
 
+                if (err) {
+                        std::string msg("collect mib data failed.");
+                        Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 27, msg, __FILE__, __LINE__);
+
+                        return SNMP_ERR_GENERR;
+                }
+
+                snmpagent_impl::get_instance().increment_getrequest_count();
+        }
+        break;
+        case MODE_GETNEXT:
+        break;
+        default:
+                /*
+                 * we should never get here, so this is a really bad error
+                 */
+                snmp_log(LOG_ERR,
+                         "unknown mode (%d) in handle_get_vstable\n",
+                         reqinfo->mode);
                 return SNMP_ERR_GENERR;
         }
-
-        snmpagent_impl::get_instance().increment_getrequest_count();
 
         return SNMP_ERR_NOERROR;
 }
@@ -484,18 +500,34 @@ handle_get_rstable(netsnmp_mib_handler *handler,
          * this gives you chance to act on the request in some other way
          * if need be.
          */
-        error_code err;
-        //collect mibdata
-        l7vs::snmpagent_impl::get_instance().collect_mibdata(err);
+        switch (reqinfo->mode) {
 
-        if (err) {
-                std::string msg("collect mib data failed.");
-                Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 28, msg, __FILE__, __LINE__);
+        case MODE_GET: {
+                error_code err;
+                //collect mibdata
+                l7vs::snmpagent_impl::get_instance().collect_mibdata(err);
 
+                if (err) {
+                        std::string msg("collect mib data failed.");
+                        Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 28, msg, __FILE__, __LINE__);
+
+                        return SNMP_ERR_GENERR;
+                }
+
+                snmpagent_impl::get_instance().increment_getrequest_count();
+        }
+        break;
+        case MODE_GETNEXT:
+        break;
+        default:
+                /*
+                 * we should never get here, so this is a really bad error
+                 */
+                snmp_log(LOG_ERR,
+                         "unknown mode (%d) in handle_get_rstable\n",
+                         reqinfo->mode);
                 return SNMP_ERR_GENERR;
         }
-
-        snmpagent_impl::get_instance().increment_getrequest_count();
 
         return SNMP_ERR_NOERROR;
 }
