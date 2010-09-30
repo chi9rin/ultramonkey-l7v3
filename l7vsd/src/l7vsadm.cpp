@@ -25,6 +25,7 @@
 #include <iostream>
 #include <sstream>
 #include <exception>
+#include <csignal>
 #include <boost/bind.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
