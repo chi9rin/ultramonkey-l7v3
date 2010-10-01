@@ -20,7 +20,7 @@ fi
 
 
 RET=`$L7VSADM`
-EXPECT="Layer-7 Virtual Server version 3.0.0-1
+EXPECT="Layer-7 Virtual Server version 3.0.0
 Prot LocalAddress:Port ProtoMod Scheduler
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
 TCP localhost:40001 ip rr"
@@ -40,7 +40,7 @@ fi
 
 
 RET=`$L7VSADM`
-EXPECT="Layer-7 Virtual Server version 3.0.0-1
+EXPECT="Layer-7 Virtual Server version 3.0.0
 Prot LocalAddress:Port ProtoMod Scheduler
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn"
 

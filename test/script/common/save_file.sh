@@ -2,6 +2,24 @@
 
 #Save configfiles and logfiles.
 LOG "save_file start."
+
+if [ -e /etc/hosts ]
+then
+	if [ ! -d ${TMP_DIR}/etc ]
+	then 
+		mkdir -p ${TMP_DIR}/etc
+	fi
+	\cp -f /etc/hosts ${TMP_DIR}/etc
+else
+	false
+fi
+if [ $? -ne 0 ]
+then
+	LOG_ERR "/etc/hosts file move failed."
+else
+	LOG "/etc/hosts file moved ${TMP_DIR}/etc ." 
+fi
+
 if [ -n ${L7VSD_CONF_DIR} -a ${L7VSD_CONF_DIR} != "/"  ]
 then
 	if [ ! -d ${TMP_DIR}/l7vs ]

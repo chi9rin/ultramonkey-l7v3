@@ -20,7 +20,7 @@ fi
 
 
 RET=`$L7VSADM -V`
-EXPECT="Layer-7 Virtual Server version 3.0.0-1
+EXPECT="Layer-7 Virtual Server version 3.0.0
 L7vsd Log Level:
 Category                       Level
 l7vsd_network                  warn
@@ -106,7 +106,7 @@ fi
 
 
 RET=`$L7VSADM -V`
-EXPECT="Layer-7 Virtual Server version 3.0.0-1
+EXPECT="Layer-7 Virtual Server version 3.0.0
 L7vsd Log Level:
 Category                       Level
 l7vsd_network                  warn

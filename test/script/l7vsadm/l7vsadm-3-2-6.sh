@@ -12,7 +12,7 @@ fi
 usleep 100000
 
 RET=`$L7VSADM --verbose --numeric`
-EXPECT="Layer-7 Virtual Server version 3.0.0-1
+EXPECT="Layer-7 Virtual Server version 3.0.0
 L7vsd Log Level:
 Category                       Level
 l7vsd_network                  warn

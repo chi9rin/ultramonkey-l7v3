@@ -21,7 +21,7 @@ fi
 sleep 3
 
 RET=`$L7VSADM -K -n`
-EXPECT="Layer-7 Virtual Server version 3.0.0-1
+EXPECT="Layer-7 Virtual Server version 3.0.0
 Prot LocalAddress:Port ProtoMod Scheduler
      SSL_config_file
      Socket option
@@ -53,7 +53,7 @@ fi
 sleep 1
 
 RET=`$L7VSADM -K -n`
-EXPECT="Layer-7 Virtual Server version 3.0.0-1
+EXPECT="Layer-7 Virtual Server version 3.0.0
 Prot LocalAddress:Port ProtoMod Scheduler
      SSL_config_file
      Socket option

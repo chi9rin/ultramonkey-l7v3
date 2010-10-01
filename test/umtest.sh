@@ -166,6 +166,7 @@ shift `expr "$OPTIND" - 1`
 # Save log and config files.
 . ${SAVE_FILE}
 # Initialize environment.
+\cp -f ${CONF_DIR}/hosts /etc/hosts
 . ${LIGHTTPD_FUNC}
 
 ###################

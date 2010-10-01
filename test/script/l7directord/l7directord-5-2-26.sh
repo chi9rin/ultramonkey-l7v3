@@ -72,7 +72,7 @@ fi
 sleep 3
 
 RET=`$L7VSADM -l -n`
-EXPECT="Layer-7 Virtual Server version 3.0.0-1
+EXPECT="Layer-7 Virtual Server version 3.0.0
 Prot LocalAddress:Port ProtoMod Scheduler
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
 TCP 127.0.0.1:40001 sessionless rr
@@ -97,7 +97,7 @@ sleep 60
 
 
 RET=`$L7VSADM -l -n`
-EXPECT="Layer-7 Virtual Server version 3.0.0-1
+EXPECT="Layer-7 Virtual Server version 3.0.0
 Prot LocalAddress:Port ProtoMod Scheduler
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
 TCP 127.0.0.1:40001 sessionless rr
@@ -122,7 +122,7 @@ fi
 sleep 20
 
 RET=`$L7VSADM -l -n`
-EXPECT="Layer-7 Virtual Server version 3.0.0-1
+EXPECT="Layer-7 Virtual Server version 3.0.0
 Prot LocalAddress:Port ProtoMod Scheduler
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
 TCP 127.0.0.1:40001 sessionless rr
@@ -209,7 +209,7 @@ fi
 sleep 3
 
 RET=`$L7VSADM -l -n`
-EXPECT="Layer-7 Virtual Server version 3.0.0-1
+EXPECT="Layer-7 Virtual Server version 3.0.0
 Prot LocalAddress:Port ProtoMod Scheduler
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
 TCP 127.0.0.1:40001 sessionless rr
@@ -234,7 +234,7 @@ sleep 60
 
 
 RET=`$L7VSADM -l -n`
-EXPECT="Layer-7 Virtual Server version 3.0.0-1
+EXPECT="Layer-7 Virtual Server version 3.0.0
 Prot LocalAddress:Port ProtoMod Scheduler
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
 TCP 127.0.0.1:40001 sessionless rr
@@ -260,7 +260,7 @@ fi
 sleep 20
 
 RET=`$L7VSADM -l -n`
-EXPECT="Layer-7 Virtual Server version 3.0.0-1
+EXPECT="Layer-7 Virtual Server version 3.0.0
 Prot LocalAddress:Port ProtoMod Scheduler
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
 TCP 127.0.0.1:40001 sessionless rr

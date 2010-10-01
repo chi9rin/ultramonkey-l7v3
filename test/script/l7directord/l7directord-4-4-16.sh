@@ -42,7 +42,7 @@ fi
 sleep 3
 
 RET=`$L7VSADM -l -n`
-EXPECT="Layer-7 Virtual Server version 3.0.0-1
+EXPECT="Layer-7 Virtual Server version 3.0.0
 Prot LocalAddress:Port ProtoMod Scheduler
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
 TCP 127.0.0.1:50000 sessionless rr
@@ -61,7 +61,7 @@ set_lighttpd_content $RealServer2 ${TMP_DIR}/index.html
 sleep 10
 
 RET=`$L7VSADM -l -n`
-EXPECT="Layer-7 Virtual Server version 3.0.0-1
+EXPECT="Layer-7 Virtual Server version 3.0.0
 Prot LocalAddress:Port ProtoMod Scheduler
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
 TCP 127.0.0.1:50000 sessionless rr
@@ -81,7 +81,7 @@ set_lighttpd_content $RealServer2 ${TMP_DIR}/index.html
 sleep 10
 
 RET=`$L7VSADM -l -n`
-EXPECT="Layer-7 Virtual Server version 3.0.0-1
+EXPECT="Layer-7 Virtual Server version 3.0.0
 Prot LocalAddress:Port ProtoMod Scheduler
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
 TCP 127.0.0.1:50000 sessionless rr

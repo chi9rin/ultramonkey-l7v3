@@ -3,6 +3,14 @@
 #Return configfiles and logfiles.
 LOG "return_file start."
 
+\mv -f ${TMP_DIR}/etc/hosts /etc/hosts 2> /dev/null
+if [ $? -ne 0 ]
+then
+	LOG_ERR "${TMP_DIR}/etc/hosts file move failed."
+else
+        LOG "/etc/hosts file return ${L7VSD_CONF_DIR} ."
+fi	
+
 mv ${TMP_DIR}/l7vs/* ${L7VSD_CONF_DIR} 2> /dev/null
 if [ $? -ne 0 ]
 then
