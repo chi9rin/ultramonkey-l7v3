@@ -12,8 +12,8 @@ CHECK_ENV="${COMMON_SCRIPT_DIR}/check_env.sh"
 LOGGER="${COMMON_SCRIPT_DIR}/logger.sh"
 LIGHTTPD_FUNC="${COMMON_SCRIPT_DIR}/lighttpd_func.sh"
 STOP_MONKEY="${COMMON_SCRIPT_DIR}/stop_um_ps.sh"
-SAVE_FILE="${COMMON_SCRIPT_DIR}/save_file.sh"
-RETURN_FILE="${COMMON_SCRIPT_DIR}/return_file.sh"
+BACKUP_FILE="${COMMON_SCRIPT_DIR}/backup_file.sh"
+RESTORE_FILE="${COMMON_SCRIPT_DIR}/restore_file.sh"
 COLLECT_FILE="${COMMON_SCRIPT_DIR}/collect_file.sh"
 SET_DEFAULT_CONF="${COMMON_SCRIPT_DIR}/set_default_conf.sh"
 START_SNMPD="${COMMON_SCRIPT_DIR}/start_snmpd.sh"
@@ -163,8 +163,8 @@ shift `expr "$OPTIND" - 1`
 . ${CHECK_ENV}
 # Stop UltraMonkey-L7.
 . ${STOP_MONKEY}
-# Save log and config files.
-. ${SAVE_FILE}
+# Backup log and config files.
+. ${BACKUP_FILE}
 # Initialize environment.
 \cp -f ${CONF_DIR}/hosts /etc/hosts
 . ${LIGHTTPD_FUNC}
@@ -202,8 +202,8 @@ LOG "Test scripts end."
 ###################
 # Stop UltraMonkey-L7.
 . ${STOP_MONKEY}
-# Return log and config files.
-. ${RETURN_FILE}
+# Restore log and config files.
+. ${RESTORE_FILE}
 # Delete temp directory
 rm -rf ${TMP_DIR}
 exit 0

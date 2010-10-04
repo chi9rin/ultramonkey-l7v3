@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#Save configfiles and logfiles.
-LOG "save_file start."
+# Backup config files and log files.
+LOG "backup_file start."
 
 if [ -e /etc/hosts ]
 then
@@ -15,9 +15,9 @@ else
 fi
 if [ $? -ne 0 ]
 then
-	LOG_ERR "/etc/hosts file move failed."
+	LOG_ERR "Cannot move /etc/hosts file."
 else
-	LOG "/etc/hosts file moved ${TMP_DIR}/etc ." 
+	LOG "/etc/hosts file was moved to ${TMP_DIR}/etc/hosts." 
 fi
 
 if [ -n ${L7VSD_CONF_DIR} -a ${L7VSD_CONF_DIR} != "/"  ]
@@ -32,11 +32,10 @@ else
 fi
 if [ $? -ne 0 ]
 then
-	LOG_ERR "l7vs config file move failed."
+	LOG_ERR "Cannot move ${L7VSD_CONF_DIR}/* files."
 else
-	LOG "l7vs config file moved ${TMP_DIR}/l7vs ." 
+	LOG "${L7VSD_CONF_DIR}/* files were moved to ${TMP_DIR}/l7vs directory." 
 fi
-
 
 if [ -n ${L7DIRECTORD_CONF_DIR} -a ${L7DIRECTORD_CONF_DIR} != "/" ]
 then
@@ -50,11 +49,10 @@ else
 fi
 if [ $? -ne 0 ]
 then
-	LOG_ERR "l7director config file move failed."
+	LOG_ERR "Cannot move ${L7DIRECTORD_CONF_DIR}/* files."
 else
-	LOG "l7director config file moved ${TMP_DIR}/l7direcotr ."
+	LOG "${L7DIRECTORD_CONF_DIR}/* files were moved to ${TMP_DIR}/l7direcotr directory."
 fi
-
 
 if [ -n ${L7VS_LOG_DIR} -a ${L7VS_LOG_DIR} != "/" ]
 then
@@ -68,9 +66,9 @@ else
 fi
 if [ $? -ne 0 ]
 then
-	LOG_ERR "UM-L7's log file move failed."
+	LOG_ERR "Cannot move ${L7VS_LOG_DIR}/* files."
 else
-	LOG "UM-L7's log file moved ${TMP_DIR}log ."
+	LOG "${L7VS_LOG_DIR}/* files were moved to ${TMP_DIR}log directory."
 fi
 
-LOG "save_file end."
+LOG "backup_file end."
