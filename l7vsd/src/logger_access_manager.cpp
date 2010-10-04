@@ -27,7 +27,7 @@
 #include "parameter.h"
 
 /*!
- * initialze function.
+ * initialize function.
  *
  * @retrun  current instance.
  */
@@ -155,7 +155,7 @@ void l7vs::logger_access_manager::erase_logger_implement_access(
  * log rotate parameter check function.
  *
  * @param   logrotation designation contents
- * @retrun  false faild.
+ * @retrun  false failed.
  */
 bool l7vs::logger_access_manager::access_log_logrotate_parameter_check(
         const std::map<std::string, std::string>& rotatedata)
@@ -163,7 +163,7 @@ bool l7vs::logger_access_manager::access_log_logrotate_parameter_check(
         appender_property access_log_property;
         std::map<std::string, std::string> rotatedata_cpy = rotatedata;
 
-        return(logger_logrotate_utility::acccess_log_LogrotateParamCheck(rotatedata_cpy , access_log_property));
+        return(logger_logrotate_utility::access_log_LogrotateParamCheck(rotatedata_cpy , access_log_property));
 }
 
 /*!
@@ -196,7 +196,7 @@ void l7vs::logger_access_manager::access_log_rotate_loadConf()
 
         rotation_type = param.get_string(PARAM_COMP_LOGGER, ACCESS_LOG_ROTATION_KEY, ec);
         if (ec) {
-                logger_logrotate_utility::loglotation_utility_logic_error(110, "Not Exist Log Rotation Setting.", __FILE__, __LINE__);
+                logger_logrotate_utility::logrotation_utility_logic_error(110, "Not Exist Log Rotation Setting.", __FILE__, __LINE__);
         }
 
         rotate_default_verbose_displayed_contents = rotate_default_verbose_displayed_contents + ACCESS_LOG_ROTATE_TYPE + " " + rotation_type;
@@ -207,7 +207,7 @@ void l7vs::logger_access_manager::access_log_rotate_loadConf()
 
         max_backup_index = param.get_string(PARAM_COMP_LOGGER, ACCESS_LOG_MAX_BACKUP_INDEX_KEY, ec);
         if (ec) {
-                logger_logrotate_utility::loglotation_utility_logic_error(111, "Not Exist Log MaxBackupIndex Setting.", __FILE__, __LINE__);
+                logger_logrotate_utility::logrotation_utility_logic_error(111, "Not Exist Log MaxBackupIndex Setting.", __FILE__, __LINE__);
         }
 
         rotate_default_verbose_displayed_contents = rotate_default_verbose_displayed_contents + " " + ACCESS_LOG_ROTATE_MAX_BACKUP_INDEX + " " + max_backup_index;
@@ -220,7 +220,7 @@ void l7vs::logger_access_manager::access_log_rotate_loadConf()
 
                 max_file_size = param.get_string(PARAM_COMP_LOGGER, ACCESS_LOG_MAX_FILE_SIZE_KEY, ec);
                 if (ec) {
-                        logger_logrotate_utility::loglotation_utility_logic_error(112, "Not Exist Log MaxFileSize Setting.", __FILE__, __LINE__);
+                        logger_logrotate_utility::logrotation_utility_logic_error(112, "Not Exist Log MaxFileSize Setting.", __FILE__, __LINE__);
                 }
 
                 rotate_default_verbose_displayed_contents = rotate_default_verbose_displayed_contents + " " + ACCESS_LOG_ROTATE_MAX_FILESIZE + " " + max_file_size;
@@ -233,7 +233,7 @@ void l7vs::logger_access_manager::access_log_rotate_loadConf()
 
                 rotation_timing = param.get_string(PARAM_COMP_LOGGER, ACCESS_LOG_ROTATION_TIMING_KEY, ec);
                 if (ec) {
-                        logger_logrotate_utility::loglotation_utility_logic_error(113, "Not Exist Log RotaionTiming Setting.", __FILE__, __LINE__);
+                        logger_logrotate_utility::logrotation_utility_logic_error(113, "Not Exist Log RotationTiming Setting.", __FILE__, __LINE__);
                 }
 
                 rotate_default_verbose_displayed_contents = rotate_default_verbose_displayed_contents + " " + ACCESS_LOG_ROTATE_ROTATION_TIMING + " " + rotation_timing;
@@ -245,8 +245,8 @@ void l7vs::logger_access_manager::access_log_rotate_loadConf()
                 rotation_timing_value_key = param.get_string(PARAM_COMP_LOGGER, ACCESS_LOG_ROTATION_TIMING_VALUE_KEY, ec);
                 if (ec) {
                         std::stringstream   ss;
-                        ss << "Not Exist Log RotaionTiming " << rotation_timing << " Setting.";
-                        logger_logrotate_utility::loglotation_utility_logic_error(114, ss.str(), __FILE__, __LINE__);
+                        ss << "Not Exist Log RotationTiming " << rotation_timing << " Setting.";
+                        logger_logrotate_utility::logrotation_utility_logic_error(114, ss.str(), __FILE__, __LINE__);
                 }
 
                 rotate_default_verbose_displayed_contents = rotate_default_verbose_displayed_contents + " " + ACCESS_LOG_ROTATION_TIMING_VALUE + " " + rotation_timing_value_key;
@@ -259,7 +259,7 @@ void l7vs::logger_access_manager::access_log_rotate_loadConf()
 
                 max_file_size = param.get_string(PARAM_COMP_LOGGER, ACCESS_LOG_MAX_FILE_SIZE_KEY, ec);
                 if (ec) {
-                        logger_logrotate_utility::loglotation_utility_logic_error(115, "Not Exist Log MaxFileSize Setting.", __FILE__, __LINE__);
+                        logger_logrotate_utility::logrotation_utility_logic_error(115, "Not Exist Log MaxFileSize Setting.", __FILE__, __LINE__);
                 }
 
                 rotate_default_verbose_displayed_contents = rotate_default_verbose_displayed_contents + " " + ACCESS_LOG_ROTATE_MAX_FILESIZE + " " + max_file_size;
@@ -270,7 +270,7 @@ void l7vs::logger_access_manager::access_log_rotate_loadConf()
 
                 rotation_timing = param.get_string(PARAM_COMP_LOGGER, ACCESS_LOG_ROTATION_TIMING_KEY, ec);
                 if (ec) {
-                        logger_logrotate_utility::loglotation_utility_logic_error(116, "Not Exist Log RotaionTiming Setting.", __FILE__, __LINE__);
+                        logger_logrotate_utility::logrotation_utility_logic_error(116, "Not Exist Log RotationTiming Setting.", __FILE__, __LINE__);
                 }
 
                 rotate_default_verbose_displayed_contents = rotate_default_verbose_displayed_contents + " " + ACCESS_LOG_ROTATE_ROTATION_TIMING + " " + rotation_timing;
@@ -282,8 +282,8 @@ void l7vs::logger_access_manager::access_log_rotate_loadConf()
                 rotation_timing_value_key = param.get_string(PARAM_COMP_LOGGER, ACCESS_LOG_ROTATION_TIMING_VALUE_KEY, ec);
                 if (ec) {
                         std::stringstream   ss;
-                        ss << "Not Exist Log RotaionTiming " << rotation_timing << " Setting.";
-                        logger_logrotate_utility::loglotation_utility_logic_error(117, ss.str(), __FILE__, __LINE__);
+                        ss << "Not Exist Log RotationTiming " << rotation_timing << " Setting.";
+                        logger_logrotate_utility::logrotation_utility_logic_error(117, ss.str(), __FILE__, __LINE__);
                 }
 
                 rotate_default_verbose_displayed_contents = rotate_default_verbose_displayed_contents + " " + ACCESS_LOG_ROTATION_TIMING_VALUE + " " + rotation_timing_value_key;

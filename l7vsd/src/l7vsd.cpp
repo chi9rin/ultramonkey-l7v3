@@ -61,7 +61,7 @@ l7vsd::~l7vsd()
 }
 
 //! virtual_service list command
-//! @param[out]    arry of vs_element
+//! @param[out]    array of vs_element
 //! @param[out]    error_code
 void    l7vsd::list_virtual_service(vselist_type *out_vslist, error_code &err)
 {
@@ -102,7 +102,7 @@ void    l7vsd::list_virtual_service(vselist_type *out_vslist, error_code &err)
 }
 
 //! virtual_service list verbose command
-//! @param[out]    arry of vs_element
+//! @param[out]    array of vs_element
 //! @param[out]    error_code
 void    l7vsd::list_virtual_service_verbose(l7vsd_response *response, error_code &err)
 {
@@ -504,7 +504,7 @@ void    l7vsd::add_real_server(const virtualservice_element *in_vselement, error
 
                 std::ostringstream oss;
                 oss << "TRAP00020004,A real server was added.vs:";
-                //virtualservice infomation
+                //virtualservice information
                 if (in_vselement->udpmode) {
                         if (in_vselement->udp_recv_endpoint.address().is_v6()) {
                                 oss << "[" << in_vselement->udp_recv_endpoint.address().to_string() << "]:" << in_vselement->udp_recv_endpoint.port();
@@ -520,7 +520,7 @@ void    l7vsd::add_real_server(const virtualservice_element *in_vselement, error
                         }
                 }
 
-                //realserver infomation
+                //realserver information
                 BOOST_FOREACH(realserver_element elem, in_vselement->realserver_vector) {
                         if (in_vselement->udpmode) {
                                 if (elem.udp_endpoint.address().is_v6()) {
@@ -598,7 +598,7 @@ void    l7vsd::del_real_server(const virtualservice_element *in_vselement, error
 
                 std::ostringstream oss;
                 oss << "TRAP00020006,A real server was eliminated.vs:";
-                //virtualservice infomation
+                //virtualservice information
                 if (in_vselement->udpmode) {
                         if (in_vselement->udp_recv_endpoint.address().is_v6()) {
                                 oss << "[" << in_vselement->udp_recv_endpoint.address().to_string() << "]:" << in_vselement->udp_recv_endpoint.port();
@@ -614,7 +614,7 @@ void    l7vsd::del_real_server(const virtualservice_element *in_vselement, error
                         }
                 }
 
-                //realserver infomation
+                //realserver information
                 BOOST_FOREACH(realserver_element elem, in_vselement->realserver_vector) {
                         if (in_vselement->udpmode) {
                                 if (elem.udp_endpoint.address().is_v6()) {
@@ -690,7 +690,7 @@ void    l7vsd::edit_real_server(const virtualservice_element *in_vselement, erro
 
                 std::ostringstream oss;
                 oss << "TRAP00020005,The real server was changed.vs:";
-                //virtualservice infomation
+                //virtualservice information
                 if (in_vselement->udpmode) {
                         if (in_vselement->udp_recv_endpoint.address().is_v6()) {
                                 oss << "[" << in_vselement->udp_recv_endpoint.address().to_string() << "]:" << in_vselement->udp_recv_endpoint.port();
@@ -706,7 +706,7 @@ void    l7vsd::edit_real_server(const virtualservice_element *in_vselement, erro
                         }
                 }
 
-                //realserver infomation
+                //realserver information
                 BOOST_FOREACH(realserver_element elem, in_vselement->realserver_vector) {
                         if (in_vselement->udpmode) {
                                 if (elem.udp_endpoint.address().is_v6()) {
@@ -809,7 +809,7 @@ void    l7vsd::flush_virtual_service(error_code &err)
 }
 
 //! replication command
-//! @param[in]    replicaiton command
+//! @param[in]    replication command
 //! @param[out]    error_code
 void    l7vsd::replication_command(const l7vsadm_request::REPLICATION_COMMAND_TAG *cmd, error_code &err)
 {
@@ -1292,7 +1292,7 @@ int    l7vsd::run(int argc, char *argv[])
                 boost::thread    sigthread(boost::bind(&l7vsd::sig_exit_handler, this));
                 sigthread.detach();
 
-                // protoclol module control initialize
+                // protocol module control initialize
                 protocol_module_control::getInstance().initialize(L7VS_MODULE_PATH);
 
                 // schedule module control initialize
@@ -1351,7 +1351,7 @@ int    l7vsd::run(int argc, char *argv[])
                 for (;;) {
                         if (unlikely(exit_requested)) {
                                 std::stringstream buf;
-                                buf << boost::format("l7vsd signal(%d) received. exitting...") % received_sig;
+                                buf << boost::format("l7vsd signal(%d) received. exiting...") % received_sig;
                                 logger.putLogInfo(LOG_CAT_L7VSD_MAINTHREAD, 1, buf.str(), __FILE__, __LINE__);
                                 break;
                         }
@@ -1390,7 +1390,7 @@ int    l7vsd::run(int argc, char *argv[])
                 // schedule module control finalize
                 schedule_module_control::getInstance().finalize();
 
-                // protpcol module control finalize
+                // protocol module control finalize
                 protocol_module_control::getInstance().finalize();
         } catch (std::exception &e) {
                 std::stringstream    buf;

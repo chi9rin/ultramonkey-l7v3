@@ -38,7 +38,7 @@ namespace l7vs
 class tcp_thread_message : private boost::noncopyable
 {
 public:
-        //! construcor
+        //! constructor
         tcp_thread_message() {}
         //! destructor
         ~tcp_thread_message() {}

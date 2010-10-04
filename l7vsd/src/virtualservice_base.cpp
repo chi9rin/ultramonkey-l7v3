@@ -42,7 +42,7 @@
 
 #define    BPS_DEFAULT_INTERVAL_USEC    500000ULL
 
-// imprementation for virtualservice_base
+// implementation for virtualservice_base
 /*!
  * virtualservice_base class constructor.
  */
@@ -108,7 +108,7 @@ void    l7vs::virtualservice_base::load_parameter(l7vs::error_code &err)
         Parameter            param;
         int                    int_val;
         std::string            str_val;
-        //get realserver_side networkI/F card name
+        //get realserver_side network I/F card name
         str_val    = param.get_string(l7vs::PARAM_COMP_VIRTUALSERVICE, PARAM_RS_SIDE_NIC_NAME, vs_err);
         if (!vs_err) {
                 param_data.nic_realserver_side    = str_val;

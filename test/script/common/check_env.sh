@@ -60,7 +60,7 @@ check_uml7 (){
 	fi
 }
 
-# check Lighty installed
+# check lighttpd installed
 check_http_server (){
         LIGHTTPD=`which lighttpd`
 	if [ $? -ne 0 ]

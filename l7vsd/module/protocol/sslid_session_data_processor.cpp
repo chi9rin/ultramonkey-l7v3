@@ -102,8 +102,8 @@ sslid_session_data_processor::~sslid_session_data_processor()
 }
 
 //! get endpoint from session data
-//! @param[in] session_id refrence
-//! @param[out] endpoint refrence
+//! @param[in] session_id reference
+//! @param[out] endpoint reference
 //! @return 0 : success
 //! @return 1: failed
 //! @return -1:exception
@@ -183,8 +183,8 @@ int sslid_session_data_processor::get_endpoint_from_session_data(
 }
 
 //! write session data to map
-//! @param[in] session_id refrence
-//! @param[in] endpoint refrence
+//! @param[in] session_id reference
+//! @param[in] endpoint reference
 //! @param[in] now time
 //! @return 0 : success
 //! @return 1: failed

@@ -45,7 +45,7 @@ namespace l7vs
 class tcp_ssl_socket : private boost::noncopyable
 {
 public:
-        //! construcor
+        //! constructor
         //! @param[in/out]    socket use io service object
         //! @param[in]        set socket option info
         tcp_ssl_socket(boost::asio::io_service &io,
@@ -105,7 +105,7 @@ public:
         //! @return           false is set non blocking mode failure
         bool set_non_blocking_mode(boost::system::error_code &ec);
         //! write socket
-        //! @param[in]        buffers is wite data buffer
+        //! @param[in]        buffers is write data buffer
         //! @param[out]       ec is reference error code object
         //! @return           write data size
         std::size_t write_some(boost::asio::mutable_buffers_1 buffers, boost::system::error_code &ec);
@@ -145,7 +145,7 @@ protected:
         wr_mutex close_mutex;
         //! socket open flag
         bool open_flag;
-        //! set nonblocking flag
+        //! set non-blocking flag
         bool non_blocking_flag;
         //! socket option
         tcp_socket_option_info opt_info;

@@ -1,6 +1,6 @@
 /*!
  * @file  parameter.h
- * @brief ultramonke-l7 parameter class.
+ * @brief ultramonkey-l7 parameter class.
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.
@@ -44,18 +44,18 @@ namespace l7vs
 class Parameter
 {
 public:
-        Parameter();                            //!< default constractor
-        ~Parameter();                           //!< default destractor
+        Parameter();                            //!< default constructor
+        ~Parameter();                           //!< default destructor
 
         //! initialize(file designation)
         //! @param[in]    component tag
         //! @param[in]    file name
         //! @return true success
-        //! @return false failer
+        //! @return false fail
         bool init(const PARAMETER_COMPONENT_TAG, const std::string &);
 
         //! reload file function
-        //! @param[in]    parameter conponent tag
+        //! @param[in]    parameter component tag
         //! @param[in]    configuration filename
         //!                   default:PARAMETER_FILE
         //! @return true  success file read
@@ -64,7 +64,7 @@ public:
                        const std::string& = PARAMETER_FILE);
 
         //! parameter int value getter
-        //! @param[in]    parametercategory
+        //! @param[in]    parameter category
         //! @param[in]    parameter key
         //! @param[out]   error code
         //! @param[in]    configuration filename
@@ -76,7 +76,7 @@ public:
                     const std::string& = PARAMETER_FILE);
 
         //! parameter string value getter
-        //! @param[in]    parametercategory
+        //! @param[in]    parameter category
         //! @param[in]    parameter key
         //! @param[out]   error code
         //! @param[in]    configuration filename
@@ -88,7 +88,7 @@ public:
                                const std::string& = PARAMETER_FILE);
 
         //! parameter multistring value getter
-        //! @param[in]    parametercategory
+        //! @param[in]    parameter category
         //! @param[in]    parameter key
         //! @param[inout] string vector
         //! @param[out]   error code

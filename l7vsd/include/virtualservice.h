@@ -165,7 +165,7 @@ public:
 
         //! Default count for number of session-pool size
         const static int  SESSION_POOL_NUM_DEFAULT = 256;
-        //! bps calcurate interval(500ms)
+        //! bps calculate interval(500ms)
         const static long BPS_INTERVAL_DEFAULT     = 500;
         //! replication-data create interval(500ms)
         const static long REP_INTERVAL_DEFAULT     = 500;
@@ -222,7 +222,7 @@ protected:
 
         Logger                  log;
 
-        boost::asio::io_service dispatcher;           //! dispatcer service
+        boost::asio::io_service dispatcher;           //! dispatcher service
         deadline_timer_ptr_type calc_bps_timer;       //! timer object
         deadline_timer_ptr_type replication_timer;    //! timer object
         deadline_timer_ptr_type protomod_rep_timer;   //! timer object
@@ -243,11 +243,11 @@ protected:
 
         AUUL recvsize_up;           //! upstream total receive data size
         AUUL current_up_recvsize;   //! current upstream receive data size
-        //!  for calcurate upstream throughput
+        //!  for calculate upstream throughput
         AUUL sendsize_up;           //! upstream total send data size
         AUUL recvsize_down;         //! downstream total receive data size
         AUUL current_down_recvsize; //! current downstream receive data size for
-        //! calcurate upstream throughput
+        //! calculate upstream throughput
         AUUL sendsize_down;         //! downstream total send data size
 
         AUUL throughput_up;         //! upstream throughput value
@@ -256,7 +256,7 @@ protected:
         AUUL wait_count_up;         //! upstream recv wait count
         AUUL wait_count_down;       //! downstream recv wait count
 
-        AUUL interrupt_running_flag;    //! interrunpt routine is running
+        AUUL interrupt_running_flag;    //! interrupt routine is running
         AUUL virtualservice_stop_flag;  //! virtualservice is now shutting down
 
         // protocol module option string

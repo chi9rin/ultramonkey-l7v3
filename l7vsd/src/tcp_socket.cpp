@@ -228,7 +228,7 @@ bool tcp_socket::set_non_blocking_mode(boost::system::error_code &ec)
 }
 
 //! write socket
-//! @param[in]        buffers is wite data buffer
+//! @param[in]        buffers is write data buffer
 //! @param[out]        ec is reference error code object
 //! @return            write data size
 std::size_t tcp_socket::write_some(

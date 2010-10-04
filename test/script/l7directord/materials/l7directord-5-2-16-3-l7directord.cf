@@ -27,7 +27,7 @@ autoreload       = no
 #callback         = /opt/config_change.sh
 
 # = VIRTUAL DIRECTIVES
-# - A sample virual section with a sorry server.
+# - A sample virtual section with a sorry server.
 # - checkcount and quiescent settings are override the global settings.
 virtual  = 127.0.0.1:40001
 	protocol=icmp

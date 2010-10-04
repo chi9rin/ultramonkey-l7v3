@@ -37,7 +37,7 @@ netsnmp_table_data_set *rs_table;
 
 
 /*!
- * initialize snmp scaler and table data set handles.
+ * initialize snmp scalar and table data set handles.
  *
  * @param[in]      error_code& is trap error code
  * @retrun         void
@@ -128,7 +128,7 @@ handle_get_vstable_count(netsnmp_mib_handler *handler,
                         return SNMP_ERR_GENERR;
                 }
 
-                //get virtual serveice size
+                //get virtual service size
                 int rep_state = l7vs::mibdata::get_instance().get_vs_table_size();
 
                 //set value

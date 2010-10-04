@@ -58,7 +58,7 @@ l7vs::logger_implement_access::logger_implement_access(
 }
 
 /*!
- * initialze function.
+ * initialize function.
  *
  * @param   default logrotation info use flag
  * @param   default logrotation info
@@ -107,7 +107,7 @@ bool l7vs::logger_implement_access::setAcLoggerConf(
 
         if (this->rotate_default_flag == true) {
                 lotate_check_flag =
-                        logger_logrotate_utility::acccess_log_LogrotateParamCheck(
+                        logger_logrotate_utility::access_log_LogrotateParamCheck(
                                 rotatedata,
                                 access_log_property);
         } else {
@@ -147,7 +147,7 @@ bool l7vs::logger_implement_access::setAcLoggerConf(
 }
 
 /*!
- * increase reffernce count.
+ * increase reference count.
  *
  * @retrun void
  */
@@ -157,7 +157,7 @@ void l7vs::logger_implement_access::addRef()
 }
 
 /*!
- * decrease reffernce count.
+ * decrease reference count.
  *
  * @retrun void
  */
@@ -167,7 +167,7 @@ void l7vs::logger_implement_access::releaseRef()
 }
 
 /*!
- * decrease reffernce count.
+ * decrease reference count.
  *
  * @param inequal check object
  * @return check result

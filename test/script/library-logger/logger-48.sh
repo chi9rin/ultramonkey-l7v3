@@ -3,7 +3,7 @@
 # set config file
 cp materials/logger-48-l7vs.cf ${L7VSD_CONF_DIR}/l7vs.cf
 
-# set dumy log file
+# set dummy log file
 dd if=/dev/zero of=${L7VS_LOG_DIR}/l7vsadm.log bs=1024 count=1023
 
 #Add Service

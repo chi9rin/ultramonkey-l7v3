@@ -31,7 +31,7 @@
 namespace l7vs
 {
 
-//! emun States Type string
+//! enum States Type string
 static const char *replication_mode[] = {
         "REPLICATION_OUT",
         "REPLICATION_SINGLE",
@@ -142,8 +142,8 @@ int            replication::initialize()
         mutex_ptr    component_mutex;
 
         replication_mutex.clear();
-        // Conponent exists
-        // Get Component infomation
+        // Component exists
+        // Get Component information
         for (int i = 0; i < CMP_MAX; i++) {
                 key_id = boost::io::str(boost::format("cmponent_id_%02d") % i);
                 key_size = boost::io::str(boost::format("cmponent_size_%02d") % i);
@@ -218,7 +218,7 @@ int            replication::initialize()
                 // free memory
                 releaserpl();
                 releasecmp();
-                Logger::putLogError(LOG_CAT_L7VSD_SYSTEM_MEMORY, 3, "Surface infomation memory is NULL.", __FILE__, __LINE__);
+                Logger::putLogError(LOG_CAT_L7VSD_SYSTEM_MEMORY, 3, "Surface information memory is NULL.", __FILE__, __LINE__);
                 // Status Set
                 replication_state.service_status = REPLICATION_SINGLE;
                 return -1;
@@ -272,7 +272,7 @@ void        replication::finalize()
                 replication_thread_ptr->join();
         }
 
-        // Socket finalaize
+        // Socket finalize
         if (replication_send_socket.is_open()) {
                 replication_send_socket.close();
         }
@@ -335,7 +335,7 @@ void        replication::switch_to_master()
         switch (replication_state.service_status) {
         case REPLICATION_SLAVE:
         case REPLICATION_SLAVE_STOP:
-                // Set Mastre Mode
+                // Set Master Mode
                 ret = set_master();
                 if (0 != ret) {
                         replication_state.service_status = REPLICATION_SINGLE;
@@ -347,7 +347,7 @@ void        replication::switch_to_master()
                         buf = boost::io::str(boost::format("Switch to master NG. mode : %s") % replication_mode[(int)replication_state.service_status]);
                         Logger::putLogError(LOG_CAT_L7VSD_REPLICATION, 11, buf, __FILE__, __LINE__);
                 } else {
-                        // Copy from compornent area to replication area.
+                        // Copy from component area to replication area.
                         memcpy(replication_state.replication_memory, replication_state.component_memory, replication_state.total_block * DATA_SIZE);
 
                         if (REPLICATION_SLAVE == replication_state.service_status) {
@@ -445,7 +445,7 @@ void        replication::switch_to_slave()
                 }
         }
 
-        // Set Mastre Mode
+        // Set Master Mode
         ret = set_slave();
         if (0 != ret) {
                 replication_state.service_status = REPLICATION_SINGLE;
@@ -547,7 +547,7 @@ int        replication::set_slave()
 //! @param[in] component_id is the one to identify the component.
 //! @param[out] size of component use blocks
 //! @return Replication memory address
-//! @retval nonnull Replication memory address
+//! @retval non-null Replication memory address
 //! @retval NULL Error
 void        *replication::pay_memory(const std::string &inid, unsigned int &outsize)
 {
@@ -588,7 +588,7 @@ void        *replication::pay_memory(const std::string &inid, unsigned int &outs
                         }
                         // Pay memory address
                         ret = (char *)replication_state.component_memory + replication_info.component_info[i].block_head * DATA_SIZE;
-                        // Nnumber of blocks of ID was returned.
+                        // Number of blocks of ID was returned.
                         outsize = replication_info.component_info[i].block_size;
 
                         // LOG INFO
@@ -671,7 +671,7 @@ void        replication::dump_memory()
         Logger::putLogInfo(LOG_CAT_L7VSD_REPLICATION, 16, "Replication Dump End ------------------------------", __FILE__, __LINE__);
 }
 
-//! Chenge Status isActive
+//! Change Status isActive
 void        replication::start()
 {
         Logger    logger(LOG_CAT_L7VSD_REPLICATION, 7, "replication::start", __FILE__, __LINE__);
@@ -713,7 +713,7 @@ void        replication::start()
         }
 }
 
-//! Chenge Status isStop
+//! Change Status isStop
 void        replication::stop()
 {
         Logger    logger(LOG_CAT_L7VSD_REPLICATION, 8, "replication::stop", __FILE__, __LINE__);
@@ -859,7 +859,7 @@ void        replication::force_replicate()
         Logger::putLogInfo(LOG_CAT_L7VSD_REPLICATION, 23, "Replication compulsorily is success.", __FILE__, __LINE__);
 
 END:
-        // Thread rusume
+        // Thread resume
         {
                 boost::mutex::scoped_lock    lock(replication_thread_mutex);
                 if (replication_flag != EXIT) {
@@ -897,7 +897,7 @@ void        replication::reset()
 }
 
 //! Get Status
-//! @return REPLICATION_MODE_TAG enumration
+//! @return REPLICATION_MODE_TAG enumeration
 replication::REPLICATION_MODE_TAG    replication::get_status()
 {
         Logger    logger(LOG_CAT_L7VSD_REPLICATION, 11, "replication::get_status", __FILE__, __LINE__);
@@ -1264,7 +1264,7 @@ unsigned long long        replication::make_serial()
 
         // get time by clock_gettime
         if (clock_gettime(CLOCK_REALTIME, &current_time) == -1) {
-                // failre.
+                // failure.
                 Logger::putLogError(LOG_CAT_L7VSD_SYSTEM, 7, "You failed to get of time.", __FILE__, __LINE__);
                 serial_num = 0;
         } else {
@@ -1402,7 +1402,7 @@ int            replication::recv_data()
                         break;
                 }
                 if (i == replication_state.total_block - 2) {
-                        // Lock all compornent area
+                        // Lock all component area
                         for (itr = replication_mutex.begin(); itr != replication_mutex.end(); itr++) {
                                 itr->second->lock();
                         }
@@ -1410,7 +1410,7 @@ int            replication::recv_data()
                         // Synchronization is executed.
                         memcpy(replication_state.component_memory, replication_state.replication_memory, replication_state.total_block * DATA_SIZE);
 
-                        // Unlock all compornent area
+                        // Unlock all component area
                         for (itr = replication_mutex.begin(); itr != replication_mutex.end(); itr++) {
                                 itr->second->unlock();
                         }

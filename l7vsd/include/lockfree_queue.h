@@ -23,13 +23,13 @@ protected:
         volatile node_type        *node;
         const size_t            element_num;
 public:
-        // constractor
+        // constructor
         explicit lockfree_queue(size_t num = 65535) : counter(0), element_num(num) {
                 node = new node_type[element_num];
                 headloc = tailloc = 0;
         }
 
-        // destractor
+        // destructor
         ~lockfree_queue() {
                 delete [] node;
         }
@@ -55,7 +55,7 @@ start:
                 return true;
         }
 
-        //poper
+        //popper
         Tvalue *pop() {
                 size_t head, nexthead;
                 Tvalue *rtnvalue;

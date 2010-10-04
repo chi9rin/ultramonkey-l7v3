@@ -1,5 +1,5 @@
 /*!
- *    @file    logger_rogrote_utility.h
+ *    @file    logger_logrotate_utility.h
  *    @brief   log rotation utility header.
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
@@ -84,7 +84,7 @@ public:
         /*!
          * rotate type check.
          *
-         * @param   rotaton string("size" or "date" or "datesize")
+         * @param   rotation string("size" or "date" or "datesize")
          * @return  LOG_ROTATION_TAG val
          */
         static LOG_ROTATION_TAG check_rotate_type(
@@ -146,9 +146,9 @@ public:
          *
          * @param   check object.
          * @param   appender property
-         * @return  false faild
+         * @return  false failed
          */
-        static bool acccess_log_LogrotateParamCheck(
+        static bool access_log_LogrotateParamCheck(
                 accesslog_rotate_map_type &rotatedata,
                 appender_property &access_log_property);
 
@@ -161,7 +161,7 @@ public:
          * @param   line no
          * @return  void
          */
-        static void loglotation_utility_logic_error(
+        static void logrotation_utility_logic_error(
                 const unsigned int logno,
                 const std::string &str,
                 const char *file ,
@@ -172,4 +172,4 @@ public:
 
 };
 
-#endif  // LOGGER_ROGROTATE_UTILITY
+#endif  // LOGGER_LOGROTATE_UTILITY

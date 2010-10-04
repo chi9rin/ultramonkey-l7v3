@@ -4,7 +4,7 @@
 %define _sysconfdir             /etc
 %define _localstatedir          /var
 
-Summary: UltraMonkey-l7 Layer7 software load brancer server
+Summary: UltraMonkey-l7 Layer7 software load balancing server
 Name: l7vsd
 Version: 3.0.0
 Release: 0
@@ -20,7 +20,7 @@ AutoReqProv: no
 #Requires:
 
 %description
-Layer7 load barancer server daemon that works with TCP/UDP barancing
+Layer7 load balancing server daemon that works with TCP/UDP balancing
 
 %prep
 rm -rf ${RPM_BUILD_ROOT}
@@ -32,7 +32,7 @@ rm -rf ${RPM_BUILD_ROOT}
 # will result in fewer portability problems than using the one supplied
 # by various vendours. I fear that I hope in vein.
 CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS
-if [ -f confgure.in ]; then
+if [ -f configure.in ]; then
 	aclocal
 	libtoolize --force --copy
 	automake
@@ -64,7 +64,7 @@ make -j2
 #        ${RPM_BUILD_DIR}/%{name}-%{version}/etc/init.d/sslproxy.rh \
 #               ${RPM_BUILD_ROOT}/etc/init.d/sslproxy
 
-# Install eveything else
+# Install everything else
 #make DESTDIR=$RPM_BUILD_ROOT install
 
 mkdir -p $RPM_BUILD_ROOT%{_sbindir}
@@ -75,7 +75,7 @@ mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/log/l7vs/
 
 install -c -m 755 -D src/l7vsadm $RPM_BUILD_ROOT%{_sbindir}
 
-install -c -m 755 -D src/l7vsd $RPM_BUILD_ROOT%{_sibdir}
+install -c -m 755 -D src/l7vsd $RPM_BUILD_ROOT%{_sbindir}
 
 install -c -m 755 -D init.d/sslproxy $RPM_BUILD_ROOT%{_sysconfdir}/init.d
 

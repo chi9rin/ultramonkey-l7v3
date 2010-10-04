@@ -26,7 +26,7 @@
 
 #include "virtualservice.h"
 
-// imprementation for virtualservice_udp
+// implementation for virtualservice_udp
 /*!
  * virtualservice_udp class constructor.
  */

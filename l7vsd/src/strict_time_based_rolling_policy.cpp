@@ -50,7 +50,7 @@ IMPLEMENT_LOG4CXX_OBJECT(StrictTimeBasedRollingPolicy)
 
 /*!
  * default constructor.
- * initialize member valiables
+ * initialize member variables
  * @param   void
  * @return  void
  */
@@ -60,7 +60,7 @@ StrictTimeBasedRollingPolicy::StrictTimeBasedRollingPolicy() :
 }
 
 /*!
- * increase reffernce count
+ * increase reference count
  * @param   void
  * @return  void
  */
@@ -70,7 +70,7 @@ void StrictTimeBasedRollingPolicy::addRef() const
 }
 
 /*!
- * decrease reffernce count
+ * decrease reference count
  * @param   void
  * @return  void
  */
@@ -161,7 +161,7 @@ void StrictTimeBasedRollingPolicy::setOption(const LogString &option, const LogS
 /*!
  * rolling policy initialize
  * @param   filename of current use
- * @param   append or overWrite
+ * @param   append or overwrite
  * @param   memory pool
  * @return  Rollover information
  */
@@ -409,10 +409,10 @@ time_t StrictTimeBasedRollingPolicy::getNextCheck(time_t now_time)
 }
 
 /*!
- * log file rollover opration
+ * log file rollover operation
  * @param   name of current log file
  * @param   memory pool
- * @return  Rollover infomation
+ * @return  Rollover information
  */
 RolloverDescriptionPtr StrictTimeBasedRollingPolicy::rollover(
         const LogString &currentActiveFile,

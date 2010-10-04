@@ -25,13 +25,13 @@
 #ifndef  __UTILITY_H__
 #define  __UTILITY_H__
 
-//! gcc extention code output macro.
-//! static "if" weight algolithm teach compiler.
+//! gcc extension code output macro.
+//! static "if" weight algorithm teach compiler.
 //! compiler output CPU TBL code.
 //! usage:
-//!    if( likely( hoge ) ){ fasecall } else { slowcall }
+//!    if( likely( hoge ) ){ fastcall } else { slowcall }
 //! if( unlikely( hoge ) ){ slowcall } else { fastcall }
 #define likely(c)   __builtin_expect(!!(c), 1)
 #define unlikely(c) __builtin_expect(!!(c), 0)
 
-#endif  //__ULITITY_H__
+#endif  //__UTILITY_H__

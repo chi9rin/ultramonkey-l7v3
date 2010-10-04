@@ -1,13 +1,13 @@
 [Sep. 06 2010] 3.0.0-0 Norihisa NAKAI, Hiromasa KANDA, LANG XIJIAN
-  - Implimented Multi-threading architecture using Boost::Asio and Boost::Thread library.
-  - Implimented IPv6 protocol logic.
-  - Implimented SorryURI support.
+  - Implemented Multi-threading architecture using Boost::Asio and Boost::Thread library.
+  - Implemented IPv6 protocol logic.
+  - Implemented SorryURI support.
   - Change protocol between l7vsadm and l7vsd from DGRAM to STREAM.
     And serialized stream data using Boost::Serializable.
   - Change protocol and schedule module architecture to module event driven model.
   - Fixed algorithm for logger. (Search Log mode logic added.)
   - Fixed algorithm for parameter. (Using boost algorithm template.)
-  - Implimented SNMPAgent function in l7vsd.
+  - Implemented SNMPAgent function in l7vsd.
 
 /*
     FIXME add other changes
@@ -16,27 +16,27 @@
 [Dec. 17 2008] 2.1.0-0 Shinya TAKEBAYASHI
   - Added option for FAST SCHEDULE to sessionless module
     Establishing connection when client connection was established.
-  - Implimented access logger ( CLIENT-DESTINATION mapping )
+  - Implemented access logger ( CLIENT-DESTINATION mapping )
   - Optimized event listener.
   - Fixed algorithms for some check type.
   - "Checkout" has been enabled.
   - Created "man" page.(Japanese(UTF-8) only ;))
-  - Implimented flow control logic(sever).
+  - Implemented flow control logic(sever).
   - Eliminated flow control logic(client).
 
 [May. 26 2008] 2.0.0-0 Shinya TAKEBAYASHI
   - Changed logger library( vanessa_logger -> log4cxx)
   - Implemented configuration function(using configuration file: /etc/l7vs\l7vs.cf)
-  - Implemented replication system(forHA clustering)
+  - Implemented replication system(for HA clustering)
   - Added new protocol module(sessionless - Layer-4 LB like module)
 
 [Dec. 11 2007] 1.0.0-1 Shinya TAKEBAYASHI
   - Implemented blocking mode switching function
 
 [Oct. 11 2007] 1.0.0-0 Shinya TAKEBAYASHI
-  - Change liblary from GLib1.2 to GLib2.0 (memory leak fix)
+  - Change library from GLib1.2 to GLib2.0 (memory leak fix)
   - Change from select() to epoll ET.
-  - Change bloking mode to non-blocking mode(recv() and send()).
+  - Change blocking mode to non-blocking mode(recv() and send()).
   - Change from service conn list to service conn hash.
   - Change from iomux-list to hash-map and available list.
   - Add QoS Control.

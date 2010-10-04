@@ -29,12 +29,12 @@
 namespace l7vs
 {
 
-//!    constractor
+//!    constructor
 schedule_module_weighted_round_robin::schedule_module_weighted_round_robin() : schedule_module_base("wrr")
 {
 }
 
-//! destractor
+//! destructor
 schedule_module_weighted_round_robin::~schedule_module_weighted_round_robin() {}
 
 //!    initialize function
@@ -59,7 +59,7 @@ void    schedule_module_weighted_round_robin::initialize()
         vs_weights.gcd = 0;
 
         if (likely(!putLogInfo.empty())) {
-                putLogInfo(300000, "Saved endpoint, weight and gcd were initialized.", __FILE__, __LINE__);
+                putLogInfo(300000, "Saved endpoint, weight and G.C.D. were initialized.", __FILE__, __LINE__);
         }
 
         if (likely(!getloglevel.empty())) {
@@ -237,7 +237,7 @@ END:
         }
 }
 
-//! handle schedule calles then schedule function for UDP endpoint
+//! handle schedule calls then schedule function for UDP endpoint
 //! @param[in]    thread id
 //! @param[in]    list iterator first function object
 //!    @param[in]    list iterator last function object
@@ -387,7 +387,7 @@ END:
         }
 }
 
-//! replication interval interrrupt
+//! replication interval interrupt
 //! timer thread call this function. from virtualservice.
 void    schedule_module_weighted_round_robin::replication_interrupt() {}
 

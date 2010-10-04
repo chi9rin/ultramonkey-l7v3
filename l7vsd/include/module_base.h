@@ -35,7 +35,7 @@ namespace l7vs
 
 //! @class    module_base
 //! @brief    protocol module and schedule module base class
-//! @brief    all module class is extened this class.
+//! @brief    all module class is extend this class.
 class module_base
 {
 public:
@@ -57,7 +57,7 @@ protected:
         logger_func_type                putLogInfo;        //!< info log output function object
         logger_func_type                putLogDebug;    //!< debug log output function object
 
-        //! replication memory peyment method
+        //! replication memory payment method
         replicationpaymemory_func_type    replication_pay_memory;
 
         //! replication area lock function object
@@ -71,11 +71,11 @@ protected:
         boost::asio::ip::udp::endpoint virtual_service_endpoint_udp;
 
 public:
-        //! constractor
+        //! constructor
         module_base(std::string in_modulename) {
                 name = in_modulename;
         }
-        //! destractor
+        //! destructor
         virtual ~module_base() {}
         //! tcp protocol support check
         //! @return tcp support is true
@@ -116,7 +116,7 @@ public:
         //! replication function object setter.
         //! @param[in]    replication pay memory function object
         //! @param[in]    replication lock function object
-        //! @param[in]    replication unlock undontion object
+        //! @param[in]    replication unlock function object
         //! @param[in]    virtual service endpoint tcp
         //! @param[in]    virtual service endpoint udp
         void    init_replication_functions(
@@ -138,7 +138,7 @@ public:
         //      Because Loop and Timer control is in virtual_service.
         //      virtual_service call replication_interrupt in specified time at once.
         //      when called, replication_interrupt write data at once.
-        //! replication interval interrrupt
+        //! replication interval interrupt
         //! timer thread call this function. from virtualservice.
         virtual    void    replication_interrupt() = 0;
 };

@@ -100,9 +100,9 @@ namespace l7vs
                 static void    set_logtrap_level(const LOG_LEVEL_TAG in_level);
 
                 /*!
-                 *  get snmp infomation.
+                 *  get snmp information.
                  *
-                 * @return         snmp infomation
+                 * @return         snmp information
                  */
                 static snmp_info  get_snmp_info();
 

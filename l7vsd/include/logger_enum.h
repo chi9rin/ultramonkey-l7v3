@@ -45,8 +45,8 @@ enum LOG_LEVEL_TAG    {
         LOG_LV_FATAL        //!< loglevel is fatal
 };
 
-//! loglevel enum incliment function
-//! @param[in]    logleveltag refarence
+//! loglevel enum increment function
+//! @param[in]    logleveltag reference
 //!    @return        logleveltag reference
 inline LOG_LEVEL_TAG &operator++(LOG_LEVEL_TAG &level)
 {
@@ -69,13 +69,13 @@ enum LOG_CATEGORY_TAG {
         LOG_CAT_L7VSD_SESSION,                    //!< logcategory is session
         LOG_CAT_L7VSD_SESSION_THREAD,            //!< logcategory is session thread
         LOG_CAT_L7VSD_REALSERVER,                //!< logcategory is realserver
-        LOG_CAT_L7VSD_SORRYSERVER,                //!< logcategory is sollyserver
-        LOG_CAT_L7VSD_MODULE,                    //!< logcategory is module controler
+        LOG_CAT_L7VSD_SORRYSERVER,                //!< logcategory is sorryserver
+        LOG_CAT_L7VSD_MODULE,                    //!< logcategory is module controller
         LOG_CAT_L7VSD_REPLICATION,                //!< logcategory is replication
         LOG_CAT_L7VSD_REPLICATION_SENDTHREAD,    //!< logcategory is replication send thread
         LOG_CAT_L7VSD_PARAMETER,                //!< logcategory is parameter
         LOG_CAT_L7VSD_LOGGER,                    //!< logcategory is logger
-        LOG_CAT_L7VSD_COMMAND,                    //!< logcategory is command reciver
+        LOG_CAT_L7VSD_COMMAND,                    //!< logcategory is command receiver
         LOG_CAT_L7VSD_START_STOP,                //!< logcategory is main function used
         LOG_CAT_L7VSD_SYSTEM,                    //!< logcategory is systemcall other
         LOG_CAT_L7VSD_SYSTEM_MEMORY,            //!< logcategory is systemcall memory
@@ -99,8 +99,8 @@ enum LOG_CATEGORY_TAG {
 };
 
 
-//! logcategory enum incliment function
-//! @param[in]    logcategorytag refarence
+//! logcategory enum increment function
+//! @param[in]    logcategorytag reference
 //!    @return        logcategorytag reference
 inline LOG_CATEGORY_TAG &operator++(LOG_CATEGORY_TAG &cat)
 {

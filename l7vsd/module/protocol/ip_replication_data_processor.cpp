@@ -224,7 +224,7 @@ ip_replication_data_processor::~ip_replication_data_processor()
 }
 
 //! put data into temp list
-//! @param[in] ip_replication_temp_data refrence
+//! @param[in] ip_replication_temp_data reference
 void ip_replication_data_processor::put_into_temp_list(
         const ip_replication_temp_data &data)
 {
@@ -264,7 +264,7 @@ void ip_replication_data_processor::write_replication_area()
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel())) {
                 putLogDebug(600216, "in_function : void ip_replication_data_processor::"
-                            "write_replicaion_area().", __FILE__, __LINE__);
+                            "write_replication_area().", __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 
@@ -273,7 +273,7 @@ void ip_replication_data_processor::write_replication_area()
                 /*-------- DEBUG LOG --------*/
                 if (unlikely(LOG_LV_DEBUG == getloglevel())) {
                         putLogDebug(600217, "out_function : void ip_replication_data_processor::"
-                                    "write_replicaion_area().", __FILE__, __LINE__);
+                                    "write_replication_area().", __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
                 return;
@@ -304,7 +304,7 @@ void ip_replication_data_processor::write_replication_area()
                                 /*-------- DEBUG LOG --------*/
                                 if (unlikely(LOG_LV_DEBUG == getloglevel())) {
                                         boost::format formatter("function : void ip_replication_data_processor::"
-                                                                "write_replicaion_area() : 'A' : realserver_ip = %s, "
+                                                                "write_replication_area() : 'A' : realserver_ip = %s, "
                                                                 "realserver_prot = %d, last_time = %d.");
                                         formatter % replication_area[temp_data.ip_hash].realserver_ip % replication_area[temp_data.ip_hash].realserver_port %
                                         replication_area[temp_data.ip_hash].last_time;
@@ -321,7 +321,7 @@ void ip_replication_data_processor::write_replication_area()
                                 /*-------- DEBUG LOG --------*/
                                 if (unlikely(LOG_LV_DEBUG == getloglevel())) {
                                         boost::format formatter("function : void ip_replication_data_processor::"
-                                                                "write_replicaion_area() : 'U' : last_time = %d.");
+                                                                "write_replication_area() : 'U' : last_time = %d.");
                                         formatter % replication_area[temp_data.ip_hash].last_time;
                                         putLogDebug(600219, formatter.str(), __FILE__, __LINE__);
                                 }
@@ -339,8 +339,8 @@ void ip_replication_data_processor::write_replication_area()
                 if (blocked) {
                         replication_area_unlock();
                 }
-                std::cerr << "ip_replication_data_processor::write_replicaion_area() : exception : error " << e.what() << "." << std::endl;
-                boost::format formatter("function : void ip_replication_data_processor::write_replicaion_area() : "
+                std::cerr << "ip_replication_data_processor::write_replication_area() : exception : error " << e.what() << "." << std::endl;
+                boost::format formatter("function : void ip_replication_data_processor::write_replication_area() : "
                                         "exception : error = %s.");
                 formatter % e.what();
                 putLogError(600111, formatter.str(), __FILE__, __LINE__);
@@ -348,22 +348,22 @@ void ip_replication_data_processor::write_replication_area()
                 if (blocked) {
                         replication_area_unlock();
                 }
-                std::cerr << "ip_replication_data_processor::write_replicaion_area() : exception." << std::endl;
-                putLogError(600112, "function : void ip_replication_data_processor::write_replicaion_area() : "
+                std::cerr << "ip_replication_data_processor::write_replication_area() : exception." << std::endl;
+                putLogError(600112, "function : void ip_replication_data_processor::write_replication_area() : "
                             "Thread_interrupted exception.", __FILE__, __LINE__);
         } catch (...) {
                 if (blocked) {
                         replication_area_unlock();
                 }
-                std::cerr << "ip_replication_data_processor::write_replicaion_area() : Unknown exception." << std::endl;
-                putLogError(600113, "function : void ip_replication_data_processor::write_replicaion_area() : "
+                std::cerr << "ip_replication_data_processor::write_replication_area() : Unknown exception." << std::endl;
+                putLogError(600113, "function : void ip_replication_data_processor::write_replication_area() : "
                             "Unknown exception.", __FILE__, __LINE__);
         }
 
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel())) {
                 putLogDebug(600220, "out_function : void ip_replication_data_processor::"
-                            "write_replicaion_area().",  __FILE__, __LINE__);
+                            "write_replication_area().",  __FILE__, __LINE__);
         }
         /*------DEBUG LOG END------*/
 }
@@ -434,9 +434,9 @@ void ip_replication_data_processor::register_replication_area_unlock(
 }
 
 //! get data from temp list
-//! @param[out] ip_replication_temp_data refrence
+//! @param[out] ip_replication_temp_data reference
 //! @return  0 : success for get data
-//! @return  -1 : faild to get data
+//! @return  -1 : failed to get data
 int ip_replication_data_processor::get_from_temp_list(
         ip_replication_temp_data &data)
 {

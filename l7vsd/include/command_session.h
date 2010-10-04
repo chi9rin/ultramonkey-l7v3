@@ -67,7 +67,7 @@ protected:
         l7vsadm_request            request_data;
         //!    l7vsd response data
         l7vsd_response            response_data;
-        //!    l7vsd refferecne
+        //!    l7vsd reference
         l7vsd                    &vsd;
         //!    command to handler map
         command_handler_map_type    command_handler_map;
@@ -97,10 +97,10 @@ protected:
 public:
         //!    @brief        constructor
         //!    @param[in]    io_service
-        //!    @param[in]    l7vsd refernce
+        //!    @param[in]    l7vsd reference
         command_session(boost::asio::io_service &, l7vsd &);
 
-        //!    @brief        return unixsocket
+        //!    @brief        return unix socket
         unixsocket_type    &socket() {
                 return unixsocket;
         }

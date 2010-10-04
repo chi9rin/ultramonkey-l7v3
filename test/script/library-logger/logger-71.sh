@@ -2,7 +2,7 @@
 
 # set config file
 . ${SET_DEFAULT_CONF}
-# set dumy log file
+# set dummy log file
 dd if=/dev/zero of=${L7VS_LOG_DIR}/l7vs-access.log bs=1024 count=63
 
 #Run http server

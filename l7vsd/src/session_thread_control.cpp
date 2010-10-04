@@ -109,7 +109,7 @@ void    session_thread_control::upstream_run()
                         upthread_running_mutex.unlock();
                         upthread_condition.timed_wait(lock, wait);   // thread is condition wait( start at notify_all() )
                         upthread_running_mutex.lock();
-                } else if (state == EXIT) { // this state is vitrualservice end. thread is finishing.
+                } else if (state == EXIT) { // this state is virtualservice end. thread is finishing.
                         break;
                 } else { //state RUNNING
                         session->up_thread_run();    //session upstream thread looping.
@@ -172,7 +172,7 @@ void    session_thread_control::downstream_run()
                         downthread_running_mutex.unlock();
                         downthread_condition.timed_wait(lock, wait);   // thread is condition wait( start at notify_all() )
                         downthread_running_mutex.lock();
-                } else if (state == EXIT) { // this state is vitrualservice end. thread is finishing.
+                } else if (state == EXIT) { // this state is virtualservice end. thread is finishing.
                         break;
                 } else { //state RUNNING
                         session->down_thread_run();//session downstream thread looping.

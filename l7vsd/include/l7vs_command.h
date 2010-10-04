@@ -82,7 +82,7 @@ public:
         LOG_LEVEL_TAG                log_level;                //!< use log level change mode target category log level
         PARAMETER_COMPONENT_TAG        reload_param;            //!< set reload param mode
         snmp_info            snmpinfo;
-        //! constractor
+        //! constructor
         l7vsadm_request() :            command(CMD_NONE),
                 replication_command(REP_NONE),
                 log_category(LOG_CAT_NONE),
@@ -169,16 +169,16 @@ public:
         replication::REPLICATION_MODE_TAG    replication_mode_status;//!< replication status.
 
         std::list< log_category_level_type >
-        log_status_list;    //!< log cateogries statuses.
+        log_status_list;    //!< log categories statuses.
 
         //bool                    snmp_connection_status;    //!< snmp connection status
 
         snmp_info   snmpinfo;
 
         unsigned long long        total_bps;                    //!< l7vsd's total bit par sec
-        unsigned long long        total_client_recv_byte;        //!< l7vsd's total client recive bytes
+        unsigned long long        total_client_recv_byte;        //!< l7vsd's total client receive bytes
         unsigned long long        total_client_send_byte;        //!< l7vsd's total client send bytes
-        unsigned long long        total_realserver_recv_byte;    //!< l7vsd's total realserver recive bytes
+        unsigned long long        total_realserver_recv_byte;    //!< l7vsd's total realserver receive bytes
         unsigned long long        total_realserver_send_byte;    //!< l7vsd's total realserver send bytes
         std::vector<virtualservice_element>
         virtualservice_vec;            //!< virtualservice lists
@@ -255,7 +255,7 @@ public:
 private:
         friend class    boost::serialization::access;        //! friend boost serializable class
         //! serializable
-        //! @brief using boost serialiable. class serializable function.
+        //! @brief using boost serializable. class serializable function.
         //! @param[in]    archive
         //! @param[in]    version
         template <class Archive > void serialize(Archive &ar, const unsigned int version) {
@@ -275,5 +275,5 @@ private:
         }
 };
 
-}    // namespase l7vsd
+}    // namespace l7vsd
 #endif    //L7COMMAND_H

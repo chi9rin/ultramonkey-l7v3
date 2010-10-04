@@ -1,6 +1,6 @@
 #!/bin/bash
 . ${SET_DEFAULT_CONF}
-# Set l7directorc config file
+# Set l7director config file
 echo "virtual=127.0.0.1:50000" > ${L7DIRECTORD_CONF_DIR}/l7directord.cf
 
 # Start l7vsd

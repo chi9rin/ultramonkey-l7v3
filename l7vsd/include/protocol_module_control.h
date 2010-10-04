@@ -39,7 +39,7 @@ namespace l7vs
 //!    @class    protocol_module_control
 //! @brief    protocol module control class is load protocol module from shared object file.
 //! @brief    many virtual service class used protocol module instance.
-//! @brief    but, shared object load is once. and unload when vitual service refarence count is zero.
+//! @brief    but, shared object load is once. and unload when virtual service reference count is zero.
 class    protocol_module_control : public module_control_base
 {
 public:
@@ -60,10 +60,10 @@ public:
         //! @brief    protocol module information structure.
         struct    protocol_module_info {
                 void                 *handle;                    //!< dlopen handle
-                unsigned int        ref_count;                //!< refarence count
+                unsigned int        ref_count;                //!< reference count
                 create_func_type    create_func;            //!< create function object
                 destroy_func_type    destroy_func;            //!< destroy function object
-                protocol_module_info() : ref_count(0) {}    //!< constractor
+                protocol_module_info() : ref_count(0) {}    //!< constructor
         };
 
         //! name module map type typedef

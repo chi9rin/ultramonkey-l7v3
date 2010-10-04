@@ -36,7 +36,7 @@ protected:
         //! @brief    check tag is return to http protocol module.
         enum    CHECK_RESULT_TAG {
                 CHECK_OK = 0,            //!< check ok
-                CHECK_NG,                //!< check ng
+                CHECK_NG,                //!< check NG
                 CHECK_IMPOSSIBLE        //!< check impossible
         };
 
@@ -55,7 +55,7 @@ protected:
         //! check http status code function
         //! @param const char*            buffer
         //! @param const size_t            buffer_len
-        //! @return    CHECK_RESULT_TAG    status code is nomal or error
+        //! @return    CHECK_RESULT_TAG    status code is normal or error
         CHECK_RESULT_TAG    check_status_code(const char *, const size_t);
 
         //! check http method and version function
@@ -70,7 +70,7 @@ protected:
         //! @return CHECK_RESULT_TAG    http version and status code is valid
         CHECK_RESULT_TAG    check_http_version_and_status_code(const char *, const size_t);
 
-        //! serch uri function
+        //! search uri function
         //! @param const char*            buffer
         //! @param const size_t            buffer_len
         //! @param size_t&                uri offset
@@ -78,7 +78,7 @@ protected:
         //! @return bool                find is true. not find is false
         bool    find_uri(const char *, const size_t, size_t &, size_t &);
 
-        //! serch status function
+        //! search status function
         //! @param const char*            buffer
         //! @param const size_t            buffer_len
         //! @param size_t&                status offset
@@ -86,7 +86,7 @@ protected:
         //! @return bool                find is true. not find is false
         bool    find_status_code(const char *, const size_t, size_t &, size_t &);
 
-        //! serch http header function
+        //! search http header function
         //! @param const char*            buffer
         //! @param const size_t            buffer_len
         //! @param const string&        header name
@@ -95,7 +95,7 @@ protected:
         //! @return bool                find is true. not find is false
         bool    find_http_header(const char *, const size_t, const std::string &, size_t &, size_t &);
 
-        //! serch http header Cookie function
+        //! search http header Cookie function
         //! @param const char*            buffer
         //! @param const size_t            buffer_len
         //! @param size_t&                header offset
@@ -103,7 +103,7 @@ protected:
         //! @return bool                find is true. not find is false
         bool    find_http_header_cookie(const char *, const size_t, size_t &, size_t &);
 
-        //! serch http header Content_Length function
+        //! search http header Content_Length function
         //! @param const char*            buffer
         //! @param const size_t            buffer_len
         //! @param size_t&                header offset
@@ -111,7 +111,7 @@ protected:
         //! @return bool                find is true. not find is false
         bool    find_http_header_content_length(const char *, const size_t, size_t &, size_t &);
 
-        //! serch http header X_Forwarded_For function
+        //! search http header X_Forwarded_For function
         //! @param const char*            buffer
         //! @param const size_t            buffer_len
         //! @param size_t&                header offset
@@ -119,7 +119,7 @@ protected:
         //! @return bool                find is true. not find is false
         bool    find_http_header_x_forwarded_for(const char *, const size_t, size_t &, size_t &);
 
-        //! serch http header all function
+        //! search http header all function
         //! @param const char*            buffer
         //! @param const size_t            buffer_len
         //! @param size_t&                header offset
@@ -141,15 +141,15 @@ protected:
         //! @param  const char*            buffer
         void    increment_stats(const char *buffer);
 
-        //! http statistic infomation
+        //! http statistic information
         http_stats http_stats_info;
 
 public:
 
-        //! constractor
+        //! constructor
         http_protocol_module_base(std::string in_modulename) : protocol_module_base(in_modulename) {};
 
-        //! destractor
+        //! destructor
         virtual    ~http_protocol_module_base() {};
 
         //! get base statistic object.

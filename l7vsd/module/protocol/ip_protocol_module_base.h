@@ -33,15 +33,15 @@ namespace l7vs
         class ip_protocol_module_base : public protocol_module_base
         {
         protected:
-                //! http statistic infomation
+                //! http statistic information
                 http_stats http_stats_info;
 
         public:
 
-                //! constractor
+                //! constructor
                 ip_protocol_module_base(std::string in_modulename) : protocol_module_base(in_modulename) {};
 
-                //! destractor
+                //! destructor
                 virtual    ~ip_protocol_module_base() {};
 
 

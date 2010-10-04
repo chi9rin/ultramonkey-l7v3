@@ -28,12 +28,12 @@
 namespace l7vs
 {
 
-//!    constractor
+//!    constructor
 schedule_module_least_connection::schedule_module_least_connection() : schedule_module_base("lc")
 {
 }
 
-//! destractor
+//! destructor
 schedule_module_least_connection::~schedule_module_least_connection() {}
 
 //!    initialize function
@@ -157,7 +157,7 @@ END:
         }
 }
 
-//! handle schedule calles then schedule function for UDP endpoint
+//! handle schedule calls then schedule function for UDP endpoint
 //! @param[in]    thread id
 //! @param[in]    list iterator first function object
 //!    @param[in]    list iterator last function object
@@ -191,7 +191,7 @@ void    schedule_module_least_connection::handle_schedule(
         }
 }
 
-//! replication interval interrrupt
+//! replication interval interrupt
 //! timer thread call this function. from virtualservice.
 void    schedule_module_least_connection::replication_interrupt() {}
 

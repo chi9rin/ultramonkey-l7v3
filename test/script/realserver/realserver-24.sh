@@ -43,7 +43,7 @@ then
         exit 1
 fi
 
-#Del IPaliasing
+#Del IP aliasing
 stop_lighttpd $RealServer1
 
 exit 0

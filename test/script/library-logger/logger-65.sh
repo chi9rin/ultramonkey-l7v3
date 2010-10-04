@@ -2,7 +2,7 @@
 
 # set config file
 . ${SET_DEFAULT_CONF}
-# set dumy log file
+# set dummy log file
 touch ${L7VS_LOG_DIR}/l7vs-access.log
 
 #Run http server

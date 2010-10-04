@@ -31,7 +31,7 @@ namespace    l7vs
 //!    @brief        constructor
 //!    @param[in]    io_service
 //!    @param[in]    socket file
-//!    @param[in]    l7vsd refernce
+//!    @param[in]    l7vsd reference
 command_receiver::command_receiver(boost::asio::io_service &io_service, const std::string &file, l7vsd &parent)
         :    dispatcher(io_service),
              acceptor_(io_service, boost::asio::local::stream_protocol::endpoint(file)),
@@ -50,7 +50,7 @@ command_receiver::command_receiver(boost::asio::io_service &io_service, const st
 
         sockfile = file;
 
-        // create command_session for first acception.
+        // create command_session for first accept.
         command_session::command_session_ptr session(new command_session(dispatcher, vsd));
         // start an asynchronous accept for first.
         acceptor_.async_accept(session->socket(),
@@ -79,7 +79,7 @@ void    command_receiver::handle_accept(command_session::command_session_ptr ses
         if (!err) {
                 // command_session start.
                 session->start();
-                // create command_session for next acception.
+                // create command_session for next accept.
                 session.reset(new command_session(dispatcher, vsd));
                 // start an asynchronous accept for next.
                 acceptor_.async_accept(session->socket(),

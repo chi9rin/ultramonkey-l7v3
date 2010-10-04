@@ -51,7 +51,7 @@ if [ $? -ne 0 ]
 then
 	LOG_ERR "Cannot move ${L7DIRECTORD_CONF_DIR}/* files."
 else
-	LOG "${L7DIRECTORD_CONF_DIR}/* files were moved to ${TMP_DIR}/l7direcotr directory."
+	LOG "${L7DIRECTORD_CONF_DIR}/* files were moved to ${TMP_DIR}/l7director directory."
 fi
 
 if [ -n ${L7VS_LOG_DIR} -a ${L7VS_LOG_DIR} != "/" ]

@@ -31,7 +31,7 @@ namespace l7vs
 
 //! handshake socket
 //! @param[in]        handshake_type is handshaking as a server or client
-//! @return           true is handshaked
+//! @return           true is handshake success
 //! @return           false is handshake failure
 bool tcp_ssl_socket::handshake(boost::system::error_code &ec)
 {
@@ -190,7 +190,7 @@ bool tcp_ssl_socket::set_non_blocking_mode(boost::system::error_code &ec)
 }
 
 //! write socket
-//! @param[in]         buffers is wite data buffer
+//! @param[in]         buffers is write data buffer
 //! @param[out]        ec is reference error code object
 //! @return            write data size
 std::size_t tcp_ssl_socket::write_some(

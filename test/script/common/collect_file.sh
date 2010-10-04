@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#Collect configfiles and logfiles.
+#Collect config files and log files.
 LOG "collect_file start."
 
 if [ -n ${L7VSD_CONF_DIR} -a ${L7VSD_CONF_DIR} != "/" ]

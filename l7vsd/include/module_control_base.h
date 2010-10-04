@@ -1,6 +1,6 @@
 /*!
  *    @file    protocol_module_base.h
- *    @brief    shared object protocol module absctract class
+ *    @brief    shared object protocol module abstract class
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.
@@ -57,7 +57,7 @@ class    module_control_base : private boost::noncopyable
 {
 protected:
         std::string    modulefile_path;        //!<    shared object path
-        virtual    ~module_control_base() {};   //!<    destractor
+        virtual    ~module_control_base() {};   //!<    destructor
 public:
         //!    @brief    initialize prototype function is fist called
         virtual    void    initialize(const std::string &infile_path) = 0;

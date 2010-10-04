@@ -1,6 +1,6 @@
 /*!
  * @file  parameter_enum.h
- * @brief ultramonke-l7 parameter enum prototype.
+ * @brief ultramonkey-l7 parameter enum prototype.
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.
@@ -27,7 +27,7 @@
 namespace l7vs
 {
 
-//! @enum    PARAMTER_COMPONENT_TAG
+//! @enum    PARAMETER_COMPONENT_TAG
 //! @brief   parameter key tags
 enum PARAMETER_COMPONENT_TAG {
         PARAM_COMP_NOCAT = 0,        //!< parameter category is none

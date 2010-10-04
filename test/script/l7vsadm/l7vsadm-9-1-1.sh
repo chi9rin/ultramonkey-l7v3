@@ -57,13 +57,13 @@ Commands:
 
 Options:
   --tcp-service      -t service-address     service-address is host:port
-  --proto-module     -m proto-module        protocol module name and module argment
+  --proto-module     -m proto-module        protocol module name and module argument
                         [module-args]
   --scheduler        -s scheduler           one of rr,lc,wrr
   --upper            -u connection-count    maximum number of connections
   --bypass           -b sorry-server        sorry server address is host:port
   --tproxy           -T                     set sorry server connection to IP transparent mode.
-  --masq             -M                     set sorry server connection to IP masquarade mode.
+  --masq             -M                     set sorry server connection to IP masquerade mode.
   --flag             -f sorry-flag          sorry status set to virtual service
   --qos-up           -Q QoSval-up           QoS Threshold(bps) set to real server direction
   --qos-down         -q QoSval-down         QoS Threshold(bps) set to client direction
@@ -75,7 +75,7 @@ Options:
   --real-server      -r server-address      server-address is host:port
   --weight           -w weight              scheduling weight set to real server
   --tproxy           -T                     set real server connection to IP transparent mode.
-  --masq             -M                     set real server connection to IP masquarade mode.
+  --masq             -M                     set real server connection to IP masquerade mode.
   --switch           -s replication-switch  start or stop replication
   --force            -f                     force replication start
   --dump             -d                     dump replication memory

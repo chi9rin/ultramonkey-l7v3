@@ -33,7 +33,7 @@ namespace l7vs
 
 //! @class Logger
 //! @brief Logger creation class.
-//! @brief this class create Logger Inmlement class and mediate function.
+//! @brief this class create Logger Implement class and mediate function.
 class Logger
 {
 
@@ -48,8 +48,8 @@ public:
         //! default constructor creates implement class.
         Logger();
 
-        //! log output constractor
-        //! scoped log output( Logger destractor output log)
+        //! log output constructor
+        //! scoped log output( Logger destructor output log)
         //! @param[in]    Log output category tag
         //! @param[in]    log id
         //! @param[in]    log message
@@ -57,7 +57,7 @@ public:
         //! @param[in]    lineno        (=__LINE__)
         Logger(LOG_CATEGORY_TAG, const unsigned int, const std::string &, const char *, int);
 
-        //! destructor.(output log then use log output constractor)
+        //! destructor.(output log then use log output constructor)
         ~Logger();
 
         //! load Configuration.
@@ -77,14 +77,14 @@ public:
         //!    @param[in]    logcategory
         //!    @param[in]    loglevel
         //!    @return true    success loglevel change
-        //!    @return    false    failer loglevel change
+        //!    @return    false    fail loglevel change
         static bool setLogLevel(LOG_CATEGORY_TAG cat, LOG_LEVEL_TAG level);
 
         //! set all category's log level.
         //!    @param[in]    logcategory
         //!    @param[in]    loglevel
         //!    @return true    success loglevel change
-        //!    @return    false    failer loglevel change
+        //!    @return    false    frailer loglevel change
         static bool setLogLevelAll(LOG_LEVEL_TAG level);
 
         //! output fatal log.

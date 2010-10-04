@@ -2,7 +2,7 @@
  *    @file    utility.h
  *    @brief    read - write spin lock class.
  *    @brief    this lock used CPU power upon blocking.
- *    @brief    don't used contextswitch. little clitical section use.
+ *    @brief    don't used context switch. little critical section use.
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.
@@ -41,15 +41,15 @@ class    wr_mutex : private boost::noncopyable
 protected:
         pthread_rwlock_t    mutex;    //! mutex
 public:
-        //! default constractor
+        //! default constructor
         wr_mutex() {
                 pthread_rwlock_init(&mutex, NULL);
         }
-        //! destractor.
+        //! destructor.
         ~wr_mutex() {
                 pthread_rwlock_destroy(&mutex);
         }
-        //! reaqd lock function. non-blocking read threads.
+        //! read lock function. non-blocking read threads.
         //! be blocked write thread mutex.
         void    rdlock() {
                 pthread_rwlock_rdlock(&mutex);
@@ -58,7 +58,7 @@ public:
         void    wrlock() {
                 pthread_rwlock_wrlock(&mutex);
         }
-        //! unlock funtion. unlock rdlock and wrlock.
+        //! unlock function. unlock rdlock and wrlock.
         void    unlock() {
                 pthread_rwlock_unlock(&mutex);
         }
@@ -77,11 +77,11 @@ class    read_scoped_lock : private boost::noncopyable
 protected:
         T    &mutex;    //! mutex reference.
 public:
-        //!    constractor. use explicit keyword.
+        //!    constructor. use explicit keyword.
         explicit read_scoped_lock(T &m) : mutex(m) {
                 mutex.rdlock();
         }
-        //! destractor.
+        //! destructor.
         ~read_scoped_lock() {
                 mutex.unlock();
         }
@@ -103,11 +103,11 @@ class    readwrite_scoped_lock : private boost::noncopyable
 protected:
         T    &mutex;                //! mutex reference.
 public:
-        //! default constractor.
+        //! default constructor.
         explicit readwrite_scoped_lock(T &m) : mutex(m) {
                 mutex.wrlock();
         }
-        //! default destractor
+        //! default destructor
         ~readwrite_scoped_lock() {
                 mutex.unlock();
         }

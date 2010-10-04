@@ -1,6 +1,6 @@
 /*!
  * @file  parameter.cpp
- * @brief ultramonke-l7 parameter class.
+ * @brief ultramonkey-l7 parameter class.
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.
@@ -50,12 +50,12 @@ l7vs::Parameter::Parameter()
                 switch (param_cat) {
                 case LOG_CAT_L7VSADM_PARAMETER:
                         Logger::putLogFatal(param_cat, 2,
-                                            "param_cat=LOG_CAT_L7VSDADM_PARAMETER continue!",
+                                            "param_cat=LOG_CAT_L7VSADM_PARAMETER continue!",
                                             __FILE__, __LINE__);
                         break;
                 default:
                         Logger::putLogFatal(param_cat, 3,
-                                            "param_cat= not LOG_CAT_L7VSDADM_PARAMETER exit!",
+                                            "param_cat= not LOG_CAT_L7VSADM_PARAMETER exit!",
                                             __FILE__, __LINE__);
                         exit(1);
                 }
@@ -73,7 +73,7 @@ l7vs::Parameter::~Parameter()
 //! @param[in]    COMPONENT TAG
 //! @param[in]    file name
 //! @return true  success
-//! @return false failer
+//! @return false fail
 bool l7vs::Parameter::init(const PARAMETER_COMPONENT_TAG comp,
                            const std::string &filename)
 {

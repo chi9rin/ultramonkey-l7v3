@@ -109,7 +109,7 @@ protected:
                         block_size(0) {}
         };
 
-        //! State Infomation struct to execute Replication.
+        //! State Information struct to execute Replication.
         struct replication_state_struct {
                 enum REPLICATION_MODE_TAG       service_status;                 //!< States Type of Replication Function
                 unsigned long long              send_time;                      //!< Completion last time to send data(no use)

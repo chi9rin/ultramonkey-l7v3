@@ -16,7 +16,7 @@ RET=`ps -p ${PID} -o pid,user,args,class,sched | awk 'NR==2 {print $4,$5}'`
 EXPECT="TS 0"
 if [ "${RET}" != "${EXPECT}" ]
 then
-        echo "Test failed: ps -p ${PID} -o pid,user,args,class,schede"
+        echo "Test failed: ps -p ${PID} -o pid,user,args,class,sched"
         exit 1
 fi
 

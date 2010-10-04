@@ -60,14 +60,14 @@ const int protocol_module_ip::COLLECT_STATS_OFF = 0;
 const int protocol_module_ip::COLLECT_STATS_ON = 1;
 
 using namespace boost::xpressive;
-//! constractor
+//! constructor
 protocol_module_ip::protocol_module_ip() :
         ip_protocol_module_base(MODULE_NAME), forwarded_for(FORWARDED_FOR_OFF)
 {
         sorry_uri.assign('\0');
         sorry_uri[0] = '/';
 }
-//! destractor
+//! destructor
 protocol_module_ip::~protocol_module_ip()
 {
 }
@@ -99,7 +99,7 @@ bool protocol_module_ip::is_udp()
         return false;
 }
 
-//! replication interval interrrupt
+//! replication interval interrupt
 //! timer thread call this function. from virtualservice.
 void protocol_module_ip::replication_interrupt()
 {
@@ -150,9 +150,9 @@ void protocol_module_ip::initialize(rs_list_itr_func_type    inlist_begin,
         rs_list_end = inlist_end;
         //RealServer list next function
         rs_list_next = inlist_next;
-        //RealServer list lock funtion
+        //RealServer list lock function
         rs_list_lock = inlist_lock;
-        //RealServer list unlock funtion
+        //RealServer list unlock function
         rs_list_unlock = inlist_unlock;
 
         /*-------- DEBUG LOG --------*/
@@ -174,7 +174,7 @@ void protocol_module_ip::finalize()
         }
         /*------DEBUG LOG END------*/
 
-        //RealServer list functions initializtion
+        //RealServer list functions initialization
         //RealServer list begin function
         rs_list_begin.clear();
         //RealServer list end function
@@ -186,8 +186,8 @@ void protocol_module_ip::finalize()
         //RealServer list unlock function
         rs_list_unlock.clear();
 
-        //Replication functions initializtion
-        //component memory allcate function
+        //Replication functions initialization
+        //component memory allocate function
         replication_pay_memory.clear();
         //component memory lock function
         replication_area_lock.clear();
@@ -202,7 +202,7 @@ void protocol_module_ip::finalize()
         }
         /*------DEBUG LOG END------*/
 
-        //ScheduleModule's functions initializtion
+        //ScheduleModule's functions initialization
         schedule_tcp.clear();
 
         /*-------- DEBUG LOG --------*/
@@ -212,7 +212,7 @@ void protocol_module_ip::finalize()
         }
         /*------DEBUG LOG END------*/
 
-        //Module's option initializtion
+        //Module's option initialization
         //forwarded_for
         forwarded_for = FORWARDED_FOR_OFF;
         //sorry-uri
@@ -256,7 +256,7 @@ void protocol_module_ip::finalize()
         }
         /*------DEBUG LOG END------*/
 
-        //logger functions initializtion
+        //logger functions initialization
         //log level getting function
         getloglevel.clear();
         //logger(Fatal)
@@ -297,9 +297,9 @@ void protocol_module_ip::handle_rslist_update()
 }
 
 //! module parameter check.used by l7vsadm
-//! @param[in]    module paramter string list
-//! @return    result.flag true is parameter is noproblem.
-//! @return result.flag false is paramter is problem.
+//! @param[in]    module parameter string list
+//! @return    result.flag true is parameter is no problem.
+//! @return result.flag false is parameter is problem.
 protocol_module_base::check_message_result protocol_module_ip::check_parameter(const std::vector <
                 std::string > & args)
 {
@@ -360,7 +360,7 @@ protocol_module_base::check_message_result protocol_module_ip::check_parameter(c
                                                 try {
                                                         unsigned long ultimeout = 0;
                                                         ultimeout = boost::lexical_cast<unsigned long>(*it);
-                                                        // int maxvalue check
+                                                        // int max value check
                                                         if (ultimeout > INT_MAX) {
                                                                 check_result.flag = false;
                                                                 formatter.parse("'-T/--timeout' option value '%s' is too large.");
@@ -410,7 +410,7 @@ protocol_module_base::check_message_result protocol_module_ip::check_parameter(c
                                         // not set reschedule flag
                                         no_reschedule_flag = true;
                                 } else {
-                                        // already set reshcedule flag
+                                        // already set reschedule flag
                                         check_result.flag = false;
                                         check_result.message = "You have to choose either of reschedule or no-reschedule.";
                                         putLogError(600004, check_result.message, __FILE__, __LINE__);
@@ -586,9 +586,9 @@ protocol_module_base::check_message_result protocol_module_ip::check_parameter(c
 }
 
 //! parameter set
-//! @param[in] module paramter string list
-//! @return    result.flag true is parameter is noproblem.
-//! @return result.flag false is paramter is problem.
+//! @param[in] module parameter string list
+//! @return    result.flag true is parameter is no problem.
+//! @return result.flag false is parameter is problem.
 protocol_module_base::check_message_result protocol_module_ip::set_parameter(const std::vector <
 		std::string > & args)
 {
@@ -652,7 +652,7 @@ protocol_module_base::check_message_result protocol_module_ip::set_parameter(con
 						try {
 							unsigned long ultimeout = 0;
 							ultimeout = boost::lexical_cast<unsigned long>(*it);
-							// int maxvalue check
+							// int max value check
 							if (ultimeout > INT_MAX) {
 								check_result.flag = false;
 								formatter.parse("'-T/--timeout' option value '%s' is too large.");
@@ -707,7 +707,7 @@ protocol_module_base::check_message_result protocol_module_ip::set_parameter(con
 					reschedule = 0;
 
 				} else {
-					// already set reshcedule flag
+					// already set reschedule flag
 					check_result.flag = false;
 					check_result.message = "You have to choose either of reschedule or no-reschedule.";
 					putLogError(600017, check_result.message, __FILE__, __LINE__);
@@ -858,12 +858,12 @@ protocol_module_base::check_message_result protocol_module_ip::set_parameter(con
 
 		// result check
 		if (check_result.flag) {
-			// set timeout's default value
+			// set timeout default value
 			if (!timeout_flag) {
 				timeout = 3600;
 			}
 
-			// set reschedule's default value
+			// set reschedule default value
 			if (!reschedule_flag) {
 				reschedule = 0;
 			}
@@ -1073,9 +1073,9 @@ protocol_module_base::check_message_result protocol_module_ip::set_parameter(con
 }
 
 //! parameter add
-//! @param[in] module paramter string list
-//! @return    result.flag true is parameter is noproblem.
-//! @return result.flag false is paramter is problem.
+//! @param[in] module parameter string list
+//! @return    result.flag true is parameter is no problem.
+//! @return result.flag false is parameter is problem.
 protocol_module_base::check_message_result protocol_module_ip::add_parameter(const std::vector <
                 std::string > & args)
 {
@@ -1117,7 +1117,7 @@ protocol_module_base::check_message_result protocol_module_ip::add_parameter(con
 }
 
 //! get option info
-//! @param[out] module paramter string
+//! @param[out] module parameter string
 void protocol_module_ip::get_option_info(std::string &option)
 {
         /*-------- DEBUG LOG --------*/
@@ -1142,7 +1142,7 @@ void protocol_module_ip::get_option_info(std::string &option)
         /*------DEBUG LOG END------*/
 }
 
-//! TCP/IP scheduled function registation.
+//! TCP/IP scheduled function registration.
 //! @param[in] schedule module TCP/IP scheduled function object type
 void protocol_module_ip::register_schedule(tcp_schedule_func_type inschedule)
 {
@@ -1161,8 +1161,8 @@ void protocol_module_ip::register_schedule(tcp_schedule_func_type inschedule)
         /*------DEBUG LOG END------*/
 }
 
-//! UDP scheduled function registation
-//! @param[in] schedule module UDP scheduled funtion object type
+//! UDP scheduled function registration
+//! @param[in] schedule module UDP scheduled function object type
 void protocol_module_ip::register_schedule(udp_schedule_func_type inschedule)
 {
         /*-------- DEBUG LOG --------*/
@@ -1173,7 +1173,7 @@ void protocol_module_ip::register_schedule(udp_schedule_func_type inschedule)
         /*------DEBUG LOG END------*/
 }
 
-//! called from session initialzie use in upstream_thread
+//! called from session initialize use in upstream_thread
 //! @param[in]    upstream thread id.
 //! @param[in]    downstream thread id
 //! @return        session use EVENT mode.
@@ -1570,7 +1570,7 @@ protocol_module_base::EVENT_TAG protocol_module_ip::handle_accept(const boost::t
 
 //! called from after session recv in client socket. use in upstream thread.
 //! @param[in]    upstream thread id
-//! @param[in]    receive buffer refarence.
+//! @param[in]    receive buffer reference.
 //! @param[in]    receive length
 //! @return        session use EVENT mode.
 protocol_module_base::EVENT_TAG protocol_module_ip::handle_client_recv(const boost::thread::id thread_id,
@@ -2139,7 +2139,7 @@ protocol_module_base::EVENT_TAG protocol_module_ip::handle_realserver_select(
 //! called from after realserver select
 //! @param[in]    upstream thread id
 //! @param[out]    realserver UDP endpoint
-//! @param[out]    sendbuffer reference
+//! @param[out]    send buffer reference
 //! @param[out]    send data length
 //! @return        session use EVENT mode.
 protocol_module_base::EVENT_TAG protocol_module_ip::handle_realserver_select(
@@ -2711,7 +2711,7 @@ protocol_module_base::EVENT_TAG protocol_module_ip::handle_realserver_send(
 
 //! called from after sorryserver select
 //! @param[in]    upstream thread id
-//! @param[in]    sorryserver endpiont reference
+//! @param[in]    sorryserver endpoint reference
 //! @return        session use EVENT mode.
 protocol_module_base::EVENT_TAG protocol_module_ip::handle_sorryserver_select(
         const boost::thread::id thread_id, boost::asio::ip::tcp::endpoint &sorry_endpoint)
@@ -3396,7 +3396,7 @@ protocol_module_base::EVENT_TAG protocol_module_ip::handle_realserver_recv(
         return STOP;
 }
 
-//! called from after realserver recvive for TCP/IP
+//! called from after realserver receive for TCP/IP
 //! @param[in]    downstream thread id
 //! @param[in]    realserver TCP/IP endpoint reference
 //! @param[in]    realserver receive buffer reference.
@@ -4002,7 +4002,7 @@ protocol_module_base::EVENT_TAG protocol_module_ip::handle_sorryserver_recv(
 
 }
 
-//! called from UPSTEEARM thread. make module original message.
+//! called from UPSTREAM thread. make module original message.
 //! @param[in]    downstream thread id.
 //! @return     session use EVENT mode
 protocol_module_base::EVENT_TAG protocol_module_ip::handle_response_send_inform(
@@ -4023,7 +4023,7 @@ protocol_module_base::EVENT_TAG protocol_module_ip::handle_response_send_inform(
 
 //! called from after client connection check. use TCP/IP only. create client send message.
 //! @param[in]    downstream thread id
-//! @param[out]    send budffer reference
+//! @param[out]    send buffer reference
 //! @param[out]    send data length
 //! @return     session use EVENT mode
 protocol_module_base::EVENT_TAG protocol_module_ip::handle_client_connection_check(
@@ -4583,7 +4583,7 @@ protocol_module_base::EVENT_TAG protocol_module_ip::handle_sorry_enable(
                                         }
                                         //data state is HTTP_BODY or UNKNOWN
                                         else {
-                                                //set ebd flag on
+                                                //set end flag on
                                                 session_data_ptr->end_flag = END_FLAG_ON;
 
                                                 /*-------- DEBUG LOG --------*/
@@ -5052,7 +5052,7 @@ protocol_module_base::EVENT_TAG protocol_module_ip::handle_realserver_disconnect
         return status;
 }
 
-//! call from sorry server disconnect. use upstraem thread and downstream thread
+//! call from sorry server disconnect. use upstream thread and downstream thread
 //! @param[in]    upstream and downstream thread id( check! one thread one event )
 //! @param[in]    disconnect sorryserver endpoint
 //! @return        session use EVENT mode
@@ -5225,7 +5225,7 @@ bool  protocol_module_ip::get_data_from_recvbuffer(
 
         char *tmpbuffer = NULL;
 
-        //pointer volidate check
+        //pointer validate check
         if (unlikely(data_ptr == NULL || data_ptr->data_buffer == NULL)) {
                 boost::format formatter("Invalid pointer. thread id : %d.");
                 formatter % boost::this_thread::get_id();
@@ -5289,7 +5289,7 @@ bool  protocol_module_ip::get_data_from_recvbuffer(
                 /*------DEBUG LOG END------*/
                 return true;
         } else {
-                //the new data can append to buffer through moving orignal data
+                //the new data can append to buffer through moving original data
                 if (data_ptr->data_buffer_size - data_ptr->data_length >= recvlen) {
                         memmove(data_ptr->data_buffer, data_ptr->data_buffer + data_ptr->data_offset, data_ptr->data_length);
                         /*-------- DEBUG LOG --------*/
@@ -5653,7 +5653,7 @@ bool protocol_module_ip::create_x_forwarded_for(const std::string &client_endpoi
         size_t http_header_all_len    = 0;
         const char *X_FORWARDED_FOR    = "X-Forwarded-For";
 
-        //search "X-Forwared-For" header
+        //search "X-Forwarded-For" header
         find_ret = http_utility::find_http_header_x_forwarded_for(buffer, buffer_len,
                         x_forwarded_for_offset, x_forwarded_for_len);
 
@@ -5667,9 +5667,9 @@ bool protocol_module_ip::create_x_forwarded_for(const std::string &client_endpoi
         }
         /*------DEBUG LOG END------*/
 
-        //search "X-Forwared-For" result is OK
+        //search "X-Forwarded-For" result is OK
         if (find_ret) {
-                //create "X-Forwared-For" string
+                //create "X-Forwarded-For" string
                 x_forwarded_for_insert_pos = x_forwarded_for_offset + x_forwarded_for_len;
                 x_forwarded_for_context = ", ";
                 x_forwarded_for_context += client_endpoint;
@@ -5701,7 +5701,7 @@ bool protocol_module_ip::create_x_forwarded_for(const std::string &client_endpoi
         }
         /*------DEBUG LOG END------*/
 
-        //create "X-Forwared-For" string
+        //create "X-Forwarded-For" string
         x_forwarded_for_insert_pos = http_header_all_offset;
         x_forwarded_for_context = X_FORWARDED_FOR;
         x_forwarded_for_context += ": ";
@@ -5723,7 +5723,7 @@ bool protocol_module_ip::create_x_forwarded_for(const std::string &client_endpoi
 
 
 
-}//namesapce l7vsd
+}//namespace l7vsd
 
 extern "C" l7vs::protocol_module_base*
 create_module()

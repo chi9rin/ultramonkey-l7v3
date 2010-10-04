@@ -1,7 +1,7 @@
 ######################################################################
 # Makefile                                                    Dec 2008
 #
-# UltraMonkey-L7: Linux Layer7 loadbarancer Server
+# UltraMonkey-L7: Linux Layer7 load balancing server
 # Copyright (C) 2008  NTT COMWARE Corporation.
 #
 # This program is free software; you can redistribute it and/or

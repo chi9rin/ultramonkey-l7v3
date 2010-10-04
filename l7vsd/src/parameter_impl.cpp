@@ -1,6 +1,6 @@
 /*!
- * @file  paramter_impl.cpp
- * @brief paramater impliment file.
+ * @file  parameter_impl.cpp
+ * @brief parameter implement file.
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.
@@ -51,7 +51,7 @@ static bool create_map_flag = false;
 //
 //! Initialize ParameterImpl class
 //! @return true    success
-//! @return false   failer
+//! @return false   fail
 bool l7vs::ParameterImpl::init()
 {
 
@@ -80,7 +80,7 @@ bool l7vs::ParameterImpl::init()
 //! @param[in]    COMPONENT TAG
 //! @param[in]    file name
 //! @return true  success
-//! @return false failer
+//! @return false fail
 bool l7vs::ParameterImpl::init(const l7vs::PARAMETER_COMPONENT_TAG comp,
                                const std::string &file_name)
 {
@@ -128,7 +128,7 @@ bool l7vs::ParameterImpl::read_file(const l7vs::PARAMETER_COMPONENT_TAG comp,
 
         std::string    section_string;
         while (std::getline(ifs, line)) {
-                // triming
+                // trimming
                 boost::algorithm::trim(line);
                 // zero line skip
                 if (line.size() == 0) continue;
@@ -208,9 +208,9 @@ bool l7vs::ParameterImpl::read_file(const l7vs::PARAMETER_COMPONENT_TAG comp,
                                 // check same key
                                 if (multistring_map.end() != multistring_map.find(key)) {
                                         // Only SSL component can designate more than one value.
-                                        // Other component overwrite tmp multimap
+                                        // Other component overwrite tmp multi map
 
-                                        // get compornent tag from section_string
+                                        // get component tag from section_string
                                         for (std::map<PARAMETER_COMPONENT_TAG, std::string>::iterator section_itr = tag_section_table_map.begin();
                                              section_itr != tag_section_table_map.end();
                                              ++section_itr) {
@@ -221,7 +221,7 @@ bool l7vs::ParameterImpl::read_file(const l7vs::PARAMETER_COMPONENT_TAG comp,
                                                 }
                                         }
                                 }
-                                // tmp multimap insert
+                                // tmp multi map insert
                                 multistring_map.insert(string_pair_type(key, strvalue));
                         }
                         // insert int value
@@ -259,7 +259,7 @@ bool l7vs::ParameterImpl::read_file(const l7vs::PARAMETER_COMPONENT_TAG comp,
                 }
         }
 
-        //convert temporaly map to global map.
+        //convert temporally map to global map.
         if (comp == PARAM_COMP_ALL) {
                 intMap.clear();
                 // all tmp int map copy
@@ -275,7 +275,7 @@ bool l7vs::ParameterImpl::read_file(const l7vs::PARAMETER_COMPONENT_TAG comp,
         // comp error
         else if (comp == PARAM_COMP_NOCAT) {
                 Logger::putLogError(logcat, 2,
-                                    "parameter_component_none is not suport",
+                                    "parameter_component_none is not support",
                                     __FILE__, __LINE__);
         }
         // TAG designation

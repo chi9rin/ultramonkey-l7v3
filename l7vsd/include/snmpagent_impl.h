@@ -211,7 +211,7 @@ namespace l7vs
                 void    refresh_statistics(const boost::asio::ip::tcp::endpoint &vs_endpoint, const std::string &protocol);
 
                 /*!
-                 *  set vsd infomation.
+                 *  set vsd information.
                  *
                  * @param[in]      vsd is vsd pointer.
                  * @retrun         void
@@ -219,9 +219,9 @@ namespace l7vs
                 void    set_vsd_info(l7vsd *vsd);
 
                 /*!
-                 *  get snmp infomation.
+                 *  get snmp information.
                  *
-                 * @retrun         snmp_info is snmp infomation.
+                 * @retrun         snmp_info is snmp information.
                  */
                 snmp_info get_snmp_info();
 

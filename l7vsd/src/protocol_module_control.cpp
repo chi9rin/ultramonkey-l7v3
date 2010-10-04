@@ -57,7 +57,7 @@ protocol_module_control::getInstance()
 /*!
  * initialize class.
  *
- * @param   filepath
+ * @param   file path
  * @return  void
  */
 void
@@ -84,8 +84,8 @@ protocol_module_control::finalize()
 /*!
  * load shared object.
  *
- * @param   modulename
- * @param   loggingfunction
+ * @param   module name
+ * @param   logging function
  * @return  pointer for protocol_module_base class instance
  */
 protocol_module_base*
@@ -144,7 +144,7 @@ protocol_module_control::load_module(const    std::string &modulename)
 /*!
  * unload shared object.
  *
- * @param   modulename
+ * @param   module name
  * @param   pointer for protocol_module_base class instance
  * @return  void
  */

@@ -28,7 +28,7 @@
 namespace l7vs
 {
 
-//! construcor
+//! constructor
 tcp_realserver_connect_socket_list::tcp_realserver_connect_socket_list()
 {
 }

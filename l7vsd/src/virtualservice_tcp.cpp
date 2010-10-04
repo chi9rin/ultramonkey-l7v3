@@ -38,7 +38,7 @@
 #include "utility.h"
 #include "logger_access_manager.h"
 
-// imprementation for virtualservice_tcp
+// implementation for virtualservice_tcp
 /*!
  * virtualservice_tcp class constructor.
  */
@@ -131,7 +131,7 @@ void l7vs::virtualservice_tcp::handle_replication_interrupt(const boost::system:
                 return;
         }
 
-        //check maxdatasize
+        //check max data size
         if ((rep_size * DATA_SIZE) <
             ((sizeof(replication_data) * MAX_REPLICATION_DATA_NUM) + sizeof(replication_header))) {
                 Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 2, REP_AREA_SIZE_ERR_MSG,
@@ -235,7 +235,7 @@ void l7vs::virtualservice_tcp::read_replicationdata()
                 return;
         }
 
-        //check maxdatasize
+        //check max data size
         if ((rep_size * DATA_SIZE) <
             ((sizeof(replication_data) * MAX_REPLICATION_DATA_NUM) + sizeof(replication_header))) {
                 Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 4, REP_AREA_SIZE_ERR_MSG,
@@ -269,7 +269,7 @@ void l7vs::virtualservice_tcp::read_replicationdata()
 
         //find vs(loop)
         for (unsigned int i = 0; i < loop_cnt; ++i) {
-                //get tcp endpointdata
+                //get tcp endpoint data
                 std::string tmpstr = rep_data_ptr->tcp_endpoint;
                 std::string ipaddr;
                 unsigned short portno;
@@ -494,7 +494,7 @@ void l7vs::virtualservice_tcp::handle_accept(const l7vs::session_thread_control 
                 Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 38, fmt4.str(), __FILE__, __LINE__);
         }
 
-        //regist accept event handler
+        //register accept event handler
         if (!ssl_virtualservice_mode_flag) {
                 acceptor_.async_accept(stc_ptr_register_accept->get_session()->get_client_socket(),
                         boost::bind(&virtualservice_tcp::handle_accept, this, stc_ptr_register_accept,
@@ -516,7 +516,7 @@ void l7vs::virtualservice_tcp::handle_accept(const l7vs::session_thread_control 
 /*!
  * initialize virtualservice(TCP)
  *
- * @param erro_code
+ * @param error_code
  * @return void
  */
 void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
@@ -730,7 +730,7 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
                 access_log_flag = true;
         }
 
-        // access log rotation infomation set.
+        // access log rotation information set.
         if (element.access_log_rotate_key_info == "") {
                 element.access_log_rotate_key_info = "none";
                 element.access_log_rotate_verbose_info = logger_access_manager::getInstance().get_rotate_default_verbose_displayed_contents();
@@ -847,7 +847,7 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
 /*!
  * finalize virtualservice(TCP)
  *
- * @param erro_code
+ * @param error_code
  * @return void
  */
 void l7vs::virtualservice_tcp::finalize(l7vs::error_code &err)
@@ -900,7 +900,7 @@ void l7vs::virtualservice_tcp::finalize(l7vs::error_code &err)
                 delete stc;
                 stc = NULL;
                 if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
-                        boost::format fmt("join pool sessin: pool_sessions.size = %d");
+                        boost::format fmt("join pool session: pool_sessions.size = %d");
                         fmt % pool_sessions.size();
                         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 55, fmt.str(),
                                 __FILE__, __LINE__);
@@ -946,7 +946,7 @@ void l7vs::virtualservice_tcp::finalize(l7vs::error_code &err)
                         replication_status = false;
                 }
 
-                //check maxdatasize
+                //check max data size
                 if ((rep_size * DATA_SIZE) <
                     ((sizeof(replication_data) * MAX_REPLICATION_DATA_NUM) + sizeof(replication_header))) {
                         err.setter(true, REP_AREA_SIZE_ERR_MSG);
@@ -1026,7 +1026,7 @@ bool l7vs::virtualservice_tcp::operator!=(const l7vs::virtualservice_base &in)
 }
 
 /*!
- * add VirtualService( not-imprement )
+ * add VirtualService( not-implement )
  *
  * @param virtualservice_element
  * @param err
@@ -1069,7 +1069,7 @@ void l7vs::virtualservice_tcp::edit_virtualservice(const l7vs::virtualservice_el
                 return;
         }
 
-        //if change ScueduleModule Name, unload old ScheduleModule and load new ScheduleModule
+        //if change ScheduleModule Name, unload old ScheduleModule and load new ScheduleModule
         if ((element.schedule_module_name != elem.schedule_module_name) && ("" != elem.schedule_module_name)) {
                 schedule_module_control::getInstance().unload_module(schedmod);
                 schedmod = schedule_module_control::getInstance().load_module(elem.schedule_module_name);
@@ -1567,7 +1567,7 @@ void l7vs::virtualservice_tcp::run()
                 if (!stc_ptr) {
                         return;
                 }
-                //regist accept event handler
+                //register accept event handler
                 waiting_sessions.insert(stc_ptr->get_session().get(), stc_ptr);
         }
         if (!ssl_virtualservice_mode_flag) {
@@ -1579,7 +1579,7 @@ void l7vs::virtualservice_tcp::run()
                         boost::bind(&virtualservice_tcp::handle_accept, this, stc_ptr,
                                 boost::asio::placeholders::error));
         }
-        //regist timer event handler
+        //register timer event handler
         calc_bps_timer->expires_from_now(boost::posix_time::milliseconds(param_data.bps_interval));
         calc_bps_timer->async_wait(boost::bind(&virtualservice_tcp::handle_throughput_update,
                                                this, boost::asio::placeholders::error));
@@ -1910,7 +1910,7 @@ std::string l7vs::virtualservice_tcp::get_ssl_password()
 }
 
 //!
-//! Convert verify option string to intger(#define).
+//! Convert verify option string to integer(#define).
 //!
 //! @param[in] opt_string option string
 //! @retval ret option value
@@ -1969,7 +1969,7 @@ int l7vs::virtualservice_tcp::conv_verify_option(std::string opt_string)
 }
 
 //!
-// Convert SSL option string to intger(#define).
+// Convert SSL option string to integer(#define).
 //
 // @param[in] opt_string option string
 // @retval ret option value

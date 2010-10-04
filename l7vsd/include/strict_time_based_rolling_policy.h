@@ -81,9 +81,9 @@ protected:
 public:
         //! default constructor
         StrictTimeBasedRollingPolicy();
-        //! increase reffernce count
+        //! increase reference count
         void addRef() const;
-        //! decrease reffernce count
+        //! decrease reference count
         void releaseRef() const;
         //! option setter
         void setOption(const LogString &, const LogString &);
@@ -94,9 +94,9 @@ public:
         l7vs::LOG_ROTATION_TIMING_TAG getRotationTiming();
         //! rotationTiming setter
         void setRotationTiming(const l7vs::LOG_ROTATION_TIMING_TAG);
-        //! rotatioTimingValue getter
+        //! rotationTimingValue getter
         std::string getRotationTimingValue();
-        //! rotatioTimingValue setter
+        //! rotationTimingValue setter
         void setRotationTimingValue(const std::string &);
 
         //! rolling policy initialize

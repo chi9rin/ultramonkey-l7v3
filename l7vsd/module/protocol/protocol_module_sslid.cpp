@@ -232,8 +232,8 @@ bool protocol_module_sslid::is_use_sorry()
 }
 
 //! module parameter check.used by l7vsadm
-//! @param[in] module paramter string list
-//! @return result.flag true is parameter is noproblem.
+//! @param[in] module parameter string list
+//! @return result.flag true is parameter is no problem.
 //! @return result.flag false is parameter is problem.
 protocol_module_sslid::check_message_result protocol_module_sslid::check_parameter(
         const std::vector<std::string>& args)
@@ -377,7 +377,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::check_paramet
                                         // not set reschedule flag
                                         no_reschedule_flag = true;
                                 } else {
-                                        // already set reshcedule flag
+                                        // already set reschedule flag
                                         result.flag = false;
                                         result.message = "You have to choose either of reschedule or no-reschedule.";
                                         putLogError(300007, result.message, __FILE__, __LINE__);
@@ -421,9 +421,9 @@ protocol_module_sslid::check_message_result protocol_module_sslid::check_paramet
 }
 
 //! parameter set
-//! @param[in] module paramter string list
-//! @return result.flag true is parameter is noproblem.
-//! @return result.flag false is paramter is problem.
+//! @param[in] module parameter string list
+//! @return result.flag true is parameter is no problem.
+//! @return result.flag false is parameter is problem.
 protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter(
         const std::vector<std::string>& args)
 {
@@ -572,7 +572,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
                                         no_reschedule_flag = true;
                                         reschedule = 0;
                                 } else {
-                                        // already set reshcedule flag
+                                        // already set reschedule flag
                                         result.flag = false;
                                         result.message = "You have to choose either of reschedule or no-reschedule.";
                                         putLogError(300018, result.message, __FILE__, __LINE__);
@@ -591,17 +591,17 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
 
                 // result check
                 if (result.flag) {
-                        // set timeout's default value
+                        // set timeout default value
                         if (!timeout_flag) {
                                 timeout = 3600;
                         }
 
-                        // set maxlist's default value
+                        // set maxlist default value
                         if (!maxlist_flag) {
                                 maxlist = 1024;
                         }
 
-                        // set reschedule's default value
+                        // set reschedule default value
                         if (!reschedule_flag) {
                                 reschedule = 0;
                         }
@@ -801,9 +801,9 @@ protocol_module_sslid::check_message_result protocol_module_sslid::set_parameter
 }
 
 //! parameter add
-//! @param[in] module paramter string list
-//! @return result.flag true is parameter is noproblem.
-//! @return result.flag false is paramter is problem.
+//! @param[in] module parameter string list
+//! @return result.flag true is parameter is no problem.
+//! @return result.flag false is parameter is problem.
 protocol_module_sslid::check_message_result protocol_module_sslid::add_parameter(
         const std::vector<std::string>& args)
 {
@@ -844,7 +844,7 @@ protocol_module_sslid::check_message_result protocol_module_sslid::add_parameter
 }
 
 //! get option info
-//! @param[out] module paramter string
+//! @param[out] module parameter string
 void protocol_module_sslid::get_option_info(std::string &option)
 {
         /*-------- DEBUG LOG --------*/
@@ -879,7 +879,7 @@ void protocol_module_sslid::handle_rslist_update()
         /*------DEBUG LOG END------*/
 }
 
-//! TCP/IP scheduled function registation.
+//! TCP/IP scheduled function registration.
 //! @param[in] schedule module TCP/IP scheduled function object type
 void protocol_module_sslid::register_schedule(tcp_schedule_func_type inschedule)
 {
@@ -900,8 +900,8 @@ void protocol_module_sslid::register_schedule(tcp_schedule_func_type inschedule)
         /*------DEBUG LOG END------*/
 }
 
-//! UDP scheduled function registation
-//! @param[in] schedule module UDP scheduled funtion object type
+//! UDP scheduled function registration
+//! @param[in] schedule module UDP scheduled function object type
 void protocol_module_sslid::register_schedule(udp_schedule_func_type inschedule)
 {
         /*-------- DEBUG LOG --------*/
@@ -912,7 +912,7 @@ void protocol_module_sslid::register_schedule(udp_schedule_func_type inschedule)
         /*------DEBUG LOG END------*/
 }
 
-//! called from session initialzie use in upstream_thread
+//! called from session initialize use in upstream_thread
 //! @param[in] upstream thread id.
 //! @param[in] downstream thread id
 //! @return session use EVENT mode(ACCEPT, FINALIZE).
@@ -965,7 +965,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_initialize
                         // data dump
                         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                                 "handle_session_initialize() : session_thread_data_sslid(upthread) : "
-                                                "data_begain_offset = %d, data_size = %d, current_record_rest_size = %d, "
+                                                "data_begin_offset = %d, data_size = %d, current_record_rest_size = %d, "
                                                 "hello_message_flag = %d, sorry_flag = %d, end_flag = %d, accept_flag = %d, "
                                                 "thread_division = %d, pair_thread_id = %d, last_status = %d.");
                         formatter % threaddata_up->data_begain_offset
@@ -1008,7 +1008,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_session_initialize
                         // data_dump
                         boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_sslid::"
                                                 "handle_session_initialize() : session_thread_data_sslid(downthread) : "
-                                                "data_begain_offset = %d, data_size = %d, current_record_rest_size = %d, "
+                                                "data_begin_offset = %d, data_size = %d, current_record_rest_size = %d, "
                                                 "hello_message_flag = %d, sorry_flag = %d, end_flag = %d, accept_flag = %d, "
                                                 "thread_division = %d, pair_thread_id = %d, last_status = %d.");
                         formatter % threaddata_down->data_begain_offset
@@ -1229,7 +1229,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_accept(
 
 //! called from after session recv in client socket. use in upstream thread.
 //! @param[in] upstream thread id
-//! @param[in] receive buffer refarence.
+//! @param[in] receive buffer reference.
 //! @param[in] receive length
 //! @return session use EVENT mode(CLIENT_RECV, REALSERVER_SELECT, FINALIZE).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
@@ -1398,7 +1398,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_recv(
                                         status = CLIENT_RECV;
                                 } else {
                                         // the data can be sent, set the status REALSERVER_SELECT
-                                        // set client helloworld shakehand flag
+                                        // set client hello shakehand flag
                                         threaddata->hello_message_flag = ishellomessage;
                                         threaddata->current_record_rest_size = alllength;
 
@@ -1537,7 +1537,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                         }
                         /*------DEBUG LOG END------*/
 
-                        // first connection get sessionid from the data buffer
+                        // first connection get session id from the data buffer
                         std::string session_id;
                         if (threaddata->hello_message_flag &&
                             (get_ssl_session_id(threaddata->data_buffer.data() + threaddata->data_begain_offset,
@@ -1570,7 +1570,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                         /*------DEBUG LOG END------*/
 
                         if (session_id.empty()) {
-                                // no session id in hellomesseage
+                                // no session id in hello message
                                 // schedule the endpoint
                                 boost::asio::ip::tcp::endpoint temp_endpoint;
                                 boost::asio::ip::tcp::endpoint comp_endpoint;   // for compare the endpoint
@@ -1600,7 +1600,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                                         /*------DEBUG LOG END------*/
                                 }
                         } else {
-                                // the session id is in the hellomessage
+                                // the session id is in the hello message
                                 // try to get the endpoint from session data by session id
                                 int ret = session_data_processor->get_endpoint_from_session_data(
                                                   session_id,
@@ -1807,7 +1807,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
 //! called from after realserver select
 //! @param[in] upstream thread id
 //! @param[out] realserver UDP endpoint
-//! @param[out] sendbudffer reference
+//! @param[out] send buffer reference
 //! @param[out] send data length
 //! @return session use EVENT mode(STOP).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
@@ -2086,7 +2086,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_send(
                                         status = CLIENT_RECV;
                                 } else {
                                         // the data can be sent, set the status REALSERVER_SELECT
-                                        // set client helloworld shakehand flag
+                                        // set client hello shakehand flag
                                         threaddata->hello_message_flag = ishellomessage;
                                         threaddata->current_record_rest_size = alllength;
                                         status = REALSERVER_CONNECT;
@@ -2131,7 +2131,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_send(
 
 //! called from after sorryserver select
 //! @param[in] upstream thread id
-//! @param[in] sorryserver endppiont reference
+//! @param[in] sorryserver endpoint reference
 //! @return session use EVENT mode.
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_select(
         const boost::thread::id thread_id,
@@ -2470,7 +2470,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_send(
                                         status = CLIENT_RECV;
                                 } else {
                                         // the data can be sent, set the status SORRYSERVER_CONNECT
-                                        // set client helloworld shakehand flag
+                                        // set client hello shakehand flag
                                         threaddata->hello_message_flag = ishellomessage;
                                         threaddata->current_record_rest_size = alllength;
                                         status = SORRYSERVER_CONNECT;
@@ -2513,7 +2513,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_send(
         return status;
 }
 
-//! called from after realserver recvive for TCP/IP
+//! called from after realserver receive for TCP/IP
 //! @param[in] downstream thread id
 //! @param[in] realserver TCP/IP endpoint reference
 //! @param[in] realserver receive buffer reference.
@@ -2723,7 +2723,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_recv(
                                 status = REALSERVER_RECV;
                         } else {
                                 // the data can be sent, set the status CLIENT_CONNECTION_CHECK
-                                // set client helloworld shakehand flag
+                                // set client hello shakehand flag
                                 threaddata->hello_message_flag = ishellomessage;
                                 threaddata->current_record_rest_size = alllength;
                                 status = CLIENT_CONNECTION_CHECK;
@@ -3002,7 +3002,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_recv(
                                 status = SORRYSERVER_RECV;
                         } else {
                                 // the data can be sent, set the status CLIENT_CONNECTION_CHECK
-                                // set client helloworld shakehand flag
+                                // set client hello shakehand flag
                                 threaddata->hello_message_flag = ishellomessage;
                                 threaddata->current_record_rest_size = alllength;
                                 status = CLIENT_CONNECTION_CHECK;
@@ -3046,7 +3046,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_recv(
         return status;
 }
 
-//! called from UPSTEEARM thread. make module original message.
+//! called from UPSTREAM thread. make module original message.
 //! @param[in] downstream thread id.
 //! @return session use EVENT mode(STOP).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_response_send_inform(
@@ -3067,7 +3067,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_response_send_info
 
 //! called from after client connection check. use TCP/IP only. create client send message.
 //! @param[in]    downstream thread id
-//! @param[out]    send budffer reference
+//! @param[out]    send buffer reference
 //! @param[out]    send data length
 //! @return     session use EVENT mode(CLIENT_SEND, FINALIZE).
 protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_connection_check(
@@ -3118,11 +3118,11 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_connection_
 
                 // check sorry state
                 if (threaddata->sorry_flag == SORRY_FLAG_OFF) {
-                        // serverhello message
+                        // server hello message
                         if (threaddata->hello_message_flag) {
                                 threaddata->hello_message_flag = false;
                                 // it's server hello message
-                                // get sessionid from the data buffer
+                                // get session id from the data buffer
                                 std::string session_id;
                                 if (get_ssl_session_id(threaddata->data_buffer.data() + threaddata->data_begain_offset,
                                                        threaddata->data_size, session_id) == -1) {
@@ -3379,7 +3379,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_client_send(
                                         }
                                 } else {
                                         // the data is sendable, set the status CLIENT_CONNECTION_CHECK
-                                        // set client helloworld shakehand flag
+                                        // set client hello shakehand flag
                                         threaddata->hello_message_flag = ishellomessage;
                                         threaddata->current_record_rest_size = alllength;
                                         status = CLIENT_CONNECTION_CHECK;
@@ -3779,7 +3779,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_disconn
         return FINALIZE;
 }
 
-//! call from sorry server disconnect. use upstraem thread and downstream thread
+//! call from sorry server disconnect. use upstream thread and downstream thread
 //! @param[in] upstream and downstream thread id(check! one thread one event)
 //! @param[in] disconnect sorryserver endpoint
 //! @return session use EVENT mode(FINALIZE).
@@ -3821,7 +3821,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_close(
         return STOP;
 }
 
-//! replication interval interrrupt
+//! replication interval interrupt
 //! timer thread call this function. from virtualservice.
 void protocol_module_sslid::replication_interrupt()
 {
@@ -3848,7 +3848,7 @@ void protocol_module_sslid::replication_interrupt()
 
 //! put data into send buffer function
 //! @param[in] upstream and downstream thread id
-//! @param[out] sendbudffer reference
+//! @param[out] send buffer reference
 //! @param[out] send data length
 //! @return 0 : success
 //! @return -1: failed
@@ -3982,7 +3982,7 @@ int protocol_module_sslid::put_data_to_sendbuffer(
 
                         // begin offset add
                         threaddata->data_begain_offset += sendbufsize;
-                        // remian data size minus
+                        // remain data size minus
                         threaddata->current_record_rest_size -= sendbufsize;
                         // return data length
                         datalen = sendbufsize;
@@ -4080,7 +4080,7 @@ int protocol_module_sslid::put_data_to_sendbuffer(
                         }
                         /*------DEBUG LOG END------*/
 
-                        // remain data size greater than send data buffersize
+                        // remain data size greater than send data buffer size
                         // put the data to send data buffer
                         memcpy(senddatabegin, databegin + threaddata->data_begain_offset, sendbufsize);
 
@@ -4126,7 +4126,7 @@ int protocol_module_sslid::put_data_to_sendbuffer(
 }
 
 //! judge pointed endpoint whether selected
-//! @param[in] endpoint refrence
+//! @param[in] endpoint reference
 //! @return false if endpoint is not selected
 //! @return true if endpoint is selected
 bool protocol_module_sslid::realserver_selected(const boost::asio::ip::tcp::endpoint &rs_endpoint)

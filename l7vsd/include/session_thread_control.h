@@ -45,7 +45,7 @@ class    tcp_session;
 
 //!
 //!    @brief    session thread pooling utility class.
-//! @class    session_thread_control is session thread pool utirity.
+//! @class    session_thread_control is session thread pool utility.
 class    session_thread_control : private boost::noncopyable
 {
 public:
@@ -85,7 +85,7 @@ protected:
         int                    sched_priority;
         int                    num_of_core_uses;
 public:
-        //! constractor.
+        //! constructor.
         //! @param session_ptr    session class shared ptr
         session_thread_control(tcp_session *ptr, cpu_set_t in_upcpu, cpu_set_t in_downcpu, int    in_sched_algorithm) :
                 upthread_state(WAIT),
@@ -115,7 +115,7 @@ public:
                 session.reset(ptr);
 
         }
-        //! destractor
+        //! destructor
         ~session_thread_control() {
         }
 
@@ -133,9 +133,9 @@ public:
         void            startdownstream();
         //! upstream thread stop function
         void            stopupstream();
-        //! downstream thread stop funtion
+        //! downstream thread stop function
         void            stopdownstream();
-        //! all thread destory function.
+        //! all thread destroy function.
         void            join();
         //! upstream-thread id getter
         //! @return thread_id_type    upstream thread id

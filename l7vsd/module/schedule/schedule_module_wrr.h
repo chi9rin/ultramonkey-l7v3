@@ -38,13 +38,13 @@ protected:
         struct wrr_weights {
                 int currentWeight;  /*! Current Weight */
                 int maxWeight;      /*! Max of Weight */
-                int gcd;            /*! GCD of RealServer list */
+                int gcd;            /*! G.C.D. of RealServer list */
                 wrr_weights() : currentWeight(0), maxWeight(0), gcd(0) {}
         } vs_weights;
 public:
-        //!    constractor
+        //!    constructor
         schedule_module_weighted_round_robin();
-        //! destractor
+        //! destructor
         ~schedule_module_weighted_round_robin();
 
         //!    initialize function
@@ -72,7 +72,7 @@ public:
                 rslist_iterator_next_func_type        inlist_next,
                 boost::asio::ip::tcp::endpoint        &outendpoint);
 
-        //! handle schedule calles then schedule function for UDP endpoint
+        //! handle schedule calls then schedule function for UDP endpoint
         //! @param[in]    thread id
         //! @param[in]    list iterator first function object
         //!    @param[in]    list iterator last function object
@@ -85,7 +85,7 @@ public:
                 rslist_iterator_next_func_type        inlist_next,
                 boost::asio::ip::udp::endpoint        &outendpoint);
 
-        //! replication interval interrrupt
+        //! replication interval interrupt
         //! timer thread call this function. from virtualservice.
         void    replication_interrupt();
 

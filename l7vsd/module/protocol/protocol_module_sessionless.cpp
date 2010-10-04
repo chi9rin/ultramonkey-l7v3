@@ -63,14 +63,14 @@ const int protocol_module_sessionless::FORWARDED_FOR_ON = 1;
 const int protocol_module_sessionless::COLLECT_STATS_OFF = 0;
 const int protocol_module_sessionless::COLLECT_STATS_ON = 1;
 
-//! constractor
+//! constructor
 protocol_module_sessionless::protocol_module_sessionless() :
         http_protocol_module_base(MODULE_NAME), forwarded_for(FORWARDED_FOR_OFF)
 {
         sorry_uri.assign('\0');
         sorry_uri[0] = '/';
 }
-//! destractor
+//! destructor
 protocol_module_sessionless::~protocol_module_sessionless()
 {
 }
@@ -102,7 +102,7 @@ bool protocol_module_sessionless::is_udp()
         return false;
 }
 
-//! replication interval interrrupt
+//! replication interval interrupt
 //! timer thread call this function. from virtualservice.
 void protocol_module_sessionless::replication_interrupt()
 {
@@ -140,9 +140,9 @@ void protocol_module_sessionless::initialize(rs_list_itr_func_type    inlist_beg
         rs_list_end = inlist_end;
         //RealServer list next function
         rs_list_next = inlist_next;
-        //RealServer list lock funtion
+        //RealServer list lock function
         rs_list_lock = inlist_lock;
-        //RealServer list unlock funtion
+        //RealServer list unlock function
         rs_list_unlock = inlist_unlock;
 
         /*-------- DEBUG LOG --------*/
@@ -165,7 +165,7 @@ void protocol_module_sessionless::finalize()
         }
         /*------DEBUG LOG END------*/
 
-        //RealServer list functions initializtion
+        //RealServer list functions initialization
         //RealServer list begin function
         rs_list_begin.clear();
         //RealServer list end function
@@ -185,8 +185,8 @@ void protocol_module_sessionless::finalize()
         }
         /*------DEBUG LOG END------*/
 
-        //Replication functions initializtion
-        //component memory allcate function
+        //Replication functions initialization
+        //component memory allocate function
         replication_pay_memory.clear();
         //component memory lock function
         replication_area_lock.clear();
@@ -201,7 +201,7 @@ void protocol_module_sessionless::finalize()
         }
         /*------DEBUG LOG END------*/
 
-        //ScheduleModule's functions initializtion
+        //ScheduleModule's functions initialization
         schedule_tcp.clear();
 
         /*-------- DEBUG LOG --------*/
@@ -212,7 +212,7 @@ void protocol_module_sessionless::finalize()
         }
         /*------DEBUG LOG END------*/
 
-        //Module's option initializtion
+        //Module's option initialization
         //forwarded_for
         forwarded_for = FORWARDED_FOR_OFF;
         //sorry-uri
@@ -232,7 +232,7 @@ void protocol_module_sessionless::finalize()
         /*------DEBUG LOG END------*/
 
 
-        //logger functions initializtion
+        //logger functions initialization
         //log level getting function
         getloglevel.clear();
         //logger(Fatal)
@@ -273,9 +273,9 @@ void protocol_module_sessionless::handle_rslist_update()
 }
 
 //! module parameter check.used by l7vsadm
-//! @param[in]    module paramter string list
-//! @return    result.flag true is parameter is noproblem.
-//! @return result.flag false is paramter is problem.
+//! @param[in]    module parameter string list
+//! @return    result.flag true is parameter is no problem.
+//! @return result.flag false is parameter is problem.
 protocol_module_base::check_message_result protocol_module_sessionless::check_parameter(const std::vector <
                 std::string > & args)
 {
@@ -485,9 +485,9 @@ protocol_module_base::check_message_result protocol_module_sessionless::check_pa
 }
 
 //! parameter set
-//! @param[in] module paramter string list
-//! @return    result.flag true is parameter is noproblem.
-//! @return result.flag false is paramter is problem.
+//! @param[in] module parameter string list
+//! @return    result.flag true is parameter is no problem.
+//! @return result.flag false is parameter is problem.
 protocol_module_base::check_message_result protocol_module_sessionless::set_parameter(const std::vector <
                 std::string > & args)
 {
@@ -721,9 +721,9 @@ protocol_module_base::check_message_result protocol_module_sessionless::set_para
 }
 
 //! parameter add
-//! @param[in] module paramter string list
-//! @return    result.flag true is parameter is noproblem.
-//! @return result.flag false is paramter is problem.
+//! @param[in] module parameter string list
+//! @return    result.flag true is parameter is no problem.
+//! @return result.flag false is parameter is problem.
 protocol_module_base::check_message_result protocol_module_sessionless::add_parameter(const std::vector <
                 std::string > & args)
 {
@@ -769,7 +769,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::add_para
 }
 
 //! get option info
-//! @param[out] module paramter string
+//! @param[out] module parameter string
 void protocol_module_sessionless::get_option_info(std::string &option)
 {
         /*-------- DEBUG LOG --------*/
@@ -794,7 +794,7 @@ void protocol_module_sessionless::get_option_info(std::string &option)
         /*------DEBUG LOG END------*/
 }
 
-//! TCP/IP scheduled function registation.
+//! TCP/IP scheduled function registration.
 //! @param[in] schedule module TCP/IP scheduled function object type
 void protocol_module_sessionless::register_schedule(tcp_schedule_func_type inschedule)
 {
@@ -813,8 +813,8 @@ void protocol_module_sessionless::register_schedule(tcp_schedule_func_type insch
         /*------DEBUG LOG END------*/
 }
 
-//! UDP scheduled function registation
-//! @param[in] schedule module UDP scheduled funtion object type
+//! UDP scheduled function registration
+//! @param[in] schedule module UDP scheduled function object type
 void protocol_module_sessionless::register_schedule(udp_schedule_func_type inschedule)
 {
         /*-------- DEBUG LOG --------*/
@@ -826,7 +826,7 @@ void protocol_module_sessionless::register_schedule(udp_schedule_func_type insch
         /*------DEBUG LOG END------*/
 }
 
-//! called from session initialzie use in upstream_thread
+//! called from session initialize use in upstream_thread
 //! @param[in]    upstream thread id.
 //! @param[in]    downstream thread id
 //! @return        session use EVENT mode.
@@ -1142,7 +1142,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_accept(const
 
 //! called from after session recv in client socket. use in upstream thread.
 //! @param[in]    upstream thread id
-//! @param[in]    receive buffer refarence.
+//! @param[in]    receive buffer reference.
 //! @param[in]    receive length
 //! @return        session use EVENT mode.
 protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(const boost::thread::id thread_id,
@@ -1338,7 +1338,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                                 if (recv_data.receive_buffer_max_size < data_remain_size + recvlen) {
                                         //the buffer's size that will be allocated is exceed the upper limit value
                                         if (MAX_SESSIONLESS_MODULE_BUFFER_SIZE < data_remain_size + recvlen) {
-                                                std::cerr << "protocol_module_sessionless::handle_client_recv() : the buffer's size that will be allacted is exceed the upper limit value." << std::endl;
+                                                std::cerr << "protocol_module_sessionless::handle_client_recv() : the buffer's size that will be allocated is exceed the upper limit value." << std::endl;
                                                 boost::format formatter("The buffer's size that will be allocated is exceed the upper limit value. thread id : %d.");
                                                 formatter % boost::this_thread::get_id();
                                                 putLogError(100030, formatter.str(), __FILE__, __LINE__);
@@ -1463,7 +1463,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                                         //set new buffer's max size
                                         recv_data.receive_buffer_max_size = buffer_size;
                                 }
-                                //buffer's max size >= remain data size + requst size
+                                //buffer's max size >= remain data size + request size
                                 //buffer isn't need reallocate, but switch
                                 else {
                                         //pointer valid check
@@ -1533,7 +1533,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                                         }
                                         //using buffer is buffer2
                                         else {
-                                                //buffer1 initializtion
+                                                //buffer1 initialization
                                                 memset(recv_data.receive_buffer1, 0, recv_data.receive_buffer_max_size);
                                                 /*-------- DEBUG LOG --------*/
                                                 if (unlikely(LOG_LV_DEBUG == getloglevel())) {
@@ -1893,7 +1893,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                                 //add new status to status_list
                                 recv_data.send_status_list.push_back(new_send_state);
                                 std::list<send_status>::reverse_iterator new_send_it = recv_data.send_status_list.rbegin();
-                                //cacl offset
+                                //calc offset
                                 new_send_it->send_offset = recv_data.receive_buffer_max_size - recv_data.receive_buffer_rest_size
                                                            - request_data_remain_size;
 
@@ -2478,7 +2478,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                                         it->edit_division = EDIT_DIVISION_NO_EDIT;
 
                                         if (send_buffer_remian_size > 0 && it->send_possible_size > 0) {
-                                                //send_buffer_remian_size is larger
+                                                //send_buffer_remain_size is larger
                                                 if (send_buffer_remian_size >= it->send_possible_size) {
                                                         copy_size = it->send_possible_size;
                                                         /*-------- DEBUG LOG --------*/
@@ -2564,10 +2564,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                                 }
                                 //edit_data_list is not empty
                                 else {
-                                        //find the item in the list which has mininum insert_posission
+                                        //find the item in the list which has minimum insert_position
                                         std::list<edit_data>::iterator edit_min = std::min_element(it->edit_data_list.begin(),
                                                         it->edit_data_list.end());
-                                        //send_buffer_remian_size is larger than data that before X-Forwarded-For
+                                        //send_buffer_remain_size is larger than data that before X-Forwarded-For
                                         if (send_buffer_remian_size >= edit_min->insert_posission - it->send_end_size) {
                                                 //copy data before X-Forwarded-For
                                                 copy_size = edit_min->insert_posission - it->send_end_size;
@@ -2649,7 +2649,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                                                         break;
                                                 }
                                         }
-                                        //data that before X-Forwarded-For is larger than send_buffer_remian_size
+                                        //data that before X-Forwarded-For is larger than send_buffer_remain_size
                                         else {
                                                 copy_size = send_buffer_remian_size;
                                                 /*-------- DEBUG LOG --------*/
@@ -2776,7 +2776,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
                         }
                 }
 
-                //set copyed data length
+                //set copied data length
                 datalen = send_buffer_end_size - send_buffer_remian_size;
                 status = REALSERVER_SEND;
         } catch (int e) {
@@ -2978,7 +2978,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_s
                         //offset recalc
                         it->send_offset += it->send_end_size;
 
-                        //insert_posission recalc
+                        //insert_position recalc
                         for (std::list<edit_data>::iterator list_it = it->edit_data_list.begin(); list_it
                              != it->edit_data_list.end(); ++list_it) {
                                 list_it->insert_posission -= it->send_end_size;
@@ -3053,7 +3053,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_s
 
 //! called from after sorryserver select
 //! @param[in]    upstream thread id
-//! @param[in]    sorryserver endpiont reference
+//! @param[in]    sorryserver endpoint reference
 //! @return        session use EVENT mode.
 protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_select(
         const boost::thread::id thread_id, boost::asio::ip::tcp::endpoint &sorry_endpoint)
@@ -3360,7 +3360,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                         it->edit_division = EDIT_DIVISION_NO_EDIT;
 
                                         if (send_buffer_remian_size > 0 && it->send_possible_size > 0) {
-                                                //send_buffer_remian_size is larger
+                                                //send_buffer_remain_size is larger
                                                 if (send_buffer_remian_size > it->send_possible_size) {
                                                         //copy data from receive_buffer to sendbuffer by sending_possible size
                                                         copy_size = it->send_possible_size;
@@ -3443,10 +3443,10 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                 }
                                 //edit_data_list is not empty
                                 else {
-                                        //search item which insert_posission is mininum
+                                        //search item which insert_position is minimum
                                         std::list<edit_data>::iterator edit_min = std::min_element(it->edit_data_list.begin(),
                                                         it->edit_data_list.end());
-                                        //send_buffer_remian_size is larger than data that before X-Forwarded-For/uri
+                                        //send_buffer_remain_size is larger than data that before X-Forwarded-For/uri
                                         if (send_buffer_remian_size >= edit_min->insert_posission - it->send_end_size) {
                                                 //copy data before X-Forwarded-For/url
                                                 copy_size = edit_min->insert_posission - it->send_end_size;
@@ -3528,7 +3528,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                                         break;
                                                 }
                                         }
-                                        //data that before X-Forwarded-For/uri is larger than send_buffer_remian_size
+                                        //data that before X-Forwarded-For/uri is larger than send_buffer_remain_size
                                         else {
                                                 copy_size = send_buffer_remian_size;
                                                 /*-------- DEBUG LOG --------*/
@@ -3658,7 +3658,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                         }
                 }
 
-                //set copyed data length
+                //set copied data length
                 datalen = send_buffer_end_size - send_buffer_remian_size;
 
                 status = SORRYSERVER_SEND;
@@ -3867,7 +3867,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                         //offset recalc
                         it->send_offset += it->send_end_size;
 
-                        //insert_posission recalc
+                        //insert_position recalc
                         for (std::list<edit_data>::iterator list_it = it->edit_data_list.begin(); list_it
                              != it->edit_data_list.end(); ++list_it) {
                                 list_it->insert_posission -= it->send_end_size;
@@ -3878,12 +3878,12 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                 }
                 //sending possible data is not exist
                 else {
-                        //can receive from clent continue
+                        //can receive from client continue
                         if (it->send_rest_size > 0) {
                                 //change status from SEND_OK to SEND_CONTINUE
                                 it->status = SEND_CONTINUE;
                         }
-                        //can not receive from clent continue
+                        //can not receive from client continue
                         else {
                                 //change status from SEND_OK to SEND_END
                                 it->status = SEND_END;
@@ -3965,7 +3965,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
         return STOP;
 }
 
-//! called from after realserver recvive for TCP/IP
+//! called from after realserver receive for TCP/IP
 //! @param[in]    downstream thread id
 //! @param[in]    realserver TCP/IP endpoint reference
 //! @param[in]    realserver receive buffer reference.
@@ -4161,7 +4161,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                         if (recv_data.receive_buffer_max_size < data_remain_size + recvlen) {
                                 //the buffer's size that will be allocated is exceed the upper limit value
                                 if (MAX_SESSIONLESS_MODULE_BUFFER_SIZE < data_remain_size + recvlen) {
-                                        std::cerr << "protocol_module_sessionless::handle_realserver_recv() : the buffer's size that will be allacted is exceed the upper limit value." << std::endl;
+                                        std::cerr << "protocol_module_sessionless::handle_realserver_recv() : the buffer's size that will be allocated is exceed the upper limit value." << std::endl;
                                         boost::format formatter("The buffer's size that will be allocated is exceed the upper limit value. thread id : %d.");
                                         formatter % boost::this_thread::get_id();
                                         putLogError(100083, formatter.str(), __FILE__, __LINE__);
@@ -4290,7 +4290,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                                 //set new buffer's max size
                                 recv_data.receive_buffer_max_size = buffer_size;
                         }
-                        //buffer's max size >= remain data size + requst size
+                        //buffer's max size >= remain data size + request size
                         //buffer isn't need reallocate, but switch
                         else {
                                 //pointer valid check
@@ -5132,7 +5132,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                         if (recv_data.receive_buffer_max_size < data_remain_size + recvlen) {
                                 //the buffer's size that will be allocated is exceed the upper limit value
                                 if (MAX_SESSIONLESS_MODULE_BUFFER_SIZE < data_remain_size + recvlen) {
-                                        std::cerr << "protocol_module_sessionless::handle_sorryserver_recv() : the buffer's size that will be allacted is exceed the upper limit value." << std::endl;
+                                        std::cerr << "protocol_module_sessionless::handle_sorryserver_recv() : the buffer's size that will be allocated is exceed the upper limit value." << std::endl;
                                         boost::format formatter("The buffer's size that will be allocated is exceed the upper limit value. thread id : %d.");
                                         formatter % boost::this_thread::get_id();
                                         putLogError(100094, formatter.str(), __FILE__, __LINE__);
@@ -5257,7 +5257,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                 //set new buffer's max size
                                 recv_data.receive_buffer_max_size = buffer_size;
                         }
-                        //buffer's max size >= remain data size + requst size
+                        //buffer's max size >= remain data size + request size
                         //buffer isn't need reallocate, but switch
                         else {
                                 //pointer valid check
@@ -5327,7 +5327,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                 }
                                 //using buffer is buffer2
                                 else {
-                                        //buffer1 initializtion
+                                        //buffer1 initialization
                                         memset(recv_data.receive_buffer1, 0, recv_data.receive_buffer_max_size);
                                         /*-------- DEBUG LOG --------*/
                                         if (unlikely(LOG_LV_DEBUG == getloglevel())) {
@@ -5652,7 +5652,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                         //add new status to status_list
                         recv_data.send_status_list.push_back(new_send_state);
                         std::list<send_status>::reverse_iterator new_send_it = recv_data.send_status_list.rbegin();
-                        //cacl offset
+                        //calc offset
                         new_send_it->send_offset = recv_data.receive_buffer_max_size - recv_data.receive_buffer_rest_size
                                                    - request_data_remain_size;
 
@@ -5885,7 +5885,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
         return status;
 }
 
-//! called from UPSTEEARM thread. make module original message.
+//! called from UPSTREAM thread. make module original message.
 //! @param[in]    downstream thread id.
 //! @return     session use EVENT mode
 protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_response_send_inform(
@@ -5905,7 +5905,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_response_sen
 
 //! called from after client connection check. use TCP/IP only. create client send message.
 //! @param[in]    downstream thread id
-//! @param[out]    send budffer reference
+//! @param[out]    send buffer reference
 //! @param[out]    send data length
 //! @return     session use EVENT mode
 protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_connection_check(
@@ -5996,7 +5996,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_conne
                         /*------DEBUG LOG END------*/
                         //send_end_size recalc
                         it->send_end_size = it->send_possible_size;
-                        //set copyed data length
+                        //set copied data length
                         datalen = it->send_possible_size;
                         //sending_possible size recalc
                         it->send_possible_size = 0;
@@ -6035,7 +6035,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_conne
                         it->send_end_size = send_buffer_size;
                         //sending_possible size recalc
                         it->send_possible_size -= send_buffer_size;
-                        //set copyed data length
+                        //set copied data length
                         datalen = send_buffer_size;
                 }
 
@@ -6180,12 +6180,12 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_send(
                 }
                 //sending possible data is not exist
                 else {
-                        //can receive from clent continue
+                        //can receive from client continue
                         if (it->send_rest_size > 0) {
                                 //change status from SEND_OK to SEND_CONTINUE
                                 it->status = SEND_CONTINUE;
                         }
-                        //can not receive from clent continue
+                        //can not receive from client continue
                         else {
                                 //change status from SEND_OK to SEND_END
                                 it->status = SEND_END;
@@ -6457,7 +6457,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_enable
                                         }
                                         /*------DEBUG LOG END------*/
 
-                                        //sending ng data is exist or send_rest_size > 0
+                                        //sending NG data is exist or send_rest_size > 0
                                         if (send_disable) {
                                                 //set end flag on
                                                 session_data->end_flag = END_FLAG_ON;
@@ -6592,7 +6592,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_disabl
                                 send_possible = true;
                         }
 
-                        //sending ng data is exist or send_rest_size > 0
+                        //sending NG data is exist or send_rest_size > 0
                         it = find_if(recv_data.send_status_list.begin(), recv_data.send_status_list.end(), data_send_disable());
                         if (it != recv_data.send_status_list.end()) {
                                 send_disable = true;
@@ -6697,7 +6697,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorry_disabl
                                                 putLogDebug(100244, formatter.str(), __FILE__, __LINE__);
                                         }
                                         /*------DEBUG LOG END------*/
-                                        //sending ng data is exist or send_rest_size > 0
+                                        //sending NG data is exist or send_rest_size > 0
                                         if (send_disable) {
                                                 //set end flag on
                                                 session_data->end_flag = END_FLAG_ON;
@@ -6952,7 +6952,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_d
         return status;
 }
 
-//! call from sorry server disconnect. use upstraem thread and downstream thread
+//! call from sorry server disconnect. use upstream thread and downstream thread
 //! @param[in]    upstream and downstream thread id( check! one thread one event )
 //! @param[in]    disconnect sorryserver endpoint
 //! @return        session use EVENT mode

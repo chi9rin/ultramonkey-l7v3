@@ -18,7 +18,7 @@ AutoReqProv: no
 %define hb2_tempdir	/usr/share/doc/%{name}-%{version}-%{release}/heartbeat-ra
 
 %description
-Layer-7 load balancer daemon
+Layer-7 load balancing daemon
 
 %prep
 %setup -q

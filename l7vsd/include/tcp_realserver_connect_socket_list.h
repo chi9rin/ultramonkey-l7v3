@@ -37,7 +37,7 @@ namespace l7vs
 {
 
 //!    @class    tcp_realserver_connect_socket_list
-//! @brief    this class is connected realsever list by up thread.
+//! @brief    this class is connected realserver list by up thread.
 class tcp_realserver_connect_socket_list : private boost::noncopyable
 {
 public:
@@ -46,7 +46,7 @@ public:
         //! realserver list element type first : connection endpoint second : socket pointer
         typedef std::pair<boost::asio::ip::tcp::endpoint, tcp_socket_ptr > list_element;
 
-        //! construcor
+        //! constructor
         tcp_realserver_connect_socket_list();
         //! destructor
         ~tcp_realserver_connect_socket_list();

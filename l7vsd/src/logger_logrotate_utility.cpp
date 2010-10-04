@@ -1,5 +1,5 @@
 /*!
- * @file  logger_rogrote_utility.cpp
+ * @file  logger_logrotate_utility.cpp
  * @brief logger module implementation class For access log.
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
@@ -58,7 +58,7 @@ using namespace l7vs;
 /*!
  * rotate type check.
  *
- * @param   rotaton string("size" or "date" or "datesize")
+ * @param   rotation string("size" or "date" or "datesize")
  * @return  LOG_ROTATION_TAG val
  */
 LOG_ROTATION_TAG logger_logrotate_utility::check_rotate_type(const std::string &rotation_type)
@@ -73,10 +73,10 @@ LOG_ROTATION_TAG logger_logrotate_utility::check_rotate_type(const std::string &
                 else {
                         std::stringstream   ss;
                         ss << "Invalid Log Rotation Setting : " << rotation_type;
-                        logger_logrotate_utility::loglotation_utility_logic_error(51, ss.str(), __FILE__, __LINE__);
+                        logger_logrotate_utility::logrotation_utility_logic_error(51, ss.str(), __FILE__, __LINE__);
                 }
         } else {
-                logger_logrotate_utility::loglotation_utility_logic_error(52, "Not Exist Log Rotation Setting.", __FILE__, __LINE__);
+                logger_logrotate_utility::logrotation_utility_logic_error(52, "Not Exist Log Rotation Setting.", __FILE__, __LINE__);
         }
 
         return(rotation_value);
@@ -98,20 +98,20 @@ unsigned int logger_logrotate_utility::check_max_backup_index(const std::string 
                 } catch (const boost::bad_lexical_cast &bc) {
                         std::stringstream    ss;
                         ss << "Invalid MaxBackupIndex Value : " << max_backup_index << ".";
-                        logger_logrotate_utility::loglotation_utility_logic_error(53, ss.str(), __FILE__, __LINE__);
+                        logger_logrotate_utility::logrotation_utility_logic_error(53, ss.str(), __FILE__, __LINE__);
                 }
                 if (LOGGER_BACKUP_INDEX_LOWER_LIMIT > max_backup_index_value) {
                         std::stringstream ss;
                         ss << "Max Backup Index must at least " << LOGGER_BACKUP_INDEX_LOWER_LIMIT << ".";
-                        logger_logrotate_utility::loglotation_utility_logic_error(54, ss.str(), __FILE__, __LINE__);
+                        logger_logrotate_utility::logrotation_utility_logic_error(54, ss.str(), __FILE__, __LINE__);
                 }
                 if (LOGGER_BACKUP_INDEX_LIMIT < max_backup_index_value) {
                         std::stringstream ss;
                         ss << "Max Backup Index must at most " << LOGGER_BACKUP_INDEX_LIMIT << ".";
-                        logger_logrotate_utility::loglotation_utility_logic_error(55, ss.str(), __FILE__, __LINE__);
+                        logger_logrotate_utility::logrotation_utility_logic_error(55, ss.str(), __FILE__, __LINE__);
                 }
         } else {
-                logger_logrotate_utility::loglotation_utility_logic_error(56, "Not Exist Log MaxBackupIndex Setting.", __FILE__, __LINE__);
+                logger_logrotate_utility::logrotation_utility_logic_error(56, "Not Exist Log MaxBackupIndex Setting.", __FILE__, __LINE__);
         }
 
         return(max_backup_index_value);
@@ -129,13 +129,13 @@ unsigned long long logger_logrotate_utility::check_max_file_size(const std::stri
         unsigned long long max_file_size_value = 0;
 
         if (max_file_size == "") {
-                logger_logrotate_utility::loglotation_utility_logic_error(57, "Not Exist Log MaxFileSize Setting.", __FILE__, __LINE__);
+                logger_logrotate_utility::logrotation_utility_logic_error(57, "Not Exist Log MaxFileSize Setting.", __FILE__, __LINE__);
         }
 
         std::string size_val;
         int maxFileSizeStr_length = max_file_size.length();
         if (maxFileSizeStr_length <= 0) {
-                logger_logrotate_utility::loglotation_utility_logic_error(58, "Invalid FileSize Value.", __FILE__, __LINE__);
+                logger_logrotate_utility::logrotation_utility_logic_error(58, "Invalid FileSize Value.", __FILE__, __LINE__);
         }
 
         std::string last_str = max_file_size.substr(maxFileSizeStr_length - 1, 1);
@@ -148,28 +148,28 @@ unsigned long long logger_logrotate_utility::check_max_file_size(const std::stri
         try {
                 max_file_size_value = boost::lexical_cast<size_t>(size_val);
         } catch (const boost::bad_lexical_cast &bc) {
-                logger_logrotate_utility::loglotation_utility_logic_error(59, "Invalid FileSize Value.", __FILE__, __LINE__);
+                logger_logrotate_utility::logrotation_utility_logic_error(59, "Invalid FileSize Value.", __FILE__, __LINE__);
         }
 
         if ("K" == last_str) {
                 if ((ULLONG_MAX / 1024) < max_file_size_value) {
-                        logger_logrotate_utility::loglotation_utility_logic_error(60, "Invalid FileSize Value.", __FILE__, __LINE__);
+                        logger_logrotate_utility::logrotation_utility_logic_error(60, "Invalid FileSize Value.", __FILE__, __LINE__);
                 }
                 max_file_size_value = max_file_size_value * 1024;
         } else if ("M" == last_str) {
                 if ((ULLONG_MAX / 1024 / 1024) < max_file_size_value)
-                        logger_logrotate_utility::loglotation_utility_logic_error(61, "Invalid FileSize Value.", __FILE__, __LINE__);
+                        logger_logrotate_utility::logrotation_utility_logic_error(61, "Invalid FileSize Value.", __FILE__, __LINE__);
                 max_file_size_value = max_file_size_value * 1024 * 1024;
         } else if ("G" == last_str) {
                 if ((ULLONG_MAX / 1024 / 1024 / 1024) < max_file_size_value)
-                        logger_logrotate_utility::loglotation_utility_logic_error(62, "Invalid FileSize Value.", __FILE__, __LINE__);
+                        logger_logrotate_utility::logrotation_utility_logic_error(62, "Invalid FileSize Value.", __FILE__, __LINE__);
                 max_file_size_value = max_file_size_value * 1024 * 1024 * 1024;
         }
         if (LOGGER_FILESIZE_LOWER_LIMIT > max_file_size_value) {
                 int limit = LOGGER_FILESIZE_LOWER_LIMIT;
                 std::ostringstream oss;
                 oss << "FileSize must at least " << limit << " bytes.";
-                logger_logrotate_utility::loglotation_utility_logic_error(63, oss.str(), __FILE__, __LINE__);
+                logger_logrotate_utility::logrotation_utility_logic_error(63, oss.str(), __FILE__, __LINE__);
         }
 
 
@@ -193,9 +193,9 @@ LOG_ROTATION_TIMING_TAG logger_logrotate_utility::check_rotate_timing(const std:
                 else if ("week" == rotation_timing) rotation_timing_value = LOG_TIM_WEEK;
                 else if ("date" == rotation_timing) rotation_timing_value = LOG_TIM_DATE;
                 else if ("hour" == rotation_timing) rotation_timing_value = LOG_TIM_HOUR;
-                else logger_logrotate_utility::loglotation_utility_logic_error(64, "Invalid Log RotationTiming Setting.", __FILE__, __LINE__);
+                else logger_logrotate_utility::logrotation_utility_logic_error(64, "Invalid Log RotationTiming Setting.", __FILE__, __LINE__);
         } else {
-                logger_logrotate_utility::loglotation_utility_logic_error(65, "Not Exist Log RotaionTiming Setting.", __FILE__, __LINE__);
+                logger_logrotate_utility::logrotation_utility_logic_error(65, "Not Exist Log RotationTiming Setting.", __FILE__, __LINE__);
         }
 
 
@@ -229,10 +229,10 @@ std::string logger_logrotate_utility::check_rotate_timing_value(const std::strin
                                 try {
                                         month = boost::lexical_cast<int>(monthStr);
                                 } catch (const boost::bad_lexical_cast &bc) {
-                                        logger_logrotate_utility::loglotation_utility_logic_error(66, "Parse Timing Year Error.", __FILE__, __LINE__);
+                                        logger_logrotate_utility::logrotation_utility_logic_error(66, "Parse Timing Year Error.", __FILE__, __LINE__);
                                 }
                                 if (1 > month || month > 12) {
-                                        logger_logrotate_utility::loglotation_utility_logic_error(67, "Parse Timing Year Error.", __FILE__, __LINE__);
+                                        logger_logrotate_utility::logrotation_utility_logic_error(67, "Parse Timing Year Error.", __FILE__, __LINE__);
                                 }
                                 fpos = rpos + 1;
                                 // find date
@@ -242,13 +242,13 @@ std::string logger_logrotate_utility::check_rotate_timing_value(const std::strin
                                         try {
                                                 date = boost::lexical_cast<int>(dateStr);
                                         } catch (const boost::bad_lexical_cast &bc) {
-                                                logger_logrotate_utility::loglotation_utility_logic_error(68, "Parse Timing Year Error.", __FILE__, __LINE__);
+                                                logger_logrotate_utility::logrotation_utility_logic_error(68, "Parse Timing Year Error.", __FILE__, __LINE__);
                                         }
                                 }
-                                if (1 > date || date > 31)  logger_logrotate_utility::loglotation_utility_logic_error(69, "Parse Timing Year Error.", __FILE__, __LINE__);
+                                if (1 > date || date > 31)  logger_logrotate_utility::logrotation_utility_logic_error(69, "Parse Timing Year Error.", __FILE__, __LINE__);
 
                                 int dates[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-                                if (date > dates[month - 1]) logger_logrotate_utility::loglotation_utility_logic_error(70, "Parse Timing Year Error.", __FILE__, __LINE__);
+                                if (date > dates[month - 1]) logger_logrotate_utility::logrotation_utility_logic_error(70, "Parse Timing Year Error.", __FILE__, __LINE__);
 
                                 fpos = rpos + 1;
                                 // find hour
@@ -258,26 +258,26 @@ std::string logger_logrotate_utility::check_rotate_timing_value(const std::strin
                                         try {
                                                 hour = boost::lexical_cast<int>(hourStr);
                                         } catch (const boost::bad_lexical_cast &bc) {
-                                                logger_logrotate_utility::loglotation_utility_logic_error(71, "Parse Timing Year Error.", __FILE__, __LINE__);
+                                                logger_logrotate_utility::logrotation_utility_logic_error(71, "Parse Timing Year Error.", __FILE__, __LINE__);
                                         }
-                                        if (0 > hour || hour > 23) logger_logrotate_utility::loglotation_utility_logic_error(72, "Parse Timing Year Error.", __FILE__, __LINE__);
+                                        if (0 > hour || hour > 23) logger_logrotate_utility::logrotation_utility_logic_error(72, "Parse Timing Year Error.", __FILE__, __LINE__);
 
                                         // minute
                                         std::string minuteStr = ret.substr(rpos + 1);
                                         try {
                                                 minute = boost::lexical_cast<int>(minuteStr);
                                         } catch (const boost::bad_lexical_cast &bc) {
-                                                logger_logrotate_utility::loglotation_utility_logic_error(73, "Parse Timing Year Error.", __FILE__, __LINE__);
+                                                logger_logrotate_utility::logrotation_utility_logic_error(73, "Parse Timing Year Error.", __FILE__, __LINE__);
                                         }
-                                        if (0 > minute || minute > 59) logger_logrotate_utility::loglotation_utility_logic_error(74, "Parse Timing Year Error.", __FILE__, __LINE__);
+                                        if (0 > minute || minute > 59) logger_logrotate_utility::logrotation_utility_logic_error(74, "Parse Timing Year Error.", __FILE__, __LINE__);
                                 } else {
-                                        logger_logrotate_utility::loglotation_utility_logic_error(75, "Parse Timing Year Error.", __FILE__, __LINE__);
+                                        logger_logrotate_utility::logrotation_utility_logic_error(75, "Parse Timing Year Error.", __FILE__, __LINE__);
                                 }
                         } else {
-                                logger_logrotate_utility::loglotation_utility_logic_error(76, "Parse Timing Year Error.", __FILE__, __LINE__);
+                                logger_logrotate_utility::logrotation_utility_logic_error(76, "Parse Timing Year Error.", __FILE__, __LINE__);
                         }
 
-                        // format to internal rotation timing value expresson
+                        // format to internal rotation timing value expression
                         std::ostringstream oss;
                         oss << std::setfill('0') << std::setw(2) << month
                             << std::setfill('0') << std::setw(2) << date
@@ -287,7 +287,7 @@ std::string logger_logrotate_utility::check_rotate_timing_value(const std::strin
                         rotation_timing_value_value = oss.str();
 
                 } else {
-                        logger_logrotate_utility::loglotation_utility_logic_error(77, "Not Exist Log RotaionTiming Year Setting.", __FILE__, __LINE__);
+                        logger_logrotate_utility::logrotation_utility_logic_error(77, "Not Exist Log RotationTiming Year Setting.", __FILE__, __LINE__);
                 }
         }
 
@@ -306,10 +306,10 @@ std::string logger_logrotate_utility::check_rotate_timing_value(const std::strin
                                 try {
                                         date = boost::lexical_cast<int>(dateStr);
                                 } catch (const boost::bad_lexical_cast &bc) {
-                                        logger_logrotate_utility::loglotation_utility_logic_error(78, "Parse Timing Month Error.", __FILE__, __LINE__);
+                                        logger_logrotate_utility::logrotation_utility_logic_error(78, "Parse Timing Month Error.", __FILE__, __LINE__);
                                 }
                                 if (1 > date || date > 31) {
-                                        logger_logrotate_utility::loglotation_utility_logic_error(79, "Parse Timing Month Error.", __FILE__, __LINE__);
+                                        logger_logrotate_utility::logrotation_utility_logic_error(79, "Parse Timing Month Error.", __FILE__, __LINE__);
                                 }
                                 fpos = rpos + 1;
                                 // find hour
@@ -319,29 +319,29 @@ std::string logger_logrotate_utility::check_rotate_timing_value(const std::strin
                                         try {
                                                 hour = boost::lexical_cast<int>(hourStr);
                                         } catch (const boost::bad_lexical_cast &bc) {
-                                                logger_logrotate_utility::loglotation_utility_logic_error(80, "Parse Timing Month Error.", __FILE__, __LINE__);
+                                                logger_logrotate_utility::logrotation_utility_logic_error(80, "Parse Timing Month Error.", __FILE__, __LINE__);
                                         }
                                         if (0 > hour || hour > 23) {
-                                                logger_logrotate_utility::loglotation_utility_logic_error(81, "Parse Timing Month Error.", __FILE__, __LINE__);
+                                                logger_logrotate_utility::logrotation_utility_logic_error(81, "Parse Timing Month Error.", __FILE__, __LINE__);
                                         }
                                         // minute
                                         std::string minuteStr = ret.substr(rpos + 1);
                                         try {
                                                 minute = boost::lexical_cast<int>(minuteStr);
                                         } catch (const boost::bad_lexical_cast &bc) {
-                                                logger_logrotate_utility::loglotation_utility_logic_error(82, "Parse Timing Month Error.", __FILE__, __LINE__);
+                                                logger_logrotate_utility::logrotation_utility_logic_error(82, "Parse Timing Month Error.", __FILE__, __LINE__);
                                         }
                                         if (0 > minute || minute > 59) {
-                                                logger_logrotate_utility::loglotation_utility_logic_error(83, "Parse Timing Month Error.", __FILE__, __LINE__);
+                                                logger_logrotate_utility::logrotation_utility_logic_error(83, "Parse Timing Month Error.", __FILE__, __LINE__);
                                         }
                                 } else {
-                                        logger_logrotate_utility::loglotation_utility_logic_error(84, "Parse Timing Month Error.", __FILE__, __LINE__);
+                                        logger_logrotate_utility::logrotation_utility_logic_error(84, "Parse Timing Month Error.", __FILE__, __LINE__);
                                 }
                         } else {
-                                logger_logrotate_utility::loglotation_utility_logic_error(85, "Parse Timing Month Error.", __FILE__, __LINE__);
+                                logger_logrotate_utility::logrotation_utility_logic_error(85, "Parse Timing Month Error.", __FILE__, __LINE__);
                         }
 
-                        // format to internal rotation timing value expresson
+                        // format to internal rotation timing value expression
                         std::stringstream oss;
                         oss << std::setfill('0') << std::setw(2) << date
                             << std::setfill('0') << std::setw(2) << hour
@@ -350,7 +350,7 @@ std::string logger_logrotate_utility::check_rotate_timing_value(const std::strin
                         rotation_timing_value_value = oss.str();
 
                 } else {
-                        logger_logrotate_utility::loglotation_utility_logic_error(86, "Not Exist Log RotaionTiming Month Setting.", __FILE__, __LINE__);
+                        logger_logrotate_utility::logrotation_utility_logic_error(86, "Not Exist Log RotationTiming Month Setting.", __FILE__, __LINE__);
                 }
         }
 
@@ -374,7 +374,7 @@ std::string logger_logrotate_utility::check_rotate_timing_value(const std::strin
                                 else if ("fri" == weekStr) week = 5;
                                 else if ("sat" == weekStr) week = 6;
                                 else {
-                                        logger_logrotate_utility::loglotation_utility_logic_error(87, "Parse Timing Week Error.", __FILE__, __LINE__);
+                                        logger_logrotate_utility::logrotation_utility_logic_error(87, "Parse Timing Week Error.", __FILE__, __LINE__);
                                 }
                                 fpos = rpos + 1;
                                 // find hour
@@ -384,29 +384,29 @@ std::string logger_logrotate_utility::check_rotate_timing_value(const std::strin
                                         try {
                                                 hour = boost::lexical_cast<int>(hourStr);
                                         } catch (const boost::bad_lexical_cast &bc) {
-                                                logger_logrotate_utility::loglotation_utility_logic_error(88, "Parse Timing Week Error.", __FILE__, __LINE__);
+                                                logger_logrotate_utility::logrotation_utility_logic_error(88, "Parse Timing Week Error.", __FILE__, __LINE__);
                                         }
                                         if (0 > hour || hour > 23) {
-                                                logger_logrotate_utility::loglotation_utility_logic_error(89, "Parse Timing Week Error.", __FILE__, __LINE__);
+                                                logger_logrotate_utility::logrotation_utility_logic_error(89, "Parse Timing Week Error.", __FILE__, __LINE__);
                                         }
                                         // minute
                                         std::string minuteStr = ret.substr(rpos + 1);
                                         try {
                                                 minute = boost::lexical_cast<int>(minuteStr);
                                         } catch (const boost::bad_lexical_cast &bc) {
-                                                logger_logrotate_utility::loglotation_utility_logic_error(90, "Parse Timing Week Error.", __FILE__, __LINE__);
+                                                logger_logrotate_utility::logrotation_utility_logic_error(90, "Parse Timing Week Error.", __FILE__, __LINE__);
                                         }
                                         if (0 > minute || minute > 59) {
-                                                logger_logrotate_utility::loglotation_utility_logic_error(91, "Parse Timing Week Error.", __FILE__, __LINE__);
+                                                logger_logrotate_utility::logrotation_utility_logic_error(91, "Parse Timing Week Error.", __FILE__, __LINE__);
                                         }
                                 } else {
-                                        logger_logrotate_utility::loglotation_utility_logic_error(92, "Parse Timing Week Error.", __FILE__, __LINE__);
+                                        logger_logrotate_utility::logrotation_utility_logic_error(92, "Parse Timing Week Error.", __FILE__, __LINE__);
                                 }
                         } else {
-                                logger_logrotate_utility::loglotation_utility_logic_error(93, "Parse Timing Week Error.", __FILE__, __LINE__);
+                                logger_logrotate_utility::logrotation_utility_logic_error(93, "Parse Timing Week Error.", __FILE__, __LINE__);
                         }
 
-                        // format to internal rotation timing value expresson
+                        // format to internal rotation timing value expression
                         std::ostringstream oss;
                         oss << std::setfill('0') << std::setw(1) << week
                             << std::setfill('0') << std::setw(2) << hour
@@ -414,7 +414,7 @@ std::string logger_logrotate_utility::check_rotate_timing_value(const std::strin
 
                         rotation_timing_value_value = oss.str();
                 } else {
-                        logger_logrotate_utility::loglotation_utility_logic_error(94, "Not Exist Log RotaionTiming Week Setting.", __FILE__, __LINE__);
+                        logger_logrotate_utility::logrotation_utility_logic_error(94, "Not Exist Log RotationTiming Week Setting.", __FILE__, __LINE__);
                 }
         }
 
@@ -431,33 +431,33 @@ std::string logger_logrotate_utility::check_rotate_timing_value(const std::strin
                                 try {
                                         hour = boost::lexical_cast<int>(hourStr);
                                 } catch (const boost::bad_lexical_cast &bc) {
-                                        logger_logrotate_utility::loglotation_utility_logic_error(95, "Parse Timing Date Error.", __FILE__, __LINE__);
+                                        logger_logrotate_utility::logrotation_utility_logic_error(95, "Parse Timing Date Error.", __FILE__, __LINE__);
                                 }
                                 if (0 > hour || hour > 23) {
-                                        logger_logrotate_utility::loglotation_utility_logic_error(96, "Parse Timing Date Error.", __FILE__, __LINE__);
+                                        logger_logrotate_utility::logrotation_utility_logic_error(96, "Parse Timing Date Error.", __FILE__, __LINE__);
                                 }
                                 // minute
                                 std::string minuteStr = ret.substr(rpos + 1);
                                 try {
                                         minute = boost::lexical_cast<int>(minuteStr);
                                 } catch (const boost::bad_lexical_cast &bc) {
-                                        logger_logrotate_utility::loglotation_utility_logic_error(97, "Parse Timing Date Error.", __FILE__, __LINE__);
+                                        logger_logrotate_utility::logrotation_utility_logic_error(97, "Parse Timing Date Error.", __FILE__, __LINE__);
                                 }
                                 if (0 > minute || minute > 59) {
-                                        logger_logrotate_utility::loglotation_utility_logic_error(98, "Parse Timing Date Error.", __FILE__, __LINE__);
+                                        logger_logrotate_utility::logrotation_utility_logic_error(98, "Parse Timing Date Error.", __FILE__, __LINE__);
                                 }
                         } else {
-                                logger_logrotate_utility::loglotation_utility_logic_error(99, "Parse Timing Date Error.", __FILE__, __LINE__);
+                                logger_logrotate_utility::logrotation_utility_logic_error(99, "Parse Timing Date Error.", __FILE__, __LINE__);
                         }
 
-                        // format to internal rotation timing value expresson
+                        // format to internal rotation timing value expression
                         std::ostringstream oss;
                         oss << std::setfill('0') << std::setw(2) << hour
                             << std::setfill('0') << std::setw(2) << minute;
 
                         rotation_timing_value_value = oss.str();
                 } else {
-                        logger_logrotate_utility::loglotation_utility_logic_error(100, "Not Exist Log RotaionTiming Date Setting.", __FILE__, __LINE__);
+                        logger_logrotate_utility::logrotation_utility_logic_error(100, "Not Exist Log RotationTiming Date Setting.", __FILE__, __LINE__);
                 }
         }
 
@@ -468,19 +468,19 @@ std::string logger_logrotate_utility::check_rotate_timing_value(const std::strin
                         try {
                                 minute = boost::lexical_cast<int>(ret);
                         } catch (const boost::bad_lexical_cast &bc) {
-                                logger_logrotate_utility::loglotation_utility_logic_error(101, "Parse Timing Hour Error.", __FILE__, __LINE__);
+                                logger_logrotate_utility::logrotation_utility_logic_error(101, "Parse Timing Hour Error.", __FILE__, __LINE__);
                         }
                         if (0 > minute || minute > 59) {
-                                logger_logrotate_utility::loglotation_utility_logic_error(102, "Parse Timing Hour Error.", __FILE__, __LINE__);
+                                logger_logrotate_utility::logrotation_utility_logic_error(102, "Parse Timing Hour Error.", __FILE__, __LINE__);
                         }
 
-                        // format to internal rotation timing value expresson
+                        // format to internal rotation timing value expression
                         std::ostringstream oss;
                         oss << std::setfill('0') << std::setw(2) << minute;
 
                         rotation_timing_value_value = oss.str();
                 } else {
-                        logger_logrotate_utility::loglotation_utility_logic_error(103, "Not Exist Log RotaionTiming Hour Setting.", __FILE__, __LINE__);
+                        logger_logrotate_utility::logrotation_utility_logic_error(103, "Not Exist Log RotationTiming Hour Setting.", __FILE__, __LINE__);
                 }
         }
 
@@ -510,7 +510,7 @@ void logger_logrotate_utility::set_appender(const appender_property &log_propert
 
                 switch (log_property.rotation_value) {
                 case LOG_ROT_SIZE: {
-                        // create FixedWindcd owRollingPolicy
+                        // create FixedWindowRollingPolicy
                         log4cxx::rolling::FixedWindowRollingPolicyPtr fixedRollingPolicy =
                                 new log4cxx::rolling::FixedWindowRollingPolicy();
 
@@ -552,7 +552,7 @@ void logger_logrotate_utility::set_appender(const appender_property &log_propert
                         } catch (const std::exception &e) {
                                 std::stringstream    buf;
                                 buf << "File Create Failed:" << log_property.log_filename_value;
-                                logger_logrotate_utility::loglotation_utility_logic_error(104, buf.str(), __FILE__, __LINE__);
+                                logger_logrotate_utility::logrotation_utility_logic_error(104, buf.str(), __FILE__, __LINE__);
                         }
 
                         // activate appender options
@@ -602,7 +602,7 @@ void logger_logrotate_utility::set_appender(const appender_property &log_propert
                         } catch (const std::exception &e) {
                                 std::stringstream    buf;
                                 buf << "File Create Failed:" << log_property.log_filename_value;
-                                logger_logrotate_utility::loglotation_utility_logic_error(105, buf.str(), __FILE__, __LINE__);
+                                logger_logrotate_utility::logrotation_utility_logic_error(105, buf.str(), __FILE__, __LINE__);
                         }
 
                         // activate appender options
@@ -655,7 +655,7 @@ void logger_logrotate_utility::set_appender(const appender_property &log_propert
                         } catch (const std::exception &e) {
                                 std::stringstream    buf;
                                 buf << "File Create Failed:" << log_property.log_filename_value;
-                                logger_logrotate_utility::loglotation_utility_logic_error(106, buf.str(), __FILE__, __LINE__);
+                                logger_logrotate_utility::logrotation_utility_logic_error(106, buf.str(), __FILE__, __LINE__);
                         }
 
                         // activate appender options
@@ -670,7 +670,7 @@ void logger_logrotate_utility::set_appender(const appender_property &log_propert
 
                 log4cxx::LoggerPtr cat_logger = log4cxx::Logger::getLogger(log_category);
                 if (0 == cat_logger) {
-                        logger_logrotate_utility::loglotation_utility_logic_error(107, "getLogger Failed.", __FILE__, __LINE__);
+                        logger_logrotate_utility::logrotation_utility_logic_error(107, "getLogger Failed.", __FILE__, __LINE__);
                 }
 
                 AppenderPtr appender_pointer = cat_logger->getAppender(log_category);
@@ -687,7 +687,7 @@ void logger_logrotate_utility::set_appender(const appender_property &log_propert
         } catch (const std::exception &e) {
                 std::ostringstream oss;
                 oss <<  "Logger Reload Config Failed : " << e.what();
-                logger_logrotate_utility::loglotation_utility_logic_error(108, oss.str(), __FILE__, __LINE__);
+                logger_logrotate_utility::logrotation_utility_logic_error(108, oss.str(), __FILE__, __LINE__);
 
         }
 
@@ -698,9 +698,9 @@ void logger_logrotate_utility::set_appender(const appender_property &log_propert
  *
  * @param   check object.
  * @param   appender property
- * @return  false faild
+ * @return  false failed
  */
-bool logger_logrotate_utility::acccess_log_LogrotateParamCheck(
+bool logger_logrotate_utility::access_log_LogrotateParamCheck(
         accesslog_rotate_map_type &rotatedata,
         appender_property &access_log_property)
 {
@@ -724,7 +724,7 @@ bool logger_logrotate_utility::acccess_log_LogrotateParamCheck(
                         } else if (itr->first == ACCESS_LOG_ROTATION_TIMING_VALUE) {
                                 rotation_timing_value_key = itr->second;
                         } else {
-                                logger_logrotate_utility::loglotation_utility_logic_error(109, "access log rotation invalid argument.", __FILE__, __LINE__);
+                                logger_logrotate_utility::logrotation_utility_logic_error(109, "access log rotation invalid argument.", __FILE__, __LINE__);
                         }
                 }
 
@@ -759,7 +759,7 @@ bool logger_logrotate_utility::acccess_log_LogrotateParamCheck(
  * @param   line no
  * @return  void
  */
-void logger_logrotate_utility::loglotation_utility_logic_error(const unsigned int logno, const std::string &str, const char *file , const unsigned int line)
+void logger_logrotate_utility::logrotation_utility_logic_error(const unsigned int logno, const std::string &str, const char *file , const unsigned int line)
 {
 #if    defined(LOGGER_PROCESS_VSD)
         Logger::putLogError(l7vs::LOG_CAT_L7VSD_LOGGER, logno, str, file, line);

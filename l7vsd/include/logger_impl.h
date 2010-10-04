@@ -93,7 +93,7 @@ public:
         //! returns current instance.
         static LoggerImpl &getInstance();
 
-        //! initialze function
+        //! initialize function
         virtual bool init();
 
         //! Configuration function
@@ -176,7 +176,7 @@ public:
         /*!
          * output fatal log.
          *
-         * @param   category that logging matter occured
+         * @param   category that logging matter occurred
          * @param   log message id
          * @param   log message
          * @param   current file
@@ -256,7 +256,7 @@ public:
         /*!
          * output error log.
          *
-         * @param   category that logging matter occured
+         * @param   category that logging matter occurred
          * @param   log message id
          * @param   log message
          * @param   current file
@@ -335,7 +335,7 @@ public:
         /*!
          * output warn log.
          *
-         * @param   category that logging matter occured
+         * @param   category that logging matter occurred
          * @param   log message id
          * @param   log message
          * @param   current file
@@ -414,7 +414,7 @@ public:
         /*!
          * output info log.
          *
-         * @param   category that logging matter occured
+         * @param   category that logging matter occurred
          * @param   log message id
          * @param   log message
          * @param   current file
@@ -494,7 +494,7 @@ public:
         /*!
          * output debug log.
          *
-         * @param   category that logging matter occured
+         * @param   category that logging matter occurred
          * @param   log message id
          * @param   log message
          * @param   current file
@@ -614,18 +614,18 @@ protected:
         //! default constructor initialize member variables.
         LoggerImpl();
 
-        //! cpoy constructor disable
+        //! copy constructor disable
         LoggerImpl(const LoggerImpl &);
 
         //! operator= disable
         LoggerImpl &operator=(const LoggerImpl &);
 
-        //! LOG_LEVEL_TAG to log4cxx::LevelPtr transrator
+        //! LOG_LEVEL_TAG to log4cxx::LevelPtr translator
         virtual inline const log4cxx::LevelPtr toLevel(LOG_LEVEL_TAG level)    {
                 return log4cxx::Level::toLevel(levelTable[level]);
         }
 
-        //! if error occured, switch appenders to syslogappender and fileappender(/dev/console)
+        //! if error occurred, switch appenders to syslogappender and fileappender(/dev/console)
         virtual void errorConf(unsigned int messageId,
                                const std::string &errorMessage,
                                const char *file,
@@ -634,7 +634,7 @@ protected:
         virtual void logic_error(const unsigned int, const std::string &, const char *, const unsigned int);
 
         /*
-            //! log4cxx::LevelPtr to LOG_LEVEL_TAG transrator
+            //! log4cxx::LevelPtr to LOG_LEVEL_TAG translator
             virtual inline LOG_LEVEL_TAG toLevelTag(const log4cxx::LevelPtr level){
                 int levelInt = level->toInt();
                 switch (levelInt) {
@@ -667,7 +667,7 @@ protected:
         //! category - loglevel hash map
         category_level_map_type    category_level_map;
         category_level_read_map_type category_level_read_map;
-        //! category string -> logcateogry hash map
+        //! category string -> logcategory hash map
         name_category_map_type    name_category_map;
         //! log_category -> category string hash map
         category_name_map_type    category_name_map;

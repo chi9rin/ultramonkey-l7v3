@@ -51,7 +51,7 @@ DEBUG_FLAG=""
 
 # Functions
 usage (){
-	echo "usage : umtest [DIR|TESTSCRIPT]"
+	echo "usage : $0 [DIR|TEST-SCRIPT]"
 }
 
 check_option (){

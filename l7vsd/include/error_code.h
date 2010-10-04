@@ -1,6 +1,6 @@
 /*!
  *    @file    error_code.h
- *    @brief    error code and error messege impliment class
+ *    @brief    error code and error message implement class
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.
@@ -35,11 +35,11 @@ namespace l7vs
 class    error_code
 {
 protected:
-        bool        flag;    //!<    errorcode flag
-        std::string    msg;    //!<    errorcode message
+        bool        flag;    //!<    error code flag
+        std::string    msg;    //!<    error code message
 public:
-        error_code() : flag(false) {}   //!< constractor
-        //! setter constractor
+        error_code() : flag(false) {}   //!< constructor
+        //! setter constructor
         //! @param[in]    flags
         //! @param[in]    error message
         error_code(const bool inflg, const std::string &instr) {
@@ -47,18 +47,18 @@ public:
                 msg = instr;
         }
         bool    operator==(const bool in)const {
-                return (flag == in);        //!< operator== orverload
+                return (flag == in);        //!< operator== overload
         }
         bool    operator!=(const bool in)const {
-                return (flag != in);        //!< operator!= orverload
+                return (flag != in);        //!< operator!= overload
         }
         bool    operator!() const {
-                return !flag;        //!< operator! orverload
+                return !flag;        //!< operator! overload
         }
         typedef void (*unspecified_bool_type)();    //!< if return function
-        static void unspecified_bool_true() {}        //!< if true orverload function
+        static void unspecified_bool_true() {}        //!< if true overload function
         operator unspecified_bool_type() const {
-                return flag == 0 ? 0 : unspecified_bool_true;        //!< if() orverload
+                return flag == 0 ? 0 : unspecified_bool_true;        //!< if() overload
         }
         const std::string    &get_message() const {
                 return msg;        //!< message getter

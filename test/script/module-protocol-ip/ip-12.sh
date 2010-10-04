@@ -36,7 +36,7 @@ usleep 100000
 $L7VSADM -A -t 127.0.0.1:40001 -m ip --timeout 10
 if [ $? -ne 0 ]
 then
-	echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m ip --timout 10"
+	echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m ip --timeout 10"
         exit 1
 fi
 

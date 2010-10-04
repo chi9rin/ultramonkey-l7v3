@@ -38,7 +38,7 @@ namespace l7vs
 //!    @class    schedule_module_control
 //! @brief    schedule module control class is load schedule module from shared object file.
 //! @brief    many virtual service class used schedule module instance.
-//! @brief    but, shared object load is once. and unload when vitual service refarence count is zero.
+//! @brief    but, shared object load is once. and unload when vitual service reference count is zero.
 class    schedule_module_control : public module_control_base
 {
 public:
@@ -56,10 +56,10 @@ public:
         //! @brief    schedule module information structure.
         struct    schedule_module_info {
                 void                 *handle;                //!< dlopen handle
-                unsigned int        ref_count;            //!< refarence count
+                unsigned int        ref_count;            //!< reference count
                 create_func_type    create_func;        //!< create function object
                 destroy_func_type    destroy_func;        //!< destroy function object
-                schedule_module_info() : ref_count(0) {}    //!< constractor
+                schedule_module_info() : ref_count(0) {}    //!< constructor
         };
 
         //! name module map type typedef

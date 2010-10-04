@@ -31,7 +31,7 @@ public:
         typedef    Hash    hasher_type;
         hasher_type        hasher;
 
-        // constractor
+        // constructor
         lockfree_hashmap(size_t num = 65535, Hash inhasher = boost::hash< const Tkey * >()) :
                 element_num(num) {
                 hashmap = new container[element_num];
@@ -39,7 +39,7 @@ public:
                 __sync_lock_test_and_set(&counter, 0);
         }
 
-        // destractor
+        // destructor
         virtual    ~lockfree_hashmap() {
                 delete [] hashmap;
         }
@@ -79,7 +79,7 @@ public:
                 }
         }
 
-        //eracer
+        //eraser
         void    erase(const Tkey    *key) {
                 size_t    hashvalue = get_hashvalue(key);
                 for (;;) {
@@ -102,7 +102,7 @@ public:
                 __sync_lock_test_and_set(&counter, 0);
         }
 
-        //poper
+        //popper
         void    pop(Tkey*& key, Tvalue*& value) {
                 for (size_t i = 0 ; likely(i < element_num) ; ++i) {
                         if (unlikely(hashmap[i].key)) {
@@ -126,7 +126,7 @@ public:
                 return !counter;
         }
 
-        // functor
+        // functor XXX
         void    do_all(boost::function< void(Tvalue *) >    func) {
                 for (size_t    i = 0; likely(i < element_num) ; ++i) {
                         if (unlikely(hashmap[i].key)) {
@@ -140,7 +140,7 @@ private:
         size_t    get_hashvalue(const Tkey *key) {
                 return hasher(key) % element_num;
         }
-        //reget array number case of collision(method chain)
+        //re-get array number case of collision(method chain)
         size_t    get_rehashvalue(size_t &key) {
                 return ((key + 1) % element_num);
         }

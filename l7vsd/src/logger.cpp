@@ -44,8 +44,8 @@ l7vs::Logger::Logger() :
         }
 }
 
-//! log output constractor
-//! scoped log output( Logger destractor output log)
+//! log output constructor
+//! scoped log output( Logger destructor output log)
 //! @param[in]    Log output category tag
 //! @param[in]    log id
 //! @param[in]    log message
@@ -135,7 +135,7 @@ bool l7vs::Logger::setLogLevelAll(LOG_LEVEL_TAG level)
 /*!
  * output fatal log.
  * this is only wrapper to implement method.
- * @param   category that logging matter occured
+ * @param   category that logging matter occurred
  * @param   log message id
  * @param   log message
  * @param   current file
@@ -149,9 +149,9 @@ void l7vs::Logger::putLogFatal(LOG_CATEGORY_TAG cat, const unsigned int message_
 }
 
 /*!
- * output errorl log.
+ * output error log.
  * this is only wrapper to implement method.
- * @param   category that logging matter occured
+ * @param   category that logging matter occurred
  * @param   log message id
  * @param   log message
  * @param   current file
@@ -167,7 +167,7 @@ void l7vs::Logger::putLogError(LOG_CATEGORY_TAG cat, const unsigned int message_
 /*!
  * output warn log.
  * this is only wrapper to implement method.
- * @param   category that logging matter occured
+ * @param   category that logging matter occurred
  * @param   log message id
  * @param   log message
  * @param   current file
@@ -183,7 +183,7 @@ void l7vs::Logger::putLogWarn(LOG_CATEGORY_TAG cat, const unsigned int message_i
 /*!
  * output info log.
  * this is only wrapper to implement method.
- * @param   category that logging matter occured
+ * @param   category that logging matter occurred
  * @param   log message id
  * @param   log message
  * @param   current file
@@ -199,7 +199,7 @@ void l7vs::Logger::putLogInfo(LOG_CATEGORY_TAG cat, const unsigned int message_i
 /*!
  * output debug log.
  * this is only wrapper to implement method.
- * @param   category that logging matter occured
+ * @param   category that logging matter occurred
  * @param   log message id
  * @param   log message
  * @param   current file

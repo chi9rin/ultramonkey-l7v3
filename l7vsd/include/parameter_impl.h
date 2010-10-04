@@ -1,6 +1,6 @@
 /*!
- * @file  paramter_impl.h
- * @brief ultramonke-l7 parameter impliment class.
+ * @file  parameter_impl.h
+ * @brief ultramonkey-l7 parameter implement class.
  *
  * L7VSD: Linux Virtual Server for Layer7 Load Balancing
  * Copyright (C) 2009  NTT COMWARE Corporation.
@@ -50,15 +50,15 @@ protected:
         boost::mutex                            create_mutex;
         //! read / write mutex
         boost::mutex                            param_mutex;
-        //! componenttag to section name map
+        //! component tag to section name map
         std::map< PARAMETER_COMPONENT_TAG, std::string >
         tag_section_table_map;
-        //! constractor
+        //! constructor
         ParameterImpl() {}
-        //! destractor
+        //! destructor
         ~ParameterImpl() {}
 public:
-        //! instansgetter
+        //! instance getter
         //! @return instance
         static ParameterImpl &get_instance() {
                 static ParameterImpl instance;
@@ -67,27 +67,27 @@ public:
 
         //! initialize
         //! @return true success
-        //! @return false failer
+        //! @return false fail
         bool init();
 
         //! initialize(file designation)
         //! @param[in]    component tag
         //! @param[in]    file name
         //! @return true success
-        //! @return false failer
+        //! @return false fail
         bool init(const PARAMETER_COMPONENT_TAG, const std::string &);
 
         //! target component read
         //! @param[in]    component tag
         //! @param[in]    file name
-        //! @return false failer
+        //! @return false fail
         //! @return true success
         bool    read_file(const PARAMETER_COMPONENT_TAG, const std::string &);
 
         //! int value getter
         //! @param[in]    component tag
-        //! @param[in]    keystring
-        //! @param[out]   errorcode
+        //! @param[in]    key string
+        //! @param[out]   error code
         //! @param[in]    file name
         //! @return int value
         int get_int(const PARAMETER_COMPONENT_TAG,
@@ -97,8 +97,8 @@ public:
 
         //! string value getter
         //! @param[in]    component tag
-        //! @param[in]    keystring
-        //! @param[out]   errorcode
+        //! @param[in]    key string
+        //! @param[out]   error code
         //! @param[in]    file name
         //! @return string value
         std::string get_string(const PARAMETER_COMPONENT_TAG,
@@ -108,9 +108,9 @@ public:
 
         //! multistring value getter
         //! @param[in]    component tag
-        //! @param[in]    keystring
+        //! @param[in]    key string
         //! @param[inout] string vector
-        //! @param[out]   errorcode
+        //! @param[out]   error code
         //! @param[in]    file name
         //! @return       void
         void get_multistring(const PARAMETER_COMPONENT_TAG,

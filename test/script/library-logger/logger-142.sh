@@ -3,7 +3,7 @@
 # set config file
 cp materials/logger-142-l7vs.cf ${L7VSD_CONF_DIR}/l7vs.cf
 
-# set dumy log file
+# set dummy log file
 dd if=/dev/zero of=${L7VS_LOG_DIR}/l7vs-access.log bs=1024 count=63
 dd if=/dev/zero of=${L7VS_LOG_DIR}/l7vs-access.log.1 bs=1024 count=63
 dd if=/dev/zero of=${L7VS_LOG_DIR}/l7vs-access.log.2 bs=1024 count=63

@@ -271,7 +271,7 @@ tcp_session::tcp_session(
         add_down_thread_vs_message_func.second = boost::bind(&tcp_session::down_thread_exit, this, _1);
         virtual_service_message_down_thread_function_map.insert(add_down_thread_vs_message_func);
 
-        // epoll impliment
+        // epoll implement
         up_client_epollfd = epoll_create(EVENT_NUM);
         up_realserver_epollfd = epoll_create(EVENT_NUM);
         up_sorryserver_epollfd = epoll_create(EVENT_NUM);
@@ -885,7 +885,7 @@ void tcp_session::up_thread_run()
                 }
         }
         if (likely(!exit_flag)) {
-                // set client socket options(recieve buffer size)
+                // set client socket options(receive buffer size)
                 if (upstream_buffer_size > 0) {
                         boost::asio::socket_base::receive_buffer_size opt(upstream_buffer_size);
 
@@ -898,7 +898,7 @@ void tcp_session::up_thread_run()
                                 // cannot set socket option
                                 std::stringstream buf;
                                 buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                                buf << "cannot set client socket recieve buffer size: ";
+                                buf << "cannot set client socket receive buffer size: ";
                                 buf << ec.message();
                                 Logger::putLogError(LOG_CAT_L7VSD_SESSION, 12, buf.str(), __FILE__, __LINE__);
                                 {
@@ -1180,7 +1180,7 @@ void tcp_session::down_thread_run()
 
 }
 
-//! endpoint data to string infomation
+//! endpoint data to string information
 //! @param[in]        endpoint is target endpoint object
 std::string tcp_session::endpoint_to_string(
         const endpoint &target_endpoint)
@@ -1208,7 +1208,7 @@ std::string tcp_session::endpoint_to_string(
 }
 
 //! up thread accept client side
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_client_accept(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -1233,7 +1233,7 @@ void tcp_session::up_thread_client_accept(const TCP_PROCESS_TYPE_TAG process_typ
                 } else {
                         if (ssl_handshake_timer_flag == false) {
                                 // set handshake timer
-                                //regist handshake timer event handler
+                                //register handshake timer event handler
                                 ssl_handshake_timer.reset(new boost::asio::deadline_timer(io));
                                 ssl_handshake_timer->expires_from_now(boost::posix_time::seconds(ssl_handshake_time_out));
                                 ssl_handshake_timer->async_wait(boost::bind(&tcp_session::handle_ssl_handshake_timer,
@@ -1295,7 +1295,7 @@ void tcp_session::up_thread_client_accept(const TCP_PROCESS_TYPE_TAG process_typ
 }
 
 //! up thread raise module event of handle_accept and do handshake
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_client_accept_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -1367,7 +1367,7 @@ void tcp_session::handle_ssl_handshake_timer(const boost::system::error_code &er
 }
 
 //! up thread receive client side and raise module event of handle_client_recv
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_client_receive(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -1397,7 +1397,7 @@ void tcp_session::up_thread_client_receive(const TCP_PROCESS_TYPE_TAG process_ty
         event.data.fd = !ssl_flag ? client_socket.get_socket().native()
                         : client_ssl_socket.get_socket().lowest_layer().native();
 
-        // epoll wailt codes
+        // epoll wait codes
         if (is_epoll_edge_trigger) {
                 event.events = EPOLLIN | EPOLLHUP | EPOLLET;
         } else {
@@ -1477,7 +1477,7 @@ void tcp_session::up_thread_client_receive(const TCP_PROCESS_TYPE_TAG process_ty
                 if (recv_size > 0) {
                         //----Debug log----------------------------------------------------------------------
                         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                                endpoint client_endpoint; // XXX redifined???
+                                endpoint client_endpoint; // XXX redefined???
                                 client_endpoint = !ssl_flag ? client_socket.get_socket().lowest_layer().remote_endpoint(ec)
                                                   : client_ssl_socket.get_socket().lowest_layer().remote_endpoint(ec);
                                 boost::format formatter("Thread ID[%d] up_thread_client_receive receive data size[%d] from [%d]");
@@ -1491,7 +1491,7 @@ void tcp_session::up_thread_client_receive(const TCP_PROCESS_TYPE_TAG process_ty
                         std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
                         if (unlikely(func_type == up_thread_module_event_map.end())) {
                                 //Error unknown protocol_module_base::EVENT_TAG return
-                                boost::format formatter("Thread ID[%d] protocol_module returnd illegal EVENT_TAG: %d");
+                                boost::format formatter("Thread ID[%d] protocol_module returned illegal EVENT_TAG: %d");
                                 formatter % boost::this_thread::get_id() % module_event;
                                 Logger::putLogError(LOG_CAT_L7VSD_SESSION, 20, formatter.str(), __FILE__, __LINE__);
                                 up_thread_exit(process_type);
@@ -1525,7 +1525,7 @@ void tcp_session::up_thread_client_receive(const TCP_PROCESS_TYPE_TAG process_ty
         }
 }
 //! up thread raise client respond send event message for up and down thread
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_client_respond(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -1552,7 +1552,7 @@ void tcp_session::up_thread_client_respond(const TCP_PROCESS_TYPE_TAG process_ty
         }
 }
 //! up thread raise module event of handle_response_send_inform
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_client_respond_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -1577,7 +1577,7 @@ void tcp_session::up_thread_client_respond_event(const TCP_PROCESS_TYPE_TAG proc
         }
 }
 //! up thread close client socket and raise client disconnect event message for up and down thread
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_client_disconnect(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -1602,7 +1602,7 @@ void tcp_session::up_thread_client_disconnect(const TCP_PROCESS_TYPE_TAG process
                 while (!down_thread_message_que.push(down_msg)) {}
         }
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC_OUT up_thread_client_disconnect up_func[%s] donw_func[%s]");
+                boost::format formatter("Thread ID[%d] FUNC_OUT up_thread_client_disconnect up_func[%s] down_func[%s]");
                 formatter % boost::this_thread::get_id()
                 % func_tag_to_string(UP_FUNC_CLIENT_DISCONNECT_EVENT)
                 % func_tag_to_string(DOWN_FUNC_CLIENT_DISCONNECT_EVENT);
@@ -1610,7 +1610,7 @@ void tcp_session::up_thread_client_disconnect(const TCP_PROCESS_TYPE_TAG process
         }
 }
 //! up thread raise module event of handle_client_disconnect
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_client_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -1634,7 +1634,7 @@ void tcp_session::up_thread_client_disconnect_event(const TCP_PROCESS_TYPE_TAG p
         }
 }
 //! up thread send realserver and raise module event of handle_client_recv
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_realserver_send(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -1769,7 +1769,7 @@ void tcp_session::up_thread_realserver_send(const TCP_PROCESS_TYPE_TAG process_t
 }
 
 //! up thread raise module event of handle_realserver_select
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_realserver_get_destination_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -1807,7 +1807,7 @@ void tcp_session::up_thread_realserver_get_destination_event(const TCP_PROCESS_T
         }
 }
 //! up thread connect realserver
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_realserver_connect(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -1905,7 +1905,7 @@ out_tproxy:
                         }
                         parent_service.connection_active(server_endpoint);
                         if (unlikely(!new_socket->set_non_blocking_mode(ec))) {
-                                // socket set nonblocking mode error
+                                // socket set non-blocking mode error
                                 std::stringstream buf;
                                 buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
                                 buf << "set non blocking socket error: " << ec.message();
@@ -1914,15 +1914,15 @@ out_tproxy:
                                 return;
                         }
 
-                        //set realserver_socket options(recieve buffer size)
+                        //set realserver_socket options(receive buffer size)
                         if (downstream_buffer_size > 0) {
                                 boost::asio::socket_base::receive_buffer_size opt1(downstream_buffer_size);
                                 new_socket->get_socket().set_option(opt1, ec);
                                 if (unlikely(ec)) {
-                                        // socket set nonblocking mode error
+                                        // socket set non-blocking mode error
                                         std::stringstream buf;
                                         buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                                        buf << "realserver socket recieve buffer size error: " << ec.message();
+                                        buf << "realserver socket receive buffer size error: " << ec.message();
                                         Logger::putLogError(LOG_CAT_L7VSD_SESSION, 35, buf.str(), __FILE__, __LINE__);
                                         up_thread_exit(process_type);
                                         return;
@@ -1933,7 +1933,7 @@ out_tproxy:
                                 boost::asio::socket_base::send_buffer_size opt2(upstream_buffer_size);
                                 new_socket->get_socket().set_option(opt2, ec);
                                 if (unlikely(ec)) {
-                                        // socket set nonblocking mode error
+                                        // socket set non-blocking mode error
                                         std::stringstream buf;
                                         buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
                                         buf << "realserver socket send buffer size error: " << ec.message();
@@ -1971,7 +1971,7 @@ out_tproxy:
         }
 }
 //! up thread raise module event of handle_realserver_connect
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_realserver_connect_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -1997,7 +1997,7 @@ void tcp_session::up_thread_realserver_connect_event(const TCP_PROCESS_TYPE_TAG 
         }
 }
 //! up thread raise module event of handle_realserver_connection_fail
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_realserver_connection_fail_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2018,7 +2018,7 @@ void tcp_session::up_thread_realserver_connection_fail_event(const TCP_PROCESS_T
         }
 }
 //! up thread close realserver socket and raise realserver disconnect event message for up and down thread
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_realserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2052,7 +2052,7 @@ void tcp_session::up_thread_realserver_disconnect(const TCP_PROCESS_TYPE_TAG pro
         }
 }
 //! up thread raise module event of handle_client_disconnect
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_realserver_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2080,7 +2080,7 @@ void tcp_session::up_thread_realserver_disconnect_event(const TCP_PROCESS_TYPE_T
 }
 
 //! up thread close all realserver socket and raise module event of handle_realserver_disconnect
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_all_realserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2138,7 +2138,7 @@ void tcp_session::up_thread_all_realserver_disconnect(const TCP_PROCESS_TYPE_TAG
         }
 }
 //! up thread send sorryserver and raise module event of handle_sorryserver_send
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_sorryserver_send(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2249,7 +2249,7 @@ void tcp_session::up_thread_sorryserver_send(const TCP_PROCESS_TYPE_TAG process_
                                         //Error unknown protocol_module_base::EVENT_TAG return
                                         std::stringstream buf;
                                         buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                                        buf << "protocol_module returnd illegal EVENT_TAG: " << module_event;
+                                        buf << "protocol_module returned illegal EVENT_TAG: " << module_event;
                                         Logger::putLogError(LOG_CAT_L7VSD_SESSION, 49, buf.str(), __FILE__, __LINE__);
                                         up_thread_exit(process_type);
                                         return;
@@ -2277,7 +2277,7 @@ void tcp_session::up_thread_sorryserver_send(const TCP_PROCESS_TYPE_TAG process_
         }
 }
 //! up thread raise module event of handle_sorryserver_select
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_sorryserver_get_destination_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2302,7 +2302,7 @@ void tcp_session::up_thread_sorryserver_get_destination_event(const TCP_PROCESS_
         }
 }
 //! up thread connect sorryserver
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_sorryserver_connect(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2371,7 +2371,7 @@ out_tproxy:
                 bool bres = sorryserver_socket.second->connect(sorry_endpoint, ec);
                 if (likely(bres)) {
                         if (unlikely(!sorryserver_socket.second->set_non_blocking_mode(ec))) {
-                                // socket set nonblocking mode error
+                                // socket set non-blocking mode error
                                 std::stringstream buf;
                                 buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
                                 buf << "set non blocking socket error: " << ec.message();
@@ -2398,7 +2398,7 @@ out_tproxy:
         }
 }
 //! up thread raise module event of handle_sorryserver_connect
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_sorryserver_connect_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2431,7 +2431,7 @@ void tcp_session::up_thread_sorryserver_connect_event(const TCP_PROCESS_TYPE_TAG
         }
 }
 //! up thread raise module event of handle_sorryserver_connection_fail
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_sorryserver_connection_fail_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2452,7 +2452,7 @@ void tcp_session::up_thread_sorryserver_connection_fail_event(const TCP_PROCESS_
         }
 }
 //! up thread close sorryserver socket and raise sorryserver disconnect event message for up and down thread
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_sorryserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2483,7 +2483,7 @@ void tcp_session::up_thread_sorryserver_disconnect(const TCP_PROCESS_TYPE_TAG pr
         }
 }
 //! up thread close sorryserver socket and raise module sorryserver disconnect event
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_sorryserver_mod_disconnect(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2515,7 +2515,7 @@ void tcp_session::up_thread_sorryserver_mod_disconnect(const TCP_PROCESS_TYPE_TA
 }
 
 //! up thread raise module event of handle_sorryserver_disconnect
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_sorryserver_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2540,7 +2540,7 @@ void tcp_session::up_thread_sorryserver_disconnect_event(const TCP_PROCESS_TYPE_
         }
 }
 //! up thread raise module event of handle_sorry_enable
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_sorry_enable_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2572,7 +2572,7 @@ void tcp_session::up_thread_sorry_enable_event(const TCP_PROCESS_TYPE_TAG proces
         }
 }
 //! up thread raise module event of handle_sorry_disable
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_sorry_disable_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2605,7 +2605,7 @@ void tcp_session::up_thread_sorry_disable_event(const TCP_PROCESS_TYPE_TAG proce
 }
 
 //! up thread exit main loop
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::up_thread_exit(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2663,7 +2663,7 @@ void tcp_session::up_thread_all_socket_close(void)
 }
 
 //! down thread receive from realserver and raise module event of handle_realserver_recv
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::down_thread_realserver_receive(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2820,7 +2820,7 @@ void tcp_session::down_thread_realserver_receive(const TCP_PROCESS_TYPE_TAG proc
         }
 }
 //! down thread close realserver socket and raise realserver disconnect event message for up and down thread
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::down_thread_realserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2863,7 +2863,7 @@ void tcp_session::down_thread_realserver_disconnect(const TCP_PROCESS_TYPE_TAG p
 }
 
 //! down thread raise module event of handle_realserver_disconnect
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::down_thread_realserver_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2900,7 +2900,7 @@ void tcp_session::down_thread_realserver_disconnect_event(const TCP_PROCESS_TYPE
         }
 }
 //! down thread close realserver socket and raise realserver disconnect event message for up and down thread
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::down_thread_all_realserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2954,7 +2954,7 @@ void tcp_session::down_thread_all_realserver_disconnect(const TCP_PROCESS_TYPE_T
         }
 }
 //! down thread raise module event of handle_client_connection_check
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::down_thread_client_connection_chk_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -2979,7 +2979,7 @@ void tcp_session::down_thread_client_connection_chk_event(const TCP_PROCESS_TYPE
 }
 
 //! down thread raise module event of handle_response_send_inform
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::down_thread_client_respond_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -3003,7 +3003,7 @@ void tcp_session::down_thread_client_respond_event(const TCP_PROCESS_TYPE_TAG pr
         }
 }
 //! down thread send for client and raise module event of handle_client_send
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::down_thread_client_send(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -3107,7 +3107,7 @@ void tcp_session::down_thread_client_send(const TCP_PROCESS_TYPE_TAG process_typ
                         parent_service.update_down_send_size(send_size);
                         //----Debug log----------------------------------------------------------------------
                         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                                endpoint client_endpoint // XXX redifined???
+                                endpoint client_endpoint // XXX redefined???
                                 = !ssl_flag ? client_socket.get_socket().lowest_layer().remote_endpoint(ec)
                                   : client_ssl_socket.get_socket().lowest_layer().remote_endpoint(ec);
                                 boost::format formatter("Thread ID[%d] down_thread_client_send send data size[%d] for [%d]");
@@ -3144,7 +3144,7 @@ void tcp_session::down_thread_client_send(const TCP_PROCESS_TYPE_TAG process_typ
         }
 }
 //! down thread close client socket and raise client disconnect event message for up and down thread
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::down_thread_client_disconnect(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -3174,7 +3174,7 @@ void tcp_session::down_thread_client_disconnect(const TCP_PROCESS_TYPE_TAG proce
 }
 
 //! down thread raise module event of handle_client_disconnect
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::down_thread_client_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -3200,7 +3200,7 @@ void tcp_session::down_thread_client_disconnect_event(const TCP_PROCESS_TYPE_TAG
         }
 }
 //! down thread receive from sorryserver and raise module event of handle_sorryserver_recv
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::down_thread_sorryserver_receive(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -3327,7 +3327,7 @@ down_thread_sorryserver_receive_out:
         }
 }
 //! down thread raise module event of handle_sorryserver_disconnect
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::down_thread_sorryserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -3358,7 +3358,7 @@ void tcp_session::down_thread_sorryserver_disconnect(const TCP_PROCESS_TYPE_TAG 
         }
 }
 //! down thread close sorryserver socket and raise module sorryserver disconnect event
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::down_thread_sorryserver_mod_disconnect(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -3391,7 +3391,7 @@ void tcp_session::down_thread_sorryserver_mod_disconnect(const TCP_PROCESS_TYPE_
         }
 }
 //! down thread raise module event of handle_sorryserver_disconnect
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::down_thread_sorryserver_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -3417,7 +3417,7 @@ void tcp_session::down_thread_sorryserver_disconnect_event(const TCP_PROCESS_TYP
         }
 }
 //! down thread raise module event of handle_sorry_enable
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::down_thread_sorry_enable_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -3451,7 +3451,7 @@ void tcp_session::down_thread_sorry_enable_event(const TCP_PROCESS_TYPE_TAG proc
         }
 }
 //! down thread raise module event of handle_sorry_disable
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::down_thread_sorry_disable_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -3484,7 +3484,7 @@ void tcp_session::down_thread_sorry_disable_event(const TCP_PROCESS_TYPE_TAG pro
         }
 }
 //! down thread exit main loop
-//! @param[in]        process_type is prosecess type
+//! @param[in]        process_type is process type
 void tcp_session::down_thread_exit(const TCP_PROCESS_TYPE_TAG process_type)
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {

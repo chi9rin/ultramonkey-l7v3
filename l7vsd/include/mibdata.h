@@ -54,7 +54,7 @@ namespace l7vs
                 mibdata& operator=(const mibdata &);
 
                 /*!
-                 * update virtual service table infomation.
+                 * update virtual service table information.
                  *
                  * @param   l7vsd * l7vsd pointer
                  * @param   error_code & error code
@@ -63,7 +63,7 @@ namespace l7vs
                 void  update_vs_table(l7vsd *, error_code &);
 
                 /*!
-                 * update real server table infomation.
+                 * update real server table information.
                  *
                  * @param   const std::vector<rsdata> & temporary real server list
                  * @param   error_code & error code

@@ -227,7 +227,7 @@ l7vs::LoggerImpl::LoggerImpl()
         name_category_map["l7vsd_system_signal"] = LOG_CAT_L7VSD_SYSTEM_SIGNAL;
         category_name_map[LOG_CAT_L7VSD_SYSTEM_SIGNAL] = "l7vsd_system_signal";
 
-        //l7vsd system enviroment category initialize
+        //l7vsd system environment category initialize
         category_level_map[LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT] = LOG_LV_ERROR;
         name_category_map["l7vsd_system_environment"] = LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT;
         category_name_map[LOG_CAT_L7VSD_SYSTEM_ENVIRONMENT] = "l7vsd_system_environment";
@@ -371,7 +371,7 @@ bool l7vs::LoggerImpl::init()
 
 /*!
  * error handling function.
- * if error occured, switch appenders to syslogappender and fileappender(/dev/console)
+ * if error occurred, switch appenders to syslogappender and fileappender(/dev/console)
  * message will output to syslog/fileappender appender
  *
  * @param   log message id
@@ -577,7 +577,7 @@ void l7vs::LoggerImpl::loadConf()
                         else if ("hour" == rotationTimingStr) property->rotation_timing_value = LOG_TIM_HOUR;
                         else logic_error(10, "Invalid Log RotationTiming Setting.", __FILE__, __LINE__);
                 } else {
-                        logic_error(11, "Not Exist Log RotaionTiming Setting.", __FILE__, __LINE__);
+                        logic_error(11, "Not Exist Log RotationTiming Setting.", __FILE__, __LINE__);
                 }
 
                 if (LOG_TIM_YEAR == property->rotation_timing_value) {
@@ -644,7 +644,7 @@ void l7vs::LoggerImpl::loadConf()
                                         logic_error(22, "Parse Timing Year Error.", __FILE__, __LINE__);
                                 }
 
-                                // format to internal rotation timing value expresson
+                                // format to internal rotation timing value expression
                                 std::ostringstream oss;
                                 oss << std::setfill('0') << std::setw(2) << month
                                     << std::setfill('0') << std::setw(2) << date
@@ -654,7 +654,7 @@ void l7vs::LoggerImpl::loadConf()
                                 property->rotation_timing_value_value = oss.str();
 
                         } else {
-                                logic_error(23, "Not Exist Log RotaionTiming Year Setting.", __FILE__, __LINE__);
+                                logic_error(23, "Not Exist Log RotationTiming Year Setting.", __FILE__, __LINE__);
                         }
                 }
 
@@ -709,7 +709,7 @@ void l7vs::LoggerImpl::loadConf()
                                         logic_error(31, "Parse Timing Month Error.", __FILE__, __LINE__);
                                 }
 
-                                // format to internal rotation timing value expresson
+                                // format to internal rotation timing value expression
                                 std::stringstream oss;
                                 oss << std::setfill('0') << std::setw(2) << date
                                     << std::setfill('0') << std::setw(2) << hour
@@ -718,7 +718,7 @@ void l7vs::LoggerImpl::loadConf()
                                 property->rotation_timing_value_value = oss.str();
 
                         } else {
-                                logic_error(32, "Not Exist Log RotaionTiming Month Setting.", __FILE__, __LINE__);
+                                logic_error(32, "Not Exist Log RotationTiming Month Setting.", __FILE__, __LINE__);
                         }
                 }
 
@@ -775,7 +775,7 @@ void l7vs::LoggerImpl::loadConf()
                                         logic_error(39, "Parse Timing Week Error.", __FILE__, __LINE__);
                                 }
 
-                                // format to internal rotation timing value expresson
+                                // format to internal rotation timing value expression
                                 std::ostringstream oss;
                                 oss << std::setfill('0') << std::setw(1) << week
                                     << std::setfill('0') << std::setw(2) << hour
@@ -783,7 +783,7 @@ void l7vs::LoggerImpl::loadConf()
 
                                 property->rotation_timing_value_value = oss.str();
                         } else {
-                                logic_error(40, "Not Exist Log RotaionTiming Week Setting.", __FILE__, __LINE__);
+                                logic_error(40, "Not Exist Log RotationTiming Week Setting.", __FILE__, __LINE__);
                         }
                 }
 
@@ -820,14 +820,14 @@ void l7vs::LoggerImpl::loadConf()
                                         logic_error(45, "Parse Timing Date Error.", __FILE__, __LINE__);
                                 }
 
-                                // format to internal rotation timing value expresson
+                                // format to internal rotation timing value expression
                                 std::ostringstream oss;
                                 oss << std::setfill('0') << std::setw(2) << hour
                                     << std::setfill('0') << std::setw(2) << minute;
 
                                 property->rotation_timing_value_value = oss.str();
                         } else {
-                                logic_error(46, "Not Exist Log RotaionTiming Date Setting.", __FILE__, __LINE__);
+                                logic_error(46, "Not Exist Log RotationTiming Date Setting.", __FILE__, __LINE__);
                         }
                 }
 
@@ -845,13 +845,13 @@ void l7vs::LoggerImpl::loadConf()
                                         logic_error(48, "Parse Timing Hour Error.", __FILE__, __LINE__);
                                 }
 
-                                // format to internal rotation timing value expresson
+                                // format to internal rotation timing value expression
                                 std::ostringstream oss;
                                 oss << std::setfill('0') << std::setw(2) << minute;
 
                                 property->rotation_timing_value_value = oss.str();
                         } else {
-                                logic_error(49, "Not Exist Log RotaionTiming Hour Setting.", __FILE__, __LINE__);
+                                logic_error(49, "Not Exist Log RotationTiming Hour Setting.", __FILE__, __LINE__);
                         }
                 }
         }
@@ -874,7 +874,7 @@ void l7vs::LoggerImpl::loadConf()
 
                 switch (property->rotation_value) {
                 case LOG_ROT_SIZE: {
-                        // create FixedWindcd owRollingPolicy
+                        // create FixedWindowRollingPolicy
                         log4cxx::rolling::FixedWindowRollingPolicyPtr fixedRollingPolicy =
                                 new log4cxx::rolling::FixedWindowRollingPolicy();
 

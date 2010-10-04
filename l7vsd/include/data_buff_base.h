@@ -39,7 +39,7 @@ template< typename InternetProtocol >
 class data_buff_base : private boost::noncopyable
 {
 public:
-        //! construcor
+        //! constructor
         data_buff_base();
         //! destructor
         ~data_buff_base();
@@ -82,7 +82,7 @@ protected:
 
 
 
-//! construcor
+//! constructor
 template< typename InternetProtocol >
 data_buff_base< InternetProtocol >::data_buff_base()
 {

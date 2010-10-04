@@ -45,7 +45,7 @@
 namespace l7vs
 {
 
-//! @class Lologger_access_managergger
+//! @class logger_access_manager
 //! @brief logger_implement_access creation class.
 //! @brief this class create logger_implement_access and rotate check function.
 class logger_access_manager
@@ -65,7 +65,7 @@ public:
         accesslog_rotate_default_map_type_iterator;
 
         /*!
-         * initialze function.
+         * initialize function.
          *
          * @retrun  current instance.
          */
@@ -99,7 +99,7 @@ public:
          * log rotate parameter check function.
          *
          * @param   logrotation designation contents
-         * @retrun  false faild.
+         * @retrun  false failed.
          */
         bool access_log_logrotate_parameter_check(
                 const std::map<std::string, std::string>& rotatedata);

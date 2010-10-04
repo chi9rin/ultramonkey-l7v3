@@ -32,7 +32,7 @@ namespace    l7vs
 
 //!    @brief        constructor
 //!    @param[in]    io_service
-//!    @param[in]    l7vsd refernce
+//!    @param[in]    l7vsd reference
 command_session::command_session(boost::asio::io_service &io_service, l7vsd &parent)
         :    unixsocket(io_service),
              vsd(parent)
@@ -140,7 +140,7 @@ void    command_session::execute_command()
 {
         Logger    logger(LOG_CAT_L7VSD_COMMAND, 8, "command_session::execute_command", __FILE__, __LINE__);
 
-        // deserialize requestdata
+        // deserialize request data
         std::stringstream    ss;
         ss << &(request_buffer[0]);
         boost::archive::text_iarchive   ia(ss);
@@ -179,7 +179,7 @@ void    command_session::execute_command()
         }
         /*------ DEBUG LOG END ------*/
 
-        // serialize responsedata
+        // serialize response data
         boost::archive::text_oarchive    oa(response_stream);
         oa << (const l7vsd_response &) response_data;
 }
@@ -189,7 +189,7 @@ void    command_session::start()
 {
         Logger    logger(LOG_CAT_L7VSD_COMMAND, 11, "command_session::start", __FILE__, __LINE__);
 
-        // start async read requestdata from unixsocket.
+        // start async read request data from unixsocket.
         unixsocket.async_read_some(boost::asio::buffer(request_buffer),
                                    boost::bind(&command_session::handle_read,
                                                shared_from_this(),

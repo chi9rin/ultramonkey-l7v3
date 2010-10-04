@@ -170,7 +170,7 @@ l7vs::http_utility::check_http_version_and_status_code(
 
 }
 
-//! serch uri function
+//! search uri function
 //! @param const char*            buffer
 //! @param const size_t            buffer_len
 //! @param size_t&                uri offset
@@ -220,7 +220,7 @@ bool    l7vs::http_utility::find_uri(const char *buffer,
 
 }
 
-//! serch status function
+//! search status function
 //! @param const char*            buffer
 //! @param const size_t            buffer_len
 //! @param size_t&                status offset
@@ -267,7 +267,7 @@ bool    l7vs::http_utility::find_status_code(const char *buffer,
 
 }
 
-//! serch http header function
+//! search http header function
 //! @param const char*            buffer
 //! @param const size_t            buffer_len
 //! @param const string&        header name
@@ -375,7 +375,7 @@ bool    l7vs::http_utility::find_http_header(const char *buffer,
 
 }
 
-//! serch http header Cookie function
+//! search http header Cookie function
 //! @param const char*            buffer
 //! @param const size_t            buffer_len
 //! @param size_t&                header offset
@@ -450,7 +450,7 @@ bool    l7vs::http_utility::find_http_header_cookie(
 
 }
 
-//! serch http header Content_Length function
+//! search http header Content_Length function
 //! @param const char*            buffer
 //! @param const size_t            buffer_len
 //! @param size_t&                header offset
@@ -530,7 +530,7 @@ bool    l7vs::http_utility::find_http_header_content_length(
 
 }
 
-//! serch http header X_Forwarded_For function
+//! search http header X_Forwarded_For function
 //! @param const char*            buffer
 //! @param const size_t            buffer_len
 //! @param size_t&                header offset
@@ -612,7 +612,7 @@ bool    l7vs::http_utility::find_http_header_x_forwarded_for(
 
 }
 
-//! serch http header all function
+//! search http header all function
 //! @param const char*            buffer
 //! @param const size_t            buffer_len
 //! @param size_t&                header offset

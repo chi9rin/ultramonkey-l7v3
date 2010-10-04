@@ -36,7 +36,7 @@ namespace l7vs
 //
 //! @class schedule_module_base
 //!    @brief    schedule module abstract base class.
-//! @brief    all schedule module is extened this class.
+//! @brief    all schedule module is extend this class.
 class schedule_module_base : public module_base
 {
 public:
@@ -50,9 +50,9 @@ public:
         typedef    boost::function< rslist_type::iterator(rslist_type::iterator)>
         rslist_iterator_next_func_type;
 public:
-        //!    constractor
+        //!    constructor
         schedule_module_base(std::string in_modulename) : module_base(in_modulename) {};
-        //! destractor
+        //! destructor
         virtual    ~schedule_module_base() {};
         //!    initialize function
         virtual    void    initialize() = 0;
@@ -69,7 +69,7 @@ public:
                 rslist_iterator_next_func_type,
                 boost::asio::ip::tcp::endpoint &) = 0;
 
-        //! handle schedule calles then schedule function for UDP endpoint
+        //! handle schedule calls then schedule function for UDP endpoint
         //! @param[in]    thread id
         //! @param[in]    list iterator first function object
         //!    @param[in]    list iterator last function object

@@ -102,7 +102,7 @@ ip_session_data_processor::~ip_session_data_processor()
 
 //! get endpoint from session data
 //! @param[in] ip hash
-//! @param[out] endpoint refrence
+//! @param[out] endpoint reference
 //! @return 0 : success
 //! @return 1: failed
 //! @return -1:exception
@@ -184,7 +184,7 @@ int ip_session_data_processor::get_endpoint_from_session_data(
 
 //! write session data to session table
 //! @param[in] ip hash
-//! @param[in] endpoint refrence
+//! @param[in] endpoint reference
 //! @param[in] now time
 //! @return 0 : success
 //! @return 1: failed

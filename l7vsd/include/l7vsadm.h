@@ -277,7 +277,7 @@ protected:
         bool parse_opt_vs_fwdmode_func(int &, int, char*[]);
         //! virtualservice option qosupstream function
         bool parse_opt_vs_qosup_func(int &, int, char*[]);
-        //! virtualservice option qosdownstream functipn
+        //! virtualservice option qosdownstream function
         bool parse_opt_vs_qosdown_func(int &, int, char*[]);
         //! virtualservice option udp func.
         bool parse_opt_vs_udp_func(int &, int, char*[]);
@@ -388,7 +388,7 @@ protected:
         l7vsadm_request request; //!< send_request
         l7vsd_response response; //!< recv_response
 
-        // l7vsadm using datas.
+        // l7vsadm using data.
         bool numeric_flag; //!< numeric flag
         boost::asio::io_service io_service; //!< io_service
 
@@ -400,7 +400,7 @@ protected:
         int command_wait_count;
 
 public:
-        //! constractor
+        //! constructor
         l7vsadm();
 
         //! execute function

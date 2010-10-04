@@ -1,6 +1,6 @@
 #!/bin/bash
 . ${SET_DEFAULT_CONF}
-# Set l7directorc config file
+# Set l7directord config file
 echo "virtual=127.0.0.1:50000
 virtual=127.0.0.1:50001
     module=ip
@@ -44,7 +44,7 @@ then
 fi
 sleep 5
 
-# Edit l7directorc config file
+# Edit l7director config file
 echo "virtual=127.0.0.1:50000
 virtual=127.0.0.1:50001
     module=ip

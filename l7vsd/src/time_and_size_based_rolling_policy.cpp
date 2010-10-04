@@ -45,7 +45,7 @@ IMPLEMENT_LOG4CXX_OBJECT(TimeAndSizeBasedRollingPolicy)
 
 /*!
  * default constructor.
- * initialize member valiables
+ * initialize member variables
  * @param   void
  * @return  void
  */

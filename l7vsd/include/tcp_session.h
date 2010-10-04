@@ -60,7 +60,7 @@ class virtualservice_tcp;
 //! @brief    tcp_thread_message class name define.
 class tcp_thread_message;
 
-//! @class    loger_implement_access
+//! @class    logger_implement_access
 //! @brief    logger_implement_access class name define.
 class logger_implement_access;
 
@@ -85,7 +85,7 @@ public:
                 ACCESS_LOG_OFF
         };
 
-        //! construcor
+        //! constructor
         //! @param[in/out]    vs is parent virtualservice object
         //! @param[in/out]    io is session use io service object
         //! @param[in]        set_option is
@@ -144,7 +144,7 @@ protected:
                 UP_FUNC_CLIENT_RECEIVE,                     //! up_thread_client_receive function
                 UP_FUNC_CLIENT_RESPOND_SEND,                //! up_thread_client_respond function
                 UP_FUNC_CLIENT_RESPOND_SEND_EVENT,          //! up_thread_client_respond_event function
-                UP_FUNC_REALSERVER_GET_DEST_EVENT,          //! up_thread_realserver_get_distination_event function
+                UP_FUNC_REALSERVER_GET_DEST_EVENT,          //! up_thread_realserver_get_destination_event function
                 UP_FUNC_REALSERVER_CONNECT,                 //! up_thread_realserver_connect function
                 UP_FUNC_REALSERVER_CONNECT_EVENT,           //! up_thread_realserver_connect_event function
                 UP_FUNC_REALSERVER_CONNECT_FAIL_EVENT,      //! up_thread_realserver_connection_fail_event function
@@ -301,7 +301,7 @@ protected:
         //! virtual service message convert to down thread function object map
         std::map< TCP_VIRTUAL_SERVICE_MESSAGE_TAG, tcp_session_func>
         virtual_service_message_down_thread_function_map;
-        //! client conection src endpoint
+        //! client connection src endpoint
         boost::asio::ip::tcp::endpoint client_endpoint;
         //! virtualservice accept endpoint
         boost::asio::ip::tcp::endpoint virtualservice_endpoint;
@@ -363,180 +363,180 @@ protected:
         //! reset ssl object for reuse
         //! @param[in/out]    clear_ssl is clear target SSL structure pointer
         virtual bool ssl_clear_keep_cache(SSL *clear_ssl);
-        //! endpoint data to string infomation
+        //! endpoint data to string information
         //! @param[in]        endpoint is target endpoint object
         virtual std::string endpoint_to_string(
                 const boost::asio::ip::tcp::endpoint &target_endpoint);
 
         //! up thread accept client side
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_client_accept(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread raise module event of handle_accept
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_client_accept_event(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread receive client side and raise module event of handle_client_recv
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_client_receive(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread raise client respond send event message for up and down thread
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_client_respond(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread raise module event of handle_response_send_inform
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_client_respond_event(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread close client socket and raise client disconnect event message for up and down thread
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_client_disconnect(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread raise module event of handle_client_disconnect
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_client_disconnect_event(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread send realserver and raise module event of handle_client_recv
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_realserver_send(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread raise module event of handle_realserver_select
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_realserver_get_destination_event(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread connect realserver
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_realserver_connect(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread raise module event of handle_realserver_connect
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_realserver_connect_event(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread raise module event of handle_realserver_connection_fail
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_realserver_connection_fail_event(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread close realserver socket and raise realserver disconnect event message for up and down thread
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_realserver_disconnect(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread raise module event of handle_realserver_disconnect
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_realserver_disconnect_event(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread close all realserver socket and raise module event of handle_realserver_disconnect
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_all_realserver_disconnect(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread send sorryserver and raise module event of handle_sorryserver_send
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_sorryserver_send(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread raise module event of handle_sorryserver_select
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_sorryserver_get_destination_event(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread connect sorryserver
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_sorryserver_connect(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread raise module event of handle_sorryserver_connect
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_sorryserver_connect_event(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread raise module event of handle_sorryserver_connection_fail
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_sorryserver_connection_fail_event(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread close sorryserver socket and raise sorryserver disconnect event message for up and down thread
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_sorryserver_disconnect(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread close sorryserver socket and raise module sorryserver disconnect event
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_sorryserver_mod_disconnect(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread raise module event of handle_sorryserver_disconnect
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_sorryserver_disconnect_event(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread raise module event of handle_sorry_enable
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_sorry_enable_event(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread raise module event of handle_sorry_disable
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_sorry_disable_event(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread exit main loop
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void up_thread_exit(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! up thread close all socket
         virtual void up_thread_all_socket_close(void);
 
         //! down thread receive from realserver and raise module event of handle_realserver_recv
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void down_thread_realserver_receive(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! down thread close realserver socket and raise realserver disconnect event message for up and down thread
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void down_thread_realserver_disconnect(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! down thread raise module event of handle_realserver_disconnect
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void down_thread_realserver_disconnect_event(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! down thread close all realserver socket and raise module event of handle_realserver_disconnect
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void down_thread_all_realserver_disconnect(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! down thread raise module event of handle_client_connection_check
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void down_thread_client_connection_chk_event(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! down thread raise module event of handle_response_send_inform
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void down_thread_client_respond_event(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! down thread send for client and raise module event of handle_client_send
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void down_thread_client_send(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! down thread close client socket and raise client disconnect event message for up and down thread
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void down_thread_client_disconnect(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! down thread raise module event of handle_client_disconnect
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void down_thread_client_disconnect_event(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! down thread receive from sorryserver and raise module event of handle_sorryserver_recv
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void down_thread_sorryserver_receive(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! down thread close sorryserver socket and raise sorryserver disconnect event message for up and down thread
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void down_thread_sorryserver_disconnect(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! down thread close sorryserver socket and raise module sorryserver disconnect event
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void down_thread_sorryserver_mod_disconnect(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! down thread raise module event of handle_sorryserver_disconnect
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void down_thread_sorryserver_disconnect_event(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! down thread raise module event of handle_sorry_enable
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void down_thread_sorry_enable_event(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! down thread raise module event of handle_sorry_disable
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void down_thread_sorry_disable_event(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! down thread exit main loop
-        //! @param[in]        process_type is prosecess type
+        //! @param[in]        process_type is process type
         virtual void down_thread_exit(
                 const TCP_PROCESS_TYPE_TAG process_type);
         //! down thread close all socket

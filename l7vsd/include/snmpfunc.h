@@ -78,7 +78,7 @@ int        handle_get_rstable(netsnmp_mib_handler *handler,
                               netsnmp_request_info *requests);
 
 /*!
- * initialize snmp scaler and table data set handles.
+ * initialize snmp scalar and table data set handles.
  *
  * @param[in]      error_code& is trap error code
  * @retrun         void

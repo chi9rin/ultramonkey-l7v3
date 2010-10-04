@@ -13,7 +13,7 @@ usleep 100000
 kill -SIGUSR2 `pgrep l7vsd`
 if [ $? -ne 0 ]
 then
-        echo "Test failed: kill -SIGUSER2"
+        echo "Test failed: kill -SIGUSR2"
         exit 1
 fi
 usleep 100000

@@ -40,7 +40,7 @@ namespace l7vs
 {
 
 //!    @class    stats_base
-//! @brief    this class is base class of all statistic infomation classes.
+//! @brief    this class is base class of all statistic information classes.
 class stats_base
 {
 public:
@@ -57,7 +57,7 @@ public:
         //!    constructor
         stats_base(STATS_MODE_TAG m) : mode(m) {};
 
-        //! destractor
+        //! destructor
         ~stats_base() {};
 
         //! get statistic mode
@@ -71,7 +71,7 @@ protected:
 };
 
 //!    @class    stats_base
-//! @brief    this class is a class of http statistic infomation classes.
+//! @brief    this class is a class of http statistic information classes.
 class http_stats : public stats_base
 {
 public:
@@ -82,7 +82,7 @@ public:
                 http_post_requests = 0;
         };
 
-        //! destractor
+        //! destructor
         ~http_stats(){};
 
         //! http request counts
@@ -154,7 +154,7 @@ public:
         //! @struct check_message_result
         //!    @brief    this class is POD. this class used then return multi value
         struct check_message_result {
-                bool        flag;        //! return flasg
+                bool        flag;        //! return flag
                 std::string    message;    //! return message
                 //!    == operator
                 //! @param[in]    check_message_result& is equal check object.
@@ -169,7 +169,7 @@ public:
                 bool        operator!=(const check_message_result &in) {
                         return ((flag != in.flag) || (message != in.message));
                 }
-                //! constractor
+                //! constructor
                 check_message_result() : flag(false) {}
         };
 protected:
@@ -193,9 +193,9 @@ protected:
         bool                           statistic;       //!< collect statistic flag
 
 public:
-        //! constractor
+        //! constructor
         protocol_module_base(std::string in_modulename) : module_base(in_modulename), statistic(false) {};
-        //! destractor
+        //! destructor
         virtual    ~protocol_module_base() {};
         //! initialize function. called from module control. module loaded call
         //! @param[in]    realserver list iterator begin function object type
@@ -223,31 +223,31 @@ public:
 
 
         //! module parameter check.used by l7vsadm
-        //! @param[in]    module paramter string list
-        //! @return    result.flag true is parameter is noproblem.
-        //! @return result.flag false is paramter is problem.
+        //! @param[in]    module parameter string list
+        //! @return    result.flag true is parameter is no problem.
+        //! @return result.flag false is parameter is problem.
         virtual    check_message_result    check_parameter(const std::vector<std::string>& args) = 0;
         //! parameter set
-        //! @param[in] module paramter string list
-        //! @return    result.flag true is parameter is noproblem.
-        //! @return result.flag false is paramter is problem.
+        //! @param[in] module parameter string list
+        //! @return    result.flag true is parameter is no problem.
+        //! @return result.flag false is parameter is problem.
         virtual    check_message_result    set_parameter(const std::vector<std::string>& args) = 0;
         //! parameter add
-        //! @param[in] module paramter string list
-        //! @return    result.flag true is parameter is noproblem.
-        //! @return result.flag false is paramter is problem.
+        //! @param[in] module parameter string list
+        //! @return    result.flag true is parameter is no problem.
+        //! @return result.flag false is parameter is problem.
         virtual    check_message_result    add_parameter(const std::vector<std::string>& args) = 0;
         //! get option info
         //! @param[out] module parameter string
         virtual void                    get_option_info(std::string &option) = 0;
-        //! TCP/IP scheduled function registation.
+        //! TCP/IP scheduled function registration.
         //! @param[in] schedule module TCP/IP scheduled function object type
         virtual    void    register_schedule(tcp_schedule_func_type inschedule) = 0;
-        //! UDP scheduled function registation
-        //! @param[in] schedule module UDP scheduled funtion object type
+        //! UDP scheduled function registration
+        //! @param[in] schedule module UDP scheduled function object type
         virtual    void    register_schedule(udp_schedule_func_type inschedule) = 0;
 
-        //! called from session initialzie use in upstream_thread
+        //! called from session initialize use in upstream_thread
         //! @param[in]    upstream thread id.
         //! @param[in]    downstream thread id
         //! @return        session use EVENT mode.
@@ -272,8 +272,8 @@ public:
 
         //! called from after session recv in client socket. use in upstream thread.
         //! @param[in]    upstream thread id
-        //! @param[in]    recive buffer refarence.
-        //! @param[in]    recive length
+        //! @param[in]    receive buffer reference.
+        //! @param[in]    receive length
         //! @return        session use EVENT mode.
         virtual    EVENT_TAG    handle_client_recv(
                 const boost::thread::id thread_id,
@@ -291,7 +291,7 @@ public:
         //! called from after realserver select
         //! @param[in]    upstream thread id
         //! @param[out]    realserver UDP endpoint
-        //! @param[out]    sendbudffer reference
+        //! @param[out]    send buffer reference
         //! @param[out]    send data length
         //! @return        session use EVENT mode.
         virtual    EVENT_TAG    handle_realserver_select(
@@ -302,7 +302,7 @@ public:
 
         //! called from after realserver connect
         //! @param[in]    upstream thread id
-        //! @param[out]    sendbuffer reference
+        //! @param[out]    send buffer reference
         //! @param[out]    send data length
         //! @return        session use EVENT mode.
         virtual    EVENT_TAG    handle_realserver_connect(
@@ -326,7 +326,7 @@ public:
 
         //! called from after sorryserver select
         //! @param[in]    upstream thread id
-        //! @param[in]    sorryserver endppiont reference
+        //! @param[in]    sorryserver endpoint reference
         //! @return        session use EVENT mode.
         virtual    EVENT_TAG    handle_sorryserver_select(
                 const boost::thread::id thread_id,
@@ -355,10 +355,10 @@ public:
         //! @return        session use EVENT mode.
         virtual    EVENT_TAG    handle_sorryserver_send(const boost::thread::id thread_id) = 0;
 
-        //! called from after realserver recvive for TCP/IP
+        //! called from after realserver receive for TCP/IP
         //! @param[in]    downstream thread id
         //! @param[in]    realserver TCP/IP endpoint reference
-        //! @param[in]    realserver recive buffer reference.
+        //! @param[in]    realserver receive buffer reference.
         //! @param[in]    recv data length
         //! @return        session use EVENT mode.
         virtual    EVENT_TAG    handle_realserver_recv(
@@ -366,10 +366,10 @@ public:
                 const boost::asio::ip::tcp::endpoint &rs_endpoint,
                 const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer,
                 const size_t recvlen) = 0;
-        //! called from after realserver recive.for UDP
+        //! called from after realserver receive.for UDP
         //! @param[in]    downstream thread id
         //! @param[in]    realserver UDP endpoint reference
-        //! @param[in]    recive from realserver buffer reference
+        //! @param[in]    receive from realserver buffer reference
         //! @param[in]    recv data length
         //! @return        session use EVENT mode.
         virtual    EVENT_TAG    handle_realserver_recv(
@@ -378,10 +378,10 @@ public:
                 const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer,
                 const size_t recvlen) = 0;
 
-        //! called from after sorryserver recive
+        //! called from after sorryserver receive
         //! @param[in]    downstream thread id
         //! @param[in]    sorryserver endpoint reference
-        //! @param[in]    recive from realserver buffer reference.
+        //! @param[in]    receive from realserver buffer reference.
         //! @param[in]    recv data length
         //! @return     session use EVENT mode
         virtual    EVENT_TAG    handle_sorryserver_recv(
@@ -390,7 +390,7 @@ public:
                 const boost::array<char, MAX_BUFFER_SIZE>& recvbuffer,
                 const size_t recvlen) = 0;
 
-        //! called from UPSTEEARM thread. make module original message.
+        //! called from UPSTREAM thread. make module original message.
         //! @param[in]    downstream thread id.
         //! @return         session use EVENT mode
         virtual    EVENT_TAG    handle_response_send_inform(
@@ -398,7 +398,7 @@ public:
 
         //! called from after client connection check. use TCP/IP only. create client send message.
         //! @param[in]    downstream thread id
-        //! @param[out]    send budffer reference
+        //! @param[out]    send buffer reference
         //! @param[out]    send data length
         //! @return     session use EVENT mode
         virtual EVENT_TAG    handle_client_connection_check(
@@ -447,7 +447,7 @@ public:
                 const boost::thread::id thread_id,
                 const boost::asio::ip::tcp::endpoint &rs_endpoint) = 0;
 
-        //! call from sorry server disconnect. use upstraem thread and downstream thread
+        //! call from sorry server disconnect. use upstream thread and downstream thread
         //! @param[in]    upstream and downstream thread id( check! one thread one event )
         //! @param[in]    disconnect sorryserver endpoint
         //! @return        session use EVENT mode

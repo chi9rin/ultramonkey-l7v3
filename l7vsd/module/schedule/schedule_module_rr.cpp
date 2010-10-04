@@ -29,12 +29,12 @@
 namespace l7vs
 {
 
-//!    constractor
+//!    constructor
 schedule_module_round_robin::schedule_module_round_robin() : schedule_module_base("rr")
 {
 }
 
-//! destractor
+//! destructor
 schedule_module_round_robin::~schedule_module_round_robin() {}
 
 //!    initialize function
@@ -217,7 +217,7 @@ END:
         }
 }
 
-//! handle schedule calles then schedule function for UDP endpoint
+//! handle schedule calls then schedule function for UDP endpoint
 //! @param[in]    thread id
 //! @param[in]    list iterator first function object
 //!    @param[in]    list iterator last function object
@@ -351,7 +351,7 @@ END:
         }
 }
 
-//! replication interval interrrupt
+//! replication interval interrupt
 //! timer thread call this function. from virtualservice.
 void    schedule_module_round_robin::replication_interrupt() {}
 

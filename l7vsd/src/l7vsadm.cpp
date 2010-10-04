@@ -780,7 +780,7 @@ bool l7vs::l7vsadm::parse_opt_vs_qosup_func(int &pos, int argc, char *argv[])
                 return false;
         }
         try {
-                virtualservice_element &elem = request.vs_element; // request virtualservice element refalence get.
+                virtualservice_element &elem = request.vs_element; // request virtualservice element reference get.
                 std::string tmp = argv[pos];
                 std::string::reverse_iterator ritr = tmp.rbegin();
                 if (*ritr == 'G' || *ritr == 'g') {
@@ -837,7 +837,7 @@ bool l7vs::l7vsadm::parse_opt_vs_qosup_func(int &pos, int argc, char *argv[])
         }
         return true;
 }
-//! virtualservice option qosdownstream functipn
+//! virtualservice option qosdownstream function
 //! @param[in] argument position
 //! @param[in] argument count
 //! @param[in] argument value
@@ -853,7 +853,7 @@ bool l7vs::l7vsadm::parse_opt_vs_qosdown_func(int &pos, int argc, char *argv[])
                 return false;
         }
         try {
-                virtualservice_element &elem = request.vs_element; // request virtualservice element refalence get.
+                virtualservice_element &elem = request.vs_element; // request virtualservice element reference get.
                 std::string tmp = argv[pos];
                 std::string::reverse_iterator ritr = tmp.rbegin();
                 if (*ritr == 'G' || *ritr == 'g') {
@@ -918,10 +918,10 @@ bool l7vs::l7vsadm::parse_opt_vs_udp_func(int &pos, int argc, char *argv[])
 {
         Logger logger(LOG_CAT_L7VSADM_COMMON, 12, "l7vsadm::parse_opt_vs_udp_func", __FILE__, __LINE__);
 
-        virtualservice_element &elem = request.vs_element; // request virtualservie element reference get.
+        virtualservice_element &elem = request.vs_element; // request virtualservice element reference get.
         elem.udpmode = true; // udpmode on.
         boost::asio::ip::tcp::endpoint zeropoint;
-        if (zeropoint != elem.tcp_accept_endpoint) { // adddress tcp_acceptor endpoint
+        if (zeropoint != elem.tcp_accept_endpoint) { // address tcp_acceptor endpoint
                 std::stringstream sstream;
                 sstream << elem.tcp_accept_endpoint;
                 std::string endpoint = sstream.str();
@@ -2275,13 +2275,13 @@ bool l7vs::l7vsadm::parse_help_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd,
         std::cout <<
                   "Options:\n"
                   "  --tcp-service      -t service-address     service-address is host:port\n"
-                  "  --proto-module     -m proto-module        protocol module name and module argment\n"
+                  "  --proto-module     -m proto-module        protocol module name and module argument\n"
                   "                        [module-args]\n"
                   "  --scheduler        -s scheduler           one of rr,lc,wrr\n"
                   "  --upper            -u connection-count    maximum number of connections\n"
                   "  --bypass           -b sorry-server        sorry server address is host:port\n"
                   "  --tproxy           -T                     set sorry server connection to IP transparent mode.\n"
-                  "  --masq             -M                     set sorry server connection to IP masquarade mode.\n"
+                  "  --masq             -M                     set sorry server connection to IP masquerade mode.\n"
 
                   "  --flag             -f sorry-flag          sorry status set to virtual service\n"
                   "  --qos-up           -Q QoSval-up           QoS Threshold(bps) set to real server direction\n"
@@ -2294,7 +2294,7 @@ bool l7vs::l7vsadm::parse_help_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd,
                   "  --real-server      -r server-address      server-address is host:port\n"
                   "  --weight           -w weight              scheduling weight set to real server\n"
                   "  --tproxy           -T                     set real server connection to IP transparent mode.\n"
-                  "  --masq             -M                     set real server connection to IP masquarade mode.\n"
+                  "  --masq             -M                     set real server connection to IP masquerade mode.\n"
                   "  --switch           -s replication-switch  start or stop replication\n"
                   "  --force            -f                     force replication start\n"
                   "  --dump             -d                     dump replication memory\n"
@@ -2640,7 +2640,7 @@ void l7vs::l7vsadm::disp_list_verbose()
         }
         std::cout << buf.str();
 }
-//! l7vsadm constractor.
+//! l7vsadm constructor.
 //! create including all dictionary.
 l7vs::l7vsadm::l7vsadm()
         :   numeric_flag(false),
@@ -2980,7 +2980,7 @@ bool l7vs::l7vsadm::execute(int argc, char *argv[])
         }
         /*------ DEBUG LOG END ------*/
 
-        // set sighanlder
+        // set sighandler
         if (0 > set_sighandlers()) {
                 std::string buf("set_sighandlers failed.");
                 std::cerr << "COMMON ERROR: " << buf << std::endl;
@@ -2988,7 +2988,7 @@ bool l7vs::l7vsadm::execute(int argc, char *argv[])
                 return false;
         }
 
-        // readparam
+        // read param
         set_parameter();
 
         // Get l7vsadm execute file path from /proc/(pid)/exe (symbolic link)
@@ -3193,7 +3193,7 @@ static void sig_exit_handler(int sig)
         signal_flag = true;
 }
 
-//! set singal handler function
+//! set signal handler function
 //! @param[in] signal
 //! @param[in] handler function pointer
 //! @return 0/success, -1/fail
@@ -3218,7 +3218,7 @@ static int set_sighandler(int sig, void (*handler)(int))
         return 0;
 }
 
-//! set all singal handler function
+//! set all signal handler function
 //! @return 0/success, -1/fail
 static int set_sighandlers()
 {

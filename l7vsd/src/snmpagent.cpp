@@ -157,9 +157,9 @@ namespace l7vs
         }
 
         /*!
-         *  get snmp infomation.
+         *  get snmp information.
          *
-         * @return         snmp infomation
+         * @return         snmp information
          */
         snmp_info  snmpagent::get_snmp_info()
         {

@@ -33,7 +33,7 @@
 namespace l7vs
 {
         /*!
-         * update virtual service table infomation.
+         * update virtual service table information.
          *
          * @param   l7vsd * l7vsd pointer
          * @param   error_code & error code
@@ -166,7 +166,7 @@ namespace l7vs
 
                                 virtualservice_element &srv = (*it)->get_element();
 
-                                //get virtual service IP address infomation
+                                //get virtual service IP address information
                                 if (srv.udpmode) {
                                         protocol = SNMP_IPPROTO_UDP;
                                         if (srv.udp_recv_endpoint.address().is_v4()) {
@@ -187,7 +187,7 @@ namespace l7vs
                                         vs_port = srv.tcp_accept_endpoint.port();
                                 }
 
-                                //get sorry server IP address infomation
+                                //get sorry server IP address information
                                 if (srv.sorry_endpoint.address().is_v4()) {
                                         strncpy(sorry_ipaddress, srv.sorry_endpoint.address().to_v4().to_string().c_str(), L7VS_IPADDR_LEN);
                                 } else {
@@ -198,7 +198,7 @@ namespace l7vs
 
                                 sorry_flag = (srv.sorry_flag == 1) ? 1 : 2;
 
-                                //get protocol mudule option string
+                                //get protocol module option string
                                 std::stringstream protocol_module_arg;
                                 BOOST_FOREACH(std::string str, srv.protocol_args) {
                                         protocol_module_arg << str << " ";
@@ -213,7 +213,7 @@ namespace l7vs
                                 //set realserver size
                                 int rs_size = srv.realserver_vector.size();
 
-                                //get http statstics
+                                //get http statistics
                                 protocol_module_base   *protocol_module_ptr = (*it)->get_protocol_module();
                                 stats_base& base_stats = protocol_module_ptr->get_stats();
                                 if ( base_stats.get_mode() == stats_base::MODE_HTTP ) {
@@ -226,18 +226,18 @@ namespace l7vs
                                 //set sorry max connection
                                 sorry_maxconnection.low = srv.sorry_maxconnection;
 
-                                //set throughput infomation
+                                //set throughput information
                                 throughput_upstream.low = srv.throughput_upstream;
                                 throughput_downstream.low = srv.throughput_downstream;
                                 qos_upstream.low = srv.qos_upstream * 8;
                                 qos_downstream.low = srv.qos_downstream * 8;
 
-                                //set session infomation
+                                //set session information
                                 pool_session_count = (*it)->get_pool_sessions_count();
                                 active_session_count = (*it)->get_active_sessions_count();
                                 waiting_session_count = (*it)->get_waiting_sessions_count();
 
-                                //set vs table row infomation
+                                //set vs table row information
                                 netsnmp_set_row_column(row, COLUMN_L7VSVSINDEX, ASN_INTEGER, (char *)&vs_index, sizeof(int));
                                 netsnmp_set_row_column(row, COLUMN_L7VSVSPROTOCOL, ASN_INTEGER, (char *)&protocol, sizeof(int));
                                 netsnmp_set_row_column(row, COLUMN_L7VSVSADDRTYPE, ASN_INTEGER, (char *)&vs_ipaddress_type, sizeof(int));
@@ -274,7 +274,7 @@ namespace l7vs
 
                                         rsdata data;
 
-                                        //set realserver infomation
+                                        //set realserver information
                                         if (srv.udpmode) {
                                                 if ((*rs_it).udp_endpoint.address().is_v4()) {
                                                         strncpy(data.address, (*rs_it).udp_endpoint.address().to_v4().to_string().c_str(), L7VS_IPADDR_LEN);
@@ -318,12 +318,12 @@ namespace l7vs
                 }
                 /*------ DEBUG LOG END ------*/
 
-                //update realserver infomation with temporary realserver data list
+                //update realserver information with temporary realserver data list
                 update_rs_table(rs_vector, err);
         }
 
         /*!
-         * update real server table infomation.
+         * update real server table information.
          *
          * @param   const std::vector<rsdata> & temporary real server list
          * @param   error_code & error code

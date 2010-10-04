@@ -8,7 +8,7 @@
 #
 # Author: Shinya TAKEBAYASHI
 # Released: January 2008
-# Licence: GNU General Public Licence
+# License: GNU General Public License
 
 L7VSD_OPTIONS=""
 
@@ -34,7 +34,7 @@ start() {
     RETVAL=$?
 
     if [ $RETVAL -ne 0 ]; then
-	echo "error occured."
+	echo "error occurred."
 	echo "$PROG was not started."
     else
 	echo "done."

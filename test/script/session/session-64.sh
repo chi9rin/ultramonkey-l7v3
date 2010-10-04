@@ -1,4 +1,4 @@
-#!/bin/bashgg
+#!/bin/bash
 
 # set config file
 . ${SET_DEFAULT_CONF}
@@ -123,13 +123,13 @@ fi
 RET=`wget -qO- -t 1 -T 1 https://127.0.0.1:40001/ --no-check-certificate`
 if [ $? -eq 0 ]
 then
-        echo "Test failed: wget -qO- -t 1 -T 1 https://127.0.0.1:40001/ --no-check-certificat"
+        echo "Test failed: wget -qO- -t 1 -T 1 https://127.0.0.1:40001/ --no-check-certificate"
         exit 1
 fi
 
 if [ -n "${RET}" ]
 then
-        echo "Test failed: wget -qO- -t 1 -T 1 https://127.0.0.1:40001/ --certificate=newcert.pem --private-key=newkey.pem --no-check-certificat"
+        echo "Test failed: wget -qO- -t 1 -T 1 https://127.0.0.1:40001/ --certificate=newcert.pem --private-key=newkey.pem --no-check-certificate"
         exit 1
 fi
 

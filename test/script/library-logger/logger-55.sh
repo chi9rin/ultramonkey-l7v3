@@ -5,7 +5,7 @@ PARM=`date -d '1 minute' +'%d %H:%M'`
 
 sed "s|l7vsd_rotation_timing_value = \"XXX\"|l7vsd_rotation_timing_value = \"$PARM\"|" materials/logger-55-l7vs.cf > ${L7VSD_CONF_DIR}/l7vs.cf
 
-# set dumy log file
+# set dummy log file
 touch ${L7VS_LOG_DIR}/l7vsd.log
 
 #Add Service

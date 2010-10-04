@@ -72,7 +72,7 @@ then
         exit 1
 fi
 
-#Add IPaliasing
+#Add IP aliasing
 ifconfig lo:0 add ::2
 ifconfig lo:1 add ::3
 
@@ -119,7 +119,7 @@ then
 	exit 1
 fi
 
-#Del IPaliasing
+#Del IP aliasing
 ifconfig lo:0 del ::2
 ifconfig lo:1 del ::3
 

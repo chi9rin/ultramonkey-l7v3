@@ -44,9 +44,9 @@ protected:
         boost::asio::io_service                        &dispatcher;
         //! acceptor
         boost::asio::local::stream_protocol::acceptor    acceptor_;
-        //! l7vsd refference
+        //! l7vsd reference
         l7vsd                                            &vsd;
-        //! socketfile
+        //! socket file
         std::string                                sockfile;
 
         //!    @brief        accept handler
@@ -58,7 +58,7 @@ public:
         //!    @brief        constructor
         //!    @param[in]    io_service
         //!    @param[in]    socket file
-        //!    @param[in]    l7vsd refernce
+        //!    @param[in]    l7vsd reference
         command_receiver(boost::asio::io_service &, const std::string &, l7vsd &);
 
         //!    @brief        destructor

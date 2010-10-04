@@ -55,7 +55,7 @@ then
 fi
 
 
-#Coneect
+#Connect
 RET=`LANG=C $WGET -t 1 -O- http://127.0.0.1:40001/ 2>&1`
 if [ $? -eq 0 ]
 then

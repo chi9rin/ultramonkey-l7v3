@@ -426,7 +426,7 @@ public:
 private:
         friend class boost::serialization::access; //! friend boost serializable class
         //! serializable
-        //! @brief using boost serialiable. class serializable function.
+        //! @brief using boost serializable. class serializable function.
         //! @param[in] archive
         //! @param[in] version
         template <class Archive>

@@ -72,7 +72,7 @@ then
         exit 1
 fi
 
-#Del IPaliasing
+#Del IP aliasing
 stop_lighttpd $RealServer1
 stop_lighttpd $RealServer2
 

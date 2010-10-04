@@ -30,17 +30,17 @@ namespace l7vs
 class http_utility
 {
 public:
-        //! constractor
+        //! constructor
         http_utility() {};
 
-        //! destractor
+        //! destructor
         virtual    ~http_utility() {};
 
         //! @enum    CHECK_RESULT_TAG
         //! @brief    check tag is return to http protocol module.
         enum    CHECK_RESULT_TAG {
                 CHECK_OK = 0,            //!< check ok
-                CHECK_NG,                //!< check ng
+                CHECK_NG,                //!< check NG
                 CHECK_IMPOSSIBLE        //!< check impossible
         };
 
@@ -56,7 +56,7 @@ public:
         //! @return CHECK_RESULT_TAG    http version and status code is valid
         static CHECK_RESULT_TAG    check_http_version_and_status_code(const char *, const size_t);
 
-        //! serch uri function
+        //! search uri function
         //! @param const char*            buffer
         //! @param const size_t            buffer_len
         //! @param size_t&                uri offset
@@ -64,7 +64,7 @@ public:
         //! @return bool                find is true. not find is false
         static bool    find_uri(const char *, const size_t, size_t &, size_t &);
 
-        //! serch status function
+        //! search status function
         //! @param const char*            buffer
         //! @param const size_t            buffer_len
         //! @param size_t&                status offset
@@ -72,7 +72,7 @@ public:
         //! @return bool                find is true. not find is false
         static bool    find_status_code(const char *, const size_t, size_t &, size_t &);
 
-        //! serch http header function
+        //! search http header function
         //! @param const char*            buffer
         //! @param const size_t            buffer_len
         //! @param const string&        header name
@@ -81,7 +81,7 @@ public:
         //! @return bool                find is true. not find is false
         static bool    find_http_header(const char *, const size_t, const std::string &, size_t &, size_t &);
 
-        //! serch http header Cookie function
+        //! search http header Cookie function
         //! @param const char*            buffer
         //! @param const size_t            buffer_len
         //! @param size_t&                header offset
@@ -89,7 +89,7 @@ public:
         //! @return bool                find is true. not find is false
         static bool    find_http_header_cookie(const char *, const size_t, size_t &, size_t &);
 
-        //! serch http header Content_Length function
+        //! search http header Content_Length function
         //! @param const char*            buffer
         //! @param const size_t            buffer_len
         //! @param size_t&                header offset
@@ -97,7 +97,7 @@ public:
         //! @return bool                find is true. not find is false
         static bool    find_http_header_content_length(const char *, const size_t, size_t &, size_t &);
 
-        //! serch http header X_Forwarded_For function
+        //! search http header X_Forwarded_For function
         //! @param const char*            buffer
         //! @param const size_t            buffer_len
         //! @param size_t&                header offset
@@ -105,7 +105,7 @@ public:
         //! @return bool                find is true. not find is false
         static bool    find_http_header_x_forwarded_for(const char *, const size_t, size_t &, size_t &);
 
-        //! serch http header all function
+        //! search http header all function
         //! @param const char*            buffer
         //! @param const size_t            buffer_len
         //! @param size_t&                header offset

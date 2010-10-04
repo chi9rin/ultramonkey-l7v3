@@ -83,7 +83,7 @@ public:
         virtual ~logger_implement_access() {};
 
         /*!
-         * initialze function.
+         * initialize function.
          *
          * @param   default logrotation info use flag
          * @param   default logrotation info
@@ -139,21 +139,21 @@ public:
         }
 
         /*!
-         * increase reffernce count.
+         * increase reference count.
          *
          * @retrun void
          */
         virtual void    addRef();
 
         /*!
-         * decrease reffernce count.
+         * decrease reference count.
          *
          * @retrun void
          */
         virtual void    releaseRef();
 
         /*!
-         * decrease reffernce count.
+         * decrease reference count.
          *
          * @param inequal check object
          * @return check result

@@ -69,7 +69,7 @@ make_lighttpd_tmpdir (){
 	fi
 }
 
-#make lighhtpd_configfile
+#make lighttpd_configfile
 start_lighttpd (){
 #Set default value
 template_file=${DEFAULT_CONF_DIR}/default.conf

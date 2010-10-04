@@ -1,4 +1,4 @@
-#!/bin/bashgg
+#!/bin/bash
 
 # set config file
 . ${SET_DEFAULT_CONF}

@@ -35,9 +35,9 @@ protected:
         boost::asio::ip::tcp::endpoint    tcp_endpoint ;
         boost::asio::ip::udp::endpoint    udp_endpoint ;
 public:
-        //!    constractor
+        //!    constructor
         schedule_module_round_robin();
-        //! destractor
+        //! destructor
         ~schedule_module_round_robin();
 
         //!    initialize function
@@ -65,7 +65,7 @@ public:
                 rslist_iterator_next_func_type        inlist_next,
                 boost::asio::ip::tcp::endpoint        &outendpoint);
 
-        //! handle schedule calles then schedule function for UDP endpoint
+        //! handle schedule calls then schedule function for UDP endpoint
         //! @param[in]    thread id
         //! @param[in]    list iterator first function object
         //!    @param[in]    list iterator last function object
@@ -78,7 +78,7 @@ public:
                 rslist_iterator_next_func_type        inlist_next,
                 boost::asio::ip::udp::endpoint        &outendpoint);
 
-        //! replication interval interrrupt
+        //! replication interval interrupt
         //! timer thread call this function. from virtualservice.
         void    replication_interrupt();
 };
