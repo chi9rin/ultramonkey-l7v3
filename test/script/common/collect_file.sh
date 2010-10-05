@@ -16,12 +16,11 @@ else
 	LOG "l7vs config file moved ${TAR_DIR} ." 
 fi
 
-
 if [ -n ${L7DIRECTORD_CONF_DIR} -a ${L7DIRECTORD_CONF_DIR} != "/" ]
 then
-        mv ${L7DIRECTORD_CONF_DIR}/* ${TAR_DIR} 2> /dev/null
+	mv ${L7DIRECTORD_CONF_DIR}/* ${TAR_DIR} 2> /dev/null
 else
-        false
+	false
 fi
 if [ $? -ne 0 ]
 then
@@ -32,9 +31,9 @@ fi
 
 if [ -n ${L7VS_LOG_DIR} -a ${L7VS_LOG_DIR} != "/" ]
 then
-        mv ${L7VS_LOG_DIR}/* ${TAR_DIR} 2> /dev/null
+	mv ${L7VS_LOG_DIR}/* ${TAR_DIR} 2> /dev/null
 else
-        false
+	false
 fi
 if [ $? -ne 0 ]
 then

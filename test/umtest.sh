@@ -201,7 +201,7 @@ LOG "Test scripts end."
 # Aftertreatment
 ###################
 # Stop UltraMonkey-L7.
-. ${STOP_MONKEY}
+#. ${STOP_MONKEY}
 # Restore log and config files.
 . ${RESTORE_FILE}
 # Delete temp directory

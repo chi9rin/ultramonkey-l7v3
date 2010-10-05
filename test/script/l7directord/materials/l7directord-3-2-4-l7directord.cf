@@ -1,0 +1,8 @@
+virtual=127.0.0.1:10000
+	sorryserver=127.0.0.2:20000 masq
+	qosup=100M
+	qosdown=1G
+virtual=127.0.0.1:10001
+	sorryserver=127.0.0.2:20000 tproxy
+	qosup=100M
+	qosdown=1G
