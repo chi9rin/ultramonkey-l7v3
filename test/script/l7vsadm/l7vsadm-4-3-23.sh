@@ -46,50 +46,50 @@ l7vsd_system_memory            warn
 l7vsd_system_endpoint          warn
 l7vsd_system_signal            warn
 l7vsd_system_environment       warn
-l7vsd_snmpbridge               warn
+l7vsd_snmpagent                info
 l7vsd_protocol                 warn
 l7vsd_schedule                 warn
 
 Replication Mode:
 SINGLE
 
-SNMPAgent Connection Status:
-non-connecting
-
-SNMPAgent Log Level:
-Category                       Level
-snmpagent_start_stop           warn
-snmpagent_manager_receive      warn
-snmpagent_manager_send         warn
-snmpagent_l7vsd_receive        warn
-snmpagent_l7vsd_send           warn
-snmpagent_logger               warn
-snmpagent_parameter            warn
-snmpagent_system               warn
-snmpagent_system_memory        warn
-snmpagent_system_endpoint      warn
-snmpagent_system_signal        warn
-snmpagent_system_environment   warn
+SNMPAgent:
+Agent Status                   inactive
+log trap status                none
+log trap level                 none
+cache update interval          none
+start date                     none
+last request date              none
+last trap date                 none
+total GET requests             none
+total SET requests             none
+total trap counts              none
 
 Prot LocalAddress:Port ProtoMod Scheduler Protomod_opt_string
-     SorryAddress:Port Sorry_cc Sorry_flag
-     QoS-up   Throughput-up
-     QoS-down Throughput-down
-     SSL_config_file
-     Socket option
-     Access_log_flag
-     Access_log_file
-     Access_log_rotate option
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
-TCP 127.0.0.1:40001 ip rr --timeout 3600 --no-reschedule --sorry-uri '/'
-    none 0 0
-    100000000 0
-    0 0
-    none
-    none
-    0
-    none
-    --ac-rotate-type size --ac-rotate-max-backup-index 10 --ac-rotate-max-filesize 10M"
+TCP 127.0.0.1:40001 ip rr --timeout 3600 --no-reschedule --sorry-uri '/' --statistic 0
+  Bypass Settings:
+    Sorry Server                  none
+    Max Connection                0
+    Sorry Flag                    off
+  SSL Settings:
+    SSL Config File               none
+  Logging Settings:
+    Access Log                    off
+    Access Log File               none
+    Access Log Rotate             --ac-rotate-type size --ac-rotate-max-backup-index 10 --ac-rotate-max-filesize 10M
+  Socket Settings:
+    TCP_DEFER_ACCEPT              disable
+    TCP_NODELAY                   disable
+    TCP_CORK                      disable
+    TCP_QUICKACK                  disable
+  Throughput:
+    Current Upload / Limit        0.000000 Mbps / 800.000000 Mbps
+    Current Download / Limit      0.000000 Mbps / 0.000000 Mbps
+  Statistics:
+    HTTP Total Requests           0
+    HTTP GET Requests             0
+    HTTP POST Requests            0"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -V -n"
@@ -131,50 +131,50 @@ l7vsd_system_memory            warn
 l7vsd_system_endpoint          warn
 l7vsd_system_signal            warn
 l7vsd_system_environment       warn
-l7vsd_snmpbridge               warn
+l7vsd_snmpagent                info
 l7vsd_protocol                 warn
 l7vsd_schedule                 warn
 
 Replication Mode:
 SINGLE
 
-SNMPAgent Connection Status:
-non-connecting
-
-SNMPAgent Log Level:
-Category                       Level
-snmpagent_start_stop           warn
-snmpagent_manager_receive      warn
-snmpagent_manager_send         warn
-snmpagent_l7vsd_receive        warn
-snmpagent_l7vsd_send           warn
-snmpagent_logger               warn
-snmpagent_parameter            warn
-snmpagent_system               warn
-snmpagent_system_memory        warn
-snmpagent_system_endpoint      warn
-snmpagent_system_signal        warn
-snmpagent_system_environment   warn
+SNMPAgent:
+Agent Status                   inactive
+log trap status                none
+log trap level                 none
+cache update interval          none
+start date                     none
+last request date              none
+last trap date                 none
+total GET requests             none
+total SET requests             none
+total trap counts              none
 
 Prot LocalAddress:Port ProtoMod Scheduler Protomod_opt_string
-     SorryAddress:Port Sorry_cc Sorry_flag
-     QoS-up   Throughput-up
-     QoS-down Throughput-down
-     SSL_config_file
-     Socket option
-     Access_log_flag
-     Access_log_file
-     Access_log_rotate option
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
-TCP 127.0.0.1:40001 ip rr --timeout 3600 --no-reschedule --sorry-uri '/'
-    none 0 1
-    100000000 0
-    0 0
-    none
-    none
-    0
-    none
-    --ac-rotate-type size --ac-rotate-max-backup-index 10 --ac-rotate-max-filesize 10M"
+TCP 127.0.0.1:40001 ip rr --timeout 3600 --no-reschedule --sorry-uri '/' --statistic 0
+  Bypass Settings:
+    Sorry Server                  none
+    Max Connection                0
+    Sorry Flag                    on
+  SSL Settings:
+    SSL Config File               none
+  Logging Settings:
+    Access Log                    off
+    Access Log File               none
+    Access Log Rotate             --ac-rotate-type size --ac-rotate-max-backup-index 10 --ac-rotate-max-filesize 10M
+  Socket Settings:
+    TCP_DEFER_ACCEPT              disable
+    TCP_NODELAY                   disable
+    TCP_CORK                      disable
+    TCP_QUICKACK                  disable
+  Throughput:
+    Current Upload / Limit        0.000000 Mbps / 800.000000 Mbps
+    Current Download / Limit      0.000000 Mbps / 0.000000 Mbps
+  Statistics:
+    HTTP Total Requests           0
+    HTTP GET Requests             0
+    HTTP POST Requests            0"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -V -n"

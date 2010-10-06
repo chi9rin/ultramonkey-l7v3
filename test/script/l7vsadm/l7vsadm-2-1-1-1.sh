@@ -19,7 +19,7 @@ then
         exit 1
 fi
 
-RET=`cat ${L7VS_LOG_DIR}/l7vsadm.log` #| grep "\[WARN\] l7vsadm_common ADM33100009 Command wait value too long. Use default value."`
+RET=`cat ${L7VS_LOG_DIR}/l7vsadm.log` # | grep "\[WARN\] l7vsadm_common ADM33100009 Command wait value too long. Use default value."`
 echo "$RET"
 exit 1
 if [ -z "${RET}" ]

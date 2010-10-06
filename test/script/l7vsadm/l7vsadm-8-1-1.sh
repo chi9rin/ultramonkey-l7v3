@@ -52,10 +52,10 @@ then
         exit 1
 fi
 
-$L7VSADM -P -r all
+$L7VSADM -P -r logger
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM -P -r all"
+        echo "Test failed: $L7VSADM --parameter --reload logger"
         exit 1
 fi
 

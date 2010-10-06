@@ -83,6 +83,7 @@ then
         echo "Test failed: kill ${CONNECT1}"
         exit 1
 fi
+sleep 1
 
 #Connect
 RET=`$WGET -t 1 -qO- http://127.0.0.1:40001/`

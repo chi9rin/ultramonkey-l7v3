@@ -12,7 +12,6 @@ fi
 usleep 100000
 
 RET=`$L7VSADM --help`
-echo "$RET"
 EXPECT="Usage: 
   l7vsadm -A -t service-address -m proto-module [module-args]
           [-s scheduler] [-u connection-count] [-b sorry-server] [-T|M]
@@ -31,7 +30,8 @@ EXPECT="Usage:
   l7vsadm -R -f
   l7vsadm -R -d
   l7vsadm -L -c log-category -l log-level
-  l7vsadm -S -c log-category -l log-level
+  l7vsadm -S [-f snmp-flag] [-i update-interval] [-t log-trap-flag] [-l log-trap-level]
+  l7vsadm -S -r [-t service-address -m proto-module]
   l7vsadm -P -r reload-parameter
   l7vsadm -l [-n]
   l7vsadm -V [-n]
@@ -57,13 +57,13 @@ Commands:
 
 Options:
   --tcp-service      -t service-address     service-address is host:port
-  --proto-module     -m proto-module        protocol module name and module argument
+  --proto-module     -m proto-module        protocol module name and module argment
                         [module-args]
   --scheduler        -s scheduler           one of rr,lc,wrr
   --upper            -u connection-count    maximum number of connections
   --bypass           -b sorry-server        sorry server address is host:port
   --tproxy           -T                     set sorry server connection to IP transparent mode.
-  --masq             -M                     set sorry server connection to IP masquerade mode.
+  --masq             -M                     set sorry server connection to IP masquarade mode.
   --flag             -f sorry-flag          sorry status set to virtual service
   --qos-up           -Q QoSval-up           QoS Threshold(bps) set to real server direction
   --qos-down         -q QoSval-down         QoS Threshold(bps) set to client direction
@@ -75,14 +75,19 @@ Options:
   --real-server      -r server-address      server-address is host:port
   --weight           -w weight              scheduling weight set to real server
   --tproxy           -T                     set real server connection to IP transparent mode.
-  --masq             -M                     set real server connection to IP masquerade mode.
+  --masq             -M                     set real server connection to IP masquarade mode.
   --switch           -s replication-switch  start or stop replication
   --force            -f                     force replication start
   --dump             -d                     dump replication memory
   --category         -c log-category        set log category for l7vsd or SNMP Agent
   --level            -l log-level           set log level for l7vsd or SNMP Agent
   --reload           -r reload-parameter    reload specified config parameter
-  --numeric          -n                     list the table in numeric"
+  --numeric          -n                     list the table in numeric
+  --flag             -f snmp-flag           start or stop snmp function 0(off) 1(on)
+  --interval         -i update-interval     set collect snmp cache collect interval(s)
+  --logtrap          -t log-trap-flag       start or stop log trap function 0(off) 1(on)
+  --logtraplevel     -l log-trap-level      set log trap level for snmp
+  --refresh          -r                     clear statistic info for snmp"
 
 if [ "${RET}" != "${EXPECT}" ]
 then

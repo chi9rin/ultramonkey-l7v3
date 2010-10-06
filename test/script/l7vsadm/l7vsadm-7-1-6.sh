@@ -36,7 +36,7 @@ l7vsd_system_memory            warn
 l7vsd_system_endpoint          warn
 l7vsd_system_signal            warn
 l7vsd_system_environment       warn
-l7vsd_snmpbridge               warn
+l7vsd_snmpagent                info
 l7vsd_protocol                 warn
 l7vsd_schedule                 warn"
 if [ "${RET}" != "${EXPECT}" ]
@@ -77,7 +77,7 @@ l7vsd_system_memory            error
 l7vsd_system_endpoint          error
 l7vsd_system_signal            error
 l7vsd_system_environment       error
-l7vsd_snmpbridge               error
+l7vsd_snmpagent                error
 l7vsd_protocol                 error
 l7vsd_schedule                 error"
 if [ "${RET}" != "${EXPECT}" ]

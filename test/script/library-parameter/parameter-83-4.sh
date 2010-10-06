@@ -26,8 +26,8 @@ then
         exit 1
 fi
 
-RET=`$L7VSADM -V | awk '/TCP localhost:44431/ { getline; getline; getline; getline; print $0 }' `
-EXPECT="    /etc/l7vs/sslproxy/sslproxy.target.cf"
+RET=`$L7VSADM -V | awk '/TCP localhost:44431/ { getline; getline; getline; getline; getline; getline; print $4 }' `
+EXPECT="/etc/l7vs/sslproxy/sslproxy.target.cf"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -V"
