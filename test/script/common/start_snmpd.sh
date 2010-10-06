@@ -22,7 +22,7 @@ then
 	then
 		LOG_WARN "Can not stop snmptrapd."
 	else
-		LOG "Stopping l7vsd done."
+		LOG "Stopping snmptrapd done."
 	fi
 fi
 
