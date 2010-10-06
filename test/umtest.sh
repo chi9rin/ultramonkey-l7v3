@@ -201,7 +201,7 @@ LOG "Test scripts end."
 # Aftertreatment
 ###################
 # Return log and config files.
-. ${RETURN_FILE}
+. ${RESTORE_FILE}
 # Delete temp directory
 rm -rf ${TMP_DIR}
 exit 0
