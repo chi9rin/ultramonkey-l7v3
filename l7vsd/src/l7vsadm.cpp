@@ -2583,7 +2583,8 @@ void l7vs::l7vsadm::disp_list_verbose()
                         if (zeropoint == vse.sorry_endpoint) {
                                 sorryepstr = "none";
                         } else {
-                                sorryepstr = endpoint_to_string<boost::asio::ip::tcp>(vse.sorry_endpoint, numeric_flag);
+                                sorryepstr = endpoint_to_string<boost::asio::ip::tcp>(vse.sorry_endpoint,
+                                             numeric_flag) + " " + vse.get_fwdmode_str();
                         }
 
                         if (vse.sorry_flag) {
