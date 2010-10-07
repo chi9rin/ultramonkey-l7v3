@@ -1,0 +1,38 @@
+
+-- この行以下は無視されます --
+
+M    l7directord/l7directord-4-1-5-2.sh
+D    l7directord/l7directord-5-2-4-4.sh
+M    l7directord/l7directord-1-2-48-2.sh
+M    l7directord/l7directord-4-1-2.sh
+AM   l7directord/l7directord-5-3-2.sh
+D    l7directord/l7directord-5-2-5-3.sh
+M    l7directord/l7directord-5-2-9.sh
+M    l7directord/l7directord-1-2-49-1.sh
+D    l7directord/l7directord-5-2-4-5.sh
+M    l7directord/l7directord-5-2-26.sh
+M    l7directord/l7directord-5-2-24-6.sh
+AM   l7directord/l7directord-5-3-3.sh
+D    l7directord/l7directord-5-2-5-4.sh
+M    l7directord/l7directord-1-2-49-2.sh
+D    l7directord/l7directord-5-2-4-6.sh
+M    l7directord/l7directord-4-1-1-1.sh
+AM   l7directord/l7directord-5-3-4.sh
+M    l7directord/l7directord-1-2-49-3.sh
+RM   l7directord/l7directord-1-2-44-1.sh
+M    l7directord/l7directord-4-1-1-2.sh
+M    l7directord/l7directord-1-3-9.sh
+M    l7directord/l7directord-5-2-24-3.sh
+D    l7directord/l7directord-1-2-49-4.sh
+M    l7directord/l7directord-4-1-5-1.sh
+M    l7directord/l7directord-1-2-44-2.sh
+M    l7directord/materials/l7directord-help.txt
+A    l7directord/materials/l7directord-5-3-3-l7directord.cf
+AM   l7directord/materials/l7directord-5-2-24-callback.sh
+M    l7directord/materials/l7directord-1-2-44-l7directord.cf
+A    l7directord/materials/l7directord-5-3-2-l7directord.cf
+A    l7directord/materials/l7directord-5-2-24-no_exec_callback.sh
+M    l7directord/materials/l7directord-1-2-48-l7directord.cf
+A    l7directord/materials/l7directord-1-3-11-l7directord.cf
+M    l7directord/materials/l7directord-1-2-46-l7directord.cf
+A    l7directord/materials/l7directord-5-3-4-l7directord.cf

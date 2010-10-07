@@ -91,6 +91,8 @@ TCP 127.0.0.1:40001 ip rr --timeout 3600 --no-reschedule --sorry-uri '/' --stati
     HTTP Total Requests           0
     HTTP GET Requests             0
     HTTP POST Requests            0"
+echo "${RET}" > /tmp/a.txt
+echo "${EXPECT}" > /tmp/b.txt
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -V -n"

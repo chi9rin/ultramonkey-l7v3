@@ -23,7 +23,7 @@ then
         exit 1
 fi
 
-if [ $((TIME1+10)) -ne $TIME2 ]
+if [ $((TIME1+10)) -gt $TIME2 ]
 then
         echo "Test failed: flock -n -x $L7VSADM l7vsadm"
         exit 1

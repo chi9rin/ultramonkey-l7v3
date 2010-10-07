@@ -112,6 +112,7 @@ TCP 127.0.0.1:40001 sessionless rr --sorry-uri '/' --statistic 0
     HTTP Total Requests           0
     HTTP GET Requests             0
     HTTP POST Requests            0"
+echo "$RET"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: l7vsadm -V -n"
