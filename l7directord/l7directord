@@ -3667,7 +3667,7 @@ sub ld_log {
     ld_debug(2, $message);
     chomp $message;
 
-    if ( !$PROC_STAT{log_opened} ) {
+    if ( !$CONFIG{supervised} && !$PROC_STAT{log_opened} ) {
         return 1;
     }
 
