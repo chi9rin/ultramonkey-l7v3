@@ -115,6 +115,7 @@ um_test (){
 			LOG "Execute ${SCRIPT_NAME} ."
 			make_lighttpd_tmpdir
 			. ${START_SNMPD}
+			echo -n "${SCRIPT_NAME}" | tee -a ${REPORT_FILE}
 			(
 				cd $1
 				if [ -n "${DEBUG_FLAG}" ]
@@ -126,9 +127,9 @@ um_test (){
 			# Write report.
 			if [ $? -eq 0 ]
 			then
-				echo -e "${SCRIPT_NAME}\tOK" | tee -a ${REPORT_FILE}
+				echo -e "\tOK" | tee -a ${REPORT_FILE}
 			else
-				echo -e "${SCRIPT_NAME}\tNG" | tee -a ${REPORT_FILE}
+				echo -e "\tNG" | tee -a ${REPORT_FILE}
 				cat ${TMP_DIR}/umtest_tmp | tee -a ${REPORT_FILE}
 			fi
 			# Stop UltraMonkey-L7.
