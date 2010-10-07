@@ -23,6 +23,7 @@ cp $dummy /sbin/l7vsadm
 function cleanup {
 	rm $dummy
 	rm $dummylog
+	rm /sbin/l7vsadm
 	mv $bak /usr/sbin/l7vsadm
 }
 
