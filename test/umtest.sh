@@ -193,13 +193,15 @@ done
 
 # Count OK and NG
 echo "############# Summary ###############" | tee -a ${REPORT_FILE}
-grep -v "^Test failed" ${REPORT_FILE} | 
-awk 'BEGIN{OkCon=0;NgCon=0;}
-     {if($2 == "OK")
-	 OkCon++;
-      if($2 == "NG")
-	 NgCon++;}
-     END{printf("OK=%d\tNG=%d\n",OkCon,NgCon)}' | tee -a ${REPORT_FILE}
+perl -ne "print if m/^[^\t]+\t(?:OK|NG)/" ${REPORT_FILE} |
+    awk 'BEGIN { OkCon=0; NgCon=0; }
+         {
+           if ($2 == "OK")
+               OkCon++;
+           if ($2 == "NG")
+               NgCon++;
+         }
+         END { printf("OK=%d\tNG=%d\n", OkCon, NgCon) }' | tee -a ${REPORT_FILE}
 LOG "Test scripts end."
 ###################
 # Aftertreatment
