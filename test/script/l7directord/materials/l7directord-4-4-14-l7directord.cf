@@ -1,0 +1,6 @@
+checkinterval=3
+retryinterval=3
+checkcount=10
+virtual=127.0.0.1:50000
+    real=127.0.0.1:20000
+    service=http

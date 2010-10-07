@@ -38,7 +38,7 @@ then
 fi
 sleep 2
 
-RET=`cat ${L7VS_LOG_DIR}/l7directord.log | grep "\[ERR0303\] Failed to command ./usr/sbin/l7vsadm -D -t 127.0.0.1:50000 -m sessionless 2>&1' with return: 65280"`
+RET=`cat ${L7VS_LOG_DIR}/l7directord.log | grep "\[ERR0303\] Failed to command .$L7VSADM -D -t 127.0.0.1:50000 -m sessionless 2>&1' with return: 65280"`
 if [ -z "${RET}" ]
 then
         echo "Test failed: cat ${L7VS_LOG_DIR}/l7directord.log"

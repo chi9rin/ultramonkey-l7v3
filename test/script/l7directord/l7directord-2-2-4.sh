@@ -57,7 +57,7 @@ fi
 sleep 5
 
 RET=`ps -ef | grep l7directord | grep -v grep | grep -v umtest.sh | awk '{print $8,$9}'`
-EXPECT="/usr/sbin/l7directord start
+EXPECT="$L7DIRECTORD start
 l7directord: http:127.0.0.1:50001:UP
 l7directord: http:127.0.0.1:50002:UP
 l7directord: http:127.0.0.1:50003:UP"
@@ -80,7 +80,7 @@ fi
 sleep 5
 
 RET=`ps -ef | grep l7directord | grep -v grep | grep -v umtest.sh | awk '{print $8,$9}'`
-EXPECT="/usr/sbin/l7directord start
+EXPECT="$L7DIRECTORD start
 l7directord: http:127.0.0.1:50001:UP
 l7directord: http:127.0.0.1:50002:UP"
 if [ "$RET" != "$EXPECT" ]

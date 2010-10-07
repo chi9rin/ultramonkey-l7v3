@@ -17,6 +17,7 @@ RESTORE_FILE="${COMMON_SCRIPT_DIR}/restore_file.sh"
 COLLECT_FILE="${COMMON_SCRIPT_DIR}/collect_file.sh"
 SET_DEFAULT_CONF="${COMMON_SCRIPT_DIR}/set_default_conf.sh"
 START_SNMPD="${COMMON_SCRIPT_DIR}/start_snmpd.sh"
+UM_WRAPPER="${COMMON_SCRIPT_DIR}/um_wrapper"
 
 if [ ! -d "$TEST_DIR" ]
 then
@@ -167,7 +168,9 @@ shift `expr "$OPTIND" - 1`
 . ${BACKUP_FILE}
 # Initialize environment.
 \cp -f ${CONF_DIR}/hosts /etc/hosts
+# Load common functions
 . ${LIGHTTPD_FUNC}
+. ${UM_WRAPPER}
 
 ###################
 # Test
@@ -200,7 +203,7 @@ LOG "Test scripts end."
 ###################
 # Aftertreatment
 ###################
-# Return log and config files.
+# Restore log and config files.
 . ${RESTORE_FILE}
 # Delete temp directory
 rm -rf ${TMP_DIR}

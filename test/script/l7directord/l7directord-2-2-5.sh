@@ -45,10 +45,10 @@ then
 fi
 
 RET=`ps -ef | grep l7directord | grep -v grep | grep -v umtest.sh | awk '{print $8,$9}'`
-EXPECT="/usr/sbin/l7directord start
-/usr/sbin/l7directord /etc/ha.d/conf/a.cf
+EXPECT="$L7DIRECTORD start
+$L7DIRECTORD /etc/ha.d/conf/a.cf
 l7directord: none:127.0.0.1:50005:UP
-/usr/sbin/l7directord /etc/ha.d/conf/b.cf
+$L7DIRECTORD /etc/ha.d/conf/b.cf
 l7directord: none:127.0.0.1:50006:UP
 l7directord: ping:127.0.0.1:50001:UP
 l7directord: ping:127.0.0.1:50002:UP
@@ -60,7 +60,7 @@ then
         exit 1
 fi
 
-PID=`ps -ef | grep "/usr/sbin/l7directord start" | awk '{print $2}'`
+PID=`ps -ef | grep "$L7DIRECTORD start" | awk '{print $2}'`
 kill -KILL $PID
 
 sleep 15
@@ -85,9 +85,9 @@ then
 fi
 
 RET=`ps -ef | grep l7directord | grep -v grep | grep -v umtest.sh | awk '{print $8,$9}'`
-EXPECT="/usr/sbin/l7directord /etc/ha.d/conf/a.cf
+EXPECT="$L7DIRECTORD /etc/ha.d/conf/a.cf
 l7directord: none:127.0.0.1:50005:UP
-/usr/sbin/l7directord /etc/ha.d/conf/b.cf
+$L7DIRECTORD /etc/ha.d/conf/b.cf
 l7directord: none:127.0.0.1:50006:UP"
 if [ "$RET" != "$EXPECT" ]
 then

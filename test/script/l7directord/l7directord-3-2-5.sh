@@ -28,15 +28,15 @@ chmod +x $dummy
 
 # backup l7vsadm
 bak="/tmp/`uuidgen`.l7vsadm"
-mv /usr/sbin/l7vsadm $bak
+mv $L7VSADM $bak
 
 # install dummy l7vsadm
-cp $dummy /usr/sbin/l7vsadm
+cp $dummy $L7VSADM
 
 function cleanup {
 	rm $dummy
 	rm $dummylog
-	mv $bak /usr/sbin/l7vsadm
+	mv $bak $L7VSADM
 }
 
 # Start l7directord
@@ -49,11 +49,11 @@ cat /dev/null > ${L7DIRECTORD_CONF_DIR}/l7directord.cf
 $INIT_L7DIRECTORD reload 
 
 # check /usr/sbin/l7vsadm -D -t
-grep " /usr/sbin/l7vsadm -D -t" $dummylog | wc -l
+grep " $L7VSADM -D -t" $dummylog | wc -l
 if [ $? -ne 0 ]
 then
 	cleanup
-        echo "Test failed: Cannot find '/usr/sbin/l7vsadm -D -t' in the log."
+        echo "Test failed: Cannot find '$L7VSADM -D -t' in the log."
         exit 1
 fi
 

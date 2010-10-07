@@ -82,10 +82,10 @@ then
 fi
 
 RET=`ps -ef | grep l7directord | grep -v grep | grep -v umtest.sh | awk '{print $8,$9}'`
-EXPECT="/usr/sbin/l7directord start
-/usr/sbin/l7directord /etc/ha.d/conf/2.cf
-/usr/sbin/l7directord /etc/ha.d/conf/3.cf
-/usr/sbin/l7directord /etc/ha.d/conf/1.cf
+EXPECT="$L7DIRECTORD start
+$L7DIRECTORD /etc/ha.d/conf/2.cf
+$L7DIRECTORD /etc/ha.d/conf/3.cf
+$L7DIRECTORD /etc/ha.d/conf/1.cf
 l7directord: none:127.0.0.1:50001:UP
 l7directord: none:127.0.0.1:50002:UP
 l7directord: none:[::1]:50003:UP

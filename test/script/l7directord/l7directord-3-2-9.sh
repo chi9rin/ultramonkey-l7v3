@@ -4,27 +4,21 @@ cat /dev/null > ${L7DIRECTORD_CONF_DIR}/l7directord.cf
 
 # backup l7directord
 bak="/tmp/`uuidgen`.l7directord"
-cp /usr/sbin/l7directord $bak
+cp $L7DIRECTORD $bak
 
 # insert Dumper code
-sed -i -e "s/my \$current_service = ld_read_l7vsadm();/my \$current_service = ld_read_l7vsadm(); use Data::Dumper; ld_log(Dumper \$current_service); exit;/" $L7DIRECTORD
+sed -i -e "s/my \$current_service = ld_read_l7vsadm();/my \$current_service = ld_read_l7vsadm(); ld_log(Dumper \$current_service); exit;/" $L7DIRECTORD
 
-function cleanup {
-	mv $bak /usr/sbin/l7directord
+cleanup() {
+	mv $bak $L7DIRECTORD
 }
 
 # Start l7vsd
-$L7VSD
-
-# sleep until l7vsd start
-while :
-do
-	if [ -e "/var/run/l7vs/l7vs" ]
-	then
-		break
-	fi
-	usleep 10000
-done
+start_l7vsd
+if [ $? -ne 0 ]; then
+	cleanup
+	exit 1
+fi
 
 # Add various service
 $L7VSADM -A -t 127.0.0.1:10000 -m sessionless -s wrr -q 100M -Q 200M -b 127.0.0.1:12345 -f 1
@@ -43,12 +37,16 @@ $L7VSADM -a -t [::1]:20060 -m ip -r 127.0.0.1:20000
 $L7VSADM -a -t [::1]:20060 -m ip -r 127.0.0.1:30000 -w 0
 
 # Start l7directord
-$INIT_L7DIRECTORD start 
+start_l7directord
+if [ $? -ne 0 ]; then
+	cleanup
+	exit 1
+fi
 
 # sleep until l7directord stop
 while :
 do
-	ps aux | grep /usr/sbin/l7directord | grep -v grep
+	ps aux | grep $L7DIRECTORD | grep -v grep > /dev/null 2>&1
 	if [ $? -ne 0 ]
 	then
 		break
@@ -58,12 +56,13 @@ done
 
 # analyze result
 analyze="/tmp/`uuidgen`.log"
-grep -A 300 VAR /var/log/l7vs/l7directord.log | sed -e "s/^\[[^\]*\] //" > $analyze
-diff $analyze ./materials/l7directord-3-2-9.log
+grep -A 300 VAR ${L7VS_LOG_DIR}/l7directord.log | sed -e "s/^\[[^\]*\] //" > $analyze
+diff_result=`diff $analyze ./materials/l7directord-3-2-9.log`
 if [ $? -ne 0 ]
 then
 	cleanup
         echo "Test failed: Dumper result was not matched."
+	echo "$diff_result"
 	exit 1
 fi
 

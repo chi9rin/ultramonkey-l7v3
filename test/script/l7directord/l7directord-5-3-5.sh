@@ -31,7 +31,7 @@ then
         exit 1
 fi
 
-RET=`cat ${L7VS_LOG_DIR}/l7directord.log | grep "\[ERR0303\] Failed to command ./usr/sbin/l7vsadm -A -t 127.0.0.1:50001 -m ip --foo -s wrr -u 0 -b 0.0.0.0:0 -Q 0 -q 0 2>&1. with return: 65280"`
+RET=`cat ${L7VS_LOG_DIR}/l7directord.log | grep "\[ERR0303\] Failed to command .$L7VSADM -A -t 127.0.0.1:50001 -m ip --foo -s wrr -u 0 -b 0.0.0.0:0 -Q 0 -q 0 2>&1. with return: 65280"`
 if [ -z "${RET}" ]
 then
         echo "Test failed: cat ${L7VS_LOG_DIR}/l7directord.log"
@@ -47,7 +47,7 @@ fi
 
 
 ##########
-RET=`cat ${L7VS_LOG_DIR}/l7directord.log | grep "\[ERR0303\] Failed to command ./usr/sbin/l7vsadm -A -t 127.0.0.1:50002 -m sslid -foo -s lc -u 0 -b 0.0.0.0:0 -Q 0 -q 0 2>&1' with return: 65280"`
+RET=`cat ${L7VS_LOG_DIR}/l7directord.log | grep "\[ERR0303\] Failed to command .$L7VSADM -A -t 127.0.0.1:50002 -m sslid -foo -s lc -u 0 -b 0.0.0.0:0 -Q 0 -q 0 2>&1' with return: 65280"`
 if [ -z "${RET}" ]
 then
         echo "Test failed: cat ${L7VS_LOG_DIR}/l7directord.log"
@@ -62,7 +62,7 @@ then
 fi
 
 ###########33
-RET=`cat ${L7VS_LOG_DIR}/l7directord.log | grep "\[ERR0303\] Failed to command ./usr/sbin/l7vsadm -A -t 127.0.0.1:50003 -m sessionless --foo -s rr -u 0 -b 0.0.0.0:0 -Q 0 -q 0 2>&1' with return: 65280"`
+RET=`cat ${L7VS_LOG_DIR}/l7directord.log | grep "\[ERR0303\] Failed to command .$L7VSADM -A -t 127.0.0.1:50003 -m sessionless --foo -s rr -u 0 -b 0.0.0.0:0 -Q 0 -q 0 2>&1' with return: 65280"`
 if [ -z "${RET}" ]
 then
         echo "Test failed: cat ${L7VS_LOG_DIR}/l7directord.log"
