@@ -1,7 +1,7 @@
 #!/bin/bash
 . ${SET_DEFAULT_CONF}
 
-\cp -p ./materials/l7directord-5-2-24-realdowncallback.sh ${L7DIRECTORD_CONF_DIR}/realdowncallback.sh
+\cp -p ./materials/l7directord-5-2-24-callback.sh ${L7DIRECTORD_CONF_DIR}/realdowncallback.sh
 sed "s|XXX|${L7DIRECTORD_CONF_DIR}/realdowncallback.sh|g" ./materials/l7directord-5-2-24-down-l7directord.cf > ${L7DIRECTORD_CONF_DIR}/l7directord.cf
 
 #Run http server
@@ -34,8 +34,8 @@ then
 fi
 sleep 1
 stop_lighttpd $RealServer1
-sleep 11
-RET=`cat ${L7VS_LOG_DIR}/realdowncallbacktest`
+sleep 20
+RET=`cat ${L7VS_LOG_DIR}/callbacktest`
 EXPECT="callback is executed."
 if [ "$RET" != "$EXPECT" ]
 then

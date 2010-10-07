@@ -1,0 +1,11 @@
+virtual=127.0.0.1:40001
+    sorryserver=127.0.0.1:50001
+    maxconn=10
+    qosup=10M
+    qosdown=5M
+virtual=127.0.0.1:40002
+    sorryserver=127.0.0.1:50002 tproxy
+    maxconn=0
+    qosup=0
+    qosdown=0
+

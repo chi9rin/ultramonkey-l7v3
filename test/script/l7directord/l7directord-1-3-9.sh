@@ -1,6 +1,6 @@
 #!/bin/bash
 . ${SET_DEFAULT_CONF}
-\cp ./materials/l7directord-43-l7directord.cf ${L7DIRECTORD_CONF_DIR}/l7directord.cf
+\cp ./materials/l7directord-1-3-9-l7directord.cf ${L7DIRECTORD_CONF_DIR}/l7directord.cf
 
 # Start l7vsd
 $L7VSD

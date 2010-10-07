@@ -146,7 +146,7 @@ fi
 
 RET=`cat ${L7VS_LOG_DIR}/l7directord.log | egrep "\[WRN1102\] Service check NG. HTTP response is not ok. Response status line is .500 Can't connect to 127.0.0.1:50002" | wc -l`
 # checkcount 3
-if [ $RET -ne 3 ]
+if [ $RET -gt 3 ]
 then
         echo "Test failed: cat ${L7VS_LOG_DIR}/l7directord.log"
         exit 1
@@ -160,7 +160,7 @@ do
         if [ -n "$TIME1" ]
         then
                 # retryinterval 1
-                if [ $((TIME1+1)) -ne $((TIME2)) ]
+                if [ $((TIME1+1)) -gt $((TIME2)) ]
                 then
                         echo "Test failed: cat ${L7VS_LOG_DIR}/l7directord.log"
                         exit 1
@@ -186,7 +186,7 @@ do
         if [ -n "$TIME1" ]
         then
 		# checkinterval 5
-                if [ $((TIME1+5)) -ne $((TIME2)) ]
+                if [ $((TIME1+5)) -gt $((TIME2)) ]
                 then
                         echo "Test failed: cat ${L7VS_LOG_DIR}/l7directord-5-2-26-real1a-access.log"
                         exit 1
@@ -298,7 +298,7 @@ do
         if [ -n "$TIME1" ]
         then
                 # retryinterval 3
-                if [ $((TIME1+3)) -ne $((TIME2)) ]
+                if [ $((TIME1+3)) -gt $((TIME2)) ]
                 then
                         echo "Test failed: cat ${L7VS_LOG_DIR}/l7directord.log"
                         exit 1
@@ -324,7 +324,7 @@ do
         if [ -n "$TIME1" ]
         then
 		# checkinterval 1
-                if [ $((TIME1+1)) -ne $((TIME2)) ]
+                if [ $((TIME1+1)) -gt $((TIME2)) ]
                 then
                         echo "Test failed: cat ${L7VS_LOG_DIR}/l7directord-5-2-26-real1b-access.log"
                         exit 1

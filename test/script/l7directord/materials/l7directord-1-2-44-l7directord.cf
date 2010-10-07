@@ -133,10 +133,10 @@ fallback   =     "localhost6:80"
 fallback    =       "localhost6:http"
 
 callback=/bin/sh
-callback='/bin/csh'
+callback='/bin/sh'
 callback="/bin/bash"
 callback  =  /bin/sh
-callback  =     '/bin/csh'
+callback  =     '/bin/sh'
 callback  =       "/bin/bash"
 
 execute=/etc/hosts
@@ -145,6 +145,11 @@ execute="/etc/group"
 execute  =  /etc/hosts
 execute  =    '/etc/passwd'
 execute  =      "/etc/group"
+
+supervised
+supervised = foo
+supervised   = '0'
+supervised     = no
 
 logfile=/tmp/logfile
 logfile=local0
@@ -159,8 +164,4 @@ logfile   =      'local0'
 logfile     =   "/tmp/logfile"
 logfile     =   "local0"
 
-supervised
-supervised = foo
-supervised   = '0'
-supervised     = no
 

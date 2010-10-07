@@ -54,7 +54,7 @@ do
 	TIME2=`date -d "$TMP" +'%s'`
 	if [ -n "$TIME1" ]
 	then
-		if [ $((TIME1+5)) -ne $((TIME2)) ]
+		if [ $((TIME1+5)) -gt $((TIME2)) ]
 		then
 			echo "Test failed: cat ${L7VS_LOG_DIR}/l7directord-4-1-1-1-access.log"
 			exit 1

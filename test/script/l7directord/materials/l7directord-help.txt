@@ -234,11 +234,13 @@ SSYYNNTTAAXX
            the qosdown limit.  KK(kilo), MM(mega) and GG(giga) unit are
            available.
 
-       ssoorrrryysseerrvveerr ==_i_p___a_d_d_r_e_s_s_|_h_o_s_t_n_a_m_e_[_:_p_o_r_t_n_u_m_b_e_r_|_s_e_r_v_i_c_e_n_a_m_e_]
+       ssoorrrryysseerrvveerr ==_i_p___a_d_d_r_e_s_s_|_h_o_s_t_n_a_m_e_[_:_p_o_r_t_n_u_m_b_e_r_|_s_e_r_v_i_c_e_n_a_m_e_] [mmaassqq|ttpprrooxxyy]
            Defines a sorry server by IP-address (or hostname) and port (or
-           servicename). Firewall-mark settings cannot be set.  If the number
-           of requests to the virtual service cross the maxconn limit, the
-           requests would be redirected to the sorry server.
+           servicename). The second argument defines the forwarding mechanism,
+           it must be mmaassqq or ttpprrooxxyy.  Firewall-mark settings cannot be set.
+           If the number of requests to the virtual service cross the maxconn
+           limit, or no available real server exists, then the requests would
+           be redirected to the sorry server.
 
        cchheecckkttyyppee == nneeggoottiiaattee|ccoonnnneecctt|_N|ppiinngg|ccuussttoomm|ooffff|oonn
            Type of check to perform. Negotiate sends a request and matches a
@@ -448,4 +450,4 @@ AAUUTTHHOORRSS
 
 
 
-perl v5.10.1                      2010-09-10                    L7DIRECTORD(1)
+perl v5.10.1                      2010-10-07                    L7DIRECTORD(1)

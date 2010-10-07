@@ -2,15 +2,14 @@
 . ${SET_DEFAULT_CONF}
 
 #test l7directord config file
-RET=`$L7DIRECTORD --version`
+RET=`$L7DIRECTORD --version | grep -A 1 "^l7directord, version [0-9]*\.[0-9]*\.[0-9]*" | sed -e 1d | grep "^Copyright (C) 20[0-9][0-9] NTT COMWARE CORPORATION"`
 if [ $? -ne 0 ]
 then
         echo "Test failed: $L7DIRECTORD --version"
         exit 1
 fi
-EXPECT="l7directord, version 3.0.0-0
-Copyright (C) 2009 NTT COMWARE CORPORATION"
-if [ "$RET" != "$EXPECT" ]
+
+if [ -z "$RET" ]
 then
         echo "Test failed: $L7DIRECTORD --version"
         exit 1

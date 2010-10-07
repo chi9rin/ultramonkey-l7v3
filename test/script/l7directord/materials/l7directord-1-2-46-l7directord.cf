@@ -16,9 +16,10 @@ execute=/etc/hosts
 execute='/etc/passwd'
 execute="/etc/group"
 
+supervised
+
 logfile     =   "local0"
 
-supervised
 
 virtual=1.1.1.1:80
     real=localhost

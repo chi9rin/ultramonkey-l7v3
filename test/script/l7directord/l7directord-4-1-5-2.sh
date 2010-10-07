@@ -46,7 +46,7 @@ do
 		# checktimeout  3
 		#               ||
                 #               6
-		if [ $((TIME1+6)) -ne $((TIME2)) ]
+		if [ $((TIME1+6)) -gt $((TIME2)) ]
 		then
 			echo "Test failed: cat ${L7VS_LOG_DIR}/l7directord.log"
 			exit 1
