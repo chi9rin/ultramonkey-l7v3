@@ -22,7 +22,7 @@ do
 	fi
 	RET3=`$INIT_L7DIRECTORD configtest 2>&1`
 	
-	# all result should be same.
+	# all result must be same.
 	if [ "$RET1" != "$RET2" -o "$RET1" != "$RET3" ]
 	then
 		echo "Test failed: configtest result was not matched."
@@ -45,13 +45,13 @@ done
 RET1=`$L7DIRECTORD configtest 2>&1`
 if [ $? -eq 1 ]
 then
-        echo "Test failed: $L7DIRECTORD configtest should be no error."
+        echo "Test failed: $L7DIRECTORD configtest must be no error."
         exit 1
 fi
 RET2=`$L7DIRECTORD -t 2>&1`
 if [ $? -eq 1 ]
 then
-        echo "Test failed: $L7DIRECTORD -t should be no error."
+        echo "Test failed: $L7DIRECTORD -t must be no error."
         exit 1
 fi
 RET3=`$INIT_L7DIRECTORD configtest 2>&1`
@@ -64,7 +64,7 @@ fi
 EXPECT="Syntax OK"
 if [ "$RET1" != "$EXPECT" ]
 then
-        echo "Test failed: $L7DIRECTORD configtest should be Syntax OK."
+        echo "Test failed: $L7DIRECTORD configtest must be Syntax OK."
         exit 1
 fi
 

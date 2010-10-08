@@ -36,7 +36,7 @@ timeout_time=`echo $timeout_line | sed -e "s/^.* ..:..:\(..\).*/\1/" | xargs exp
 # this diff time will be same as checktimeout value.
 diff_time=`expr $timeout_time - $start_time`
 if [ $diff_time -ne 3 -a $diff_time -ne 4 ]; then
-        echo "Test failed: Timeout should occurred in 3 sec, but it passed $diff_time sec this time."
+        echo "Test failed: Timeout must occurred in 3 (or 4) sec, but it passed $diff_time sec this time."
         exit 1
 fi
 

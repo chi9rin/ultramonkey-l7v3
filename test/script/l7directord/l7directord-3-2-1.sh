@@ -32,7 +32,7 @@ $INIT_L7DIRECTORD start
 # stop l7directord
 $INIT_L7DIRECTORD stop 
 
-# /usr/sbin/l7vsadm should be used
+# /usr/sbin/l7vsadm must be used
 grep " $L7VSADM -K -n" $dummylog > /dev/null 2>&1
 if [ $? -ne 0 ]
 then
@@ -49,7 +49,7 @@ $INIT_L7DIRECTORD start
 # stop l7directord
 $INIT_L7DIRECTORD stop 
 
-# /sbin/l7vsadm should be used
+# /sbin/l7vsadm must be used
 grep " /sbin/l7vsadm -K -n" $dummylog > /dev/null 2>&1
 if [ $? -ne 0 ]
 then
