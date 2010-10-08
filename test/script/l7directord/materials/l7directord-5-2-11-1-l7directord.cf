@@ -1,0 +1,10 @@
+virtual  = 127.0.0.1:40001
+	real = 127.0.0.1:50001
+	checktype   = negotiate
+	service     = http
+	request     = "index.html"
+#	receive     = "html"
+#	login	    = "username"
+#	passwd      = "hogehoge"
+#	database    = "fugafuga"
+#	virtualhost = "example.com"

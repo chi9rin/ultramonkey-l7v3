@@ -1,12 +1,12 @@
 #!/bin/bash
 . ${SET_DEFAULT_CONF}
-\cp ./materials/l7directord-4-1-3-1-l7directord.cf ${L7DIRECTORD_CONF_DIR}/l7directord.cf
+\cp ./materials/l7directord-4-1-4-l7directord.cf ${L7DIRECTORD_CONF_DIR}/l7directord.cf
 
 #Run http server
 RealServer1=RealServer1
 RealServer1_ADDR=127.0.0.1
 RealServer1_PORT=50001
-start_lighttpd -s $RealServer1 -a $RealServer1_ADDR -p $RealServer1_PORT -l ${L7VS_LOG_DIR}/l7directord-4-1-3-1-access.log
+start_lighttpd -s $RealServer1 -a $RealServer1_ADDR -p $RealServer1_PORT -l ${L7VS_LOG_DIR}/l7directord-4-1-4-access.log
 
 if [ $? -ne 0 ]
 then
@@ -30,10 +30,10 @@ then
         echo "Test failed: $INIT_L7DIRECTORD start"
         exit 1
 fi
-sleep 5
+sleep 15
  
 del_lighttpd_content $RealServer1 index.html
-sleep 30
+sleep 40
 
 $INIT_L7DIRECTORD stop
 if [ $? -ne 0 ]
@@ -42,21 +42,21 @@ then
         exit 1
 fi
 
-RET=`cat ${L7VS_LOG_DIR}/l7directord-4-1-3-1-access.log`
+RET=`cat ${L7VS_LOG_DIR}/l7directord-4-1-4-access.log`
 if [ -z "$RET" ]
-then        echo "Test failed: ${L7VS_LOG_DIR}/l7directord-4-1-3-1-access.log"
+then        echo "Test failed: ${L7VS_LOG_DIR}/l7directord-4-1-4-access.log"
         exit 1
 fi
 
 TIME1=""
 TIME2=""
-for TMP in `cat ${L7VS_LOG_DIR}/l7directord-4-1-3-1-access.log| grep " 404 "  | awk '{ print $4 }' | sed 's/:/ /' | awk '{ print $2}'`
+for TMP in `cat ${L7VS_LOG_DIR}/l7directord-4-1-4-access.log| grep " 404 "  | awk '{ print $4 }' | sed 's/:/ /' | awk '{ print $2}'`
 do
         TIME2=`date -d "$TMP" +'%s'`
         if [ -n "$TIME1" ]
         then
-                if [ $((TIME1+5)) -gt $((TIME2)) ]
-                then                        echo "Test failed: cat ${L7VS_LOG_DIR}/l7directord-4-1-3-1-access.log"
+                if [ $((TIME1+10)) -gt $((TIME2)) ]
+                then                        echo "Test failed: cat ${L7VS_LOG_DIR}/l7directord-4-1-4-access.log"
                         exit 1
                 fi
         fi

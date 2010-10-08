@@ -30,6 +30,24 @@ set_lighttpd_content (){
 	return $?
 }
 
+del_lighttpd_content (){
+	if [ ! -d ${LIGHTTPD_TMP_DIR}/$1 ]
+	then
+		echo "SERVERNAME:$1 is not exist."	
+		return 1
+	fi
+
+	if [ ! -f "${LIGHTTPD_TMP_DIR}/$1/$2" ]
+	then
+		echo "Content is not specified or not exist."
+		return 1
+	fi
+
+	rm -f ${LIGHTTPD_TMP_DIR}/$1/$2
+
+	return $?
+}
+
 up_lighttpd (){
 	if [ -n "$1" -a -f "${LIGHTTPD_TMP_DIR}/$1.cf" ]
 	then
