@@ -19,7 +19,9 @@ stop_l7directord || exit 1
 # [WRN0001] l7directord `/etc/ha.d/conf/l7directord.cf' received signal: TERM. Terminate process.
 grep "WRN0001" $tmp_log >/dev/null 2>&1
 if [ $? -ne 0 ]; then
+	rm $tmp_log
 	echo "Test failed: l7directord log must be written to stdout by supervised mode."
 	exit 1
 fi
+rm $tmp_log
 exit 0

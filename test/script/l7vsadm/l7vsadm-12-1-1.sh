@@ -22,10 +22,12 @@ done
 
 diff_result=`diff $tmp_log ./materials/l7vsadm-12-1-1.log`
 if [ $? -ne 0 ]; then
+	rm $tmp_log
 	echo "Test failed: l7vsadm signal log was not matched."
 	echo "$diff_result"
 	exit 1
 fi
 
+rm $tmp_log
 exit 0
 

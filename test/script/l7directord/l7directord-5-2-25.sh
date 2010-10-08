@@ -14,6 +14,7 @@ sed -i -e 's/read_config();/read_config();ld_log(Dumper \\%CONFIG); sleep 1; exi
 
 cleanup() {
 	mv $bak $L7DIRECTORD
+	rm $tmp_log
 }
 
 # Start l7vsd
