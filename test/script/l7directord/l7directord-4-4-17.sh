@@ -34,7 +34,7 @@ fi
 # Run server (spend 5 sec. 200 OK)
 test_server -p 20000 -t 5 ./materials/l7directord-4-4-17-response.txt &
 
-sleep 5
+sleep 7
 
 # [WRN1102] Service check NG. HTTP response is not ok. Response status line is ...
 grep "WRN1102" ${L7VS_LOG_DIR}/l7directord.log > /dev/null 2>&1
