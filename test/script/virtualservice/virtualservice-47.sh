@@ -55,7 +55,6 @@ fi
 
 #Connect
 RET=`$WGET -t 1 -qO- http://127.0.0.1:40001/`
-echo "$RET"
 if [ "${RET}" != "${SorryServer1}" ]
 then
         echo "Test failed: $WGET -t 1 -qO- http://127.0.0.1:40001/"

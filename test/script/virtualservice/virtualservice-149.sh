@@ -44,7 +44,7 @@ for (( i = 0 ; i < 2; i++ )){
 	RET=`wget -qO- https://127.0.0.1:40001/ --no-check-certificate`
 	if [ "${RET}" != "${RealServer1}" ]
 	then
-	        echo "wget -qO- https://127.0.0.1:40001/ --no-check-certificate"
+	        echo "Test failed: wget -qO- https://127.0.0.1:40001/ --no-check-certificate"
 	        exit 1
 	fi
 }
