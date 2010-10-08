@@ -3,7 +3,7 @@
 \cp ./materials/l7directord-1-2-44-l7directord.cf ${L7DIRECTORD_CONF_DIR}/l7directord.cf
 
 #test l7directord config file
-RET=`$L7DIRECTORD -t"`
+RET=`$L7DIRECTORD -t`
 if [ $? -ne 0 ]
 then
         echo "Test failed: $L7DIRECTORD -t"

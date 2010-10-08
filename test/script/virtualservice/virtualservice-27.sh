@@ -89,7 +89,7 @@ Prot LocalAddress:Port ProtoMod Scheduler Protomod_opt_string
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
 TCP 127.0.0.1:40001 sessionless rr --sorry-uri '/' --statistic 0
   Bypass Settings:
-    Sorry Server                  127.0.0.1:50001
+    Sorry Server                  127.0.0.1:50001 Masq
     Max Connection                0
     Sorry Flag                    off
   SSL Settings:

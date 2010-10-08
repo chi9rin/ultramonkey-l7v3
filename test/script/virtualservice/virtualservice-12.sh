@@ -167,7 +167,7 @@ Prot LocalAddress:Port ProtoMod Scheduler Protomod_opt_string
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
 TCP localhost:40001 ip lc --timeout 3600 --no-reschedule --sorry-uri '/' --statistic 0
   Bypass Settings:
-    Sorry Server                  localhost:50001
+    Sorry Server                  localhost:50001 Masq
     Max Connection                200
     Sorry Flag                    off
   SSL Settings:

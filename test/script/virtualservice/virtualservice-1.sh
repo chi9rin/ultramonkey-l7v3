@@ -82,20 +82,20 @@ Prot LocalAddress:Port ProtoMod Scheduler Protomod_opt_string
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
 TCP localhost:40001 sessionless wrr --sorry-uri '/' --statistic 0
   Bypass Settings:
-    Sorry Server                  localhost:50001
+    Sorry Server                  localhost:50001 Masq
     Max Connection                10
     Sorry Flag                    off
   SSL Settings:
     SSL Config File               none
   Logging Settings:
     Access Log                    on
-    Access Log File               deferaccept,cork,quickackoff,nodelay
+    Access Log File               /var/log/l7vs/l7vsd_conn.log
     Access Log Rotate             --ac-rotate-type size --ac-rotate-max-backup-index 12 --ac-rotate-max-filesize 1M
   Socket Settings:
     TCP_DEFER_ACCEPT              enable
     TCP_NODELAY                   enable
     TCP_CORK                      enable
-    TCP_QUICKACK                  enable
+    TCP_QUICKACK                  disable
   Throughput:
     Current Upload / Limit        0.000000 Mbps / 800.000000 Mbps
     Current Download / Limit      0.000000 Mbps / 800.000000 Mbps
