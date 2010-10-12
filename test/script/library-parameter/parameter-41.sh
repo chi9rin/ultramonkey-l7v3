@@ -20,12 +20,5 @@ then
         exit 1
 fi
 
-RET=`cat ${L7VS_LOG_DIR}/l7vsd.log | grep "\[WARN\] l7vsd_mainthread VSD30600006 task scheduler priority parameter not found."`
-if [ -z "${RET}" ]
-then
-        echo "Test failed: cat ${L7VS_LOG_DIR}/l7vsd.log"
-        exit 1
-fi
-
 exit 0
 
