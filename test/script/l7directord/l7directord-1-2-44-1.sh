@@ -9,10 +9,9 @@ then
         echo "Test failed: $L7DIRECTORD configtest"
         exit 1
 fi
-usleep 100000
 
-EXPECT="Syntax OK"
-if [ "$RET" != "$EXPECT" ]
+echo "$RET" | grep "Syntax OK" > /dev/null 2>&1
+if [ $? -ne 0 ]
 then
         echo "Test failed: $L7DIRECTORD configtest"
         exit 1

@@ -10,8 +10,8 @@ then
         exit 1
 fi
 
-EXPECT="Syntax OK"
-if [ "$RET" != "$EXPECT" ]
+echo "$RET" | grep "Syntax OK" > /dev/null 2>&1
+if [ $? -ne 0 ]
 then
         echo "Test failed: $L7DIRECTORD ${L7DIRECTORD_CONF_DIR}/specified.cf configtest"
         exit 1
