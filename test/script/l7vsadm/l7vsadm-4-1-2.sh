@@ -22,17 +22,10 @@ then
 fi
 usleep 100000
 
-$L7VSADM -A -t 127.0.0.1:40001 -m sessionless -u 1000 -q 512 -Q 512 -b $SorryServer1_ADDR:$SorryServer1_PORT -f 1 -T -z /etc/l7vs/sslproxy/sslproxy.target.cf -O deferaccept -L 1 -a /var/log/l7vs/access_log
+$L7VSADM -A -t 127.0.0.1:40001 -m sessionless -u 1000 -q 512 -Q 512 -b $SorryServer1_ADDR:$SorryServer1_PORT -f 1 -z /etc/l7vs/sslproxy/sslproxy.target.cf -O deferaccept -L 1 -a /var/log/l7vs/access_log
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m sessionless -u 1000 -q 512 -Q 512 -b $SorryServer1_ADDR:$SorryServer1_PORT -f 1 -T -z /etc/l7vs/sslproxy/sslproxy.target.cf -O deferaccept -L 1 -a /var/log/l7vs/access_log"
-        exit 1
-fi
-
-$L7VSADM -A -t 127.0.0.1:40002 -m sessionless -u 1000 -q 512 -Q 512 -b $SorryServer1_ADDR:$SorryServer1_PORT -f 1 -M -z /etc/l7vs/sslproxy/sslproxy.target.cf -O deferaccept -L 1 -a /var/log/l7vs/access_log
-if [ $? -ne 0 ]
-then
-        echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m sessionless -u 1000 -q 512 -Q 512 -b $SorryServer1_ADDR:$SorryServer1_PORT -f 1 -M -z /etc/l7vs/sslproxy/sslproxy.target.cf -O deferaccept -L 1 -a /var/log/l7vs/access_log"
+        echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m sessionless -u 1000 -q 512 -Q 512 -b $SorryServer1_ADDR:$SorryServer1_PORT -f 1 -z /etc/l7vs/sslproxy/sslproxy.target.cf -O deferaccept -L 1 -a /var/log/l7vs/access_log"
         exit 1
 fi
 
@@ -86,29 +79,6 @@ total trap counts              none
 Prot LocalAddress:Port ProtoMod Scheduler Protomod_opt_string
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
 TCP localhost:40001 sessionless rr --sorry-uri '/' --statistic 0
-  Bypass Settings:
-    Sorry Server                  localhost:50001 Tproxy
-    Max Connection                1000
-    Sorry Flag                    on
-  SSL Settings:
-    SSL Config File               /etc/l7vs/sslproxy/sslproxy.target.cf
-  Logging Settings:
-    Access Log                    on
-    Access Log File               deferaccept
-    Access Log Rotate             --ac-rotate-type size --ac-rotate-max-backup-index 10 --ac-rotate-max-filesize 10M
-  Socket Settings:
-    TCP_DEFER_ACCEPT              enable
-    TCP_NODELAY                   disable
-    TCP_CORK                      disable
-    TCP_QUICKACK                  disable
-  Throughput:
-    Current Upload / Limit        0.000000 Mbps / 0.004096 Mbps
-    Current Download / Limit      0.000000 Mbps / 0.004096 Mbps
-  Statistics:
-    HTTP Total Requests           0
-    HTTP GET Requests             0
-    HTTP POST Requests            0
-TCP localhost:40002 sessionless rr --sorry-uri '/' --statistic 0
   Bypass Settings:
     Sorry Server                  localhost:50001 Masq
     Max Connection                1000

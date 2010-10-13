@@ -244,9 +244,7 @@ bool l7vs::l7vsadm::parse_vs_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, i
                     count_map["--bypass"] == 0 &&
                     count_map["-f"] == 0 &&
                     count_map["--flag"] == 0 &&
-                    count_map["-M"] == 0 &&
                     count_map["--masq"] == 0 &&
-                    count_map["-T"] == 0 &&
                     count_map["--tproxy"] == 0 &&
                     count_map["-Q"] == 0 &&
                     count_map["--qos-up"] == 0 &&
@@ -312,20 +310,7 @@ bool l7vs::l7vsadm::parse_vs_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, i
                 is_conflict = true;
         }
         if (is_conflict == false &&
-            count_map["-M"] == 1 && count_map["--masq"] == 1) {
-                //-M(--masq)
-                conflict_option_name = "--masq";
-                is_conflict = true;
-        }
-        if (is_conflict == false &&
-            count_map["-T"] == 1 && count_map["--tproxy"] == 1) {
-                //-T(--tproxy)
-                conflict_option_name = "--tproxy";
-                is_conflict = true;
-        }
-        if (is_conflict == false &&
-            count_map["-M"] + count_map["--masq"] +
-            count_map["-T"] + count_map["--tproxy"] > 1) {
+            count_map["--masq"] + count_map["--tproxy"] > 1) {
                 conflict_option_name = "--masq/tproxy";
                 is_conflict = true;
         }
@@ -743,9 +728,9 @@ bool l7vs::l7vsadm::parse_opt_vs_fwdmode_func(int &pos, int argc, char *argv[])
         Logger logger(LOG_CAT_L7VSADM_COMMON, /*XXX*/999, "l7vsadm::parse_opt_vs_fwdmode_func", __FILE__, __LINE__);
 
         std::string opt(argv[pos]);
-        if (opt == "-M" || opt == "--masq") {
+        if (opt == "--masq") {
                 request.vs_element.sorry_fwdmode = virtualservice_element::FWD_MASQ;
-        } else if (opt == "-T" || opt == "--tproxy") {
+        } else if (opt == "--tproxy") {
 #ifdef IP_TRANSPARENT
                 request.vs_element.sorry_fwdmode = virtualservice_element::FWD_TPROXY;
 #else
@@ -1297,9 +1282,7 @@ bool l7vs::l7vsadm::parse_rs_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, i
                 // Existence check of the parameter
                 if (count_map["-w"] == 0 &&
                     count_map["--weight"] == 0 &&
-                    count_map["-M"] == 0 &&
                     count_map["--masq"] == 0 &&
-                    count_map["-T"] == 0 &&
                     count_map["--tproxy"] == 0) {
                         std::string buf("All option omitted for edit rs command.");
                         l7vsadm_err.setter(true, buf);
@@ -1347,24 +1330,9 @@ bool l7vs::l7vsadm::parse_rs_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, i
                 is_conflict = true;
         }
         if ((is_conflict == false) &&
-            (count_map["-M"] == 1) && (count_map["--masq"] == 1) &&
+            count_map["--masq"] + count_map["--tproxy"] > 1 &&
             (l7vsadm_request::CMD_DEL_RS != cmd)) {
-                //-M(--masq)
-                conflict_option_name = "--masq";
-                is_conflict = true;
-        }
-        if ((is_conflict == false) &&
-            (count_map["-T"] == 1) && (count_map["--tproxy"] == 1) &&
-            (l7vsadm_request::CMD_DEL_RS != cmd)) {
-                //-T(--tproxy)
-                conflict_option_name = "--tproxy";
-                is_conflict = true;
-        }
-        if ((is_conflict == false) &&
-            count_map["-M"] + count_map["--masq"] +
-            count_map["-T"] + count_map["--tproxy"] > 1 &&
-            (l7vsadm_request::CMD_DEL_RS != cmd)) {
-                //-M/T(--masq/tproxy)
+                //--masq/tproxy
                 conflict_option_name = "--masq/tproxy";
                 is_conflict = true;
         }
@@ -1424,9 +1392,9 @@ bool l7vs::l7vsadm::parse_opt_rs_fwdmode_func(int &pos, int argc, char *argv[])
         Logger logger(LOG_CAT_L7VSADM_COMMON, /*XXX*/999, "l7vsadm::parse_opt_rs_fwdmode_func", __FILE__, __LINE__);
 
         std::string opt(argv[pos]);
-        if (opt == "-M" || opt == "--masq") {
+        if (opt == "--masq") {
                 request.vs_element.realserver_vector.front().fwdmode = realserver_element::FWD_MASQ;
-        } else if (opt == "-T" || opt == "--tproxy") {
+        } else if (opt == "--tproxy") {
 #ifdef IP_TRANSPARENT
                 request.vs_element.realserver_vector.front().fwdmode = realserver_element::FWD_TPROXY;
 #else
@@ -2280,8 +2248,8 @@ bool l7vs::l7vsadm::parse_help_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd,
                   "  --scheduler        -s scheduler           one of rr,lc,wrr\n"
                   "  --upper            -u connection-count    maximum number of connections\n"
                   "  --bypass           -b sorry-server        sorry server address is host:port\n"
-                  "  --tproxy           -T                     set sorry server connection to IP transparent mode.\n"
-                  "  --masq             -M                     set sorry server connection to IP masquerade mode.\n"
+                  "  --tproxy                                  set sorry server connection to IP transparent mode.\n"
+                  "  --masq                                    set sorry server connection to IP masquerade mode.\n"
 
                   "  --flag             -f sorry-flag          sorry status set to virtual service\n"
                   "  --qos-up           -Q QoSval-up           QoS Threshold(bps) set to real server direction\n"
@@ -2293,8 +2261,8 @@ bool l7vs::l7vsadm::parse_help_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd,
                   "                        [logrotate-args]\n"
                   "  --real-server      -r server-address      server-address is host:port\n"
                   "  --weight           -w weight              scheduling weight set to real server\n"
-                  "  --tproxy           -T                     set real server connection to IP transparent mode.\n"
-                  "  --masq             -M                     set real server connection to IP masquerade mode.\n"
+                  "  --tproxy                                  set real server connection to IP transparent mode.\n"
+                  "  --masq                                    set real server connection to IP masquerade mode.\n"
                   "  --switch           -s replication-switch  start or stop replication\n"
                   "  --force            -f                     force replication start\n"
                   "  --dump             -d                     dump replication memory\n"
@@ -2321,16 +2289,16 @@ std::string l7vs::l7vsadm::usage()
         stream <<
                "Usage: \n"
                "  l7vsadm -A -t service-address -m proto-module [module-args]\n"
-               "          [-s scheduler] [-u connection-count] [-b sorry-server] [-T|M]\n"
+               "          [-s scheduler] [-u connection-count] [-b sorry-server] [--masq|tproxy]\n"
                "          [-f sorry-flag] [-Q QoSval-up] [-q QoSval-down] [-z ssl-config-file]\n"
                "          [-O socket-option] [-L access-log-flag] [-a access-log-file [logrotate-args]]\n"
                "  l7vsadm -E -t service-address -m proto-module [module-args]\n"
-               "          [-s scheduler] [-u connection-count] [-b sorry-server] [-T|M]\n"
+               "          [-s scheduler] [-u connection-count] [-b sorry-server] [--masq|tproxy]\n"
                "          [-f sorry-flag] [-Q QoSval-up] [-q QoSval-down] [-L access-log-flag]\n"
                "  l7vsadm -D -t service-address -m proto-module [module-args]\n"
                "  l7vsadm -C\n"
                "  l7vsadm -a|e -t service-address -m proto-module [module-args]\n"
-               "          -r server-address [-w weight] [-T|M]\n"
+               "          -r server-address [-w weight] [--masq|tproxy]\n"
                "  l7vsadm -d -t service-address -m proto-module [module-args]\n"
                "          -r server-address\n"
                "  l7vsadm -R -s replication-switch\n"
@@ -2697,9 +2665,7 @@ l7vs::l7vsadm::l7vsadm()
         vs_option_dic["--upper"]           = boost::bind(&l7vsadm::parse_opt_vs_upper_func, this, _1, _2, _3);
         vs_option_dic["-b"]                = boost::bind(&l7vsadm::parse_opt_vs_bypass_func, this, _1, _2, _3);
         vs_option_dic["--bypass"]          = boost::bind(&l7vsadm::parse_opt_vs_bypass_func, this, _1, _2, _3);
-        vs_option_dic["-T"]                = boost::bind(&l7vsadm::parse_opt_vs_fwdmode_func, this, _1, _2, _3);
         vs_option_dic["--tproxy"]          = boost::bind(&l7vsadm::parse_opt_vs_fwdmode_func, this, _1, _2, _3);
-        vs_option_dic["-M"]                = boost::bind(&l7vsadm::parse_opt_vs_fwdmode_func, this, _1, _2, _3);
         vs_option_dic["--masq"]            = boost::bind(&l7vsadm::parse_opt_vs_fwdmode_func, this, _1, _2, _3);
         vs_option_dic["-f"]                = boost::bind(&l7vsadm::parse_opt_vs_flag_func, this, _1, _2, _3);
         vs_option_dic["--flag"]            = boost::bind(&l7vsadm::parse_opt_vs_flag_func, this, _1, _2, _3);
@@ -2723,9 +2689,7 @@ l7vs::l7vsadm::l7vsadm()
         rs_option_dic["--tcp-service"]  = boost::bind(&l7vsadm::parse_opt_vs_target_func, this, _1, _2, _3);
         rs_option_dic["-w"]             = boost::bind(&l7vsadm::parse_opt_rs_weight_func, this, _1, _2, _3);
         rs_option_dic["--weight"]       = boost::bind(&l7vsadm::parse_opt_rs_weight_func, this, _1, _2, _3);
-        rs_option_dic["-T"]             = boost::bind(&l7vsadm::parse_opt_rs_fwdmode_func, this, _1, _2, _3);
         rs_option_dic["--tproxy"]       = boost::bind(&l7vsadm::parse_opt_rs_fwdmode_func, this, _1, _2, _3);
-        rs_option_dic["-M"]             = boost::bind(&l7vsadm::parse_opt_rs_fwdmode_func, this, _1, _2, _3);
         rs_option_dic["--masq"]         = boost::bind(&l7vsadm::parse_opt_rs_fwdmode_func, this, _1, _2, _3);
         rs_option_dic["-m"]             = boost::bind(&l7vsadm::parse_opt_vs_module_func, this, _1, _2, _3);
         rs_option_dic["--proto-module"] = boost::bind(&l7vsadm::parse_opt_vs_module_func, this, _1, _2, _3);

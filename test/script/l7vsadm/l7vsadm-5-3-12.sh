@@ -58,31 +58,31 @@ then
         exit 1
 fi
 
-$L7VSADM -a -t 127.0.0.1:40001 -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} -M
+$L7VSADM -a -t 127.0.0.1:40001 -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} --masq
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM -a -t 127.0.0.1:40001 -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} -M"
+        echo "Test failed: $L7VSADM -a -t 127.0.0.1:40001 -m ip -r ${RealServer1_ADDR}:${RealServer1_PORT} --masq"
         exit 1
 fi
 
-$L7VSADM -a -t 127.0.0.1:40001 -m ip -r ${RealServer2_ADDR}:${RealServer2_PORT} -M
+$L7VSADM -a -t 127.0.0.1:40001 -m ip -r ${RealServer2_ADDR}:${RealServer2_PORT} --masq
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM -a -t 127.0.0.1:40001 -m ip -r ${RealServer2_ADDR}:${RealServer2_PORT} -M"
+        echo "Test failed: $L7VSADM -a -t 127.0.0.1:40001 -m ip -r ${RealServer2_ADDR}:${RealServer2_PORT} --masq"
         exit 1
 fi
 
-$L7VSADM -a -t 127.0.0.1:40001 -m ip -r ${RealServer3_ADDR}:${RealServer3_PORT} -T
+$L7VSADM -a -t 127.0.0.1:40001 -m ip -r ${RealServer3_ADDR}:${RealServer3_PORT} --tproxy
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM -a -t 127.0.0.1:40001 -m ip -r ${RealServer3_ADDR}:${RealServer3_PORT} -T"
+        echo "Test failed: $L7VSADM -a -t 127.0.0.1:40001 -m ip -r ${RealServer3_ADDR}:${RealServer3_PORT} --tproxy"
         exit 1
 fi
 
-$L7VSADM -a -t 127.0.0.1:40001 -m ip -r ${RealServer4_ADDR}:${RealServer4_PORT} -T
+$L7VSADM -a -t 127.0.0.1:40001 -m ip -r ${RealServer4_ADDR}:${RealServer4_PORT} --tproxy
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM -a -t 127.0.0.1:40001 -m ip -r ${RealServer4_ADDR}:${RealServer4_PORT} -T"
+        echo "Test failed: $L7VSADM -a -t 127.0.0.1:40001 -m ip -r ${RealServer4_ADDR}:${RealServer4_PORT} --tproxy"
         exit 1
 fi
 

@@ -30,14 +30,6 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -A -t localhost:40001 -m sessionless -b $SorryServer1_ADDR:$SorryServer1_PORT -M -T 2>&1 | grep "PARSE ERROR: Option --masq/tproxy is conflict."`
-EXPECT="PARSE ERROR: Option --masq/tproxy is conflict."
-if [ "${RET}" != "${EXPECT}" ]
-then
-        echo "Test failed: $L7VSADM -A -t localhost:40001 -m sessionless -b $SorryServer1_ADDR:$SorryServer1_PORT -M -T"
-        exit 1
-fi
-
 RET=`$L7VSADM -A -t localhost:40001 -m sessionless -b $SorryServer1_ADDR:$SorryServer1_PORT --masq --tproxy 2>&1 | grep "PARSE ERROR: Option --masq/tproxy is conflict."`
 EXPECT="PARSE ERROR: Option --masq/tproxy is conflict."
 if [ "${RET}" != "${EXPECT}" ]
@@ -46,51 +38,11 @@ then
         exit 1
 fi
 
-RET=`$L7VSADM -A -t localhost:40001 -m sessionless -b $SorryServer1_ADDR:$SorryServer1_PORT -M --tproxy 2>&1 | grep "PARSE ERROR: Option --masq/tproxy is conflict."`
-EXPECT="PARSE ERROR: Option --masq/tproxy is conflict."
-if [ "${RET}" != "${EXPECT}" ]
-then
-        echo "Test failed: $L7VSADM -A -t localhost:40001 -m sessionless -b $SorryServer1_ADDR:$SorryServer1_PORT -M --tproxy"
-        exit 1
-fi
-
-RET=`$L7VSADM -A -t localhost:40001 -m sessionless -b $SorryServer1_ADDR:$SorryServer1_PORT --masq -T 2>&1 | grep "PARSE ERROR: Option --masq/tproxy is conflict."`
-EXPECT="PARSE ERROR: Option --masq/tproxy is conflict."
-if [ "${RET}" != "${EXPECT}" ]
-then
-        echo "Test failed: $L7VSADM -A -t localhost:40001 -m sessionless -b $SorryServer1_ADDR:$SorryServer1_PORT --masq -T"
-        exit 1
-fi
-
-RET=`$L7VSADM -A -t localhost:40001 -m sessionless -b $SorryServer2_ADDR:$SorryServer2_PORT -M -T 2>&1 | grep "PARSE ERROR: Option --masq/tproxy is conflict."`
-EXPECT="PARSE ERROR: Option --masq/tproxy is conflict."
-if [ "${RET}" != "${EXPECT}" ]
-then
-        echo "Test failed: $L7VSADM -A -t localhost:40001 -m sessionless -b $SorryServer2_ADDR:$SorryServer2_PORT -M -T"
-        exit 1
-fi
-
 RET=`$L7VSADM -A -t localhost:40001 -m sessionless -b $SorryServer2_ADDR:$SorryServer2_PORT --masq --tproxy 2>&1 | grep "PARSE ERROR: Option --masq/tproxy is conflict."`
 EXPECT="PARSE ERROR: Option --masq/tproxy is conflict."
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -A -t localhost:40001 -m sessionless -b $SorryServer2_ADDR:$SorryServer2_PORT --masq --tproxy"
-        exit 1
-fi
-
-RET=`$L7VSADM -A -t localhost:40001 -m sessionless -b $SorryServer2_ADDR:$SorryServer2_PORT -M --tproxy 2>&1 | grep "PARSE ERROR: Option --masq/tproxy is conflict."`
-EXPECT="PARSE ERROR: Option --masq/tproxy is conflict."
-if [ "${RET}" != "${EXPECT}" ]
-then
-        echo "Test failed: $L7VSADM -A -t localhost:40001 -m sessionless -b $SorryServer2_ADDR:$SorryServer2_PORT -M --tproxy"
-        exit 1
-fi
-
-RET=`$L7VSADM -A -t localhost:40001 -m sessionless -b $SorryServer2_ADDR:$SorryServer2_PORT --masq -T 2>&1 | grep "PARSE ERROR: Option --masq/tproxy is conflict."`
-EXPECT="PARSE ERROR: Option --masq/tproxy is conflict."
-if [ "${RET}" != "${EXPECT}" ]
-then
-        echo "Test failed: $L7VSADM -A -t localhost:40001 -m sessionless -b $SorryServer2_ADDR:$SorryServer2_PORT --masq -T"
         exit 1
 fi
 

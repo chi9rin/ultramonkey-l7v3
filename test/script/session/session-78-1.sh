@@ -22,10 +22,10 @@ fi
 usleep 100000
 
 # Add service
-$L7VSADM -A -t 127.0.0.1:40001 -m sessionless -b ${SorryServer_ADDR}:${SorryServer_PORT} -M
+$L7VSADM -A -t 127.0.0.1:40001 -m sessionless -b ${SorryServer_ADDR}:${SorryServer_PORT} --masq
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m sessionless -b ${SorryServer_ADDR}:${SorryServer_PORT} -M
+        echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m sessionless -b ${SorryServer_ADDR}:${SorryServer_PORT} --masq
 "
         exit 1
 fi

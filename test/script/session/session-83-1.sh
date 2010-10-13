@@ -22,10 +22,10 @@ fi
 usleep 100000
 
 # Add service
-$L7VSADM -A -t 127.0.0.1:40001 -m sessionless -b ${SorryServer_ADDR}:${SorryServer_PORT} -T -z $L7VSD_CONF_DIR/sslproxy/sslproxy.target.cf
+$L7VSADM -A -t 127.0.0.1:40001 -m sessionless -b ${SorryServer_ADDR}:${SorryServer_PORT} --tproxy -z $L7VSD_CONF_DIR/sslproxy/sslproxy.target.cf
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m sessionless -b ${SorryServer_ADDR}:${SorryServer_PORT} -T -z $L7VSD_CONF_DIR/sslproxy/sslproxy.target.cf"
+        echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m sessionless -b ${SorryServer_ADDR}:${SorryServer_PORT} --tproxy -z $L7VSD_CONF_DIR/sslproxy/sslproxy.target.cf"
         exit 1
 fi
 

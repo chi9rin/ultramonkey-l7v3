@@ -14,16 +14,16 @@ usleep 100000
 RET=`$L7VSADM -h`
 EXPECT="Usage: 
   l7vsadm -A -t service-address -m proto-module [module-args]
-          [-s scheduler] [-u connection-count] [-b sorry-server] [-T|M]
+          [-s scheduler] [-u connection-count] [-b sorry-server] [--masq|tproxy]
           [-f sorry-flag] [-Q QoSval-up] [-q QoSval-down] [-z ssl-config-file]
           [-O socket-option] [-L access-log-flag] [-a access-log-file [logrotate-args]]
   l7vsadm -E -t service-address -m proto-module [module-args]
-          [-s scheduler] [-u connection-count] [-b sorry-server] [-T|M]
+          [-s scheduler] [-u connection-count] [-b sorry-server] [--masq|tproxy]
           [-f sorry-flag] [-Q QoSval-up] [-q QoSval-down] [-L access-log-flag]
   l7vsadm -D -t service-address -m proto-module [module-args]
   l7vsadm -C
   l7vsadm -a|e -t service-address -m proto-module [module-args]
-          -r server-address [-w weight] [-T|M]
+          -r server-address [-w weight] [--masq|tproxy]
   l7vsadm -d -t service-address -m proto-module [module-args]
           -r server-address
   l7vsadm -R -s replication-switch
@@ -57,13 +57,13 @@ Commands:
 
 Options:
   --tcp-service      -t service-address     service-address is host:port
-  --proto-module     -m proto-module        protocol module name and module argment
+  --proto-module     -m proto-module        protocol module name and module argument
                         [module-args]
   --scheduler        -s scheduler           one of rr,lc,wrr
   --upper            -u connection-count    maximum number of connections
   --bypass           -b sorry-server        sorry server address is host:port
-  --tproxy           -T                     set sorry server connection to IP transparent mode.
-  --masq             -M                     set sorry server connection to IP masquarade mode.
+  --tproxy                                  set sorry server connection to IP transparent mode.
+  --masq                                    set sorry server connection to IP masquerade mode.
   --flag             -f sorry-flag          sorry status set to virtual service
   --qos-up           -Q QoSval-up           QoS Threshold(bps) set to real server direction
   --qos-down         -q QoSval-down         QoS Threshold(bps) set to client direction
@@ -74,8 +74,8 @@ Options:
                         [logrotate-args]
   --real-server      -r server-address      server-address is host:port
   --weight           -w weight              scheduling weight set to real server
-  --tproxy           -T                     set real server connection to IP transparent mode.
-  --masq             -M                     set real server connection to IP masquarade mode.
+  --tproxy                                  set real server connection to IP transparent mode.
+  --masq                                    set real server connection to IP masquerade mode.
   --switch           -s replication-switch  start or stop replication
   --force            -f                     force replication start
   --dump             -d                     dump replication memory

@@ -4068,10 +4068,10 @@ sub get_forward_flag {
     my $forward = shift;
 
     if (defined $forward && $forward =~ /^masq$/i) {
-        return '-M';
+        return '--masq';
     }
     elsif (defined $forward && $forward =~ /^tproxy$/i) {
-        return '-T';
+        return '--tproxy';
     }
     return q{};
 }

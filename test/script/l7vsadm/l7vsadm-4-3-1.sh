@@ -109,10 +109,10 @@ then
 fi
 
 
-$L7VSADM -E -t 127.0.0.1:40001 -m ip -s lc -u 200 -b ${SorryServer1_ADDR}:${SorryServer1_PORT} -f 1 -T -Q 1M -q 1M -L 1
+$L7VSADM -E -t 127.0.0.1:40001 -m ip -s lc -u 200 -b ${SorryServer1_ADDR}:${SorryServer1_PORT} -f 1 --tproxy -Q 1M -q 1M -L 1
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM -E -t 127.0.0.1:40001 -m ip -s lc -u 200 -b ${SorryServer1_ADDR}:${SorryServer1_PORT} -f 1 -T -Q 1M -q 1M -L 1"
+        echo "Test failed: $L7VSADM -E -t 127.0.0.1:40001 -m ip -s lc -u 200 -b ${SorryServer1_ADDR}:${SorryServer1_PORT} -f 1 --tproxy -Q 1M -q 1M -L 1"
         exit 1
 fi
 

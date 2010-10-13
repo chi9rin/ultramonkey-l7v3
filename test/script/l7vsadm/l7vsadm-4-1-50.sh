@@ -31,24 +31,10 @@ then
 fi
 usleep 100000
 
-$L7VSADM -A -t 127.0.0.1:40001 -m sessionless -b ${SorryServer1_ADDR}:${SorryServer1_PORT} -T
-if [ $? -ne 0 ]
-then
-        echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m sessionless -b ${SorryServer1_ADDR}:${SorryServer1_PORT} -T"
-        exit 1
-fi
-
 $L7VSADM -A -t 127.0.0.1:40002 -m sessionless -b ${SorryServer1_ADDR}:${SorryServer1_PORT} --tproxy
 if [ $? -ne 0 ]
 then
         echo "Test failed: $L7VSADM -A -t 127.0.0.1:40002 -m sessionless -b ${SorryServer1_ADDR}:${SorryServer1_PORT} --tproxy"
-        exit 1
-fi
-
-$L7VSADM -A -t 127.0.0.1:40003 -m sessionless -b ${SorryServer2_ADDR}:${SorryServer2_PORT} -T
-if [ $? -ne 0 ]
-then
-        echo "Test failed: $L7VSADM -A -t 127.0.0.1:40003 -m sessionless -b ${SorryServer2_ADDR}:${SorryServer2_PORT} -T"
         exit 1
 fi
 
@@ -108,55 +94,9 @@ total trap counts              none
 
 Prot LocalAddress:Port ProtoMod Scheduler Protomod_opt_string
   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
-TCP 127.0.0.1:40001 sessionless rr --sorry-uri '/' --statistic 0
-  Bypass Settings:
-    Sorry Server                  127.0.0.1:50001 Tproxy
-    Max Connection                0
-    Sorry Flag                    off
-  SSL Settings:
-    SSL Config File               none
-  Logging Settings:
-    Access Log                    off
-    Access Log File               none
-    Access Log Rotate             --ac-rotate-type size --ac-rotate-max-backup-index 10 --ac-rotate-max-filesize 10M
-  Socket Settings:
-    TCP_DEFER_ACCEPT              disable
-    TCP_NODELAY                   disable
-    TCP_CORK                      disable
-    TCP_QUICKACK                  disable
-  Throughput:
-    Current Upload / Limit        0.000000 Mbps / 0.000000 Mbps
-    Current Download / Limit      0.000000 Mbps / 0.000000 Mbps
-  Statistics:
-    HTTP Total Requests           0
-    HTTP GET Requests             0
-    HTTP POST Requests            0
 TCP 127.0.0.1:40002 sessionless rr --sorry-uri '/' --statistic 0
   Bypass Settings:
     Sorry Server                  127.0.0.1:50001 Tproxy
-    Max Connection                0
-    Sorry Flag                    off
-  SSL Settings:
-    SSL Config File               none
-  Logging Settings:
-    Access Log                    off
-    Access Log File               none
-    Access Log Rotate             --ac-rotate-type size --ac-rotate-max-backup-index 10 --ac-rotate-max-filesize 10M
-  Socket Settings:
-    TCP_DEFER_ACCEPT              disable
-    TCP_NODELAY                   disable
-    TCP_CORK                      disable
-    TCP_QUICKACK                  disable
-  Throughput:
-    Current Upload / Limit        0.000000 Mbps / 0.000000 Mbps
-    Current Download / Limit      0.000000 Mbps / 0.000000 Mbps
-  Statistics:
-    HTTP Total Requests           0
-    HTTP GET Requests             0
-    HTTP POST Requests            0
-TCP 127.0.0.1:40003 sessionless rr --sorry-uri '/' --statistic 0
-  Bypass Settings:
-    Sorry Server                  [::1]:50002 Tproxy
     Max Connection                0
     Sorry Flag                    off
   SSL Settings:

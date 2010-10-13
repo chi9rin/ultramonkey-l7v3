@@ -9,7 +9,7 @@ $VAR1 = {
                                                                'weight' => '0',
                                                                'option' => {
                                                                              'flags' => '-r 127.0.0.3:30000',
-                                                                             'forward' => '-M'
+                                                                             'forward' => '--masq'
                                                                            },
                                                                'server' => {
                                                                              'ip' => '127.0.0.3',
@@ -21,7 +21,7 @@ $VAR1 = {
                                                                'weight' => '1',
                                                                'option' => {
                                                                              'flags' => '-r 127.0.0.2:20000',
-                                                                             'forward' => '-M'
+                                                                             'forward' => '--masq'
                                                                            },
                                                                'server' => {
                                                                              'ip' => '127.0.0.2',
@@ -36,7 +36,7 @@ $VAR1 = {
                                                                         'weight' => '20',
                                                                         'option' => {
                                                                                       'flags' => '-r 127.0.0.3:30000',
-                                                                                      'forward' => '-M'
+                                                                                      'forward' => '--masq'
                                                                                     },
                                                                         'server' => {
                                                                                       'ip' => '127.0.0.3',
@@ -48,7 +48,7 @@ $VAR1 = {
                                                                         'weight' => '10',
                                                                         'option' => {
                                                                                       'flags' => '-r 127.0.0.2:20000',
-                                                                                      'forward' => '-M'
+                                                                                      'forward' => '--masq'
                                                                                     },
                                                                         'server' => {
                                                                                       'ip' => '127.0.0.2',
@@ -66,7 +66,7 @@ $VAR1 = {
                                                            'weight' => '0',
                                                            'option' => {
                                                                          'flags' => '-r 127.0.0.1:30000',
-                                                                         'forward' => '-M'
+                                                                         'forward' => '--masq'
                                                                        },
                                                            'server' => {
                                                                          'ip' => '127.0.0.1',
@@ -78,7 +78,7 @@ $VAR1 = {
                                                            'weight' => '1',
                                                            'option' => {
                                                                          'flags' => '-r 127.0.0.1:20000',
-                                                                         'forward' => '-M'
+                                                                         'forward' => '--masq'
                                                                        },
                                                            'server' => {
                                                                          'ip' => '127.0.0.1',
@@ -93,7 +93,7 @@ $VAR1 = {
                                                                 'weight' => '20',
                                                                 'option' => {
                                                                               'flags' => '-r [::3]:30000',
-                                                                              'forward' => '-M'
+                                                                              'forward' => '--masq'
                                                                             },
                                                                 'server' => {
                                                                               'ip' => '[::3]',
@@ -105,7 +105,7 @@ $VAR1 = {
                                                                 'weight' => '10',
                                                                 'option' => {
                                                                               'flags' => '-r [::2]:20000',
-                                                                              'forward' => '-M'
+                                                                              'forward' => '--masq'
                                                                             },
                                                                 'server' => {
                                                                               'ip' => '[::2]',
