@@ -327,14 +327,44 @@ protocol_module_base::check_message_result protocol_module_ip::check_parameter(c
         bool forward_checked = false;
         bool sorryuri_checked = false;
 	bool stats_checked = false;
+
+        // cf RFC 2396 (A. Collected BNF for URI)
         sregex    sorry_uri_regex
         =    +('/' >>
-               *(alpha |
-                 digit |
-                 (set = ';', ':', '@', '&', '=') |
-                 (set = '$', '-', '_', '.', '+') |
-                 (set = '!', '*', '\'', '\(', ')', ',') |
-                 '%' >> repeat<2>(xdigit)));
+               *(
+                 alpha | digit |
+                 (set = '-', '_', '.', '!', '~', '*', '\'', '(', ')') |
+                 '%' >> repeat<2>(xdigit) |
+                 (set = ':', '@', '&', '=', '+', '$', ',')
+               )
+               >>
+               *(';' >>
+                 *(
+                   alpha | digit |
+                   (set = '-', '_', '.', '!', '~', '*', '\'', '(', ')') | // mark
+                   '%' >> repeat<2>(xdigit) | // escaped
+                   (set = ':', '@', '&', '=', '+', '$', ',')
+                 ) // pchar
+               ) // param
+             ) // segment
+             >>
+             !('?' >>
+               *(
+                 (set = ';', '/', '?', ':', '@', '&', '=', '+', '$', ',') | //reserved
+                 alpha | digit |
+                 (set = '-', '_', '.', '!', '~', '*', '\'', '(', ')') | // mark
+                 '%' >> repeat<2>(xdigit) // escaped
+               ) // uric
+             ) // query
+             >>
+             !('#' >>
+               *(
+                 (set = ';', '/', '?', ':', '@', '&', '=', '+', '$', ',') | //reserved
+                 alpha | digit |
+                 (set = '-', '_', '.', '!', '~', '*', '\'', '(', ')') | // mark
+                 '%' >> repeat<2>(xdigit) // escaped
+               ) // uric
+             ); // fragment
 
         typedef std::vector<std::string>::const_iterator vec_str_it;
 
@@ -617,14 +647,44 @@ protocol_module_base::check_message_result protocol_module_ip::set_parameter(con
 	bool sorryuri_checked = false;
 	bool stats_checked = false;
 	boost::format formatter;
-	sregex    sorry_uri_regex
-		=    +('/' >>
-				*(alpha |
-					digit |
-					(set = ';', ':', '@', '&', '=') |
-					(set = '$', '-', '_', '.', '+') |
-					(set = '!', '*', '\'', '\(', ')', ',') |
-					'%' >> repeat<2>(xdigit)));
+
+        // cf RFC 2396 (A. Collected BNF for URI)
+        sregex    sorry_uri_regex
+        =    +('/' >>
+               *(
+                 alpha | digit |
+                 (set = '-', '_', '.', '!', '~', '*', '\'', '(', ')') |
+                 '%' >> repeat<2>(xdigit) |
+                 (set = ':', '@', '&', '=', '+', '$', ',')
+               )
+               >>
+               *(';' >>
+                 *(
+                   alpha | digit |
+                   (set = '-', '_', '.', '!', '~', '*', '\'', '(', ')') | // mark
+                   '%' >> repeat<2>(xdigit) | // escaped
+                   (set = ':', '@', '&', '=', '+', '$', ',')
+                 ) // pchar
+               ) // param
+             ) // segment
+             >>
+             !('?' >>
+               *(
+                 (set = ';', '/', '?', ':', '@', '&', '=', '+', '$', ',') | //reserved
+                 alpha | digit |
+                 (set = '-', '_', '.', '!', '~', '*', '\'', '(', ')') | // mark
+                 '%' >> repeat<2>(xdigit) // escaped
+               ) // uric
+             ) // query
+             >>
+             !('#' >>
+               *(
+                 (set = ';', '/', '?', ':', '@', '&', '=', '+', '$', ',') | //reserved
+                 alpha | digit |
+                 (set = '-', '_', '.', '!', '~', '*', '\'', '(', ')') | // mark
+                 '%' >> repeat<2>(xdigit) // escaped
+               ) // uric
+             ); // fragment
 
 	typedef std::vector<std::string>::const_iterator vec_str_it;
 
