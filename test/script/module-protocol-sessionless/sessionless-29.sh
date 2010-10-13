@@ -26,14 +26,14 @@ then
 fi
 
 RET=`$L7VSADM -V -n | grep "TCP 127.0.0.1:40001"`
-if [ "$RET" != "TCP 127.0.0.1:40001 ip rr --timeout 3600 --no-reschedule --sorry-uri '/a/b/c/../d/e;f?g=h&i=%FF%00#jk'" ]
+if [ "$RET" != "TCP 127.0.0.1:40001 sessionless rr --sorry-uri '/a/b/c/../d/e;f?g=h&i=%FF%00#jk' --statistic 0" ]
 then
         echo "Test failed: $L7VSADM -V -n | grep TCP 127.0.0.1:40001"
         exit 1
 fi
 
 RET=`$L7VSADM -V -n | grep "TCP 127.0.0.1:40002"`
-if [ "$RET" != "TCP 127.0.0.1:40002 ip rr --timeout 3600 --no-reschedule --sorry-uri '/a/b/c/../d/e;f?g=h&i=%FF%00#jk'" ]
+if [ "$RET" != "TCP 127.0.0.1:40002 sessionless rr --sorry-uri '/a/b/c/../d/e;f?g=h&i=%FF%00#jk' --statistic 0" ]
 then
         echo "Test failed: $L7VSADM -V -n | grep TCP 127.0.0.1:40002"
         exit 1
