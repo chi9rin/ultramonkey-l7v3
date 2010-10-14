@@ -236,7 +236,7 @@ public:
 					rd_scoped_lock lock(logtrap_level_mutex);
                                         tmp_level = logtrap_level;
                                 }
-                                if ( (tmp_level >= LOG_LV_FATAL) &&
+                                if ( (tmp_level <= LOG_LV_FATAL) &&
 				      snmp_send_trap_func        &&
                                       (LOG_CAT_L7VSD_SNMPAGENT != cat)) {
                                         trapmessage trap_msg;
@@ -315,7 +315,7 @@ public:
                                         rd_scoped_lock lock(logtrap_level_mutex);
                                         tmp_level = logtrap_level;
                                 }
-                                if ( (tmp_level >= LOG_LV_ERROR) &&
+                                if ( (tmp_level <= LOG_LV_ERROR) &&
                                       snmp_send_trap_func        &&
                                       (LOG_CAT_L7VSD_SNMPAGENT != cat)) {
                                         trapmessage trap_msg;
@@ -394,7 +394,7 @@ public:
                                         rd_scoped_lock lock(logtrap_level_mutex);
                                         tmp_level = logtrap_level;
                                 }
-                                if ( (tmp_level >= LOG_LV_WARN) &&
+                                if ( (tmp_level <= LOG_LV_WARN) &&
                                       snmp_send_trap_func       &&
                                       (LOG_CAT_L7VSD_SNMPAGENT != cat)) {
                                         trapmessage trap_msg;
@@ -474,7 +474,7 @@ public:
                                         rd_scoped_lock lock(logtrap_level_mutex);
                                         tmp_level = logtrap_level;
                                 }
-                                if ( (tmp_level >= LOG_LV_INFO) &&
+                                if ( (tmp_level <= LOG_LV_INFO) &&
                                       snmp_send_trap_func       &&
                                       (LOG_CAT_L7VSD_SNMPAGENT != cat)) {
                                         trapmessage trap_msg;
@@ -554,7 +554,7 @@ public:
                                         rd_scoped_lock lock(logtrap_level_mutex);
                                         tmp_level = logtrap_level;
                                 }
-                                if ( (tmp_level >= LOG_LV_DEBUG) &&
+                                if ( (tmp_level <= LOG_LV_DEBUG) &&
                                       snmp_send_trap_func        &&
                                       (LOG_CAT_L7VSD_SNMPAGENT != cat)) {
                                         trapmessage trap_msg;

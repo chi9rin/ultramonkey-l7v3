@@ -320,120 +320,104 @@ void    l7vs::virtualservice_base::handle_throughput_update(const boost::system:
 
                         double byte_sec_up_val = 0.0;
                         if (0 != element.qos_upstream) {
-                                // wait_count = ( current_throughput(byte/s)(=(recvsize / interval(ms)) * 1000 ) / qos_limit_throughput ) - 1(thistime)
-                                //wait_count_up = ( ( ( current_up_recvsize.get() / param_data.bps_interval ) * 1000 ) / element.qos_upstream );
-
                                 byte_sec_up_val = ((double)current_up_recvsize.get() / param_data.bps_interval);
                                 wait_count_up = (unsigned long long)((byte_sec_up_val * 1000) / element.qos_upstream);
 
                                 if (wait_count_up > 0)    wait_count_up--;
-
-				//calc upstream alert on throughput
-                                unsigned long long upqos_alert_on_throughput =  element.qos_upstream * param_data.qos_up_alert_on / 100;
-                                //calc upstream alert off throughput
-                                unsigned long long upqos_alert_off_throughput =  element.qos_upstream * param_data.qos_up_alert_off / 100;
-                                if ((upqos_alert_flag == false) && ((byte_sec_up_val * 1000) > upqos_alert_on_throughput)) {
-                                        //create trap message
-			                trapmessage trap_msg;
-			                trap_msg.message = "TRAP00020007,Warning: The up-throughput has exceeded the threshold of QoS warning.";
-			                
-					trap_msg.type = trapmessage::UPQOS_ALERT_ON;
-                                        error_code err_code;
-                                        //push the trap message
-                                        snmpagent::push_trapmessage(trap_msg, err_code);
-                                        if (err_code) {
-                                                std::string msg("Push trap message failed.");
-                                                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 41, msg, __FILE__, __LINE__);
-                                        }
-
-                                        //set upstream QoS alert flag true
-                                        upqos_alert_flag = true;
-                                } else if ((upqos_alert_flag == true) && ((byte_sec_up_val * 1000) < upqos_alert_off_throughput)) {
-                                        //create trap message
-                                        trapmessage trap_msg;
-                                        trap_msg.message = "TRAP00020008,Warning release: The up-throughput has fell below the release threshold of up-QoS warning.";
-                                        trap_msg.type = trapmessage::UPQOS_ALERT_OFF;
-
-                                        error_code err_code;
-
-                                        //push the trap message
-                                        snmpagent::push_trapmessage(trap_msg, err_code);
-                                        if (err_code) {
-                                                std::string msg("Push trap message failed.");
-                                                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 42, msg, __FILE__, __LINE__);
-                                        }
-
-                                        //set upstream QoS alert flag true
-                                        upqos_alert_flag = false;
-                                }
-
                         }
                         // throughput = recvsize / ( (thistime(1) + all_wait_time) * interval(ms) ) * 1000
-                        //throughput_up = ( current_up_recvsize.get() / ( param_data.bps_interval * ( wait_count_up.get() + 1 ) ) ) * 1000;
-
                         byte_sec_up_val = ((double)current_up_recvsize.get() / (param_data.bps_interval * (wait_count_up.get() + 1)));
                         throughput_up = (unsigned long long)(byte_sec_up_val * 1000);
 
                         current_up_recvsize = 0ULL;
                 }
 
+                //calc upstream alert on throughput
+                unsigned long long upqos_alert_on_throughput =  element.qos_upstream * param_data.qos_up_alert_on / 100;
+                //calc upstream alert off throughput
+                unsigned long long upqos_alert_off_throughput =  element.qos_upstream * param_data.qos_up_alert_off / 100;
+                if ((upqos_alert_flag == false) && (throughput_up > upqos_alert_on_throughput) && (0 != element.qos_upstream)) {
+                        //create trap message
+                        trapmessage trap_msg;
+                        trap_msg.message = "TRAP00020007,Warning: The up-throughput has exceeded the threshold of QoS warning.";
+                        trap_msg.type = trapmessage::UPQOS_ALERT_ON;
+                        error_code err_code;
+                        //push the trap message
+                        snmpagent::push_trapmessage(trap_msg, err_code);
+                        if (err_code) {
+                                std::string msg("Push trap message failed.");
+                                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 41, msg, __FILE__, __LINE__);
+                        }
+
+                        //set upstream QoS alert flag true
+                        upqos_alert_flag = true;
+                } else if ((upqos_alert_flag == true) && (throughput_up < upqos_alert_off_throughput)) {
+                        //create trap message
+                        trapmessage trap_msg;
+                        trap_msg.message = "TRAP00020008,Warning release: The up-throughput has fell below the release threshold of up-QoS warning.";
+                        trap_msg.type = trapmessage::UPQOS_ALERT_OFF;
+
+                        error_code err_code;
+                        //push the trap message
+                        snmpagent::push_trapmessage(trap_msg, err_code);
+                        if (err_code) {
+                                std::string msg("Push trap message failed.");
+                                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 42, msg, __FILE__, __LINE__);
+                        }
+
+                        //set upstream QoS alert flag false
+                        upqos_alert_flag = false;
+                }
+
                 if (current_down_recvsize != 0) {
 
                         double byte_sec_down_val = 0.0;
                         if (0 != element.qos_downstream) {
-                                // wait_count = ( current_throughput(byte/s)(=(recvsize / interval(ms)) * 1000 ) / qos_limit_throughput ) - 1(thistime)
-                                //wait_count_down = ( ( ( current_down_recvsize.get() / param_data.bps_interval ) * 1000 ) / element.qos_downstream );
-
                                 byte_sec_down_val = ((double)current_down_recvsize.get() / param_data.bps_interval);
                                 wait_count_down = (unsigned long long)((byte_sec_down_val * 1000) / element.qos_downstream);
 
                                 if (wait_count_down > 0)    wait_count_down--;
-
-				//calc downstream alert on throughput
-                                unsigned long long downqos_alert_on_throughput =  element.qos_downstream * param_data.qos_down_alert_on / 100;
-                                //calc downstream alert off throughput
-                                unsigned long long downqos_alert_off_throughput =  element.qos_upstream * param_data.qos_down_alert_off / 100;
-                                if ((downqos_alert_flag == false) && ((byte_sec_down_val * 1000) > downqos_alert_on_throughput)) {
-                                        //create trap message
-                                        trapmessage trap_msg;
-                                        trap_msg.message = "TRAP00020009,Warning: The down-throughput has exceeded the threshold of down-QoS warning.";
-                                        trap_msg.type = trapmessage::DOWNQOS_ALERT_ON;
-
-					error_code err_code;
-                                        //push the trap message
-                                        snmpagent::push_trapmessage(trap_msg, err_code);
-                                        if (err_code) {
-                                                std::string msg("Push trap message failed.");
-                                                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 43, msg, __FILE__, __LINE__);
-                                        }
-                                        //set upstream QoS alert flag true
-                                        downqos_alert_flag = true;
-                                } else if ((downqos_alert_flag == true) && ((byte_sec_down_val * 1000) < downqos_alert_off_throughput)) {
-                                        //create trap message
-                                        trapmessage trap_msg;
-                                        trap_msg.message = "TRAP00020010,Warning release: The down-throughput has fell below the release threshold of down-QoS warning.";
-                                        trap_msg.type = trapmessage::DOWNQOS_ALERT_OFF;
-					
-					error_code err_code;
-                                        //push the trap message
-                                        snmpagent::push_trapmessage(trap_msg, err_code);
-                                        if (err_code) {
-                                                std::string msg("Push trap message failed.");
-                                                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 44, msg, __FILE__, __LINE__);
-                                        }
-
-                                        //set upstream QoS alert flag true
-                                        downqos_alert_flag = false;
-                                }
-
                         }
                         // throughput = recvsize / ( (thistime(1) + all_wait_time) * interval(ms) ) * 1000
-                        //throughput_down = ( current_down_recvsize.get() / ( param_data.bps_interval * ( wait_count_down.get() + 1 ) ) ) * 1000;
 
                         byte_sec_down_val = ((double)current_down_recvsize.get() / (param_data.bps_interval * (wait_count_down.get() + 1)));
                         throughput_down = (unsigned long long)(byte_sec_down_val * 1000);
-
                         current_down_recvsize = 0ULL;
+                }
+ 
+                //calc downstream alert on throughput
+                unsigned long long downqos_alert_on_throughput =  element.qos_downstream * param_data.qos_down_alert_on / 100;
+                //calc downstream alert off throughput
+                unsigned long long downqos_alert_off_throughput =  element.qos_downstream * param_data.qos_down_alert_off / 100;
+                if ((downqos_alert_flag == false) && (throughput_down > downqos_alert_on_throughput) && (0 != element.qos_downstream)) {
+                        //create trap message
+                        trapmessage trap_msg;
+                        trap_msg.message = "TRAP00020009,Warning: The down-throughput has exceeded the threshold of down-QoS warning.";
+                        trap_msg.type = trapmessage::DOWNQOS_ALERT_ON;
+                        error_code err_code;
+                        //push the trap message
+                        snmpagent::push_trapmessage(trap_msg, err_code);
+                        if (err_code) {
+                                std::string msg("Push trap message failed.");
+                                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 43, msg, __FILE__, __LINE__);
+                        }
+                        //set upstream QoS alert flag true
+                        downqos_alert_flag = true;
+                } else if ((downqos_alert_flag == true) && (throughput_down < downqos_alert_off_throughput)) {
+                        //create trap message
+                        trapmessage trap_msg;
+                        trap_msg.message = "TRAP00020010,Warning release: The down-throughput has fell below the release threshold of down-QoS warning.";
+                        trap_msg.type = trapmessage::DOWNQOS_ALERT_OFF;
+
+                        error_code err_code;
+                        //push the trap message
+                        snmpagent::push_trapmessage(trap_msg, err_code);
+                        if (err_code) {
+                                std::string msg("Push trap message failed.");
+                                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 44, msg, __FILE__, __LINE__);
+                        }
+                        //set upstream QoS alert flag false
+                        downqos_alert_flag = false;
                 }
 
                 if (0 == virtualservice_stop_flag.get()) {

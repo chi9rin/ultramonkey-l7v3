@@ -1773,10 +1773,9 @@ bool l7vs::l7vsadm::parse_snmp_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd,
                         if (! itr->second(pos, argc, argv)) return false; // option string function error.
                 } else { //option string function not found.
                         // print option not found message.
-                        std::stringstream buf;
-                        buf << "snmp option not found(--snmp): " << argv[pos];
-                        l7vsadm_err.setter(true, buf.str());
-                        Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 128, buf.str(), __FILE__, __LINE__);
+                        std::string buf = "Invalid option for -S command.";
+                        l7vsadm_err.setter(true, buf);
+                        Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 128, buf, __FILE__, __LINE__);
                         return false;
                 }
         }
@@ -1797,7 +1796,7 @@ bool    l7vs::l7vsadm::parse_opt_snmp_refresh_func(int &pos, int argc, char *arg
                 std::stringstream buf;
                 buf << "Option ";
                 buf << argv[pos];
-                buf << " conflict.";
+                buf << " is conflict.";
 
                 l7vsadm_err.setter(true, buf.str());
                 Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 129, buf.str(), __FILE__, __LINE__);
@@ -1852,7 +1851,7 @@ bool    l7vs::l7vsadm::parse_opt_snmp_vs_target_func(int &pos, int argc, char *a
                 std::stringstream buf;
                 buf << "Option ";
                 buf << argv[pos];
-                buf << " conflict.";
+                buf << " is conflict.";
 
                 l7vsadm_err.setter(true, buf.str());
                 Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 131, buf.str(), __FILE__, __LINE__);
@@ -1899,7 +1898,7 @@ bool    l7vs::l7vsadm::parse_opt_snmp_vs_module_func(int &pos, int argc, char *a
                 std::stringstream buf;
                 buf << "Option ";
                 buf << argv[pos];
-                buf << " conflict.";
+                buf << " is conflict.";
 
                 l7vsadm_err.setter(true, buf.str());
                 Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 134, buf.str(), __FILE__, __LINE__);
@@ -1957,7 +1956,7 @@ bool    l7vs::l7vsadm::parse_opt_snmp_flag_func(int &pos, int argc, char *argv[]
                 std::stringstream buf;
                 buf << "Option ";
                 buf << argv[pos];
-                buf << " conflict.";
+                buf << " is conflict.";
 
                 l7vsadm_err.setter(true, buf.str());
                 Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 138, buf.str(), __FILE__, __LINE__);
@@ -1986,7 +1985,7 @@ bool    l7vs::l7vsadm::parse_opt_snmp_flag_func(int &pos, int argc, char *argv[]
                         return false;
                 }
         } else {
-                std::string    buf("Need option value for -f option");
+                std::string    buf("Need option value for -f option.");
                 l7vsadm_err.setter(true, buf);
                 Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 141, buf, __FILE__, __LINE__);
                 return false;
@@ -2005,7 +2004,7 @@ bool    l7vs::l7vsadm::parse_opt_snmp_interval_func(int &pos, int argc, char *ar
                 std::stringstream buf;
                 buf << "Option ";
                 buf << argv[pos];
-                buf << " conflict.";
+                buf << " is conflict.";
 
                 l7vsadm_err.setter(true, buf.str());
                 Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 142, buf.str(), __FILE__, __LINE__);
@@ -2034,7 +2033,7 @@ bool    l7vs::l7vsadm::parse_opt_snmp_interval_func(int &pos, int argc, char *ar
                         return false;
                 }
         } else    {
-                std::string    buf("Need option value for -i option");
+                std::string    buf("Need option value for -i option.");
                 l7vsadm_err.setter(true, buf);
                 Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 145, buf, __FILE__, __LINE__);
                 return false;
@@ -2054,7 +2053,7 @@ bool    l7vs::l7vsadm::parse_opt_snmp_log_trap_func(int &pos, int argc, char *ar
                 std::stringstream buf;
                 buf << "Option ";
                 buf << argv[pos];
-                buf << " conflict.";
+                buf << " is conflict.";
 
                 l7vsadm_err.setter(true, buf.str());
                 Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 146, buf.str(), __FILE__, __LINE__);
@@ -2083,7 +2082,7 @@ bool    l7vs::l7vsadm::parse_opt_snmp_log_trap_func(int &pos, int argc, char *ar
                         return false;
                 }
         } else    {
-                std::string    buf("Need option value for -t option");
+                std::string    buf("Need option value for -t option.");
                 l7vsadm_err.setter(true, buf);
                 Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 149, buf, __FILE__, __LINE__);
                 return false;
@@ -2103,7 +2102,7 @@ bool    l7vs::l7vsadm::parse_opt_snmp_log_trap_level_func(int &pos, int argc, ch
                 std::stringstream buf;
                 buf << "Option ";
                 buf << argv[pos];
-                buf << " conflict.";
+                buf << " is conflict.";
 
                 l7vsadm_err.setter(true, buf.str());
                 Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 150, buf.str(), __FILE__, __LINE__);
@@ -2118,13 +2117,14 @@ bool    l7vs::l7vsadm::parse_opt_snmp_log_trap_level_func(int &pos, int argc, ch
 
                         return true;
                 } else {
-                        std::string    buf("logtrap_level not found.");
-                        l7vsadm_err.setter(true, buf);
-                        Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 151, buf, __FILE__, __LINE__);
+                        std::stringstream    buf;
+                        buf << "No such Log-Level " << argv[pos] << ".";
+                        l7vsadm_err.setter(true, buf.str());
+                        Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 151, buf.str(), __FILE__, __LINE__);
                         return false;
                 }
         } else {
-                std::string    buf("Need option value for -l option");
+                std::string    buf("Need option value for -l option.");
                 l7vsadm_err.setter(true, buf);
                 Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 152, buf, __FILE__, __LINE__);
                 return false;
@@ -2270,11 +2270,11 @@ bool l7vs::l7vsadm::parse_help_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd,
                   "  --level            -l log-level           set log level for l7vsd or SNMP Agent\n"
                   "  --reload           -r reload-parameter    reload specified config parameter\n"
                   "  --numeric          -n                     list the table in numeric\n"
-  	          "  --flag              -f snmp-flag           start or stop snmp function 0(off) 1(on)\n"
-	          "  --interval          -i update-interval     set collect snmp cache collect interval(s)\n"
-	          "  --logtrap           -t log-trap-flag       start or stop log trap function 0(off) 1(on)\n"
-	          "  --logtraplevel      -l log-trap-level      set log trap level for snmp\n"
-	          "  --refresh           -r                     clear statistic info for snmp\n"
+                  "  --flag             -f snmp-flag           start or stop snmp function 0(off) 1(on)\n"
+                  "  --interval         -i update-interval     set collect snmp cache collect interval(s)\n"
+                  "  --logtrap          -t log-trap-flag       start or stop log trap function 0(off) 1(on)\n"
+                  "  --logtraplevel     -l log-trap-level      set log trap level for snmp\n"
+                  "  --refresh          -r                     clear statistic info for snmp\n"
                   << std::endl;
 
         return true;
@@ -2579,7 +2579,7 @@ void l7vs::l7vsadm::disp_list_verbose()
                                      "    Access Log File               %s\n"
                                      "    Access Log Rotate             %s\n")
                 % ((0 == vse.access_log_flag) ? "off" : "on")
-                % ((0 == vse.socket_option_string.length()) ? "none" : vse.socket_option_string)
+                % ((0 == vse.access_log_file_name.length()) ? "none" : vse.access_log_file_name)
                 % ((0 == vse.access_log_rotate_verbose_info.length()) ? "none" :  vse.access_log_rotate_verbose_info);
 
                 buf << boost::format("  Socket Settings:\n"
@@ -2590,14 +2590,14 @@ void l7vs::l7vsadm::disp_list_verbose()
                 % ((0 == vse.socket_option_tcp_defer_accept) ? "disable" : "enable")
                 % ((0 == vse.socket_option_tcp_nodelay) ? "disable" : "enable")
                 % ((0 == vse.socket_option_tcp_cork) ? "disable" : "enable")
-                % ((0 == vse.socket_option_tcp_quickack) ? "disable" : "enable");
+                % ((0 == vse.socket_option_tcp_quickack) ? "auto" : ((1 == vse.socket_option_tcp_quickack) ? "enable" : "disable"));
 
 
                 buf << boost::format("  Throughput:\n"
                                      "    Current Upload / Limit        %f Mbps / %f Mbps\n"
                                      "    Current Download / Limit      %f Mbps / %f Mbps\n")
-                % ((double)vse.throughput_upstream * 8 / (1000 * 1000)) % ((double)output_qos_upstream_value * 8 / (1000 * 1000) )
-                % ((double)vse.throughput_downstream * 8 / (1000 * 1000)) % ((double)output_qos_downstream_value * 8 / (1000 * 1000));
+                % ((double)vse.throughput_upstream * 8 / (1000 * 1000)) % ((double)output_qos_upstream_value / (1000 * 1000) )
+                % ((double)vse.throughput_downstream * 8 / (1000 * 1000)) % ((double)output_qos_downstream_value / (1000 * 1000));
 
                 buf << boost::format("  Statistics:\n"
                                      "    HTTP Total Requests           %lld\n"

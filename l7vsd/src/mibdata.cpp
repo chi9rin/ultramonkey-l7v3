@@ -156,7 +156,7 @@ namespace l7vs
                                                 if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SNMPAGENT)) {
                                                         std::stringstream    debugstr;
                                                         debugstr << "function : mibdata::update_vs_table : vs_table add row.";
-                                                        boost::format("vs_index=%d") % vs_index;
+                                                        debugstr << "vs_index=" << vs_index;
 
                                                         Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 65, debugstr.str(), __FILE__, __LINE__);
                                                 }
@@ -227,8 +227,8 @@ namespace l7vs
                                 sorry_maxconnection.low = srv.sorry_maxconnection;
 
                                 //set throughput information
-                                throughput_upstream.low = srv.throughput_upstream;
-                                throughput_downstream.low = srv.throughput_downstream;
+                                throughput_upstream.low = srv.throughput_upstream * 8;
+                                throughput_downstream.low = srv.throughput_downstream * 8;
                                 qos_upstream.low = srv.qos_upstream * 8;
                                 qos_downstream.low = srv.qos_downstream * 8;
 
@@ -334,7 +334,7 @@ namespace l7vs
                 Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 67, "mibdata::update_rs_table", __FILE__, __LINE__);
 
                 oid   index[1] = {0};
-                int   rs_index = 0;
+                int   rs_index = 1;
                 netsnmp_table_row *row = NULL;
 
                 //delete the surplus data from real server table
@@ -368,7 +368,7 @@ namespace l7vs
                                         if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SNMPAGENT)) {
                                                 std::stringstream    debugstr;
                                                 debugstr << "function : mibdata::update_rs_table : rs_table add row.";
-                                                boost::format("rs_index=%d") % (*itr).index;
+                                                debugstr << "rs_index=" << rs_index;
 
                                                 Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 68, debugstr.str(), __FILE__, __LINE__);
                                         }
@@ -376,7 +376,7 @@ namespace l7vs
                                 }
                         }
 
-                        netsnmp_set_row_column(row, COLUMN_L7VSRSINDEX, ASN_INTEGER, (char *)&(*itr).index, sizeof(int));
+                        netsnmp_set_row_column(row, COLUMN_L7VSRSINDEX, ASN_INTEGER, (char *)&rs_index, sizeof(int));
                         netsnmp_set_row_column(row, COLUMN_L7VSRSVSINDEX, ASN_INTEGER, (char *)&(*itr).vs_index, sizeof(int));
                         netsnmp_set_row_column(row, COLUMN_L7VSRSADDRTYPE, ASN_INTEGER, (char *)&(*itr).address_type, sizeof(int));
                         netsnmp_set_row_column(row, COLUMN_L7VSRSADDR, ASN_OCTET_STR, (*itr).address, strlen((*itr).address));

@@ -19,8 +19,8 @@ then
 fi
 
 #Check default value
-RET=`$L7VSADM -V -n | grep "127.0.0.1:44431" | awk '{print $5,$6,$7,$8,$9}'`
-EXPECT="--timeout 3600 --no-reschedule --sorry-uri '/'"
+RET=`$L7VSADM -V -n | grep "127.0.0.1:44431" | awk '{print $5,$6,$7,$8,$9,$10,$11}'`
+EXPECT="--timeout 3600 --no-reschedule --sorry-uri '/' --statistic 0"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -V -n"

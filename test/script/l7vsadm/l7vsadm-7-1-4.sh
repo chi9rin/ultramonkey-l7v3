@@ -11,34 +11,28 @@ then
 fi
 usleep 100000
 
-RET=`$L7VSADM -V 2>&1 | grep "l7vsd_system"`
-EXPECT="l7vsd_system                   warn
-l7vsd_system_memory            warn
-l7vsd_system_endpoint          warn
-l7vsd_system_signal            warn
-l7vsd_system_environment       warn"
+RET=`$L7VSADM -V 2>&1 | grep "l7vsd_snmpagent"`
+EXPECT="l7vsd_snmpagent                warn"
+
 if [ "${RET}" != "${EXPECT}" ]
 then
-        echo "Test failed: $L7VSADM -V | grep l7vsd_system"
+        echo "Test failed: $L7VSADM -V | grep l7vsd_agent"
         exit 1
 fi
 
-$L7VSADM --log --category l7vsd_system_memory --level error
+$L7VSADM --log --category agent --level error
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM --log --category l7vsd_system_memory --level error"
+        echo "Test failed: $L7VSADM --log --category agent --level error"
         exit 1
 fi
 
-RET=`$L7VSADM -V 2>&1 | grep "l7vsd_system"`
-EXPECT="l7vsd_system                   warn
-l7vsd_system_memory            error
-l7vsd_system_endpoint          warn
-l7vsd_system_signal            warn
-l7vsd_system_environment       warn"
+RET=`$L7VSADM -V 2>&1 | grep "l7vsd_snmpagent"`
+EXPECT="l7vsd_snmpagent                error"
+
 if [ "${RET}" != "${EXPECT}" ]
 then
-        echo "Test failed: $L7VSADM -V | grep l7vsd_system"
+        echo "Test failed: $L7VSADM -V | grep l7vsd_snmpagent"
         exit 1
 fi
 

@@ -34,8 +34,10 @@
 #include "l7vsd.h"
 #include "error_code.h"
 #include "snmpagent.h"
+#include "snmpfunc.h"
 #define    PARAM_SCHED_ALGORITHM    "task_scheduler_algorithm"
 #define PARAM_SCHED_PRIORITY    "task_scheduler_priority"
+#define TRAP_TIME_STRING_MAX_SIZE   (20)
 
 namespace l7vs
 {
@@ -1366,19 +1368,22 @@ int    l7vsd::run(int argc, char *argv[])
 		// snmp trap function unset
 		Logger::set_snmp_send_trap_func(NULL);
 
-                //create trap message
-                trap_msg.type = trapmessage::SERVICE_STOP;
-                trap_msg.message = "TRAP00010002,l7vsd stop.";
+                // check snmp function enabled
+                if (snmpagent::get_snmp_info().enabled) {
+                        // get local time string
+                        char time_buf[TRAP_TIME_STRING_MAX_SIZE] = {0};
+                        time_t now = time(NULL);
+                        struct tm *t = localtime(&now);
+                        if (t) strftime(time_buf, sizeof(time_buf), "%Y/%m/%d %H:%M:%S", t);
 
-                // snmp trap function unset
-                err_code.setter(false, "");
-
-		//push the trap message
-		snmpagent::push_trapmessage(trap_msg, err_code);
-
-                if (err_code) {
-                        std::string msg("Push trap message failed.");
-                        Logger::putLogError(LOG_CAT_L7VSD_MAINTHREAD, 10, msg, __FILE__, __LINE__);
+                        // make trap message
+                        std::stringstream   trap_buf;
+                        trap_buf << time_buf << "," << "TRAP00010002,l7vsd stop.";
+                        char buff[HOST_NAME_MAX] = {0};
+                        gethostname(buff, HOST_NAME_MAX);
+                        trap_buf << "," << buff;
+                        // send trap message
+                        trap_service_stop(trap_buf.str());
                 }
 
                 // snmp agent finalize

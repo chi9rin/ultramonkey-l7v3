@@ -18,12 +18,12 @@ then
         exit 1
 fi
 
+#Check default value
+RET=`l7vsadm -V -n | grep "TCP 127.0.0.1:40001" | awk '{print $5,$6,$7,$8}'`
 
-RET=`l7vsadm -V -n | grep "TCP 127.0.0.1:40001" | awk '{print $5,$6}'`
-
-if [ ${RET} != "--sorry-uri \'/\'"]
+if [ "${RET}" != "--sorry-uri '/' --statistic 0" ]
 then
-        echo "Test failed: l7vsadm -V -n | grep TCP 127.0.0.1:40001 | awk '{print $5,$6}"
+        echo "Test failed: l7vsadm -V -n | grep TCP 127.0.0.1:40001 | awk '{print $5,$6,$7,$8}"
         exit 1
 fi
 exit 0

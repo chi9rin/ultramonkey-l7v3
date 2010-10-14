@@ -35,7 +35,7 @@
 #define TRAP_TIME_STRING_MAX_SIZE            (20)
 
 #ifndef FALSE
-#define FALSE                                 (0)
+#define FALSE                                (0)
 #endif
 #ifndef TRUE
 #define TRUE                                 (1)
@@ -61,6 +61,15 @@ namespace l7vs
                 while (enabled.get() != FALSE) {
                         //agent check and process
                         agent_check_and_process(0);
+
+                        //collect mib data
+                        error_code err;
+                        collect_mibdata(err);
+
+                        if (err) {
+                                std::string msg("collect mib data failed.");
+                                Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 67, msg, __FILE__, __LINE__);
+                        }
 
                         //sleep a little time
                         nanosleep(&wait_val, NULL);
@@ -104,13 +113,14 @@ namespace l7vs
 
                         if (it != trapfunc_map.end()) {
                                 //send trap message
-                                it->second(trapmsg.message);
+                                if (it->second(trapmsg.message) == SNMP_ERR_NOERROR)
+                                {
+                                        //set trap last date to current time
+                                        trap_last_date = time(NULL);
 
-                                //set trap last date to current time
-                                trap_last_date = time(NULL);
-
-                                //increment snmp trap count
-                                snmp_trap_count++;
+                                        //incrememt snmp trap count
+                                        snmp_trap_count++;
+                                }
                         }
 
                         //sleep a little time
@@ -423,7 +433,7 @@ namespace l7vs
 
                         if (err) {
                                 //mib collect failed
-                                std::string msg("thread start failed.");
+                                std::string msg("collect_mibdata failed,thread start failed.");
                                 Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 3, msg, __FILE__, __LINE__);
                                 //set error code
                                 err.setter(true, msg);
@@ -926,9 +936,6 @@ namespace l7vs
                         mib_collect_last_time = now_time;
 
                 }
-
-                //update last request date
-                request_last_date = time(NULL);
         }
 
         /*!
@@ -989,4 +996,25 @@ namespace l7vs
                 /*------ DEBUG LOG END ------*/
         }
 
+        /*!
+         *  update last request date.
+         *
+         * @retrun         void
+         */
+        void snmpagent_impl::update_last_request_date()
+        {
+                Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 59, "snmpagent_impl::update_last_request_date", __FILE__, __LINE__);
+                //update last request date
+                request_last_date = time(NULL);
+
+                /*-------- DEBUG LOG --------*/
+                if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SNMPAGENT)) {
+                        std::ostringstream  debugstr;
+                        debugstr << "function : snmpagent_impl::update_last_request_date : request_last_date = ";
+                        debugstr << request_last_date.get() << ".";
+
+                        Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 60, debugstr.str(), __FILE__, __LINE__);
+                }
+                /*------ DEBUG LOG END ------*/
+        }
 }

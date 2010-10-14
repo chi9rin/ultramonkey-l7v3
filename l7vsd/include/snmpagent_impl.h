@@ -253,6 +253,13 @@ namespace l7vs
                  * @retrun         void
                  */
                 void    increment_setrequest_count();
+
+                /*!
+                 *  update last request date.
+                 *
+                 * @retrun         void
+                 */
+                void    update_last_request_date();
         };
 
 }

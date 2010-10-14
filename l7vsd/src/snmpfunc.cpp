@@ -117,23 +117,12 @@ handle_get_vstable_count(netsnmp_mib_handler *handler,
         switch (reqinfo->mode) {
 
         case MODE_GET: {
-                error_code err;
-                //collect mibdata
-                l7vs::snmpagent_impl::get_instance().collect_mibdata(err);
-
-                if (err) {
-                        std::string msg("collect mib data failed.");
-                        Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 19, msg, __FILE__, __LINE__);
-
-                        return SNMP_ERR_GENERR;
-                }
-
                 //get virtual service size
-                int rep_state = l7vs::mibdata::get_instance().get_vs_table_size();
+                int table_size = l7vs::mibdata::get_instance().get_vs_table_size();
 
                 //set value
                 int ret = snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
-                                                   (u_char *)&rep_state,
+                                                   (u_char *)&table_size,
                                                    sizeof(int));
 
                 if (ret) {
@@ -143,7 +132,11 @@ handle_get_vstable_count(netsnmp_mib_handler *handler,
                         return SNMP_ERR_GENERR;
                 }
 
+                //increment getrequest count
                 snmpagent_impl::get_instance().increment_getrequest_count();
+
+                //update last request date
+                snmpagent_impl::get_instance().update_last_request_date();
         }
         break;
         default:
@@ -183,17 +176,6 @@ handle_get_rep_state(netsnmp_mib_handler *handler,
         switch (reqinfo->mode) {
 
         case MODE_GET: {
-                error_code err;
-                //collect mibdata
-                l7vs::snmpagent_impl::get_instance().collect_mibdata(err);
-
-                if (err) {
-                        std::string msg("collect mib data failed.");
-                        Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 21, msg, __FILE__, __LINE__);
-
-                        return SNMP_ERR_GENERR;
-                }
-
                 //get replication state
                 int rep_state = l7vs::mibdata::get_instance().get_replication_state();
 
@@ -210,7 +192,11 @@ handle_get_rep_state(netsnmp_mib_handler *handler,
                         return SNMP_ERR_GENERR;
                 }
 
+                //increment getrequest count
                 snmpagent_impl::get_instance().increment_getrequest_count();
+
+                //update last request date
+                snmpagent_impl::get_instance().update_last_request_date();
         }
         break;
         default:
@@ -451,20 +437,12 @@ handle_get_vstable(netsnmp_mib_handler *handler,
          * if need be.
          */
         switch (reqinfo->mode) {
-
         case MODE_GET: {
-                error_code err;
-                //collect mibdata
-                l7vs::snmpagent_impl::get_instance().collect_mibdata(err);
-
-                if (err) {
-                        std::string msg("collect mib data failed.");
-                        Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 27, msg, __FILE__, __LINE__);
-
-                        return SNMP_ERR_GENERR;
-                }
-
+                //increment getrequest count
                 snmpagent_impl::get_instance().increment_getrequest_count();
+
+                //update last request date
+                snmpagent_impl::get_instance().update_last_request_date();
         }
         break;
         case MODE_GETNEXT:
@@ -503,18 +481,11 @@ handle_get_rstable(netsnmp_mib_handler *handler,
         switch (reqinfo->mode) {
 
         case MODE_GET: {
-                error_code err;
-                //collect mibdata
-                l7vs::snmpagent_impl::get_instance().collect_mibdata(err);
-
-                if (err) {
-                        std::string msg("collect mib data failed.");
-                        Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 28, msg, __FILE__, __LINE__);
-
-                        return SNMP_ERR_GENERR;
-                }
-
+                //increment getrequest count
                 snmpagent_impl::get_instance().increment_getrequest_count();
+
+                //update last request date
+                snmpagent_impl::get_instance().update_last_request_date();
         }
         break;
         case MODE_GETNEXT:
