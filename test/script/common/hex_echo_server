@@ -3,24 +3,27 @@
 use strict;
 use warnings;
 use IO::Socket::INET;
+use IO::Select;
 use Getopt::Long;
 
 my $port = 80;
 my $wait = 0;
+my $timeout = 5;
 my $help = 0;
 
 my $result = GetOptions(
 	"port=i" => \$port,
 	"wait=i" => \$wait,
+	"stop=i" => \$timeout,
 	"help"   => \$help,
 );
 usage() if (!$result || $help);
 
-server($port, $wait);
+server($port, $wait, $timeout);
 
 # listen server
 sub server {
-	my ($port, $wait) = @_;
+	my ($port, $wait, $timeout) = @_;
 
 	my $sock = IO::Socket::INET->new(
 		LocalAddr => "0:$port",
@@ -30,13 +33,24 @@ sub server {
 
 	my $client = $sock->accept;
 
+	my $select = IO::Select->new;
+	$select->add($client);
+
 	sleep $wait if $wait;
 
 	# read request
-	while (<$client>) {
+	while ($select->can_read($timeout)) {
+		my $buffer;
+		sysread $client, $buffer, 100;
+
+		last if !$buffer;
+
 		# send response
-		print $client $_;
+		my $hex = unpack 'H*', $buffer;
+		$hex =~ s/([0-9a-f]{2})/$1 /g;
+		print $client "$hex\n";
 	}
+	$client->close;
 }
 
 sub usage {
@@ -45,5 +59,6 @@ Usage: $0 [OPTION]
 
   -p PORT      listen port (default 80)
   -w N         wait N seconds before send response
+  -s N         timeout N seconds (default 5)
 END
 }
