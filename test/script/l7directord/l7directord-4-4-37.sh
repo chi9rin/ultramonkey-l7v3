@@ -2,7 +2,7 @@
 . ${SET_DEFAULT_CONF}
 \cp ./materials/l7directord-4-4-37-l7directord.cf ${L7DIRECTORD_CONF_DIR}/l7directord.cf
 
-# Run server (wait 2 sec. SMTP)
+# Run server (wait 5 sec. SMTP)
 PATH=$PATH:$COMMON_SCRIPT_DIR
 test_server -p 20000 -w 5 ./materials/l7directord-4-4-37-response1.txt ./materials/l7directord-4-4-37-response2.txt ./materials/l7directord-4-4-37-response3.txt &
 

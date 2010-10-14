@@ -32,6 +32,23 @@ start_l7vsd() {
 	return 1
 }
 
+stop_l7vsd() {
+	# stop l7vsd
+	start_msg=`$INIT_L7VSD stop 2>&1`
+
+	ps aux | grep $L7VSD | grep -v grep >/dev/null 2>&1
+
+	# check the socket file
+	# give up if 2 seconds passed
+	for i in `seq 1 200`; do
+		[ ! -e $l7vsd_sockfile ] && return 0
+		usleep 10000
+	done
+
+	echo "Test failed: l7vsd socket file still exists(${l7vsd_sockfile})"
+	return 1
+}
+
 start_l7directord() {
 	# start l7directord
 	start_msg=`$INIT_L7DIRECTORD start 2>&1`
