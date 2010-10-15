@@ -12,7 +12,7 @@ fi
 usleep 100000
 
 RET=`$L7VSADM -V 2>&1 | grep "l7vsd_snmpagent"`
-EXPECT="l7vsd_snmpagent                warn"
+EXPECT="l7vsd_snmpagent                info"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -V | grep l7vsd_agent"

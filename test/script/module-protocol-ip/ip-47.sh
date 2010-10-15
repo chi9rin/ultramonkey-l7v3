@@ -12,7 +12,7 @@ fi
 
 usleep 100000
 RET=`$L7VSADM -A -t 127.0.0.1:40001 -m ip --statistic 1 -c 1 2>&1 | grep "PARSE ERROR"`
-EXPECT="PARSE ERROR : protocol module argument error: Cannot set multiple option '-c/--statistic'."
+EXPECT="PARSE ERROR: protocol module argument error(--proto-module): Cannot set multiple option '-c/--statistic'."
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m ip --statistic 1 -c 1"

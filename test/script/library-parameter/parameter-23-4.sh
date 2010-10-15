@@ -12,7 +12,7 @@ then
         exit 1
 fi
 
-RET=`cat /var/log/messages | grep "l7vsd: ${EXEC_DATE}" | grep "\[FATAL\] l7vsd_parameter VSD51600001 Parameter initialize failure"`
+RET=`cat /var/log/messages | grep "l7vsd: ${EXEC_DATE}" | grep "\[ERROR\] l7vsd_logger VSD41700001 Not exist logfilename_key : l7vsd_log_filename"`
 if [ -z "${RET}" ]
 then
         echo "Test failed: cat /var/log/messages"

@@ -93,7 +93,7 @@ TCP localhost:40001 ip rr --timeout 3600 --no-reschedule --sorry-uri '/' --stati
     TCP_DEFER_ACCEPT              disable
     TCP_NODELAY                   disable
     TCP_CORK                      disable
-    TCP_QUICKACK                  disable
+    TCP_QUICKACK                  auto
   Throughput:
     Current Upload / Limit        0.000000 Mbps / 0.000000 Mbps
     Current Download / Limit      0.000000 Mbps / 0.000000 Mbps
@@ -180,10 +180,10 @@ TCP localhost:40001 ip lc --timeout 3600 --no-reschedule --sorry-uri '/' --stati
     TCP_DEFER_ACCEPT              disable
     TCP_NODELAY                   disable
     TCP_CORK                      disable
-    TCP_QUICKACK                  disable
+    TCP_QUICKACK                  auto
   Throughput:
-    Current Upload / Limit        0.000000 Mbps / 8.000000 Mbps
-    Current Download / Limit      0.000000 Mbps / 8.000000 Mbps
+    Current Upload / Limit        0.000000 Mbps / 1.000000 Mbps
+    Current Download / Limit      0.000000 Mbps / 1.000000 Mbps
   Statistics:
     HTTP Total Requests           0
     HTTP GET Requests             0

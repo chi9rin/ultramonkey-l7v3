@@ -84,10 +84,10 @@ TCP 127.0.0.1:40001 sessionless rr --sorry-uri '/' --statistic 0
     TCP_DEFER_ACCEPT              disable
     TCP_NODELAY                   disable
     TCP_CORK                      disable
-    TCP_QUICKACK                  disable
+    TCP_QUICKACK                  auto
   Throughput:
-    Current Upload / Limit        0.000000 Mbps / 80.000000 Mbps
-    Current Download / Limit      0.000000 Mbps / 40.000000 Mbps
+    Current Upload / Limit        0.000000 Mbps / 10.000000 Mbps
+    Current Download / Limit      0.000000 Mbps / 5.000000 Mbps
   Statistics:
     HTTP Total Requests           0
     HTTP GET Requests             0
@@ -107,7 +107,7 @@ TCP 127.0.0.1:40002 sessionless rr --sorry-uri '/' --statistic 0
     TCP_DEFER_ACCEPT              disable
     TCP_NODELAY                   disable
     TCP_CORK                      disable
-    TCP_QUICKACK                  disable
+    TCP_QUICKACK                  auto
   Throughput:
     Current Upload / Limit        0.000000 Mbps / 0.000000 Mbps
     Current Download / Limit      0.000000 Mbps / 0.000000 Mbps

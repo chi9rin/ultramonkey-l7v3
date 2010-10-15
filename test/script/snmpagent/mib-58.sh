@@ -14,7 +14,7 @@ fi
 #SNMPv3  configuration
 #createUser MD5User MD5 mysecretpass DES mysecretpass
 #rwuser  MD5User auth
-\cp -f ./materials/mib-58-snmpd.conf /etc/snmp/snmpd.conf
+#\cp -f ./materials/mib-58-snmpd.conf /etc/snmp/snmpd.conf
 
 ${INIT_SNMPD} start >/dev/null
 if [ $? -ne 0 ]

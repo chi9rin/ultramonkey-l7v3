@@ -1,12 +1,5 @@
 #!/bin/bash
-
 . ${SET_DEFAULT_CONF}
-
-#Run nc server
-#nc -i 1 -l 9876 > ${TMP_DIR}/nc_tmp &
-#NC_PID=$!
-
-#chkconfig echo-stream on
 
 #Add Service
 $L7VSD
@@ -46,7 +39,6 @@ fi
 #Connect
 GET_REQ=""
 for((I=0;I<100;I++)) do GET_REQ="${GET_REQ}GET / HTTP/1.0\r\n\r\n"; done
-echo "${GET_REQ}"
 POST_REQ=""
 for((I=0;I<200;I++)) do POST_REQ="${POST_REQ}POST / HTTP/1.0\r\n\r\n"; done
 echo -e -n "${GET_REQ}" | nc 127.0.0.1 40001
@@ -54,7 +46,6 @@ echo -e -n "${POST_REQ}" | nc 127.0.0.1 40001
 
 #HTTP Total Requests check
 RET=`$L7VSADM -V -n | grep "HTTP Total Requests" | awk '{print $4}'`
-echo "$RET"
 EXPECT="300"
 if [ "${RET}" != "${EXPECT}" ]
 then

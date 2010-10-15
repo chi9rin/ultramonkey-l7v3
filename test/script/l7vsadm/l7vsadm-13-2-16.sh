@@ -14,7 +14,7 @@ fi
 usleep 100000
 
 RET=`$L7VSADM -S -i 5 -i 5 2>&1 | grep "PARSE ERROR"`
-EXPECT="PARSE ERROR : Option -i is conflict." 
+EXPECT="PARSE ERROR: Option -i is conflict." 
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -S -i 5 -i 5"

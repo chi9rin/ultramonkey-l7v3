@@ -72,7 +72,7 @@ l7vsd_system_memory              = "warn"
 l7vsd_system_endpoint            = "warn"
 l7vsd_system_signal              = "warn"
 l7vsd_system_environment         = "warn"
-l7vsd_snmpagent                  = "warn"
+l7vsd_snmpagent                  = "info"
 
 l7vsd_protocol                   = "warn"
 l7vsd_schedule                   = "warn"

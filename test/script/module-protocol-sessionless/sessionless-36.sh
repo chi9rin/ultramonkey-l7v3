@@ -13,7 +13,7 @@ usleep 100000
 
 #Check default value
 RET=`$L7VSADM -A -t 127.0.0.1:40001 -m sessionless --statistic 2 2>&1 | grep "PARSE ERROR"`
-EXPECT="PARSE ERROR : protocol module argument error: '-c/--statistic' option value '2' is not a valid value."
+EXPECT="PARSE ERROR: protocol module argument error(--proto-module): '-c/--statistic' option value '2' is not a valid value."
 
 if [ "${RET}" != "${EXPECT}" ]
 then

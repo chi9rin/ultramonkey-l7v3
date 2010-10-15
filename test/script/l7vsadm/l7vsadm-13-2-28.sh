@@ -14,8 +14,7 @@ fi
 usleep 100000
 
 RET=`$L7VSADM -S -l aaa 2>&1 | grep "PARSE ERROR"`
-echo "$RET"
-EXPECT="PARSE ERROR : No such Log-Level aaa." 
+EXPECT="PARSE ERROR: No such Log-Level aaa." 
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -S -l aaa"

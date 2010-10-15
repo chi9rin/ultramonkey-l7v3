@@ -13,8 +13,7 @@ fi
 
 usleep 100000
 RET=`$L7VSADM -S -x 2>&1 | grep "PARSE ERROR"`
-EXPECT="PARSE ERROR : Invalid option for -S command." 
-echo "$RET"
+EXPECT="PARSE ERROR: Invalid option for -S command." 
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -S -x"

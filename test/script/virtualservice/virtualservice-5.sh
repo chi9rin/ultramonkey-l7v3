@@ -28,5 +28,7 @@ then
         exit 1
 fi
 
+$L7VSADM -C
+
 exit 0
 

@@ -20,7 +20,7 @@ then
         exit 1
 fi
 #Check SNMPAgent function disable
-RET=`snmpwalk -v 2c -c public 127.0.0.1 ULTRAMONKEY-L7-MIB::ultramonkey-l7`
+RET=`snmpwalk -v 2c -c public 127.0.0.1 ULTRAMONKEY-L7-MIB::ultramonkey-l7 2>&1`
 
 EXPECT="ULTRAMONKEY-L7-MIB::ultramonkey-l7 = No Such Object available on this agent at this OID"
 

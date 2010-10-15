@@ -97,12 +97,13 @@ TCP localhost:40001 sessionless wrr --sorry-uri '/' --statistic 0
     TCP_CORK                      enable
     TCP_QUICKACK                  disable
   Throughput:
-    Current Upload / Limit        0.000000 Mbps / 800.000000 Mbps
-    Current Download / Limit      0.000000 Mbps / 800.000000 Mbps
+    Current Upload / Limit        0.000000 Mbps / 100.000000 Mbps
+    Current Download / Limit      0.000000 Mbps / 100.000000 Mbps
   Statistics:
     HTTP Total Requests           0
     HTTP GET Requests             0
     HTTP POST Requests            0"
+
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: $L7VSADM -V"
