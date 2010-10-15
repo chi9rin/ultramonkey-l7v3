@@ -1082,7 +1082,7 @@ void tcp_session::down_thread_run()
         //----Debug log----------------------------------------------------------------------
         {
                 boost::mutex::scoped_lock lock(upthread_status_mutex);
-                if (upthread_status != UPTHREAD_ACTIVE) {
+                while (upthread_status < UPTHREAD_ACTIVE) {
                         to_time(LOCKTIMEOUT, xt);
                         upthread_status_cond.timed_wait(upthread_status_mutex, xt);
                 }
@@ -1125,7 +1125,7 @@ void tcp_session::down_thread_run()
                         socket_element push_rs_socket = down_thread_connect_socket_list.get_socket();
                         down_thread_receive_realserver_socket_list.push_back(push_rs_socket);
                         down_thread_current_receive_realserver_socket = down_thread_receive_realserver_socket_list.begin();
-                        boost::mutex::scoped_lock lokc(upthread_status_mutex);
+                        boost::mutex::scoped_lock lock(upthread_status_mutex);
                         if (upthread_status < UPTHREAD_ALIVE)
                                 break;
                 }
@@ -1417,7 +1417,6 @@ void tcp_session::up_thread_client_receive(const TCP_PROCESS_TYPE_TAG process_ty
                 add_flag = true;
         }
 
-//XXX
         if (is_epoll_edge_trigger && (!add_flag)) {
                 if (epoll_ctl(up_client_epollfd, EPOLL_CTL_MOD, event.data.fd, &event) < 0) {
                         std::stringstream buf;
@@ -1681,7 +1680,6 @@ void tcp_session::up_thread_realserver_send(const TCP_PROCESS_TYPE_TAG process_t
                 }
         }
 
-//XXX
         if (is_epoll_edge_trigger && (!add_flag)) {
                 if (epoll_ctl(up_realserver_epollfd, EPOLL_CTL_MOD, event.data.fd, &event) < 0) {
                         std::stringstream buf;
@@ -1785,19 +1783,6 @@ void tcp_session::up_thread_realserver_get_destination_event(const TCP_PROCESS_T
 
         std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
         up_thread_function_pair func = up_thread_function_array[func_type->second];
-/*
-        if (module_event == protocol_module_base::SORRYSERVER_SELECT) {
-                // protocol module sorry mode change
-                tcp_thread_message *down_msg = new tcp_thread_message;
-
-                std::map<DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func>::iterator
-                down_func = up_thread_message_down_thread_function_map.find(DOWN_FUNC_SORRY_ENABLE_EVENT);
-
-                down_msg->message = down_func->second;
-                while (!down_thread_message_que.push(down_msg)) {}
-        }
-*/
-
         up_thread_next_call_function = func;
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -3207,6 +3192,16 @@ void tcp_session::down_thread_sorryserver_receive(const TCP_PROCESS_TYPE_TAG pro
                 boost::format formatter("Thread ID[%d] FUNC IN down_thread_sorryserver_receive");
                 formatter % boost::this_thread::get_id();
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+        }
+
+        if (unlikely(!sorryserver_socket.second->get_socket().lowest_layer().is_open())) {
+                if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+                        boost::format formatter("Thread ID[%d] FUNC OUT down_thread_sorryserver_receive");
+                        formatter % boost::this_thread::get_id();
+                        Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+                }
+                down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_SORRYSERVER_RECEIVE];
+                return;
         }
 
         down_thread_data_dest_side.initialize();
