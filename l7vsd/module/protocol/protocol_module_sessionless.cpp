@@ -1157,7 +1157,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_accept(const
                         //set return status
                         status = SORRYSERVER_SELECT;
                 }
-                //sorry flag on
+                //sorry flag off
                 else {
                         //set return status
                         status = REALSERVER_SELECT;
@@ -3331,7 +3331,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                         }
                                 }
 
-                                if (forwarded_for == FORWARDED_FOR_ON || session_data->sorry_flag == SORRY_FLAG_ON) {
+                                if (forwarded_for == FORWARDED_FOR_ON) {
                                         //search X-Forwarded-For header
                                         ret = find_http_header(recv_data.receive_buffer + it->send_offset, it->send_possible_size,
                                                                str_forword_for.c_str(), header_offset, header_offset_len);
@@ -7057,8 +7057,8 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                            : session_data->target_endpoint;
                 receive_data_map_it receive_data_it = session_data->receive_data_map.find(endpoint);
                 if (unlikely(receive_data_it == session_data->receive_data_map.end())) {
-                        boost::format formatter("Invalid endpoint. thread id : %d.");
-                        formatter % boost::this_thread::get_id();
+                        boost::format formatter("Invalid endpoint(%s). thread id: %d.");
+                        formatter % endpoint % boost::this_thread::get_id();
                         putLogError(100125, formatter.str(), __FILE__, __LINE__);
                         throw - 1;
                 }
