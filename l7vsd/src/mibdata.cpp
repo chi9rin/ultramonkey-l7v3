@@ -81,6 +81,9 @@ namespace l7vs
                 int vs_port = 0;
                 int sorry_port = 0;
                 int sorry_flag = 0;
+                unsigned long long http_requests_tmp = 0;
+                unsigned long long http_get_requests_tmp = 0;
+                unsigned long long http_post_requests_tmp = 0;
 
                 struct counter64 sorry_maxconnection = {
                         0
@@ -218,19 +221,38 @@ namespace l7vs
                                 stats_base& base_stats = protocol_module_ptr->get_stats();
                                 if ( base_stats.get_mode() == stats_base::MODE_HTTP ) {
                                         http_stats &httpstats = static_cast<http_stats&>(base_stats);
-                                        http_requests.low = httpstats.http_requests.get();
-                                        http_get_requests.low = httpstats.http_get_requests.get();
-                                        http_post_requests.low = httpstats.http_post_requests.get();
+					http_requests_tmp = httpstats.http_requests.get();
+					http_get_requests_tmp = httpstats.http_get_requests.get();
+					http_post_requests_tmp = httpstats.http_post_requests.get();
+					//convert to counter64 
+					http_requests.low = http_requests_tmp & 0xFFFFFFFF;
+					http_requests.high = http_requests_tmp >> 32;
+					http_get_requests.low = http_get_requests_tmp & 0xFFFFFFFF;
+					http_get_requests.high = http_get_requests_tmp >> 32;
+					http_post_requests.low = http_post_requests_tmp & 0xFFFFFFFF;
+					http_post_requests.high = http_post_requests_tmp >> 32;
                                 }
 
                                 //set sorry max connection
-                                sorry_maxconnection.low = srv.sorry_maxconnection;
+				sorry_maxconnection.low = srv.sorry_maxconnection & 0xFFFFFFFF;
+				sorry_maxconnection.high = srv.sorry_maxconnection >> 32;
 
                                 //set throughput information
-                                throughput_upstream.low = srv.throughput_upstream * 8;
-                                throughput_downstream.low = srv.throughput_downstream * 8;
-                                qos_upstream.low = srv.qos_upstream * 8;
-                                qos_downstream.low = srv.qos_downstream * 8;
+				throughput_upstream.low = (srv.throughput_upstream * 8) & 0xFFFFFFFF;
+				throughput_upstream.high = (srv.throughput_upstream * 8) >> 32;
+				throughput_downstream.low = (srv.throughput_downstream * 8) & 0xFFFFFFFF;
+				throughput_downstream.high = (srv.throughput_downstream * 8) >> 32;
+
+				//set qos information
+				if (ULLONG_MAX != srv.qos_upstream) { 
+					qos_upstream.low = (srv.qos_upstream * 8) & 0xFFFFFFFF;
+					qos_upstream.high = (srv.qos_upstream * 8) >> 32;
+				}
+
+				if (ULLONG_MAX != srv.qos_downstream) {
+					qos_downstream.low = (srv.qos_downstream * 8) & 0xFFFFFFFF;
+					qos_downstream.high = (srv.qos_downstream * 8) >> 32;
+				}
 
                                 //set session information
                                 pool_session_count = (*it)->get_pool_sessions_count();

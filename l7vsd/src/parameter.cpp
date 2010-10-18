@@ -27,13 +27,11 @@
 #include "logger.h"
 #include "utility.h"
 
-#if !defined(LOGGER_PROCESS_VSD) && !defined(LOGGER_PROCESS_ADM) && !defined(LOGGER_PROCESS_SNM)
+#if !defined(LOGGER_PROCESS_VSD) && !defined(LOGGER_PROCESS_ADM)
 #define LOGGER_PROCESS_VSD
 #endif
 
-#ifdef LOGGER_PROCESS_SNM
-l7vs::LOG_CATEGORY_TAG param_cat = l7vs::LOG_CAT_SNMPAGENT_PARAMETER;
-#elif  LOGGER_PROCESS_ADM
+#ifdef LOGGER_PROCESS_ADM
 l7vs::LOG_CATEGORY_TAG param_cat = l7vs::LOG_CAT_L7VSADM_PARAMETER;
 #else
 l7vs::LOG_CATEGORY_TAG param_cat = l7vs::LOG_CAT_L7VSD_PARAMETER;

@@ -765,8 +765,6 @@ void logger_logrotate_utility::logrotation_utility_logic_error(const unsigned in
         Logger::putLogError(l7vs::LOG_CAT_L7VSD_LOGGER, logno, str, file, line);
 #elif defined(LOGGER_PROCESS_ADM)
         Logger::putLogError(l7vs::LOG_CAT_L7VSADM_LOGGER, logno, str, file, line);
-#elif defined(LOGGER_PROCESS_SNM)
-        Logger::putLogError(l7vs::LOG_CAT_SNMPAGENT_LOGGER, logno, str, file, line);
 #else
         Logger::putLogError(l7vs::LOG_CAT_L7VSD_LOGGER, logno, str, file, line);
 #endif

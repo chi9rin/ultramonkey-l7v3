@@ -251,7 +251,7 @@ time_t StrictTimeBasedRollingPolicy::getNextCheck(time_t now_time)
                         } else {
 #if defined(LOGGER_PROCESS_ADM)
                                 t.tm_year = numYear - 1900;
-#else    //LOGGER_PROCESS_VSD or LOGGER_PROCESS_SNM
+#else    //LOGGER_PROCESS_VSD 
                                 t.tm_year = numYear + 1 - 1900;
 #endif
                         }
@@ -283,7 +283,7 @@ time_t StrictTimeBasedRollingPolicy::getNextCheck(time_t now_time)
 #if defined(LOGGER_PROCESS_ADM)
                                 t.tm_year = numYear - 1900;
                                 t.tm_mon = numMonth - 1;
-#else    //LOGGER_PROCESS_VSD or LOGGER_PROCESS_SNM
+#else    //LOGGER_PROCESS_VSD 
                                 if (12 == numMonth) {
                                         t.tm_year = numYear + 1 - 1900;
                                         t.tm_mon = 0;
@@ -328,7 +328,7 @@ time_t StrictTimeBasedRollingPolicy::getNextCheck(time_t now_time)
                         } else {
 #if defined(LOGGER_PROCESS_ADM)
                                 t.tm_mday = numDate + (numTimingWeek - numNowWeek);
-#else    //LOGGER_PROCESS_VSD or LOGGER_PROCESS_SNM
+#else    //LOGGER_PROCESS_VSD
                                 t.tm_mday = numDate + (7 - (numNowWeek - numTimingWeek));
 #endif
                         }
@@ -359,7 +359,7 @@ time_t StrictTimeBasedRollingPolicy::getNextCheck(time_t now_time)
                         } else {
 #if defined(LOGGER_PROCESS_ADM)
                                 t.tm_mday = numDate;
-#else    //LOGGER_PROCESS_VSD or LOGGER_PROCESS_SNM
+#else    //LOGGER_PROCESS_VSD
                                 t.tm_mday = numDate + 1;
 #endif
                         }
@@ -390,7 +390,7 @@ time_t StrictTimeBasedRollingPolicy::getNextCheck(time_t now_time)
                         } else {
 #if defined(LOGGER_PROCESS_ADM)
                                 t.tm_hour = numHour;
-#else    //LOGGER_PROCESS_VSD or LOGGER_PROCESS_SNM
+#else    //LOGGER_PROCESS_VSD
                                 t.tm_hour = numHour + 1;
 #endif
                         }
@@ -475,7 +475,7 @@ bool StrictTimeBasedRollingPolicy::isTriggeringEvent(
                 // Do not rollover.
                 return false;
         }
-#else    //LOGGER_PROCESS_VSD or LOGGER_PROCESS_SNM
+#else    //LOGGER_PROCESS_VSD
         return now_time > nextCheck;
 #endif
 }

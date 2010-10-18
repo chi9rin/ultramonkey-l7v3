@@ -264,28 +264,6 @@ namespace l7vs
 
                                 netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE, 1);
 
-                                //socket startup
-                                SOCK_STARTUP;
-
-                                //init l7vsAgent
-                                int ret = init_agent("l7vsAgent");
-                                if (ret) {
-                                        std::string msg("init_agent failed.");
-                                        Logger::putLogFatal(LOG_CAT_L7VSD_SNMPAGENT, 3, msg, __FILE__, __LINE__);
-                                        //set error code
-                                        err.setter(true, msg);
-                                        return;
-                                }
-
-                                init_snmp("l7vsAgent");
-
-                                //register snmp get item' handle
-                                init_snmp_handles(err);
-
-                                if (err) {
-                                        return;
-                                }
-
                                 //set initialize flag true
                                 initialized = true;
 
@@ -428,13 +406,35 @@ namespace l7vs
                 }
 
                 try {
+		        //socket startup
+                        SOCK_STARTUP;
+
+                        //init l7vsAgent
+                        int ret = init_agent("l7vsAgent");
+                        if (ret) {
+                                std::string msg("init_agent failed.");
+                                Logger::putLogFatal(LOG_CAT_L7VSD_SNMPAGENT, 3, msg, __FILE__, __LINE__);
+                                //set error code
+                                err.setter(true, msg);
+                                return;
+                        }
+
+                        init_snmp("l7vsAgent");
+
+                        //regist snmp get item' handle
+                        init_snmp_handles(err);
+
+                        if (err) {
+                                return;
+                        }
+
                         //collect mib data first time
                         mibdata::get_instance().collect_mibdata(vsd, err);
 
                         if (err) {
                                 //mib collect failed
                                 std::string msg("collect_mibdata failed,thread start failed.");
-                                Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 3, msg, __FILE__, __LINE__);
+                                Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 4, msg, __FILE__, __LINE__);
                                 //set error code
                                 err.setter(true, msg);
                                 return;
@@ -457,7 +457,7 @@ namespace l7vs
                         std::stringstream msg;
                         msg << "snmp function start failed : " << e.what() << ".";
 
-                        Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 4, msg.str(), __FILE__, __LINE__);
+                        Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 5, msg.str(), __FILE__, __LINE__);
                         //set error code
                         err.setter(true, msg.str());
                 }
@@ -487,13 +487,17 @@ namespace l7vs
                         process_mib_thread.join();
                         trap_thread.join();
 
+                        snmp_shutdown("l7vsAgent");
+                        shutdown_agent();
+                        SOCK_CLEANUP;
+
                         std::string  str =  "snmp function stop.";
                         Logger::putLogInfo(LOG_CAT_L7VSD_SNMPAGENT, 3, str, __FILE__, __LINE__);
 
                 } catch (const boost::thread_interrupted&) {
                         std::stringstream msg;
                         msg << "thread interrupted exception.";
-                        Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 5, msg.str(), __FILE__, __LINE__);
+                        Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 6, msg.str(), __FILE__, __LINE__);
                 }
         }
 
@@ -514,7 +518,7 @@ namespace l7vs
                         if (err) {
                                 std::stringstream msg;
                                 msg << "snmp function start failed.";
-                                Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 6, msg.str(), __FILE__, __LINE__);
+                                Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 7, msg.str(), __FILE__, __LINE__);
                         }
                 }
                 else {
@@ -620,7 +624,7 @@ namespace l7vs
                 if (vsd == NULL) {
                         //mib collect failed
                         std::string msg("vsd pointer is NULL.");
-                        Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 7, msg, __FILE__, __LINE__);
+                        Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 8, msg, __FILE__, __LINE__);
                         return;
                 }
 
@@ -681,7 +685,7 @@ namespace l7vs
                 if (vsd == NULL) {
                         //mib collect failed
                         std::string msg("vsd pointer is NULL.");
-                        Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 8, msg, __FILE__, __LINE__);
+                        Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 9, msg, __FILE__, __LINE__);
                         return;
                 }
 
@@ -912,7 +916,7 @@ namespace l7vs
                 //check vsd pointer
                 if (vsd == NULL) {
                         std::string msg("vsd pointer is NULL.");
-                        Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 9, msg, __FILE__, __LINE__);
+                        Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 10, msg, __FILE__, __LINE__);
                         //set error code
                         err.setter(true, msg);
                         return;
@@ -926,7 +930,7 @@ namespace l7vs
 
                         if (err) {
                                 std::string msg("collect mib data failed.");
-                                Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 10, msg, __FILE__, __LINE__);
+                                Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 11, msg, __FILE__, __LINE__);
                                 //set error code
                                 err.setter(true, msg);
                                 return;
@@ -950,8 +954,7 @@ namespace l7vs
                 if (start_flag == true) {
                         stop();
                 }
-                snmp_shutdown("l7vsAgent");
-                SOCK_CLEANUP;
+                
         }
 
         /*!

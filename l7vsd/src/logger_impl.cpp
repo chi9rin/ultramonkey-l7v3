@@ -69,21 +69,6 @@
 #define LOGGER_ROTATION_TIMING_KEY              "l7vsadm_rotation_timing"
 #define LOGGER_ROTATION_TIMING_VALUE_KEY        "l7vsadm_rotation_timing_value"
 
-#elif(LOGGER_PROCESS_SNM)
-#define    LOGGER_LOG_FILENAME_KEY              "snmp_log_filename"
-#define LOGGER_ROTATION_KEY                     "snmp_rotation"
-#define LOGGER_MAX_BACKUP_INDEX_KEY             "snmp_max_backup_index"
-#define LOGGER_MAX_FILE_SIZE_KEY                "snmp_max_filesize"
-#define LOGGER_ROTATION_TIMING_KEY              "snmp_rotation_timing"
-#define LOGGER_ROTATION_TIMING_VALUE_KEY        "snmp_rotation_timing_value"
-
-#define LOGGER_CONN_LOG_FILENAME_KEY            "snmp_conn_log_filename"
-#define LOGGER_CONN_ROTATION_KEY                "snmp_conn_rotation"
-#define LOGGER_CONN_MAX_BACKUP_INDEX_KEY        "snmp_conn_max_backup_index"
-#define LOGGER_CONN_MAX_FILE_SIZE_KEY           "snmp_conn_max_filesize"
-#define LOGGER_CONN_ROTATION_TIMING_KEY         "snmp_conn_rotation_timing"
-#define LOGGER_CONN_ROTATION_TIMING_VALUE_KEY   "snmp_conn_rotation_timing_value"
-
 #endif
 
 /*!
@@ -307,8 +292,6 @@ void l7vs::LoggerImpl::logic_error(const unsigned int logno, const std::string &
         putLogError(l7vs::LOG_CAT_L7VSD_LOGGER, logno, str, file, line);
 #elif defined(LOGGER_PROCESS_ADM)
         putLogError(l7vs::LOG_CAT_L7VSADM_LOGGER, logno, str, file, line);
-#elif defined(LOGGER_PROCESS_SNM)
-        putLogError(l7vs::LOG_CAT_SNMPAGENT_LOGGER, logno, str, file, line);
 #endif
 
         throw std::logic_error(str);
@@ -420,8 +403,6 @@ void l7vs::LoggerImpl::errorConf(unsigned int message_id,
                 log_category = LOG_CAT_L7VSD_LOGGER;
 #elif defined(LOGGER_PROCESS_ADM)
                 log_category = LOG_CAT_L7VSADM_LOGGER;
-#elif defined(LOGGER_PROCESS_SNM)
-                log_category = LOG_CAT_SNMPAGENT_LOGGER;
 #else
                 log_category = LOG_CAT_L7VSD_LOGGER;
 #endif
@@ -1049,8 +1030,6 @@ void l7vs::LoggerImpl::loadConf()
                         }
 #elif defined(LOGGER_PROCESS_ADM)
                         cat_logger->addAppender(normalAppender);
-#elif defined(LOGGER_PROCESS_SNM)
-                        cat_logger->addAppender(normalAppender);
 #else
                         cat_logger->addAppender(normalAppender);
 #endif
@@ -1080,8 +1059,6 @@ void l7vs::LoggerImpl::loadConf()
                         log_category = LOG_CAT_L7VSD_LOGGER;
 #elif defined(LOGGER_PROCESS_ADM)
                         log_category = LOG_CAT_L7VSADM_LOGGER;
-#elif defined(LOGGER_PROCESS_SNM)
-                        log_category = LOG_CAT_SNMPAGENT_LOGGER;
 #else
                         log_category = LOG_CAT_L7VSD_LOGGER;
 #endif

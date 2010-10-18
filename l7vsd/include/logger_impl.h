@@ -43,7 +43,7 @@
 #include "atomic.h"
 #include "wrlock.h"
 
-#if !defined(LOGGER_PROCESS_VSD) && !defined(LOGGER_PROCESS_ADM) && !defined(LOGGER_PROCESS_SNM)
+#if !defined(LOGGER_PROCESS_VSD) && !defined(LOGGER_PROCESS_ADM)
 #define LOGGER_PROCESS_VSD
 #endif
 
@@ -51,8 +51,6 @@
 #define LOGGER_PROCESS_ID "VSD"
 #elif defined(LOGGER_PROCESS_ADM)
 #define LOGGER_PROCESS_ID "ADM"
-#else
-#define LOGGER_PROCESS_ID "SNM"
 #endif
 
 #define LOGGER_PROCESS_PROTOCOL_MODULE_ID "PRM"
