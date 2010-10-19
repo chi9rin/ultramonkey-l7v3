@@ -683,12 +683,12 @@ void tcp_session::set_virtual_service_message(const TCP_VIRTUAL_SERVICE_MESSAGE_
         return;
         case SESSION_PAUSE_OFF: {
                 {
-                boost::mutex::scoped_lock(upthread_status_mutex);
+                boost::mutex::scoped_lock lock(upthread_status_mutex);
                         if (upthread_status == UPTHREAD_LOCK)
                                 upthread_status_cond.notify_one();
                 }
                 {
-                boost::mutex::scoped_lock(downthread_status_mutex);
+                boost::mutex::scoped_lock lock(downthread_status_mutex);
                         if (downthread_status == DOWNTHREAD_LOCK)
                                 downthread_status_cond.notify_one();
                 }
@@ -800,8 +800,8 @@ void tcp_session::up_thread_run()
 
         up_thread_id = boost::this_thread::get_id();
         {
-                boost::mutex::scoped_lock(upthread_status_mutex);
-                boost::mutex::scoped_lock(realserver_connect_mutex);
+                boost::mutex::scoped_lock lock1(upthread_status_mutex);
+                boost::mutex::scoped_lock lock2(realserver_connect_mutex);
                 upthread_status = UPTHREAD_ALIVE;
                 realserver_connect_status = false;
         }
@@ -817,9 +817,10 @@ void tcp_session::up_thread_run()
 
         {
                 boost::mutex::scoped_lock lock(downthread_status_mutex);
-                if (downthread_status < DOWNTHREAD_ALIVE)
+                if (downthread_status < DOWNTHREAD_ALIVE){
                         to_time(LOCKTIMEOUT, xt);
                         downthread_status_cond.timed_wait( lock , xt );
+		}
         }
 
         //----Debug log----------------------------------------------------------------------
@@ -945,7 +946,7 @@ void tcp_session::up_thread_run()
                 up_thread_next_call_function = func;
         }
         {
-                boost::mutex::scoped_lock(upthread_status_mutex);
+                boost::mutex::scoped_lock lock(upthread_status_mutex);
                 upthread_status = UPTHREAD_ACTIVE;
         }
         upthread_status_cond.notify_one();
@@ -959,14 +960,15 @@ void tcp_session::up_thread_run()
         }
         //----Debug log----------------------------------------------------------------------
         while (!exit_flag) {
-                if ( unlikely( upthread_status == UPTHREAD_LOCK ) ) {
-                        boost::mutex::scoped_lock lock(upthread_status_mutex);
-                        to_time(LOCKTIMEOUT, xt);
-                        upthread_status_cond.timed_wait( lock , xt );
-                        //upthread_status_cond.wait( lock );
-                        upthread_status = UPTHREAD_ACTIVE;
-                }
-
+		{
+			boost::mutex::scoped_lock lock( upthread_status_mutex );
+	                if ( unlikely( upthread_status == UPTHREAD_LOCK ) ) {
+	                        to_time(LOCKTIMEOUT, xt);
+	                        upthread_status_cond.timed_wait( lock , xt );
+	                        //upthread_status_cond.wait( lock );
+	                        upthread_status = UPTHREAD_ACTIVE;
+	                }
+		}
                 tcp_thread_message *msg = up_thread_message_que.pop();
                 if (unlikely(msg)) {
                         if (unlikely(UP_FUNC_EXIT == up_thread_next_call_function.first)) {
@@ -993,7 +995,7 @@ void tcp_session::up_thread_run()
         up_thread_all_socket_close();
 
         {
-                boost::mutex::scoped_lock(upthread_status_mutex);
+                boost::mutex::scoped_lock lock(upthread_status_mutex);
                 upthread_status = UPTHREAD_ALIVE;
         }
 
@@ -1037,7 +1039,7 @@ void tcp_session::up_thread_run()
         }
         //----Debug log----------------------------------------------------------------------
         {
-                boost::mutex::scoped_lock(upthread_status_mutex);
+                boost::mutex::scoped_lock lock(upthread_status_mutex);
                 upthread_status = UPTHREAD_SLEEP;
         }
         {
@@ -1067,7 +1069,7 @@ void tcp_session::down_thread_run()
         //----Debug log----------------------------------------------------------------------
         down_thread_id = boost::this_thread::get_id();
         {
-                boost::mutex::scoped_lock(downthread_status_mutex);
+                boost::mutex::scoped_lock lock(downthread_status_mutex);
                 downthread_status = DOWNTHREAD_ALIVE;
         }
         downthread_status_cond.notify_one();
@@ -1097,7 +1099,7 @@ void tcp_session::down_thread_run()
         }
         //----Debug log----------------------------------------------------------------------
         {
-                boost::mutex::scoped_lock(downthread_status_mutex);
+                boost::mutex::scoped_lock lock(downthread_status_mutex);
                 downthread_status = DOWNTHREAD_ACTIVE;
         }
         downthread_status_cond.notify_one();
@@ -1161,7 +1163,7 @@ void tcp_session::down_thread_run()
         //----Debug log----------------------------------------------------------------------
         //----Debug log----------------------------------------------------------------------
         {
-                boost::mutex::scoped_lock(downthread_status_mutex);
+                boost::mutex::scoped_lock lock(downthread_status_mutex);
                 downthread_status = DOWNTHREAD_SLEEP;
         }
         downthread_status_cond.notify_one();
