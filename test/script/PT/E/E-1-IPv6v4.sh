@@ -62,14 +62,14 @@ fi
 RET=`$WGET -t 1 -qO- http://$VS:50000/`
 if [ "${RET}" != "${RealServer1}" ]
 then
-        echo "Test failed: $WGET -t 1 -qO- http://$VS:40001/"
+        echo "Test failed: $WGET -t 1 -qO- http://$VS:50000/"
         exit 1
 fi
 
 RET=`$WGET -t 1 -qO- http://$VS:50000/`
 if [ "${RET}" != "${RealServer2}" ]
 then
-        echo "Test failed: $WGET -t 1 -qO- http://$VS:40001/"
+        echo "Test failed: $WGET -t 1 -qO- http://$VS:50000/"
         exit 1
 fi
 

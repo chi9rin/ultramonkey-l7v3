@@ -1,0 +1,7 @@
+virtual=[::1]:50000
+    real=[::1]:50001 masq
+    real=[::2]:50002 masq
+    module=sessionless
+    scheduler=rr
+    protocol=tcp
+    checktype=connect
