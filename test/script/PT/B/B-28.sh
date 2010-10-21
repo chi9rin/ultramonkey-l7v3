@@ -16,6 +16,7 @@ then
 	echo "Test failed: $L7VSADM"
         exit 1
 fi
+usleep 100000
 
 RET=`ls ${L7VS_LOG_DIR}/l7vsadm.log* | wc -l`
 if [ $RET -ne 2 ]
