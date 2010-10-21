@@ -113,8 +113,7 @@ namespace l7vs
 
                         if (it != trapfunc_map.end()) {
                                 //send trap message
-                                if (it->second(trapmsg.message) == SNMP_ERR_NOERROR)
-                                {
+                                if (it->second(trapmsg.message) == SNMP_ERR_NOERROR) {
                                         //set trap last date to current time
                                         trap_last_date = time(NULL);
 
@@ -236,7 +235,7 @@ namespace l7vs
                                 trapfunc_map[trapmessage::INFO_LOG]              = &trap_info;
                                 trapfunc_map[trapmessage::DEBUG_LOG]             = &trap_debug;
 
-                                //init member variables
+                                //init member varable
                                 mib_collect_last_time = boost::posix_time::ptime(boost::posix_time::min_date_time);
                                 start_date = 0;
                                 request_last_date = 0;
@@ -264,7 +263,44 @@ namespace l7vs
 
                                 netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE, 1);
 
-                                //set initialize flag true
+                                //socket startup
+                                SOCK_STARTUP;
+
+                                //init l7vsAgent
+                                int ret = init_agent("l7vsAgent");
+                                if (ret) {
+                                        std::string msg("init_agent failed.");
+                                        Logger::putLogFatal(LOG_CAT_L7VSD_SNMPAGENT, 3, msg, __FILE__, __LINE__);
+                                        //set error code
+                                        err.setter(true, msg);
+                                        return;
+                                }
+
+                                init_snmp("l7vsAgent");
+
+                                //here we initialize all the tables we're planning on supporting
+                                initialize_virtual_service_table(err);
+
+                                if (err) {
+                                        std::string msg("initialize_virtual_service_table failed.");
+                                        Logger::putLogFatal(LOG_CAT_L7VSD_SNMPAGENT, 4, msg, __FILE__, __LINE__);
+                                        //set error code
+                                        err.setter(true, msg);
+                                        return;
+                                }
+
+                                initialize_real_server_table(err);
+
+                                if (err) {
+                                        std::string msg("initialize_real_server_table failed.");
+                                        Logger::putLogFatal(LOG_CAT_L7VSD_SNMPAGENT, 5, msg, __FILE__, __LINE__);
+                                        //set error code
+                                        err.setter(true, msg);
+                                        return;
+                                }
+
+
+                                //set initializ flag true
                                 initialized = true;
 
                                 /*-------- DEBUG LOG --------*/
@@ -324,9 +360,8 @@ namespace l7vs
                                 {
                                         boost::mutex::scoped_lock lock(trap_msg_queue_condition_mutex);
 
-                                        //drop the message when the trap message queue is too large
-                                        if( trap_msg_queue.size() < trap_queue_max_size.get())
-                                        {
+                                        //drap the message when the trap message queue is too large
+                                        if ( trap_msg_queue.size() < trap_queue_max_size.get()) {
                                                 //push the message into trap message queue
                                                 trap_msg_queue.push_back(trapmessage);
                                                 /*-------- DEBUG LOG --------*/
@@ -338,8 +373,7 @@ namespace l7vs
                                                         Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 32, debugstr.str(), __FILE__, __LINE__);
                                                 }
                                                 /*------ DEBUG LOG END ------*/
-                                        }
-                                        else{
+                                        } else {
                                                 /*-------- DEBUG LOG --------*/
                                                 if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SNMPAGENT)) {
                                                         std::string  debugstr =  "function : snmpagent_impl::push_trapmessage : trap message queue is overflow.";
@@ -353,8 +387,7 @@ namespace l7vs
                                 trap_msg_queue_condition.notify_one();
 
                         }
-                }
-                catch (const std::exception &e) {
+                } catch (const std::exception &e) {
                         std::stringstream msg;
                         msg << "Push trap message failed : " << e.what() << ".";
 
@@ -406,21 +439,6 @@ namespace l7vs
                 }
 
                 try {
-		        //socket startup
-                        SOCK_STARTUP;
-
-                        //init l7vsAgent
-                        int ret = init_agent("l7vsAgent");
-                        if (ret) {
-                                std::string msg("init_agent failed.");
-                                Logger::putLogFatal(LOG_CAT_L7VSD_SNMPAGENT, 3, msg, __FILE__, __LINE__);
-                                //set error code
-                                err.setter(true, msg);
-                                return;
-                        }
-
-                        init_snmp("l7vsAgent");
-
                         //regist snmp get item' handle
                         init_snmp_handles(err);
 
@@ -475,21 +493,19 @@ namespace l7vs
                 enabled = FALSE;
 
                 if (!start_flag) {
-                        std::string  str =  "snmp function has already stopped.";
+                        std::string  str =  "snmp function has already stoped.";
                         Logger::putLogInfo(LOG_CAT_L7VSD_SNMPAGENT, 2, str, __FILE__, __LINE__);
                         return;
                 }
 
                 start_flag = false;
 
+                unregister_handler();
+
                 try {
                         trap_thread.interrupt();
                         process_mib_thread.join();
                         trap_thread.join();
-
-                        snmp_shutdown("l7vsAgent");
-                        shutdown_agent();
-                        SOCK_CLEANUP;
 
                         std::string  str =  "snmp function stop.";
                         Logger::putLogInfo(LOG_CAT_L7VSD_SNMPAGENT, 3, str, __FILE__, __LINE__);
@@ -506,7 +522,8 @@ namespace l7vs
          *
          * @retrun         void
          */
-        void snmpagent_impl::enable() {
+        void snmpagent_impl::enable()
+        {
                 Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 38, "snmpagent_impl::enable", __FILE__, __LINE__);
 
                 //set snmp function enable flag
@@ -520,8 +537,7 @@ namespace l7vs
                                 msg << "snmp function start failed.";
                                 Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 7, msg.str(), __FILE__, __LINE__);
                         }
-                }
-                else {
+                } else {
                         std::string  str =  "snmp function has already started.";
                         Logger::putLogInfo(LOG_CAT_L7VSD_SNMPAGENT, 4, str, __FILE__, __LINE__);
                 }
@@ -532,16 +548,16 @@ namespace l7vs
          *
          * @retrun         void
          */
-        void snmpagent_impl::disable() {
+        void snmpagent_impl::disable()
+        {
                 Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 39, "snmpagent_impl::disable", __FILE__, __LINE__);
 
                 //set snmp function enable flag
                 enabled = FALSE;
                 if (start_flag == true) {
                         stop();
-                }
-                else {
-                        std::string  str =  "snmp function has already stopped.";
+                } else {
+                        std::string  str =  "snmp function has already stoped.";
                         Logger::putLogInfo(LOG_CAT_L7VSD_SNMPAGENT, 5, str, __FILE__, __LINE__);
                 }
         }
@@ -550,7 +566,8 @@ namespace l7vs
          * set log trap enable
          * @retrun  void
          */
-        void snmpagent_impl::logtrap_enable() {
+        void snmpagent_impl::logtrap_enable()
+        {
                 Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 40, "snmpagent_impl::logtrap_enable", __FILE__, __LINE__);
 
                 logtrap_enabled = TRUE;
@@ -561,7 +578,8 @@ namespace l7vs
          * set log trap disable
          * @retrun  void
          */
-        void snmpagent_impl::logtrap_disable() {
+        void snmpagent_impl::logtrap_disable()
+        {
                 Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 41, "snmpagent_impl::logtrap_disable", __FILE__, __LINE__);
 
                 logtrap_enabled = FALSE;
@@ -725,7 +743,7 @@ namespace l7vs
                                 /*------ DEBUG LOG END ------*/
 
                                 http_stats &httpstats = static_cast<http_stats&>(base_stats);
-                                //clear http statistics
+                                //clear http statstics
                                 httpstats.http_requests = 0ULL;
                                 httpstats.http_get_requests = 0ULL;
                                 httpstats.http_post_requests = 0ULL;
@@ -735,7 +753,7 @@ namespace l7vs
         }
 
         /*!
-         *  set vsd information.
+         *  set vsd infomation.
          *
          * @param[in]      vsd is vsd pointer.
          * @retrun         void
@@ -748,9 +766,9 @@ namespace l7vs
         }
 
         /*!
-         *  get snmp information.
+         *  get snmp infomation.
          *
-         * @retrun         snmp_info is snmp information.
+         * @retrun         snmp_info is snmp infomation.
          */
         snmp_info snmpagent_impl::get_snmp_info()
         {
@@ -954,7 +972,12 @@ namespace l7vs
                 if (start_flag == true) {
                         stop();
                 }
-                
+
+                //shutdown l7vsAgent
+                snmp_shutdown("l7vsAgent");
+                shutdown_master_agent();
+                shutdown_agent();
+                SOCK_CLEANUP;
         }
 
         /*!

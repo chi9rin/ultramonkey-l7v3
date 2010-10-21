@@ -36,7 +36,6 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 using namespace l7vs;
-
 /*
  * function declarations
  */
@@ -54,10 +53,10 @@ int        handle_get_vstable_count(netsnmp_mib_handler *handler,
  * handle for replication state.
  *
  */
-int     handle_get_rep_state(netsnmp_mib_handler *handler,
-                             netsnmp_handler_registration *reginfo,
-                             netsnmp_agent_request_info *reqinfo,
-                             netsnmp_request_info *requests);
+int        handle_get_rep_state(netsnmp_mib_handler *handler,
+                                netsnmp_handler_registration *reginfo,
+                                netsnmp_agent_request_info *reqinfo,
+                                netsnmp_request_info *requests);
 
 /*!
  * handle for virtual service table.
@@ -78,12 +77,18 @@ int        handle_get_rstable(netsnmp_mib_handler *handler,
                               netsnmp_request_info *requests);
 
 /*!
- * initialize snmp scalar and table data set handles.
+ * initialize snmp scaler and table data set handles.
  *
  * @param[in]      error_code& is trap error code
  * @retrun         void
  */
 void    init_snmp_handles(error_code& err);
+
+/*!
+ * unregister snmp handler.
+ *
+ */
+void    unregister_handler();
 
 /*!
  * initialize virtual service table data set.

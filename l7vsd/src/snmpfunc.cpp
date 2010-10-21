@@ -34,10 +34,13 @@
 static const oid snmptrap_oid[] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };
 netsnmp_table_data_set *vs_table;
 netsnmp_table_data_set *rs_table;
-
+netsnmp_handler_registration *vs_table_size_handler = NULL;
+netsnmp_handler_registration *vs_table_handler = NULL;
+netsnmp_handler_registration *rs_table_handler = NULL;
+netsnmp_handler_registration *replication_handler = NULL;
 
 /*!
- * initialize snmp scalar and table data set handles.
+ * register snmp scaler and table data set handler.
  *
  * @param[in]      error_code& is trap error code
  * @retrun         void
@@ -49,48 +52,92 @@ init_snmp_handles(error_code& err)
 
         oid       l7vsVsNumber_oid[] = { 1, 3, 6, 1, 4, 1, 32132, 1, 1, 1, 1 };
         oid       l7vsReplicationMode_oid[] = { 1, 3, 6, 1, 4, 1, 32132, 1, 1, 1, 4 };
+        oid       l7vsVsTable_oid[] = { 1, 3, 6, 1, 4, 1, 32132, 1, 1, 1, 2 };
+        oid       l7vsRsTable_oid[] = { 1, 3, 6, 1, 4, 1, 32132, 1, 1, 1, 3 };
 
         DEBUGMSGTL(("ultramonkey_l7", "init_snmp_handles\n"));
 
-        int ret = netsnmp_register_scalar(netsnmp_create_handler_registration
-                                          ("l7vsVsNumber", handle_get_vstable_count,
-                                           l7vsVsNumber_oid,
-                                           OID_LENGTH(l7vsVsNumber_oid),
-                                           HANDLER_CAN_RONLY));
+        vs_table_size_handler = netsnmp_create_handler_registration
+                                ("l7vsVsNumber", handle_get_vstable_count,
+                                 l7vsVsNumber_oid,
+                                 OID_LENGTH(l7vsVsNumber_oid),
+                                 HANDLER_CAN_RONLY);
+
+        int ret = netsnmp_register_scalar(vs_table_size_handler);
 
         if ( ret ) {
                 std::string msg("netsnmp_register_scalar failed.");
-                Logger::putLogFatal(LOG_CAT_L7VSD_SNMPAGENT, 4, msg, __FILE__, __LINE__);
+                Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 68, msg, __FILE__, __LINE__);
                 //set error code
                 err.setter(true, msg);
                 return;
         }
 
-        ret = netsnmp_register_scalar(netsnmp_create_handler_registration
-                                      ("l7vsReplicationMode",
-                                       handle_get_rep_state,
-                                       l7vsReplicationMode_oid,
-                                       OID_LENGTH(l7vsReplicationMode_oid),
-                                       HANDLER_CAN_RONLY));
+        replication_handler = netsnmp_create_handler_registration
+                              ("l7vsReplicationMode",
+                               handle_get_rep_state,
+                               l7vsReplicationMode_oid,
+                               OID_LENGTH(l7vsReplicationMode_oid),
+                               HANDLER_CAN_RONLY);
+
+        ret = netsnmp_register_scalar(replication_handler);
 
         if (ret) {
                 std::string msg("netsnmp_register_scalar failed.");
-                Logger::putLogFatal(LOG_CAT_L7VSD_SNMPAGENT, 5, msg, __FILE__, __LINE__);
+                Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 69, msg, __FILE__, __LINE__);
                 //set error code
                 err.setter(true, msg);
                 return;
         }
 
+
         /*
-         * here we initialize all the tables we're planning on supporting
+         * registering the table with the master agent
          */
-        initialize_virtual_service_table(err);
+        /*
+         * note: if you don't need a subhandler to deal with any aspects
+         * of the request, change handle_get_vstable to "NULL"
+         */
+        if (vs_table) {
+                vs_table_handler = netsnmp_create_handler_registration
+                                   ("l7vsVsTable", handle_get_vstable,
+                                    l7vsVsTable_oid,
+                                    OID_LENGTH(l7vsVsTable_oid),
+                                    HANDLER_CAN_RWRITE);
+                int ret = netsnmp_register_table_data_set(vs_table_handler, vs_table, NULL);
 
-        if (ret) return;
+                if (ret) {
+                        std::string msg("netsnmp create l7vsVsTable data set failed.");
+                        Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 24, msg, __FILE__, __LINE__);
+                        //set error code
+                        err.setter(true, msg);
+                        return;
+                }
+        }
 
-        initialize_real_server_table(err);
+        /*
+         * registering the table with the master agent
+         */
+        /*
+         * note: if you don't need a subhandler to deal with any aspects
+         * of the request, change handle_get_rstable to "NULL"
+         */
+        if (rs_table) {
+                rs_table_handler = netsnmp_create_handler_registration
+                                   ("l7vsRsTable", handle_get_rstable,
+                                    l7vsRsTable_oid,
+                                    OID_LENGTH(l7vsRsTable_oid),
+                                    HANDLER_CAN_RWRITE);
+                int ret = netsnmp_register_table_data_set(rs_table_handler, rs_table, NULL);
 
-        if (ret) return;
+                if (ret) {
+                        std::string msg("netsnmp create l7vsRsTable data set failed.");
+                        Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 26, msg, __FILE__, __LINE__);
+                        //set error code
+                        err.setter(true, msg);
+                        return;
+                }
+        }
 }
 
 /*!
@@ -117,7 +164,7 @@ handle_get_vstable_count(netsnmp_mib_handler *handler,
         switch (reqinfo->mode) {
 
         case MODE_GET: {
-                //get virtual service size
+                //get virtual serveice size
                 int table_size = l7vs::mibdata::get_instance().get_vs_table_size();
 
                 //set value
@@ -223,8 +270,6 @@ initialize_virtual_service_table(error_code &err)
 {
         Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 79, "snmpfunc::initialize_virtual_service_table", __FILE__, __LINE__);
 
-        oid       l7vsVsTable_oid[] = { 1, 3, 6, 1, 4, 1, 32132, 1, 1, 1, 2 };
-
         /*
          * create the table structure itself
          */
@@ -310,26 +355,6 @@ initialize_virtual_service_table(error_code &err)
                                                 COLUMN_L7VSVSRSNUMBER,
                                                 ASN_INTEGER, 0, NULL, 0, 0);
 
-        /*
-         * registering the table with the master agent
-         */
-        /*
-         * note: if you don't need a subhandler to deal with any aspects
-         * of the request, change handle_get_vstable to "NULL"
-         */
-        int ret = netsnmp_register_table_data_set(netsnmp_create_handler_registration
-                        ("l7vsVsTable", handle_get_vstable,
-                         l7vsVsTable_oid,
-                         OID_LENGTH(l7vsVsTable_oid),
-                         HANDLER_CAN_RWRITE), vs_table, NULL);
-
-        if (ret) {
-                std::string msg("netsnmp create l7vsVsTable data set failed.");
-                Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 24, msg, __FILE__, __LINE__);
-                //set error code
-                err.setter(true, msg);
-                return;
-        }
 }
 
 /*!
@@ -342,8 +367,6 @@ void
 initialize_real_server_table(error_code &err)
 {
         Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 80, "snmpfunc::initialize_real_server_table", __FILE__, __LINE__);
-
-        oid       l7vsRsTable_oid[] = { 1, 3, 6, 1, 4, 1, 32132, 1, 1, 1, 3 };
 
         /*
          * create the table structure itself
@@ -394,28 +417,38 @@ initialize_real_server_table(error_code &err)
                                                 ASN_INTEGER, 0, NULL, 0,
                                                 COLUMN_L7VSRSINACTIVECONN,
                                                 ASN_INTEGER, 0, NULL, 0, 0);
+}
 
-        /*
-         * registering the table with the master agent
-         */
-        /*
-         * note: if you don't need a subhandler to deal with any aspects
-         * of the request, change handle_get_rstable to "NULL"
-         */
-        int ret = netsnmp_register_table_data_set(netsnmp_create_handler_registration
-                        ("l7vsRsTable", handle_get_rstable,
-                         l7vsRsTable_oid,
-                         OID_LENGTH(l7vsRsTable_oid),
-                         HANDLER_CAN_RWRITE), rs_table, NULL);
+/*!
+ * unregister snmp handler.
+ *
+ */
+void unregister_handler()
+{
+        // unregister snmp handler
+        if (rs_table_handler && vs_table_handler && vs_table_size_handler && replication_handler) {
+                //fix memory leak for function netsnmp_register_table_data_set() start
+                //get table registration information
+                netsnmp_table_registration_info *rs_table_registration_info = netsnmp_find_table_registration_info(rs_table_handler);
+                netsnmp_table_registration_info *vs_table_registration_info = netsnmp_find_table_registration_info(vs_table_handler);
 
-        if (ret) {
-                std::string msg("netsnmp create l7vsRsTable data set failed.");
-                Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 26, msg, __FILE__, __LINE__);
-                //set error code
-                err.setter(true, msg);
-                return;
+                if (rs_table_registration_info) {
+                        SNMP_FREE(rs_table_registration_info->indexes);
+                        SNMP_FREE(rs_table_registration_info->valid_columns);
+                        SNMP_FREE(rs_table_registration_info);
+                }
+                if (vs_table_registration_info) {
+                        SNMP_FREE(vs_table_registration_info->indexes);
+                        SNMP_FREE(vs_table_registration_info->valid_columns);
+                        SNMP_FREE(vs_table_registration_info);
+                }
+                //fix memory leak for function netsnmp_register_table_data_set() end
+
+                netsnmp_unregister_handler(rs_table_handler);
+                netsnmp_unregister_handler(vs_table_handler);
+                netsnmp_unregister_handler(vs_table_size_handler);
+                netsnmp_unregister_handler(replication_handler);
         }
-
 }
 
 /*!
@@ -446,7 +479,7 @@ handle_get_vstable(netsnmp_mib_handler *handler,
         }
         break;
         case MODE_GETNEXT:
-        break;
+                break;
         default:
                 /*
                  * we should never get here, so this is a really bad error
@@ -489,7 +522,7 @@ handle_get_rstable(netsnmp_mib_handler *handler,
         }
         break;
         case MODE_GETNEXT:
-        break;
+                break;
         default:
                 /*
                  * we should never get here, so this is a really bad error
