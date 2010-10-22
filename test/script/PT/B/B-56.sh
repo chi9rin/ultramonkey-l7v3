@@ -105,7 +105,6 @@ sleep 2
 #warnning log trap 
 $L7VSADM -A -t 127.0.0.1:40001 -m sessionless
 sleep 1
-
 RET=`cat ${L7VS_LOG_DIR}/B-56-snmptrapd.log | grep -e "SNMPv2-SMI::enterprises.32132.1.0.3.3 = STRING: \"[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\} [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\},VSD3.*" | wc -l`
 echo "TEST:: $RET"
 if [ "${RET}" != "2" ]
@@ -115,7 +114,6 @@ then
 fi
 
 sleep 20
-
 #Check MIB
 RET=`snmpwalk -v 2c -c public localhost  ULTRAMONKEY-L7-MIB::ultramonkey-l7`
 EXPECT="ULTRAMONKEY-L7-MIB::l7vsVsNumber.0 = INTEGER: 1
@@ -147,16 +145,10 @@ ULTRAMONKEY-L7-MIB::l7vsVsHttpPostCount.1 = Counter64: 0
 ULTRAMONKEY-L7-MIB::l7vsVsRsNumber.1 = INTEGER: 0
 ULTRAMONKEY-L7-MIB::l7vsReplicationMode.0 = INTEGER: single(1)"
 
-echo "$EXPECT" > /tmp/1.txt
-echo "$RET" > /tmp/2.txt
-diff /tmp/1.txt /tmp/2.txt
-
 if [ "${RET}" != "${EXPECT}" ]
 then
 	echo "Test failed: snmpwalk -v 2c -c public localhost  ULTRAMONKEY-L7-MIB::ultramonkey-l7"
 	exit 1
 fi
-
-
 
 exit 0

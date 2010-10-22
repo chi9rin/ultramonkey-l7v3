@@ -10,13 +10,19 @@ then
 		LOG_FATAL "Can not stop l7vsd."
 		exit 1
 	fi
+	usleep 500000
+	if [ -n "`pgrep l7vsd`" ]
+	then
+		LOG_FATAL "Can not stop l7vsd."
+		exit 1
+	fi
 fi
 
 if [ -n "`pgrep l7directord`" ]
 then
 	${INIT_L7DIRECTORD} stop > /dev/null 2>&1
 	pkill -KILL l7directord > /dev/null 2>&1
-	usleep 100000
+	usleep 500000
 	if [ -n "`pgrep l7directord`" ]
 	then
 		LOG_FATAL "Can not stop l7directord."

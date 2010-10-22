@@ -53,7 +53,7 @@ fi
 dd if=/dev/zero of=${TMP_DIR}/10M.dat bs=1024 count=10240
 
 #Get The File
-$WGET http://$VS1:40001 --post-file ${TMP_DIR}/10M.dat -t 1
+$WGET -qO- http://$VS1:40001 --post-file ${TMP_DIR}/10M.dat -t 1
 if [ $? -ne 0 ]
 then
         echo "Test failed: $WGET http://127.0.0.1:40001 --post-file 10M.dat"

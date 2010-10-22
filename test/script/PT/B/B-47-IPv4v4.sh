@@ -165,9 +165,6 @@ ULTRAMONKEY-L7-MIB::l7vsRsInActiveConn.3 = INTEGER: 0
 ULTRAMONKEY-L7-MIB::l7vsRsInActiveConn.4 = INTEGER: 0
 ULTRAMONKEY-L7-MIB::l7vsReplicationMode.0 = INTEGER: single(1)"
 
-echo "$RET" >1.log
-echo "$EXPECT" >2.log
-
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: snmpwalk -v 2c -c public localhost ULTRAMONKEY-L7-MIB::ultramonkey"
