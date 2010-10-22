@@ -1,6 +1,6 @@
 #!/bin/bash
 . ${SET_DEFAULT_CONF}
-\cp ./materials/C-8-IPv4v4-l7directord.cf ${L7DIRECTORD_CONF_DIR}/l7directord.cf
+\cp ./materials/C-8-IPv6v6-l7directord.cf ${L7DIRECTORD_CONF_DIR}/l7directord.cf
 
 VS="[::1]"
 RS="[::1]"

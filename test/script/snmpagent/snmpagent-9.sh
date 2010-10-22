@@ -47,14 +47,13 @@ then
 fi
 
 #Make 10M.dat in materials 
-dd if=/dev/zero of=materials/10M.dat bs=1024 count=10240
+dd if=/dev/zero of=${TMP_DIR}/10M.dat bs=1024 count=10240
 
 #Get The File
-$WGET http://127.0.0.1:40001 --post-file materials/10M.dat -t 1
+$WGET http://127.0.0.1:40001 --post-file ${TMP_DIR}/10M.dat -t 1
 if [ $? -ne 0 ]
 then
         echo "Test failed: $WGET http://127.0.0.1:40001 --post-file 10M.dat"
-        \rm -f materials/10M.dat
         exit 1
 fi
 usleep 1000000
@@ -65,10 +64,7 @@ RET=`cat  ${L7VS_LOG_DIR}/snmpagent-1-19-snmptrapd.log | grep -e  "SNMPv2-SMI::e
 if [ -z "${RET}" ]
 then
         echo "Test failed: cat ${L7VS_LOG_DIR}/snmpagent-1-19-snmptrapd.log"
-	\rm -f materials/10M.dat
         exit 1
 fi
-
-\rm -f materials/10M.dat
 
 exit 0
