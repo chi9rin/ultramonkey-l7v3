@@ -116,10 +116,10 @@ then
 fi
 
 #clear statistic(using long option)
-$L7VSADM --snmp --refresh --tcp-service  127.0.0.1:40001 --proto-module ip 
+$L7VSADM --snmp --refresh --tcp-service  $VS1:40001 --proto-module ip 
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM --snmp --refresh --tcp-service  127.0.0.1:40001 --proto-module ip "
+        echo "Test failed: $L7VSADM --snmp --refresh --tcp-service  $VS1:40001 --proto-module ip "
         exit 1
 fi
 
