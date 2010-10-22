@@ -12,6 +12,27 @@ then
 fi
 usleep 100000
 
+$L7VSADM -A -t 127.0.0.1:40001 -m sessionless
+if [ $? -ne 0 ]
+then
+        echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m sessionless"
+        exit 1
+fi
+
+$L7VSADM -a -t 127.0.0.1:40001 -m sessionless -r 127.0.0.99:9999
+if [ $? -ne 0 ]
+then
+        echo "Test failed: $L7VSADM -a -t 127.0.0.1:40001 -m sessionless -r 127.0.0.99:9999"
+        exit 1
+fi
+
+wget -qO- -t 1 http://127.0.0.1:40001/
+if [ $? -ne 0 ]
+then
+        echo "Test failed: $wget -qO- -t 1 http://127.0.0.1:40001/"
+        exit 1
+fi
+
 RET=`cat ${L7VS_LOG_DIR}/l7vsadm.log | grep "\[ERROR\]" | wc -l`
 if [ ${RET} -le 0 ]
 then

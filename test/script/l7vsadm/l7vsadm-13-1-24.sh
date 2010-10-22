@@ -37,12 +37,13 @@ then
 fi
 
 #Connect
-GET_REQ=""
-for((I=0;I<100;I++)) do GET_REQ="${GET_REQ}GET / HTTP/1.0\r\n\r\n"; done
-POST_REQ=""
-for((I=0;I<200;I++)) do POST_REQ="${POST_REQ}POST / HTTP/1.0\r\n\r\n"; done
-echo -e -n "${GET_REQ}" | nc 127.0.0.1 40001
-echo -e -n "${POST_REQ}" | nc 127.0.0.1 40001
+for ((I=0;I<100;I++)) {
+	echo -e -n "GET / HTTP/1.0\r\n\r\n" | nc 127.0.0.1 40001
+}
+
+for ((I=0;I<200;I++)) {
+	echo -e -n "POST / HTTP/1.0\r\n\r\n" | nc 127.0.0.1 40001
+}
 
 #HTTP Total Requests check
 RET=`$L7VSADM -V -n | grep "HTTP Total Requests" | awk '{print $4}'`
@@ -78,7 +79,7 @@ then
         echo "Test failed: $L7VSADM -S -r"
         exit 1
 fi
-
+usleep 100000
 
 #HTTP Total Requests check
 RET=`$L7VSADM -V -n | grep "HTTP Total Requests" | awk '{print $4}'`
