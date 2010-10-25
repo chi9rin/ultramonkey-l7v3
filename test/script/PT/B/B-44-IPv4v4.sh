@@ -23,6 +23,7 @@ then
         exit 1
 fi
 usleep 100000
+
 #Add Virtual Service
 $L7VSADM -A -t $VS1:40001 -m sessionless -s rr 
 if [ $? -ne 0 ]
@@ -42,7 +43,6 @@ fi
 #Check Return Value
 RET=`snmpget -v 2c -c public localhost ULTRAMONKEY-L7-MIB::l7vsVsAddr.1 2>&1`
 
-usleep 100000
 EXPECT="ULTRAMONKEY-L7-MIB::l7vsVsAddr.1 = STRING: \"$VS1\""
 
 if [ "${RET}" != "${EXPECT}" ]

@@ -15,6 +15,7 @@ then
         echo "Test failed: $INIT_L7VSD start"
         exit 1
 fi
+usleep 100000
 
 $INIT_L7VSD stop
 if [ $? -ne 0 ]
@@ -22,6 +23,7 @@ then
         echo "Test failed: $INIT_L7VSD stop"
         exit 1
 fi
+usleep 100000
 
 #Add Service
 $INIT_L7VSD start
