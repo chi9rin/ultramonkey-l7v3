@@ -1616,6 +1616,7 @@ void l7vs::virtualservice_tcp::stop()
         protomod_rep_timer->cancel();
         schedmod_rep_timer->cancel();
 
+        dispatcher.reset();
         dispatcher.stop();
 }
 
