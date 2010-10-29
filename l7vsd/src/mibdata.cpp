@@ -319,7 +319,7 @@ namespace l7vs
 
                                         data.index = rs_index;
                                         data.vs_index = vs_index;
-                                        data.forward = 1;
+                                        data.forward = static_cast<int>((*rs_it).fwdmode);
                                         data.weigth = (*rs_it).weight;
                                         data.active_conn = (*rs_it).get_active();
                                         data.inactive_conn = (*rs_it).get_inact();

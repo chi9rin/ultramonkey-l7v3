@@ -2466,9 +2466,9 @@ void l7vs::l7vsadm::disp_list_verbose()
 
                buf << fmtter.str();
         } else {
-               strftime(snmp_start_date, sizeof(snmp_start_date), "%Y-%m-%d %H-%M-%S", localtime(&response.snmpinfo.start_date));
-               strftime(snmp_last_request_date, sizeof(snmp_start_date), "%Y-%m-%d %H-%M-%S", localtime(&response.snmpinfo.request_last_date));
-               strftime(snmp_last_trap_date, sizeof(snmp_start_date), "%Y-%m-%d %H-%M-%S", localtime(&response.snmpinfo.trap_last_date));
+               strftime(snmp_start_date, sizeof(snmp_start_date), "%Y-%m-%d %H:%M:%S", localtime(&response.snmpinfo.start_date));
+               strftime(snmp_last_request_date, sizeof(snmp_start_date), "%Y-%m-%d %H:%M:%S", localtime(&response.snmpinfo.request_last_date));
+               strftime(snmp_last_trap_date, sizeof(snmp_start_date), "%Y-%m-%d %H:%M:%S", localtime(&response.snmpinfo.trap_last_date));
 
                boost::format fmtter("%-30s active\n"
                                     "%-30s %s\n"

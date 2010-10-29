@@ -375,7 +375,7 @@ l7vsStatus  OBJECT IDENTIFIER ::= { l7vsObjects 1 }
         ::= { l7vsRsEntry 5 }
 
     l7vsRsForward OBJECT-TYPE
-        SYNTAX      INTEGER { masq(1) }
+        SYNTAX      INTEGER { masq(1), tproxy(2) }
         MAX-ACCESS  read-only
         STATUS      current
         DESCRIPTION
