@@ -14,12 +14,15 @@ fi
 #SNMPv3  configuration
 #createUser MD5User MD5 mysecretpass DES mysecretpass
 #rwuser  MD5User auth
-#\cp -f ./materials/mib-58-snmpd.conf /etc/snmp/snmpd.conf
+\cp -f /etc/snmp/snmpd.conf ${TMP_DIR}/snmpd.conf.org
+\cp -f ./materials/mib-58-snmpd.conf /etc/snmp/snmpd.conf
 
 ${INIT_SNMPD} start >/dev/null
 if [ $? -ne 0 ]
 then
 	echo "Test failed: ${INIT_SNMPD} start"
+        \cp -f ${TMP_DIR}/snmpd.conf.org /etc/snmp/snmpd.conf
+        ${INIT_SNMPD} restart >/dev/null
 	exit 1
 fi
 usleep 1000000
@@ -29,6 +32,8 @@ $L7VSD
 if [ $? -ne 0 ]
 then
         echo "Test failed: $L7VSD"
+        \cp -f ${TMP_DIR}/snmpd.conf.org /etc/snmp/snmpd.conf
+        ${INIT_SNMPD} restart >/dev/null
         exit 1
 fi
 usleep 100000
@@ -43,6 +48,8 @@ $L7VSADM -A -t 127.0.0.1:40001 -m sessionless -b ${SorryServer_ADDR}:${SorryServ
 if [ $? -ne 0 ]
 then
         echo "Test failed: $L7VSADM -A -t 127.0.0.1:40001 -m sessionless -b ${SorryServer_ADDR}:${SorryServer_PORT}"
+        \cp -f ${TMP_DIR}/snmpd.conf.org /etc/snmp/snmpd.conf
+        ${INIT_SNMPD} restart >/dev/null
         exit 1
 fi
 
@@ -53,6 +60,8 @@ if [ $? -ne 0 ]
 then
         echo "Test failed: $L7VSADM -a -t 127.0.0.1:40001
               -m sessionless -r 127.0.0.1:50001 -w 100"
+        \cp -f ${TMP_DIR}/snmpd.conf.org /etc/snmp/snmpd.conf
+        ${INIT_SNMPD} restart >/dev/null
         exit 1
 fi
 
@@ -60,6 +69,8 @@ $L7VSADM -S -f 1
 if [ $? -ne 0 ]
 then
         echo "Test failed: $L7VSD"
+        \cp -f ${TMP_DIR}/snmpd.conf.org /etc/snmp/snmpd.conf
+        ${INIT_SNMPD} restart >/dev/null
         exit 1
 fi
 
@@ -106,7 +117,11 @@ ULTRAMONKEY-L7-MIB::l7vsReplicationMode.0 = INTEGER: single(1)"
 if [ "${RET}" != "${EXPECT}" ]
 then
         echo "Test failed: snmpwalk -v 3 -u MD5User -l auth -a MD5 -A mysecretpass 127.0.0.1 ULTRAMONKEY-L7-MIB::ultramonkey-l7"
+        \cp -f ${TMP_DIR}/snmpd.conf.org /etc/snmp/snmpd.conf
+        ${INIT_SNMPD} restart >/dev/null
         exit 1
 fi
 
+\cp -f ${TMP_DIR}/snmpd.conf.org /etc/snmp/snmpd.conf
+${INIT_SNMPD} restart >/dev/null
 exit 0

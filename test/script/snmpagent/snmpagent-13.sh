@@ -21,7 +21,6 @@ then
 fi
 
 #Start L7VAD Service
-TIME=`date`
 $L7VSD
 if [ $? -ne 0 ]
 then

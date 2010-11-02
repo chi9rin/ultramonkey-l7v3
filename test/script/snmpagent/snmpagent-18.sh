@@ -33,6 +33,7 @@ usleep 100000
 
 wget -qO- http://127.0.0.1:40001 -T 3 -t 1
 
+sleep 1
 #Check Trap Log
 RET=`cat  ${L7VS_LOG_DIR}/snmpagent-1-19-snmptrapd.log | grep -e  "SNMPv2-SMI::enterprises.32132.1.0.3.2 = STRING: \"[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\} [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\},SCM4.*"`
 if [ -z "${RET}" ]

@@ -33,7 +33,8 @@ then
         echo "Test failed: $L7VSADM -E -t 127.0.0.1:40001 -m sessionless -f -b 127.0.0.1:50002"
         exit 1
 fi
-usleep 100000
+usleep 500000
+
 
 #Check Traplog
 

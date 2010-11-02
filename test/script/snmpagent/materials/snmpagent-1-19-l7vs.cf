@@ -150,6 +150,6 @@ qos_up_alert_off = 50
 qos_down_alert_on = 85
 qos_down_alert_off = 50
 sessionpool_alert_on = 5
-sessionpool_alert_off = 8
+sessionpool_alert_off = 3
 trap_queue_polling_interval = 100000000
 trap_queue_max_size = 1000

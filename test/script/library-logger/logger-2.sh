@@ -62,6 +62,14 @@ fi
 
 stop_lighttpd $RealServer1
 
+$INIT_L7VSD stop
+if [ $? -ne 0 ]
+then
+	echo "Test failed: $L7VSD"
+        exit 1
+fi
+usleep 500000
+
 RET=`cat ${L7VS_LOG_DIR}/l7vsd.log | grep "\[DEBUG\]" | wc -l`
 if [ ${RET} -gt 0 ]
 then
@@ -73,20 +81,6 @@ RET=`cat ${L7VS_LOG_DIR}/l7vsd.log | grep "\[INFO\]" | wc -l`
 if [ ${RET} -le 0 ]
 then
         echo "Test failed: cat ${L7VS_LOG_DIR}/l7vsd.log"
-        exit 1
-fi
-
-RET=`cat ${L7VS_LOG_DIR}/l7vsadm.log | grep "\[DEBUG\]" | wc -l`
-if [ ${RET} -gt 0 ]
-then
-        echo "Test failed: cat ${L7VS_LOG_DIR}/l7vsadm.log"
-        exit 1
-fi
-
-RET=`cat ${L7VS_LOG_DIR}/l7vsadm.log | grep "\[INFO\]" | wc -l`
-if [ ${RET} -le 0 ]
-then
-        echo "Test failed: cat ${L7VS_LOG_DIR}/l7vsadm.log"
         exit 1
 fi
 

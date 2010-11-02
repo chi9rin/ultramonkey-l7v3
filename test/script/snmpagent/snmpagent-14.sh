@@ -46,12 +46,36 @@ then
 fi
 
 #Built link
-for ((i=0;i<23;i++)){ nc 127.0.0.1 40001 -w 10 & }
-for ((i=0;i<5;i++)){ nc 127.0.0.1 40001 -w 2 & }
-usleep 3000000
+#Make 28 active connection
+for ((i=0;i<28;i++)){ nc 127.0.0.1 40001 -w 5& }
+
+$TEST_CLIENT 127.0.0.1 40001 &
+CONNECT1=$!
+$TEST_CLIENT 127.0.0.1 40001 &
+CONNECT2=$!
+$TEST_CLIENT 127.0.0.1 40001 &
+CONNECT3=$!
+$TEST_CLIENT 127.0.0.1 40001 &
+CONNECT4=$!
+$TEST_CLIENT 127.0.0.1 40001 &
+CONNECT5=$!
+$TEST_CLIENT 127.0.0.1 40001 &
+
+sleep 5
+
+kill ${CONNECT1}
+kill ${CONNECT2}
+kill ${CONNECT3}
+kill ${CONNECT4}
+kill ${CONNECT5}
+
+sleep 5
 
 #Check Traplog
+cat  ${L7VS_LOG_DIR}/snmpagent-1-19-snmptrapd.log
+
 RET=`cat  ${L7VS_LOG_DIR}/snmpagent-1-19-snmptrapd.log | grep -e  "SNMPv2-SMI::enterprises.32132.1.0.2.12 = STRING: \"[0-9]\{4\}/[0-9]\{2\}/[0-9]\{2\} [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\},TRAP00020012,Warning release: The left-session has exceeded the release threshold of left-session warning."`
+
 if [ -z "${RET}" ]
 then
         echo "Test failed: cat ${L7VS_LOG_DIR}/snmpagent-1-19-snmptrapd.log"

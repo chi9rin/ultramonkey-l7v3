@@ -27,13 +27,9 @@ then
 fi
 
 wget -qO- -t 1 http://127.0.0.1:40001/
-if [ $? -ne 0 ]
-then
-        echo "Test failed: $wget -qO- -t 1 http://127.0.0.1:40001/"
-        exit 1
-fi
 
-RET=`cat ${L7VS_LOG_DIR}/l7vsadm.log | grep "\[ERROR\]" | wc -l`
+
+RET=`cat ${L7VS_LOG_DIR}/l7vsd.log | grep "\[ERROR\]" | wc -l`
 if [ ${RET} -le 0 ]
 then
         echo "Test failed: cat ${L7VS_LOG_DIR}/l7vsadm.log"
