@@ -39,7 +39,7 @@ fi
 
 test_client2 -p 40001 > $tmp_file &
 
-sleep 1
+sleep 5
 
 $L7VSADM -e -t 127.0.0.1:40001 -m sessionless -r 127.0.0.1:30000 -w 1
 if [ $? -ne 0 ]; then
@@ -54,6 +54,7 @@ if [ $? -ne 0 ]; then
         exit 1
 fi
 
+
 # sorry server connection must be left
 ps aux | grep "test_client2" | grep -v grep > /dev/null 2>&1
 if [ $? -ne 0 ]; then
@@ -62,7 +63,9 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-sleep 5
+sleep 15
+
+cat $tmp_file
 
 diff $tmp_file ./materials/virtualservice-40-response.txt > /dev/null 2>&1
 if [ $? -ne 0 ]; then
