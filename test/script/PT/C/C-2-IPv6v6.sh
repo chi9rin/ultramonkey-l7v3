@@ -82,7 +82,7 @@ then
         exit 1
 fi
 
-iptables -F
+ip6tables -F
 
 exit 0
 

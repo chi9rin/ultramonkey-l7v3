@@ -16,7 +16,7 @@ then
         echo "Test failed: kill"
         exit 1
 fi
-usleep 100000
+sleep 1
 
 RET=`pgrep l7vsd`
 if [ $? -eq 0 ]
