@@ -2,8 +2,7 @@
 //!    @file    schedule_module_base.h
 //!    @brief    shared object schedule module absctract class
 //
-//    copyright (c) sdy corporation. 2008
-//    mail: h dot okada at sdy dot co dot jp
+//    Copyright (C) 2008  NTT COMWARE Corporation.
 //
 //    Distributed under the Boost Software License, Version 1.0.(See accompanying
 //    file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
