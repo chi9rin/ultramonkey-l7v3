@@ -78,7 +78,7 @@ use Socket6;
 
 # current version
 our $VERSION     = '3.0.0-0';
-our $COPYRIGHT   = 'Copyright (C) 2010 NTT COMWARE CORPORATION;
+our $COPYRIGHT   = 'Copyright (C) 2010 NTT COMWARE CORPORATION';
 
 # default global config values
 our %GLOBAL = (
