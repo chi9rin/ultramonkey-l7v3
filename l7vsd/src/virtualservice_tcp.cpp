@@ -1721,11 +1721,11 @@ void l7vs::virtualservice_tcp::release_session(const tcp_session *session_ptr)
 
         session_thread_control *stc_ptr = active_sessions.find(session_ptr);
         if (unlikely(NULL == stc_ptr)) {
+                boost::format fmt("session release fail: "
+                        "active_sessions.find( const tcp_session* session_ptr = %d )");
+                fmt % session_ptr;
+                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, /*XXX*/999, fmt.str(), __FILE__, __LINE__);
                 if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
-                        boost::format fmt("session release fail: "
-                                "active_sessions.find( const tcp_session* session_ptr = %d )");
-                        fmt % session_ptr;
-                        Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 87, fmt.str(), __FILE__, __LINE__);
                         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 88, "out_function: "
                                 "void virtualservice_tcp::release_session( "
                                 "const boost::thread::id thread_id )", __FILE__, __LINE__);

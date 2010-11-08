@@ -57,7 +57,7 @@ tcp_session::tcp_session(
         :
         io(session_io),
         parent_service(vs),
-        exit_flag(false),
+        exit_flag(0),
         upthread_status(UPTHREAD_SLEEP),
         downthread_status(DOWNTHREAD_SLEEP),
         realserver_connect_status(false),
@@ -342,7 +342,7 @@ session_result_message tcp_session::initialize()
         session_result_message msg;
         msg.flag = false;
         msg.message = "";
-        exit_flag = false;
+        exit_flag = 0;
         up_thread_id = boost::thread::id();
         down_thread_id = boost::thread::id();
         ssl_handshake_timer_flag = false;
@@ -843,7 +843,7 @@ void tcp_session::up_thread_run()
                         Logger::putLogError(LOG_CAT_L7VSD_SESSION, 9, buf.str(), __FILE__, __LINE__);
                         {
                                 rw_scoped_lock scoped_lock(exit_flag_update_mutex);
-                                exit_flag = true;
+                                __sync_bool_compare_and_swap(&exit_flag, 0, 1);
                         }
                 }
         }
@@ -865,7 +865,7 @@ void tcp_session::up_thread_run()
                         Logger::putLogError(LOG_CAT_L7VSD_SESSION, 10, buf.str(), __FILE__, __LINE__);
                         {
                                 rw_scoped_lock scoped_lock(exit_flag_update_mutex);
-                                exit_flag = true;
+                                __sync_bool_compare_and_swap(&exit_flag, 0, 1);
                         }
                 }
         }
@@ -881,7 +881,7 @@ void tcp_session::up_thread_run()
                         Logger::putLogError(LOG_CAT_L7VSD_SESSION, 11, buf.str(), __FILE__, __LINE__);
                         {
                                 rw_scoped_lock scoped_lock(exit_flag_update_mutex);
-                                exit_flag = true;
+                                __sync_bool_compare_and_swap(&exit_flag, 0, 1);
                         }
                 }
         }
@@ -904,7 +904,7 @@ void tcp_session::up_thread_run()
                                 Logger::putLogError(LOG_CAT_L7VSD_SESSION, 12, buf.str(), __FILE__, __LINE__);
                                 {
                                         rw_scoped_lock scoped_lock(exit_flag_update_mutex);
-                                        exit_flag = true;
+                                        __sync_bool_compare_and_swap(&exit_flag, 0, 1);
                                 }
                         }
                 }
@@ -928,7 +928,7 @@ void tcp_session::up_thread_run()
                                 Logger::putLogError(LOG_CAT_L7VSD_SESSION, 13, buf.str(), __FILE__, __LINE__);
                                 {
                                         rw_scoped_lock scoped_lock(exit_flag_update_mutex);
-                                        exit_flag = true;
+                                        __sync_bool_compare_and_swap(&exit_flag, 0, 1);
                                 }
                         }
                 }
@@ -1044,7 +1044,7 @@ void tcp_session::up_thread_run()
         }
         {
                 rw_scoped_lock scoped_lock(exit_flag_update_mutex);
-                if( !__sync_bool_compare_and_swap( &exit_flag, true, 2 ) ){
+                if( !__sync_bool_compare_and_swap( &exit_flag, 1, 2 ) ){
                         parent_service.release_session(this);
                 }
         }
@@ -1175,7 +1175,7 @@ void tcp_session::down_thread_run()
 
         {
                 rw_scoped_lock scoped_lock(exit_flag_update_mutex);
-                if( !__sync_bool_compare_and_swap( &exit_flag, true, 2 ) ){
+                if( !__sync_bool_compare_and_swap( &exit_flag, 1, 2 ) ){
                         parent_service.release_session(this);
                 }
         }
@@ -1399,6 +1399,11 @@ void tcp_session::up_thread_client_receive(const TCP_PROCESS_TYPE_TAG process_ty
         event.data.fd = !ssl_flag ? client_socket.get_socket().native()
                         : client_ssl_socket.get_socket().lowest_layer().native();
 
+	if (event.data.fd == -1) {
+	        up_thread_next_call_function  = up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT];
+		return;
+	}
+
         // epoll wait codes
         if (is_epoll_edge_trigger) {
                 event.events = EPOLLIN | EPOLLHUP | EPOLLET;
@@ -1429,6 +1434,7 @@ void tcp_session::up_thread_client_receive(const TCP_PROCESS_TYPE_TAG process_ty
                         return;
                 }
         }
+
         int ret_fds = epoll_wait(up_client_epollfd, up_client_events, EVENT_NUM, epoll_timeout);
         if (ret_fds == 0) {
                 //----Debug log----------------------------------------------------------------------
@@ -1500,10 +1506,7 @@ void tcp_session::up_thread_client_receive(const TCP_PROCESS_TYPE_TAG process_ty
                         }
                         func_tag = func_type->second;
                 } else {
-                        boost::format formatter("Thread ID[%d] client read error. recv_size: %d");
-                        formatter % boost::this_thread::get_id() % recv_size;
-                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-                        func_tag = UP_FUNC_CLIENT_RECEIVE;
+                        func_tag = UP_FUNC_CLIENT_DISCONNECT;
                 }
         } else {
                 if (ec == boost::asio::error::eof) {
@@ -2606,7 +2609,7 @@ void tcp_session::up_thread_exit(const TCP_PROCESS_TYPE_TAG process_type)
         upthread_status_cond.notify_one();
         realserver_connect_cond.notify_one();
         realserver_connect_status = true;
-        exit_flag = true;
+        __sync_bool_compare_and_swap(&exit_flag, 0, 1);
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                 boost::format formatter("Thread ID[%d] FUNC OUT func up_thread_client_disconnect");
@@ -2780,13 +2783,11 @@ void tcp_session::down_thread_realserver_receive(const TCP_PROCESS_TYPE_TAG proc
                         std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type = down_thread_module_event_map.find(module_event);
                         func_tag = func_type->second;
                 } else {
-                        func_tag = DOWN_FUNC_REALSERVER_RECEIVE;
-                        //boost::this_thread::yield();
+                        func_tag = DOWN_FUNC_REALSERVER_DISCONNECT;
                 }
         } else {
                 if (ec == boost::asio::error::try_again) {
                         func_tag = DOWN_FUNC_REALSERVER_RECEIVE;
-                        //boost::this_thread::yield();
                 } else {
                         func_tag = DOWN_FUNC_REALSERVER_DISCONNECT;
                 }
@@ -3104,7 +3105,6 @@ void tcp_session::down_thread_client_send(const TCP_PROCESS_TYPE_TAG process_typ
                         //----Debug log----------------------------------------------------------------------
                         if (data_size > send_data_size) {
                                 func_tag = DOWN_FUNC_CLIENT_SEND;
-                                //down_send_wait.reset();
                         } else {
                                 protocol_module_base::EVENT_TAG module_event = protocol_module->handle_client_send(down_thread_id);
                                 std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type = down_thread_module_event_map.find(module_event);
@@ -3304,7 +3304,7 @@ void tcp_session::down_thread_sorryserver_receive(const TCP_PROCESS_TYPE_TAG pro
                         std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type = down_thread_module_event_map.find(module_event);
                         func_tag = func_type->second;
                 } else {
-                        func_tag = DOWN_FUNC_SORRYSERVER_RECEIVE;
+                        func_tag = DOWN_FUNC_SORRYSERVER_DISCONNECT;
                 }
         } else {
                 if (ec == boost::asio::error::try_again) {
@@ -3492,7 +3492,7 @@ void tcp_session::down_thread_exit(const TCP_PROCESS_TYPE_TAG process_type)
         rw_scoped_lock scoped_lock(exit_flag_update_mutex);
         boost::mutex::scoped_lock status_scoped_lock(downthread_status_mutex);
         downthread_status_cond.notify_one();
-        exit_flag = true;
+        __sync_bool_compare_and_swap(&exit_flag, 0, 1);
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                 boost::format formatter("Thread ID[%d] FUNC OUT down_thread_exit");
