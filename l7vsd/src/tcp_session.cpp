@@ -1050,8 +1050,8 @@ void tcp_session::down_thread_run()
         {
                 boost::mutex::scoped_lock lock(downthread_status_mutex);
                 downthread_status = DOWNTHREAD_ALIVE;
+                downthread_status_cond.notify_one();
         }
-        downthread_status_cond.notify_one();
 
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -1080,8 +1080,8 @@ void tcp_session::down_thread_run()
         {
                 boost::mutex::scoped_lock lock(downthread_status_mutex);
                 downthread_status = DOWNTHREAD_ACTIVE;
+                downthread_status_cond.notify_one();
         }
-        downthread_status_cond.notify_one();
 
         down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_REALSERVER_RECEIVE];
 
@@ -1136,15 +1136,13 @@ void tcp_session::down_thread_run()
         {
                 boost::mutex::scoped_lock lock(downthread_status_mutex);
                 downthread_status = DOWNTHREAD_ALIVE;
+                downthread_status_cond.notify_one();
         }
-        downthread_status_cond.notify_one();
-        //----Debug log----------------------------------------------------------------------
-        //----Debug log----------------------------------------------------------------------
         {
                 boost::mutex::scoped_lock lock(downthread_status_mutex);
                 downthread_status = DOWNTHREAD_SLEEP;
+                downthread_status_cond.notify_one();
         }
-        downthread_status_cond.notify_one();
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                 boost::format formatter("Thread ID[%d] FUNC OUT down_thread_run");
                 formatter % boost::this_thread::get_id();
