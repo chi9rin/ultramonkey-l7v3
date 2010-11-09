@@ -28,7 +28,7 @@ usleep 100000
 $L7VSADM -A -t $VS:40001 -m sessionless -s rr -u 100 -b $SS:50001 -f 0 -Q 200K -q 200k --tproxy
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM -A -t $VS:40001 -m sessionless -s rr -u 100 -b $SS:50001 -f 0 -Q 200K -q 200k"
+        echo "Test failed: $L7VSADM -A -t $VS:40001 -m sessionless -s rr -u 100 -b $SS:50001 -f 0 -Q 200K -q 200k --tproxy"
         exit 1
 fi
 

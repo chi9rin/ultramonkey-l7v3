@@ -35,7 +35,7 @@ fi
 $L7VSADM -a -t $VS:40001 -m sessionless -r $RS:50001 --tproxy
 if [ $? -ne 0 ]
 then
-        echo "Test failed: $L7VSADM -A -t $VS:40001 -m sessionless -s rr"
+        echo "Test failed: $L7VSADM -a -t $VS:40001 -m sessionless -r $RS:50001 --tproxy"
         exit 1
 fi
 
