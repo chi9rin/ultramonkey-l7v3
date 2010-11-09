@@ -684,13 +684,17 @@ void tcp_session::set_virtual_service_message(const TCP_VIRTUAL_SERVICE_MESSAGE_
         case SESSION_PAUSE_OFF: {
                 {
                 boost::mutex::scoped_lock lock(upthread_status_mutex);
-                        if (upthread_status == UPTHREAD_LOCK)
+                        if (upthread_status == UPTHREAD_LOCK) {
+	                        upthread_status = UPTHREAD_ACTIVE;
                                 upthread_status_cond.notify_one();
+                        }
                 }
                 {
                 boost::mutex::scoped_lock lock(downthread_status_mutex);
-                        if (downthread_status == DOWNTHREAD_LOCK)
+                        if (downthread_status == DOWNTHREAD_LOCK) {
+                                downthread_status = DOWNTHREAD_ACTIVE;
                                 downthread_status_cond.notify_one();
+                        }
                 }
         }
         //----Debug log----------------------------------------------------------------------
@@ -805,7 +809,6 @@ void tcp_session::up_thread_run()
                 upthread_status = UPTHREAD_ALIVE;
                 realserver_connect_status = false;
         }
-
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                 std::stringstream buf;
@@ -814,15 +817,13 @@ void tcp_session::up_thread_run()
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 18, buf.str(), __FILE__, __LINE__);
         }
         //----Debug log----------------------------------------------------------------------
-
         {
                 boost::mutex::scoped_lock lock(downthread_status_mutex);
-                if (downthread_status < DOWNTHREAD_ALIVE) {
+                while (downthread_status < DOWNTHREAD_ALIVE) {
                         to_time(LOCKTIMEOUT, xt);
                         downthread_status_cond.timed_wait(lock, xt);
 		}
         }
-
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                 std::stringstream buf;
@@ -831,7 +832,6 @@ void tcp_session::up_thread_run()
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 19, buf.str(), __FILE__, __LINE__);
         }
         //----Debug log----------------------------------------------------------------------
-
         if (likely(!exit_flag)) {
                 bool bres = !ssl_flag ? client_socket.get_socket().lowest_layer().is_open()
                             : client_ssl_socket.get_socket().lowest_layer().is_open();
@@ -944,10 +944,9 @@ void tcp_session::up_thread_run()
         while (!exit_flag) {
 		{
 			boost::mutex::scoped_lock lock(upthread_status_mutex);
-	                if ( unlikely(upthread_status == UPTHREAD_LOCK) ) {
-	                        to_time(LOCKTIMEOUT, xt);
+	                while ( unlikely(upthread_status == UPTHREAD_LOCK) ) {
+                                to_time(LOCKTIMEOUT, xt);
 	                        upthread_status_cond.timed_wait(lock, xt);
-	                        upthread_status = UPTHREAD_ACTIVE;
 	                }
 		}
                 tcp_thread_message *msg = up_thread_message_que.pop();
@@ -977,38 +976,34 @@ void tcp_session::up_thread_run()
 
         {
                 boost::mutex::scoped_lock lock(upthread_status_mutex);
-                upthread_status = UPTHREAD_ALIVE;
+                upthread_status = UPTHREAD_COMPLETE;
+                upthread_status_cond.notify_one();
         }
 
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                 std::stringstream buf;
                 buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                buf << "up thread/down thread dead wait start";
+                buf << "down thread complete wait start";
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 22, buf.str(), __FILE__, __LINE__);
         }
         //----Debug log----------------------------------------------------------------------
         {
                 boost::mutex::scoped_lock lock(downthread_status_mutex);
-                while (downthread_status != DOWNTHREAD_SLEEP) {
-                        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                                boost::format formatter("Thread ID[%s] down thread finalize wait");
-                                formatter % boost::this_thread::get_id();
-                                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-                        }
+                while (downthread_status != DOWNTHREAD_COMPLETE && downthread_status != DOWNTHREAD_SLEEP) {
                         to_time(LOCKTIMEOUT, xt);
                         downthread_status_cond.timed_wait(lock, xt);
                 }
         }
-
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                 std::stringstream buf;
                 buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                buf << "up thread/down thread dead wait end";
+                buf << "down thread complete wait end";
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 23, buf.str(), __FILE__, __LINE__);
         }
         //----Debug log----------------------------------------------------------------------
+
         if (likely(protocol_module != NULL)) {
                 protocol_module->handle_session_finalize(up_thread_id, down_thread_id);
         }
@@ -1034,6 +1029,7 @@ void tcp_session::up_thread_run()
                 formatter % boost::this_thread::get_id();
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 18, formatter.str(), __FILE__, __LINE__);
         }
+        //----Debug log----------------------------------------------------------------------
 }
 
 //! down stream thread main function
@@ -1068,7 +1064,6 @@ void tcp_session::down_thread_run()
                         upthread_status_cond.timed_wait(upthread_status_mutex, xt);
                 }
         }
-
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                 std::stringstream buf;
@@ -1077,6 +1072,7 @@ void tcp_session::down_thread_run()
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 29, buf.str(), __FILE__, __LINE__);
         }
         //----Debug log----------------------------------------------------------------------
+
         {
                 boost::mutex::scoped_lock lock(downthread_status_mutex);
                 downthread_status = DOWNTHREAD_ACTIVE;
@@ -1093,21 +1089,18 @@ void tcp_session::down_thread_run()
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 30, buf.str(), __FILE__, __LINE__);
         }
         //----Debug log----------------------------------------------------------------------
-
         while (!exit_flag) {
-                if ( unlikely(downthread_status == DOWNTHREAD_LOCK) ) {
+                {
                         boost::mutex::scoped_lock lock(downthread_status_mutex);
-                        to_time(LOCKTIMEOUT, xt);
-                        downthread_status_cond.timed_wait(lock, xt);
-                        downthread_status = DOWNTHREAD_ACTIVE;
+                        while ( unlikely(downthread_status == DOWNTHREAD_LOCK) ) {
+                                to_time(LOCKTIMEOUT, xt);
+                                downthread_status_cond.timed_wait(lock, xt);
+                        }
                 }
                 while (unlikely(!down_thread_connect_socket_list.empty())) {
                         socket_element push_rs_socket = down_thread_connect_socket_list.get_socket();
                         down_thread_receive_realserver_socket_list.push_back(push_rs_socket);
                         down_thread_current_receive_realserver_socket = down_thread_receive_realserver_socket_list.begin();
-                        boost::mutex::scoped_lock lock(upthread_status_mutex);
-                        if (upthread_status < UPTHREAD_ALIVE)
-                                break;
                 }
 
                 tcp_thread_message *msg = down_thread_message_que.pop();
@@ -1132,12 +1125,38 @@ void tcp_session::down_thread_run()
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 31, buf.str(), __FILE__, __LINE__);
         }
         //----Debug log----------------------------------------------------------------------
+
         down_thread_all_socket_close();
         {
                 boost::mutex::scoped_lock lock(downthread_status_mutex);
-                downthread_status = DOWNTHREAD_ALIVE;
+                downthread_status = DOWNTHREAD_COMPLETE;
                 downthread_status_cond.notify_one();
         }
+
+        //----Debug log----------------------------------------------------------------------
+        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+                std::stringstream buf;
+                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
+                buf << "up thread complete wait start";
+                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, /*XXX*/999, buf.str(), __FILE__, __LINE__);
+        }
+        //----Debug log----------------------------------------------------------------------
+        {
+                boost::mutex::scoped_lock lock(upthread_status_mutex);
+                while (upthread_status != UPTHREAD_COMPLETE && upthread_status != UPTHREAD_SLEEP) {
+                        to_time(LOCKTIMEOUT, xt);
+                        upthread_status_cond.timed_wait(lock, xt);
+                }
+        }
+        //----Debug log----------------------------------------------------------------------
+        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+                std::stringstream buf;
+                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
+                buf << "up thread complete wait start";
+                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, /*XXX*/999, buf.str(), __FILE__, __LINE__);
+        }
+        //----Debug log----------------------------------------------------------------------
+
         {
                 boost::mutex::scoped_lock lock(downthread_status_mutex);
                 downthread_status = DOWNTHREAD_SLEEP;
@@ -1151,6 +1170,14 @@ void tcp_session::down_thread_run()
         if ( !__sync_bool_compare_and_swap(&exit_flag, 1, 2) ) {
                 parent_service.release_session(this);
         }
+
+        //----Debug log----------------------------------------------------------------------
+        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+                boost::format formatter("Thread ID[%d] FUNC OUT down_thread_run");
+                formatter % boost::this_thread::get_id();
+                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, /*XXX*/999, formatter.str(), __FILE__, __LINE__);
+        }
+        //----Debug log----------------------------------------------------------------------
 }
 
 //! endpoint data to string information
@@ -2595,7 +2622,6 @@ void tcp_session::down_thread_realserver_receive(const TCP_PROCESS_TYPE_TAG proc
                 if (!realserver_connect_status) {
                         to_time(LOCKTIMEOUT, xt);
                         realserver_connect_cond.timed_wait(lock, xt);
-                        //realserver_connect_cond.wait(lock);
                 }
                 down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_REALSERVER_RECEIVE];
                 return;
