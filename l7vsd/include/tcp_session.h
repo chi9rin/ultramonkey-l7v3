@@ -202,14 +202,16 @@ protected:
                 UPTHREAD_SLEEP = 0,
                 UPTHREAD_ALIVE,
                 UPTHREAD_ACTIVE,
-                UPTHREAD_LOCK
+                UPTHREAD_LOCK,
+                UPTHREAD_COMPLETE
         };
         //! downthread_status tag
         enum DOWNTHREAD_STATUS_TAG {
                 DOWNTHREAD_SLEEP = 0,
                 DOWNTHREAD_ALIVE,
                 DOWNTHREAD_ACTIVE,
-                DOWNTHREAD_LOCK
+                DOWNTHREAD_LOCK,
+                DOWNTHREAD_COMPLETE
         };
         UPTHREAD_STATUS_TAG     upthread_status;
         boost::mutex            upthread_status_mutex;
