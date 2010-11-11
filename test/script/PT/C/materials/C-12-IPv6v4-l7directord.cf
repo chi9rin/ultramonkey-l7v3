@@ -1,0 +1,17 @@
+checkinterval=10
+retryinterval=5
+checkcount=3
+virtual=[::1]:50000
+    real=127.0.0.1:50001 masq
+    sorryserver=127.0.0.1:50002 masq
+    module=sessionless
+    scheduler=rr
+    service=http
+    checktype=negotiate
+    request="/index.html"
+    receive="Real"
+
+
+
+
+
