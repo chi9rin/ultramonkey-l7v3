@@ -23,14 +23,14 @@
              </attributes>
            </instance_attributes>
            <operations>
-             <op id="op:VIPcheck:ex:VIPcheck:start" name="start" timeout="90s" on_fail="block" start_delay="2s"/>
+             <op id="op:VIPcheck:ex:VIPcheck:start" name="start" timeout="90s" on_fail="restart" start_delay="4s"/>
            </operations>
          </primitive>
          <primitive id="prmVIP" class="ocf" type="IPaddr2" provider="heartbeat">
            <instance_attributes id="prmVIP_instance_attrs">
              <attributes>
                <nvpair id="atr:VIP:ex:IPadder2:ip" name="ip" value="192.168.1.200"/>
-               <nvpair id="atr:VIP:ex:IPadder2:nic" name="nic" value="eth1"/>
+               <nvpair id="atr:VIP:ex:IPadder2:nic" name="nic" value="eth0"/>
                <nvpair id="atr:VIP:ex:IPadder2:cidr_netmask" name="cidr_netmask" value="24"/>
              </attributes>
            </instance_attributes>
