@@ -109,6 +109,8 @@ fi
 %dir %{l7vsadm_sockdir}
 %dir %{hb2_tempdir}
 %config(noreplace) %{hb2_tempdir}/*
+%dir %{mibs_tempdir}
+%config(noreplace) %{mibs_tempdir}/*
 
 %changelog
 * Thu Jan 14 2010 TATEISHI Katsuyuki <kt@wheel.jp> 3.0.0-1
