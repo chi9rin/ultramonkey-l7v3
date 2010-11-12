@@ -9,13 +9,14 @@ Version: 3.0.0
 Release: 1
 License: LGPLv2
 Group: System Environment/Daemons
-URL: http://ultramonkey-l7.sourceforge.jp/
+URL: http://sourceforge.jp/projects/ultramonkey-l7/
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildRequires: glib2-devel
 AutoReqProv: no
 
 %define hb2_tempdir	/usr/share/doc/%{name}-%{version}-%{release}/heartbeat-ra
+%define mibs_tempdir	/usr/share/doc/%{name}-%{version}-%{release}/mibs
 
 %description
 Layer-7 load balancing daemon
@@ -39,6 +40,7 @@ mkdir -p -m 755 ${RPM_BUILD_ROOT}%{l7vs_moddir}
 mkdir -p ${RPM_BUILD_ROOT}%{l7vs_logdir}
 mkdir -p ${RPM_BUILD_ROOT}%{l7vsadm_sockdir}
 mkdir -p ${RPM_BUILD_ROOT}%{hb2_tempdir}
+mkdir -p ${RPM_BUILD_ROOT}%{mibs_tempdir}
 
 # bin
 install -c -m 755 -D l7vsd/src/l7vsd ${RPM_BUILD_ROOT}%{_sbindir}/l7vsd
@@ -74,6 +76,9 @@ install -c -m 600 -D doc/heartbeat-ra/cib.xml-sample ${RPM_BUILD_ROOT}%{hb2_temp
 install -c -m 755 -D doc/heartbeat-ra/L7vsd ${RPM_BUILD_ROOT}%{hb2_tempdir}/L7vsd
 install -c -m 755 -D doc/heartbeat-ra/L7directord ${RPM_BUILD_ROOT}%{hb2_tempdir}/L7directord
 install -c -m 755 -D doc/heartbeat-ra/VIPcheck ${RPM_BUILD_ROOT}%{hb2_tempdir}/VIPcheck
+
+# mib file
+install -c -m 644 -D doc/mibs/ULTRAMONKEY-L7-MIB.txt ${RPM_BUILD_ROOT}%{mibs_tempdir}/ULTRAMONKEY-L7-MIB.txt
 
 %clean
 rm -rf $RPM_BUILD_ROOT

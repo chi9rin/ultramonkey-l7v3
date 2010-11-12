@@ -159,7 +159,7 @@ l7vsd_pkill(){
 ###############################
 isRunning(){
 	RET=0
-	RET=`ps -ef | grep /usr/sbin/l7vsd | grep -v grep | wc -l`
+	RET=`pgrep -fox "/usr/sbin/l7vsd -b" | wc -l`
 	return $RET
 }
 
