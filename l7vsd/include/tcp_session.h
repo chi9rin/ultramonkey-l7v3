@@ -544,6 +544,9 @@ protected:
         //! down thread close all socket
         virtual void down_thread_all_socket_close(void);
 
+        virtual bool down_thread_client_send_epoll_wait(
+		DOWN_THREAD_FUNC_TYPE_TAG&);
+
         //! millisecond to boost::xtime converter
         virtual void to_time(int in, boost::xtime &xt);
         //! using xtime
