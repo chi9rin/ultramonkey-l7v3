@@ -685,7 +685,7 @@ void tcp_session::set_virtual_service_message(const TCP_VIRTUAL_SERVICE_MESSAGE_
                 {
                 boost::mutex::scoped_lock lock(upthread_status_mutex);
                         if (upthread_status == UPTHREAD_LOCK) {
-	                        upthread_status = UPTHREAD_ACTIVE;
+                                upthread_status = UPTHREAD_ACTIVE;
                                 upthread_status_cond.notify_one();
                         }
                 }
@@ -822,7 +822,7 @@ void tcp_session::up_thread_run()
                 while (downthread_status < DOWNTHREAD_ALIVE) {
                         to_time(LOCKTIMEOUT, xt);
                         downthread_status_cond.timed_wait(lock, xt);
-		}
+                }
         }
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -942,13 +942,13 @@ void tcp_session::up_thread_run()
         }
         //----Debug log----------------------------------------------------------------------
         while (!exit_flag) {
-		{
-			boost::mutex::scoped_lock lock(upthread_status_mutex);
-	                while ( unlikely(upthread_status == UPTHREAD_LOCK) ) {
+                {
+                        boost::mutex::scoped_lock lock(upthread_status_mutex);
+                        while ( unlikely(upthread_status == UPTHREAD_LOCK) ) {
                                 to_time(LOCKTIMEOUT, xt);
-	                        upthread_status_cond.timed_wait(lock, xt);
-	                }
-		}
+                                upthread_status_cond.timed_wait(lock, xt);
+                        }
+                }
                 tcp_thread_message *msg = up_thread_message_que.pop();
                 if (unlikely(msg)) {
                         if (unlikely(UP_FUNC_EXIT == up_thread_next_call_function.first)) {
@@ -1434,7 +1434,7 @@ void tcp_session::up_thread_client_receive(const TCP_PROCESS_TYPE_TAG process_ty
                         struct epoll_event event;
                         event.data.fd = !ssl_flag ? client_socket.get_socket().native()
                                         : client_ssl_socket.get_socket().lowest_layer().native();
-	                if (event.data.fd == -1) {
+                        if (event.data.fd == -1) {
                                 up_thread_next_call_function  = up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT];
                                 return;
                         }
@@ -2619,7 +2619,7 @@ void tcp_session::down_thread_realserver_receive(const TCP_PROCESS_TYPE_TAG proc
                         // epoll
                         struct epoll_event event;
                         event.data.fd = down_thread_current_receive_realserver_socket->second->get_socket().native();
-			// epoll add
+                        // epoll add
                         if (!down_realserver_epollfd_registered) {
                                 if (is_epoll_edge_trigger) {
                                         event.events = EPOLLIN | EPOLLHUP | EPOLLET;
@@ -2859,6 +2859,52 @@ void tcp_session::down_thread_client_respond_event(const TCP_PROCESS_TYPE_TAG pr
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
         }
 }
+bool tcp_session::down_thread_client_send_epoll_wait(DOWN_THREAD_FUNC_TYPE_TAG& func_tag)
+{
+        struct epoll_event event;
+        event.data.fd = !ssl_flag ? client_socket.get_socket().native()
+                        : client_ssl_socket.get_socket().lowest_layer().native();
+        // epoll add
+        if (!down_client_epollfd_registered) {
+                if (!ssl_flag && is_epoll_edge_trigger) {
+                        event.events = EPOLLOUT | EPOLLHUP | EPOLLET;
+                } else {
+                        event.events = EPOLLOUT | EPOLLHUP;
+                }
+                if (epoll_ctl(down_client_epollfd, EPOLL_CTL_ADD, event.data.fd, &event) < 0) {
+                        std::stringstream buf;
+                        buf << "down_thread_client_send_epoll_wait: epoll_ctl EPOLL_CTL_ADD error: ";
+                        buf << strerror(errno);
+                        Logger::putLogWarn(LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__);
+                        func_tag = DOWN_FUNC_CLIENT_SEND;
+                        return false;
+                }
+                down_client_epollfd_registered = true;
+        }
+        // epoll wait
+        int ret_fds = epoll_wait(down_client_epollfd, down_client_events, EVENT_NUM, epoll_timeout);
+        if (ret_fds <= 0) {
+                if (ret_fds < 0) {
+                        std::stringstream buf;
+                        buf << "down_thread_client_send_epoll_wait: epoll_wait error: ";
+                        buf << strerror(errno);
+                        Logger::putLogWarn(LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__);
+                        func_tag = DOWN_FUNC_CLIENT_DISCONNECT;
+                } else {
+                        func_tag = DOWN_FUNC_CLIENT_SEND;
+                }
+                return false;
+        }
+        for (int i = 0; i < ret_fds; ++i) {
+                if (down_client_events[i].data.fd == event.data.fd) {
+                        if (down_client_events[i].events & EPOLLOUT) {
+                                return true;
+                        }
+                }
+        }
+        func_tag = DOWN_FUNC_CLIENT_DISCONNECT;
+        return false;
+}
 //! down thread send for client and raise module event of handle_client_send
 //! @param[in]        process_type is process type
 void tcp_session::down_thread_client_send(const TCP_PROCESS_TYPE_TAG process_type)
@@ -2876,6 +2922,11 @@ void tcp_session::down_thread_client_send(const TCP_PROCESS_TYPE_TAG process_typ
         std::size_t send_size;
         DOWN_THREAD_FUNC_TYPE_TAG func_tag;
 
+        if (ssl_flag) {
+                if (!down_thread_client_send_epoll_wait(func_tag)) {
+                        goto down_thread_client_send_out;
+                }
+        }
         send_size = !ssl_flag ? client_socket.write_some(
                             boost::asio::buffer(
                                     data_buff.data() + send_data_size,
@@ -2908,55 +2959,16 @@ void tcp_session::down_thread_client_send(const TCP_PROCESS_TYPE_TAG process_typ
                 }
         } else {
                 if (ec == boost::asio::error::try_again) {
-                        // epoll
-                        struct epoll_event event;
-                        event.data.fd = !ssl_flag ? client_socket.get_socket().native()
-                                        : client_ssl_socket.get_socket().lowest_layer().native();
-                        // epoll add
-                        if (!down_client_epollfd_registered) {
-                                if (is_epoll_edge_trigger) {
-                                        event.events = EPOLLOUT | EPOLLHUP | EPOLLET;
-                                } else {
-                                        event.events = EPOLLOUT | EPOLLHUP;
-                                }
-                                if (epoll_ctl(down_client_epollfd, EPOLL_CTL_ADD, event.data.fd, &event) < 0) {
-                                        std::stringstream buf;
-                                        buf << "down_thread_client_send: epoll_ctl EPOLL_CTL_ADD error: ";
-                                        buf << strerror(errno);
-                                        Logger::putLogWarn(LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__);
-                                        return;
-                                }
-                                down_client_epollfd_registered = true;
-                        }
-                        // epoll wait
-                        int ret_fds = epoll_wait(down_client_epollfd, down_client_events, EVENT_NUM, epoll_timeout);
-                        if (ret_fds <= 0) {
-                                if (ret_fds < 0) {
-                                        std::stringstream buf;
-                                        buf << "down_thread_client_send: epoll_wait error: ";
-                                        buf << strerror(errno);
-                                        Logger::putLogWarn(LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__);
-                                        down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_CLIENT_DISCONNECT];
-                                }
-                                return;
-                        }
-
-                        for (int i = 0; i < ret_fds; ++i) {
-                                if (down_client_events[i].data.fd == event.data.fd) {
-                                        if (down_client_events[i].events & EPOLLOUT) {
-                                                break;
-                                        } else if (down_client_events[i].events & EPOLLHUP) {
-                                                down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_CLIENT_DISCONNECT];
-                                                return;
-                                        }
-                                }
-                        }
                         func_tag = DOWN_FUNC_CLIENT_SEND;
+                        if (!ssl_flag) {
+                                down_thread_client_send_epoll_wait(func_tag);
+                        }
                 } else {
                         func_tag = DOWN_FUNC_CLIENT_DISCONNECT;
                 }
         }
 
+down_thread_client_send_out:
         down_thread_next_call_function = down_thread_function_array[func_tag];
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
