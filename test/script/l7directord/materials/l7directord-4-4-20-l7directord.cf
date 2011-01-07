@@ -1,7 +1,0 @@
-virtual=127.0.0.1:50000
-    real=127.0.0.1:50001
-    real=127.0.0.1:50002
-    service=https
-    request=https://127.0.0.1:50001/index.html
-
-

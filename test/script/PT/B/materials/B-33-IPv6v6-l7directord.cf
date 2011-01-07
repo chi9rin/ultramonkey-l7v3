@@ -1,5 +1,0 @@
-virtual=[::1]:50000
-    real=[::1]:50001
-    real=[::1]:50002
-    scheduler=rr
-

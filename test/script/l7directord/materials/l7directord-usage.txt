@@ -1,2 +1,0 @@
-Usage: l7directord
-	{start|stop|restart|try-restart|status|reload|configtest}

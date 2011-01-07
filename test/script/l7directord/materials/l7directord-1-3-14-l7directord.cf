@@ -1,3 +1,0 @@
-virtual=localhost:40001
-    real=localhost:50001
-    checktype=ping

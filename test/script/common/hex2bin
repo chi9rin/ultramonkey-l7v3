@@ -1,2 +1,0 @@
-#!/usr/bin/perl -n
-s/(\S{2})/print pack "H*", $1/eg;

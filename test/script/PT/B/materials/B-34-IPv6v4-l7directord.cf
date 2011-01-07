@@ -1,5 +1,0 @@
-virtual=[::1]:50000
-    real=127.0.0.1:50001 masq 2
-    real=127.0.0.1:50002 masq 1
-    scheduler=wrr
-

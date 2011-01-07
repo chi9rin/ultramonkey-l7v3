@@ -1,8 +1,0 @@
-negotiatetimeout=1
-virtual=127.0.0.1:50000
-    real=127.0.0.1:50001
-    real=127.0.0.1:50002
-    service=https
-    request=100M.dat
-    receive="test"
-

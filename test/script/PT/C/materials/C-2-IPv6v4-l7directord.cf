@@ -1,9 +1,0 @@
-virtual=[::1]:50000
-    real=127.0.0.1:50001 masq
-    real=127.0.0.2:50002 masq
-    module=sessionless
-    checktype=ping
-    scheduler=rr
-    protocol=tcp
-
-

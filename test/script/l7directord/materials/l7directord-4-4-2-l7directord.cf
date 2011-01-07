@@ -1,4 +1,0 @@
-checktimeout=3
-virtual=127.0.0.1:10000
-    real=1.1.1.1:12345
-    checktype=connect
