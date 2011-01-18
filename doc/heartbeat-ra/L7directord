@@ -118,7 +118,7 @@ isRunning(){
 # Flush Virtual Service Method
 ###############################
 l7vsd_flush(){
-        PS=`pgrep -fox "/usr/sbin/l7vsd -b" | wc -l`
+        PS=`pgrep -fox "/usr/sbin/l7vsd" | wc -l`
         if [ $PS -eq 1 ]; then
                   ocf_log info "[l7vsadm]: flush virtual service!"
                   l7vsadm -C
