@@ -5,7 +5,7 @@
 
 Summary: The Layer-7 Virtual Server
 Name: ultramonkeyl7
-Version: 3.0.0
+Version: 3.0.1
 Release: 1
 License: LGPLv2
 Group: System Environment/Daemons
@@ -113,6 +113,9 @@ fi
 %config(noreplace) %{mibs_tempdir}/*
 
 %changelog
+* Mon Jan 24 2011 HIBARI Michiro <hibari.michirou@nttcom.co.jp> 3.0.1-1
+- Update for 3.0.1-1
+
 * Thu Jan 14 2010 TATEISHI Katsuyuki <kt@wheel.jp> 3.0.0-1
 - Update for 3.0.0-1
 
