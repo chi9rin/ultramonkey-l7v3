@@ -1,0 +1,624 @@
+ULTRAMONKEY-L7-MIB DEFINITIONS ::= BEGIN
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE, NOTIFICATION-TYPE, enterprises, Counter64,MODULE-IDENTITY,
+    Integer32, Opaque, enterprises, Counter32
+        FROM SNMPv2-SMI
+   TEXTUAL-CONVENTION, DisplayString, TruthValue
+        FROM SNMPv2-TC
+    InetAddress, InetAddressType, InetPortNumber
+        FROM INET-ADDRESS-MIB
+;
+
+ultramonkey-l7 MODULE-IDENTITY
+    LAST-UPDATED "1009020000Z"
+    ORGANIZATION "NTT COMWARE"
+    CONTACT-INFO
+    "UltraMonkey-L7 Community
+     URL: http://sourceforge.jp/projects/ultramonkey-l7/"
+    DESCRIPTION
+    "A MIB module for UltraMonkey-L7"
+    ::= { enterprises 32132 }
+
+ultramonkey-l7-base    OBJECT IDENTIFIER ::= { ultramonkey-l7 1 }
+
+l7vsTraps    OBJECT IDENTIFIER ::= { ultramonkey-l7-base 0 }
+l7vsObjects  OBJECT IDENTIFIER ::= { ultramonkey-l7-base 1 }
+
+-- Current Data Group
+
+l7vsStatus  OBJECT IDENTIFIER ::= { l7vsObjects 1 }
+
+    l7vsVsNumber OBJECT-TYPE
+        SYNTAX      INTEGER (0..2147483647)
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+        "The number of Virtual Service."
+        ::= { l7vsStatus 1 }
+
+    l7vsVsTable OBJECT-TYPE
+        SYNTAX      SEQUENCE OF l7vsVsEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+        "The table of Virtual Service data."
+        ::= { l7vsStatus 2 }
+   
+    l7vsVsEntry OBJECT-TYPE
+        SYNTAX     l7vsVsEntry
+        MAX-ACCESS not-accessible
+        STATUS     current
+        DESCRIPTION
+        "The information about one Virtual Service data."
+        INDEX { l7vsVsIndex }
+        ::= { l7vsVsTable 1 }
+   
+    l7vsVsEntry ::= SEQUENCE {
+        l7vsVsIndex  			INTEGER (1..2147483647),
+        l7vsVsProtocol  		INTEGER { tcp(1), udp(2) },
+        l7vsVsAddrType			INTEGER { IPv4(1), IPv6(2) },
+        l7vsVsAddr 			InetAddress,
+        l7vsVsPort 			InetPortNumber,
+        l7vsVsProtocolModuleName 	DisplayString,
+        l7vsVsProtocolModuleOptions 	DisplayString,
+	l7vsVsScheduleModuleName 	DisplayString,
+	l7vsVsScheduleModuleOptions 	DisplayString,
+        l7vsVsSorryAddrType 		INTEGER { IPv4(1), IPv6(2) },,
+        l7vsVsSorryAddr 		InetAddress,
+        l7vsVsSorryPort 		InetPortNumber,
+        l7vsVsSorryConnLimit 		Counter64 (0..9223372036854775807),
+        l7vsVsSorryForceEnabled 	INTEGER { on(1), off(2) },
+        l7vsVsThroughputUp 		Counter64 (0..18446744073709551615),
+        l7vsVsThroughputDown 		Counter64 (0..18446744073709551615),
+        l7vsVsThroughputUpQoS 		Counter64 (0..18446744073709551615),
+        l7vsVsThroughputDownQos 	Counter64 (0..18446744073709551615),
+        l7vsVsSslFlag			INTEGER { 0, 1 },
+	l7vsVsSessionPoolCount 		INTEGER (0, 2147483647),
+	l7vsVsSessionActiveCount	INTEGER (0, 2147483647),
+	l7vsVsSessionWaitCount 		INTEGER (0, 2147483647),
+	l7vsVsHttpTotalCount		Counter64 (0..18446744073709551615),
+	l7vsVsHttpGetCount		Counter64 (0..18446744073709551615),
+	l7vsVsHttpPostCount		Counter64 (0..18446744073709551615),
+        l7vsVsRsNumber 			INTEGER (0, 2147483647)
+    }
+   
+    l7vsVsIndex OBJECT-TYPE
+        SYNTAX      INTEGER (1..2147483647)
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+        "The data index of Virtual Service."
+        ::= { l7vsVsEntry 1 }
+
+    l7vsVsProtocol OBJECT-TYPE
+        SYNTAX      INTEGER {
+                        tcp(1),
+                        udp(2)
+                    }
+        MAX-ACCESS read-only
+        STATUS     current
+        DESCRIPTION
+        "Protocol id of Virtual Service."
+        ::= { l7vsVsEntry 2 }
+
+    l7vsVsAddrType OBJECT-TYPE
+        SYNTAX      INTEGER { IPv4(1), IPv6(2) }
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "IP address type of Virtual Service."
+        ::= { l7vsVsEntry 3 }
+
+    l7vsVsAddr  OBJECT-TYPE
+        SYNTAX      InetAddress
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "IP address of Virtual Service."
+        ::= { l7vsVsEntry 4 }
+
+    l7vsVsPort OBJECT-TYPE
+        SYNTAX      InetPortNumber
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "Port number of Virtual Service."
+        ::= { l7vsVsEntry 5 }
+
+    l7vsVsProtocolModuleName OBJECT-TYPE
+        SYNTAX      DisplayString
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "Protocol module of Virtual Service."
+        ::= { l7vsVsEntry 6 }
+
+    l7vsVsProtocolModuleOptions OBJECT-TYPE
+        SYNTAX      DisplayString
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "Protocol module option of Virtual Service."
+        ::= { l7vsVsEntry 7 }
+
+    l7vsVsScheduleModuleName OBJECT-TYPE
+        SYNTAX      DisplayString
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "Schedule module of Virtual Service."
+        ::= { l7vsVsEntry 8 }
+
+    l7vsVsScheduleModuleOptions OBJECT-TYPE
+        SYNTAX      DisplayString
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "Schedule module option of Virtual Service."
+        ::= { l7vsVsEntry 9 }
+
+    l7vsVsSorryAddrType OBJECT-TYPE
+        SYNTAX      INTEGER { IPv4(1), IPv6(2) }
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "IP address type of Virtual Service."
+        ::= { l7vsVsEntry 10 }
+
+
+    l7vsVsSorryAddr OBJECT-TYPE
+        SYNTAX      InetAddress
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "IP address of sorry server."
+        ::= { l7vsVsEntry 11 }
+
+    l7vsVsSorryPort OBJECT-TYPE
+        SYNTAX      InetPortNumber
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "Port number of sorry server."
+        ::= { l7vsVsEntry 12 }
+
+    l7vsVsSorryConnLimit OBJECT-TYPE
+        SYNTAX      Counter64
+        UNITS       "Connections"
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "Connection threshold of sorry server."
+        ::= { l7vsVsEntry 13 }
+
+    l7vsVsSorryForceEnabled OBJECT-TYPE
+        SYNTAX      INTEGER {
+                        on(1),
+                        off(2)
+                    }
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "Force flag of sorry server."
+        ::= { l7vsVsEntry 14 }
+
+    
+    l7vsVsThroughputUp OBJECT-TYPE
+        SYNTAX      Counter64 
+        UNITS        "B/s"
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "Current throughput of up stream."
+        ::= { l7vsVsEntry 15 }
+
+    l7vsVsThroughputDown OBJECT-TYPE
+        SYNTAX      Counter64 
+        UNITS        "B/s"
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "Current throughput of down stream."
+        ::= { l7vsVsEntry 16 }
+
+    l7vsVsThroughputUpQoS OBJECT-TYPE
+        SYNTAX      Counter64 
+        UNITS        "B/s"
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "QoS threshold of up stream."
+        ::= { l7vsVsEntry 17 }
+
+    l7vsVsThroughputDownQos OBJECT-TYPE
+        SYNTAX      Counter64 
+        UNITS        "B/s"
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "QoS threshold of down stream."
+        ::= { l7vsVsEntry 18 }
+
+    l7vsVsSslFlag     	OBJECT-TYPE
+	SYNTAX    INTEGER { 0, 1 }
+	MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "flag of SSL."
+        ::= { l7vsVsEntry 19 }
+
+    l7vsVsSessionPoolCount     OBJECT-TYPE
+	SYNTAX    INTEGER (0..2147483647)
+	MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "the count of sessions in pool."
+        ::= { l7vsVsEntry 20 }
+
+    l7vsVsSessionActiveCount     OBJECT-TYPE
+	SYNTAX    INTEGER (0..2147483647)
+	MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "the count of active sessions."
+        ::= { l7vsVsEntry 21 }
+
+    l7vsVsSessionWaitCount     OBJECT-TYPE
+	SYNTAX    INTEGER (0..2147483647)
+	MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "the count of no-active sessions."
+        ::= { l7vsVsEntry 22 }
+
+
+    l7vsVsHttpTotalCount     OBJECT-TYPE
+	SYNTAX    Counter64 
+	MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "the count of total http request."
+        ::= { l7vsVsEntry 23 }
+
+    l7vsVsHttpGetCount     OBJECT-TYPE
+	SYNTAX    Counter64 
+	MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "the count of  http request which is GET."
+        ::= { l7vsVsEntry 24 }
+
+    l7vsVsHttpPostCount     OBJECT-TYPE
+	SYNTAX    Counter64 
+	MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "the count of  http request which is POST."
+        ::= { l7vsVsEntry 25 }
+
+    l7vsVsRsNumber OBJECT-TYPE
+        SYNTAX      INTEGER (0..2147483647)
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+        "The count of Real Server."
+        ::= { l7vsVsEntry 26 }
+
+    l7vsRsTable OBJECT-TYPE
+        SYNTAX      SEQUENCE OF l7vsRsEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+        "The table of Real Server data."
+        ::= { l7vsStatus 3 }
+   
+    l7vsRsEntry OBJECT-TYPE
+        SYNTAX     l7vsRsEntry
+        MAX-ACCESS not-accessible
+        STATUS     current
+        DESCRIPTION
+        "The information about one Real Server data."
+        INDEX { l7vsRsIndex }
+        ::= { l7vsRsTable 1 }
+   
+    l7vsRsEntry ::= SEQUENCE {
+        l7vsRsIndex             INTEGER (1..2147483647)
+        l7vsRsVsIndex    	INTEGER (1..2147483647)
+        l7vsRsAddrType          INTEGER { IPv4(1), IPv6(2) }
+        l7vsRsAddr              InetAddress
+        l7vsRsPort             	InetPortNumber
+        l7vsRsForward           INTEGER { masq(1) }
+        l7vsRsWeight            INTEGER (0..2147483647)
+        l7vsRsActiveConn        INTEGER (0..2147483647)
+        l7vsRsInActiveConn      INTEGER (0..2147483647)
+    }
+   
+    l7vsRsIndex OBJECT-TYPE
+        SYNTAX      INTEGER (1..2147483647)
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+        "The data index of Real Server."
+        ::= { l7vsRsEntry 1 }
+
+    l7vsRsVsIndex OBJECT-TYPE
+        SYNTAX      INTEGER(1..2147483647)
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "Virtual Service index of Real Server."
+        ::= { l7vsRsEntry 2 }
+
+    l7vsRsAddrType OBJECT-TYPE
+        SYNTAX      INTEGER { IPv4(1), IPv6(2) }
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "IP address type of Real Server."
+        ::= { l7vsRsEntry 3 }
+
+
+    l7vsRsAddr OBJECT-TYPE
+        SYNTAX      InetAddress
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "IP address of Real Server."
+        ::= { l7vsRsEntry 4 }
+
+    l7vsRsPort OBJECT-TYPE
+        SYNTAX      InetPortNumber
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "Port number of Real Server."
+        ::= { l7vsRsEntry 5 }
+
+    l7vsRsForward OBJECT-TYPE
+        SYNTAX      INTEGER { masq(1), tproxy(2) }
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "Forward mode of Real Server."
+        ::= { l7vsRsEntry 6 }
+
+    l7vsRsWeight OBJECT-TYPE
+        SYNTAX      INTEGER (0..100)
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "Weight of Real Server."
+        ::= { l7vsRsEntry 7 }
+
+    l7vsRsActiveConn OBJECT-TYPE
+        SYNTAX      INTEGER (0..2147483647)
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "Active connections of Real Server."
+        ::= { l7vsRsEntry 8 }
+
+    l7vsRsInActiveConn OBJECT-TYPE
+        SYNTAX      INTEGER (0..2147483647)
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "Inactive connections of Real Server."
+        ::= { l7vsRsEntry 9 }
+
+    l7vsReplicationMode OBJECT-TYPE
+        SYNTAX      INTEGER {
+                        out(0),
+                        single(1),
+                        master(2),
+                        slave(3),
+                        masterstop(4),
+                        slavestop(5)
+                     }
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "Status of replication."
+        ::= { l7vsStatus 4 }
+
+-- Traps
+
+    l7vsService OBJECT IDENTIFIER ::= { l7vsTraps 1 }
+
+    l7vsServiceStart  NOTIFICATION-TYPE
+        OBJECTS { l7vsServiceStart }
+        STATUS  current
+        DESCRIPTION
+        "Trap of Virtual Service start."
+        ::= { l7vsService 1 }
+
+    l7vsServiceStop  NOTIFICATION-TYPE
+        OBJECTS { l7vsServiceStop }
+        STATUS  current
+        DESCRIPTION
+        "Trap of Virtual Service stop."
+        ::= { l7vsService 2 }
+
+    l7vsBalancing OBJECT IDENTIFIER ::= { l7vsTraps 2 }
+
+    l7vsBalancingVsAdd  NOTIFICATION-TYPE
+        OBJECTS { l7vsBalancingVsAdd } 
+        STATUS  current
+        DESCRIPTION
+        "Trap of Virtual Service added."
+        ::= { l7vsBalancing 1 }
+
+    l7vsBalancingVsChange  NOTIFICATION-TYPE
+        OBJECTS { l7vsBalancingVsChange }  
+        STATUS  current
+        DESCRIPTION
+        "Trap of Virtual Service changed."
+        ::= { l7vsBalancing 2 }
+
+    l7vsBalancingVsRemove  NOTIFICATION-TYPE
+        OBJECTS { l7vsBalancingVsRemove }  
+        STATUS  current
+        DESCRIPTION
+        "Trap of Virtual Service removed."
+        ::= { l7vsBalancing 3 }
+
+    l7vsBalancingRsAdd  NOTIFICATION-TYPE
+        OBJECTS { l7vsBalancingRsAdd }  
+        STATUS  current
+        DESCRIPTION
+        "Trap of Real Server added."
+        ::= { l7vsBalancing 4 }
+
+    l7vsBalancingRsChange  NOTIFICATION-TYPE
+        OBJECTS { l7vsBalancingRsChange }  
+        STATUS  current
+        DESCRIPTION
+        "Trap of Real Server changed."
+        ::= { l7vsBalancing 5 }
+
+    l7vsBalancingRsRemove  NOTIFICATION-TYPE
+        OBJECTS { l7vsBalancingRsRemove }  
+        STATUS  current
+        DESCRIPTION
+        "Trap of Real Server removed."
+        ::= { l7vsBalancing 6 }
+
+    l7vsBalancingUpQoSAlertOn  NOTIFICATION-TYPE
+        OBJECTS { l7vsBalancingUpQoSAlertOn }  
+        STATUS  current
+        DESCRIPTION
+        "Trap of throughput over upQoS threshold."
+        ::= { l7vsBalancing 7 }
+
+    l7vsBalancingUpQoSAlertOff  NOTIFICATION-TYPE
+        OBJECTS { l7vsBalancingUpQoSAlertOff }  
+        STATUS  current
+        DESCRIPTION
+        "Trap of throughput under upQoS threshold."
+        ::= { l7vsBalancing 8 }
+
+
+    l7vsBalancingDownQoSAlertOn  NOTIFICATION-TYPE
+        OBJECTS { l7vsBalancingDownQoSAlertOn }  
+        STATUS  current
+        DESCRIPTION
+        "Trap of throughput over downQoS threshold."
+        ::= { l7vsBalancing 9 }
+
+    l7vsBalancingDownQoSAlertOff  NOTIFICATION-TYPE
+        OBJECTS { l7vsBalancingDownQoSAlertOff }  
+        STATUS  current
+        DESCRIPTION
+        "Trap of throughput under downQoS threshold."
+        ::= { l7vsBalancing 10 }
+
+    l7vsBalancingSessionPoolAlertOn  NOTIFICATION-TYPE
+        OBJECTS { l7vsBalancingSessionPoolAlertOn }  
+        STATUS  current
+        DESCRIPTION
+        "Trap of left-session under Alert threshold."
+        ::= { l7vsBalancing 11 }
+
+    l7vsBalancingSessionPoolAlertOff  NOTIFICATION-TYPE
+        OBJECTS { l7vsBalancingSessionPoolAlertOff }  
+        STATUS  current
+        DESCRIPTION
+        "Trap of left-session over Alert threshold."
+        ::= { l7vsBalancing 12 }
+
+    l7vsLog OBJECT IDENTIFIER ::= { l7vsTraps 3 }
+
+    l7vsLogFatal  NOTIFICATION-TYPE
+        OBJECTS { l7vsLogFatal }  
+        STATUS  current
+        DESCRIPTION
+        "Trap of Fatal Log message."
+        ::= { l7vsLog 1 }
+
+    l7vsLogError  NOTIFICATION-TYPE
+        OBJECTS { l7vsLogError }  
+        STATUS  current
+        DESCRIPTION
+        "Trap of Error Log message."
+        ::= { l7vsLog 2 }
+
+    l7vsLogWarn  NOTIFICATION-TYPE
+        OBJECTS { l7vsLogWarn }  
+        STATUS  current
+        DESCRIPTION
+        "Trap of Warn Log message."
+        ::= { l7vsLog 3 }
+
+
+    l7vsLogInfo  NOTIFICATION-TYPE
+        OBJECTS { l7vsLogInfo }  
+        STATUS  current
+        DESCRIPTION
+        "Trap of Info Log message."
+        ::= { l7vsLog 4 }
+
+    l7vsLogDebug  NOTIFICATION-TYPE
+        OBJECTS { l7vsLogDebug }  
+        STATUS  current
+        DESCRIPTION
+        "Trap of Debug Log message."
+        ::= { l7vsLog 5 }
+
+-- conformance information
+
+l7vsConformance   OBJECT IDENTIFIER ::= { ultramonkey-l7-base 2 }
+l7vsCompliances   OBJECT IDENTIFIER ::= { l7vsConformance 1 }
+l7vsGroups     	  OBJECT IDENTIFIER ::= { l7vsConformance 2 }
+
+
+-- compliance statements
+
+l7vsCompliances MODULE-COMPLIANCE
+    STATUS  current
+    DESCRIPTION
+    "The compliance statement for ultramonkey-l7."
+    MODULE  -- this module
+
+    MANDATORY-GROUPS { l7vsMIBGroup, l7vsTrapGroup }
+    ::= { l7vsConformance 1 }
+
+-- units of conformance
+
+l7vsMIBGroup OBJECT-GROUP
+    OBJECTS   { l7vsVsNumber,l7vsVsIndex,l7vsVsProtocol,l7vsVsAddrType,
+		l7vsVsAddr,l7vsVsPort,l7vsVsProtocolModuleName,
+		l7vsVsProtocolModuleOptions,l7vsVsScheduleModuleName,
+		l7vsVsScheduleModuleOptions,l7vsVsSorryAddrType,
+		l7vsVsSorryAddr,l7vsVsSorryPort,l7vsVsSorryConnLimit,
+		l7vsVsSorryForceEnabled,l7vsVsThroughputUp,
+		l7vsVsThroughputDown,l7vsVsThroughputUpQoS,
+		l7vsVsThroughputDownQos,l7vsVsSslFlag,l7vsVsSessionPoolCount,
+		l7vsVsSessionActiveCount,l7vsVsSessionWaitCount,
+		l7vsVsHttpTotalCount,l7vsVsHttpGetCount,l7vsVsHttpPostCount,
+		l7vsVsRsNumber,l7vsRsIndex,l7vsRsVsIndex,l7vsRsAddrType,
+		l7vsRsAddr,l7vsRsPort,l7vsRsForward,l7vsRsWeight,
+		l7vsRsActiveConn,l7vsRsInActiveConn,l7vsReplicationMode
+ 		}
+    STATUS    current
+    DESCRIPTION
+    "The MIB group of objects providing for management of UltraMonkey-L7."
+    ::= { l7vsGroups 1 }
+
+l7vsTrapGroup NOTIFICATION-GROUP
+    NOTIFICATIONS { l7vsServiceStart,l7vsServiceStop,l7vsBalancingVsAdd,
+		    l7vsBalancingVsChange,l7vsBalancingVsRemove,
+                    l7vsBalancingRsAdd,l7vsBalancingRsChange,
+                    l7vsBalancingRsRemove,l7vsBalancingUpQoSAlertOn,
+                    l7vsBalancingUpQoSAlertOff,l7vsBalancingDownQoSAlertOn,
+                    l7vsBalancingDownQoSAlertOff,
+                    l7vsBalancingSessionPoolAlertOn,
+		    l7vsBalancingSessionPoolAlertOff,
+                    l7vsLogFatal,l7vsLogError,l7vsLogWarn,
+                    l7vsLogInfo,l7vsLogDebug }
+    STATUS  current
+    DESCRIPTION
+    "The notifications group for UltraMonkey-L7."
+    ::= { l7vsGroups 2 }
+
+END
+

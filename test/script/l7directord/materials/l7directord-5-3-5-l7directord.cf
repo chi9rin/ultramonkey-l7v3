@@ -1,0 +1,11 @@
+virtual=127.0.0.1:50000
+virtual=127.0.0.1:50001
+    module=ip --foo
+    scheduler=wrr
+virtual=127.0.0.1:50002
+    module=sslid -foo
+    scheduler=lc
+virtual=127.0.0.1:50003
+    module=sessionless --foo
+    scheduler=rr
+

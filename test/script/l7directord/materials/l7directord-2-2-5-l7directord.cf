@@ -1,0 +1,8 @@
+execute=/etc/ha.d/conf/a.cf
+execute=/etc/ha.d/conf/b.cf
+virtual=127.0.0.1:40001
+	real=127.0.0.1:50001
+	real=127.0.0.1:50002
+	real=127.0.0.1:50003
+	real=127.0.0.1:50004
+	checktype=ping

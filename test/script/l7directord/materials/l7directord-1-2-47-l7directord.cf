@@ -1,0 +1,108 @@
+# <- COMMENT
+checktimeout=0
+negotiatetimeout='1"
+ checkinterval="1"
+retryinterval     1
+configinterval   = '1O'
+checkcount=  (1)
+
+autoreload   = 1
+quiescent    = "0"
+
+fallback="1.1.1.1:foobar"
+fallback="foobar:ftp-data"
+
+callback  =  /proc/1
+
+execute=/proc/100000
+execute="/etc/sh@dow"
+
+logfile     =   "/proc/100000"
+
+ supervised
+
+virtual=1.1.1.1:80 masq
+virtual=1.1.1.1:httpd
+
+virtual=1.1.1.1:80 # <- DO NOT comment out
+   real=localhost
+    real=localtime
+    real=256.1.1.1
+    request = ""
+    receive = ''
+    login   =
+    passwd  = # comment
+    database    foobar
+    virtualhost "###"
+    checktype = connects
+    fallback="localhost:http'
+    module    =  'url'
+    sorryserver="localhost:65536"
+
+negotiatetimeout=100 # <- DO NOT comment out
+    real    =   '127.0.0.1->127.0.0.2:http'
+    real    =   '127.0.0.3:http masq'
+    real    =   '127.0.0.4:http 10 req, rec'
+    request     ='foobar'
+    receive     ='foobar'
+    login       ='foobar'
+    passwd      ='foobar'
+    database    ='foobar'
+    virtualhost ='foobar'
+    checktype   =negotiate
+    checkport   =   "1"
+    scheduler   =   'lc'
+    service='https'
+    httpmethod    =  HEAD
+    fallback = 1.1.1.1:80
+    quiescent    = "yes"
+    module    =  'sessionless --other option'
+    sorryserver    =       localhost:http
+    qosup    =  '1G'
+    qosdown    =  1M
+
+virtual    =    "localhost:80" # <- DO NOT comment out
+    real   =   localhost:80 gate 10
+    real   =   "localhost:25 -1"
+    checktype  =pong
+    checktimeout    =   one
+    negotiatetimeout=   two
+    checkinterval   =   three
+    retryinterval   =   four
+    checkcount      =   five
+    maxconn         =   six
+    scheduler   =   "wlc"
+    protocol = 'udp'
+    quiescent    = "N0"
+    module    =  crewrite --other option
+    sorryserver  =   "2.256.2.2:http"
+    qosup="010M"
+    qosdown    =  100
+    realrecovercallback="/bin/wsh"
+    realdowncallback    =  /etc/passwd
+    unknown
+
+unknown
+
+virtual    =    localhost:http # <- DO NOT comment out
+    real="1.1.1.1->0.0.0.0:80 masq 100 request receive"
+    real   =    "1.1.1.1:80 masq request "
+    real   =    "2.2.2.2->2.2.2.5 masq 'request' receive "
+    request     =   ''
+    receive     =   ''
+    checktype=0
+    maxconn=0
+    checkport   =   65536
+    scheduler   =   fast
+    protocol="ICMP"
+    service="Oracle"
+    fallback   =     'localhost:0'
+    quiescent yes
+    module="url --other option --pattern-match ''"
+    qosup='999T'
+    qosdown    =  0M
+    realdowncallback="/proc/1"
+    realrecovercallback=/bin/qsh
+/*
+COMMENT
+*/

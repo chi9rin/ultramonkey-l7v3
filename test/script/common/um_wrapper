@@ -1,0 +1,80 @@
+# -*-Shell-script-*-
+#
+# um_wrapper    This file contains functions to be used by ultramonkey-l7
+#               test shell scripts.
+#
+
+LANG=C
+
+# socket file
+l7vsd_sockfile="/var/run/l7vs/l7vs"
+
+start_l7vsd() {
+	# start l7vsd
+	start_msg=`$INIT_L7VSD start 2>&1`
+
+	# check process
+	ps aux | grep $L7VSD | grep -v grep >/dev/null 2>&1
+	if [ $? -ne 0 ]; then 
+		echo "Test failed: Cannot start l7vsd ($INIT_L7VSD start)"
+		echo "$start_msg"
+		return 1
+	fi
+
+	# check the socket file
+	# give up if 2 seconds passed
+	for i in `seq 1 200`; do
+		[ -e $l7vsd_sockfile ] && return 0
+		usleep 10000
+	done
+
+	echo "Test failed: Cannot find l7vsd socket file(${l7vsd_sockfile})"
+	return 1
+}
+
+stop_l7vsd() {
+	# stop l7vsd
+	start_msg=`$INIT_L7VSD stop 2>&1`
+
+	ps aux | grep $L7VSD | grep -v grep >/dev/null 2>&1
+
+	# check the socket file
+	# give up if 2 seconds passed
+	for i in `seq 1 200`; do
+		[ ! -e $l7vsd_sockfile ] && return 0
+		usleep 10000
+	done
+
+	echo "Test failed: l7vsd socket file still exists(${l7vsd_sockfile})"
+	return 1
+}
+
+start_l7directord() {
+	# start l7directord
+	start_msg=`$INIT_L7DIRECTORD start 2>&1`
+
+	# check process
+	ps aux | grep $L7DIRECTORD | grep -v grep >/dev/null 2>&1
+	if [ $? -ne 0 ]; then 
+		echo "Test failed: Cannot start l7directord ($INIT_L7DIRECTORD start)"
+		echo "$start_msg"
+		return 1
+	fi
+
+	return 0
+}
+
+stop_l7directord() {
+	# stop l7directord
+	stop_msg=`$INIT_L7DIRECTORD stop 2>&1`
+
+	# check process
+	ps aux | grep $L7DIRECTORD | grep -v grep >/dev/null 2>&1
+	if [ $? -eq 0 ]; then 
+		echo "Test failed: Cannot stop l7directord ($INIT_L7DIRECTORD stop)"
+		echo "$stop_msg"
+		return 1
+	fi
+
+	return 0
+}

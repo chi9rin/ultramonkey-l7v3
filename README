@@ -1,0 +1,36 @@
+About UltraMonkey-L7
+-------------------------------------------------------------------------------
+
+Welcome
+=======
+    UltraMonkey-L7 is a opensource layer-7 load balancing software.
+    
+
+System requirements
+===================
+
+           OS : Linux 2.6.9(or later)on x86 and x86_64 architecture
+                We recommend to use Red Hat Enterprise Linux.
+
+          CPU : Intel x86 and x86_64 or compatible architecture processors
+
+       Memory : 2 GB(recommended)
+
+    Libraries : log4cxx(C++ Logging Libraries) boost(C++ Template Libraries)
+    
+
+License
+=======
+
+    UltraMonkey-L7 is distributed using LGPL License.
+
+
+About UltraMonkey-L7 Project
+============================
+
+    To get more information about UltraMonkey-L7, please visit our project
+    Web Site.
+
+      Software repository - http://sourceforge.jp/projects/ultramonkey-l7/
+
+

@@ -1,0 +1,127 @@
+[Feb. 10 2011] 3.0.2-1 HIBARI Michiro
+  - Change connect method. (connect -> async_connect)
+[Jan. 25 2011] 3.0.1-1 HIBARI Michiro
+  - Fix L7directord RA.(Remove need less option "-b".)
+
+[Sep. 06 2010] 3.0.0-1 Norihisa NAKAI, Hiromasa KANDA, LANG XIJIAN
+  - Implemented Multi-threading architecture using Boost::Asio and Boost::Thread library.
+  - Implemented IPv6 protocol logic.
+  - Implemented SorryURI support.
+  - Change protocol between l7vsadm and l7vsd from DGRAM to STREAM.
+    And serialized stream data using Boost::Serializable.
+  - Change protocol and schedule module architecture to module event driven model.
+  - Fixed algorithm for logger. (Search Log mode logic added.)
+  - Fixed algorithm for parameter. (Using boost algorithm template.)
+  - Implemented SNMPAgent function in l7vsd.
+
+[Jun. 17 2010] 2.1.3-1
+  - Fix checkinig content (l7directord)
+
+[Aug. 24 2009] 2.1.3-0 TATEISHI Katsuyuki
+  - Translate man files into English. (man)
+  - Fix purging sorryserver to respect reloaded configuration. (l7directord)
+  - Fix waiting for customcheck child process. (l7directord)
+  - Fix binding virtual server socket to INADDR_ANY. (l7vsadm)
+  - Fix --forwarded-for option in protocol modules. (protomod_*)
+  - Add --timeout option to protomod_ip. (protomod_ip)
+  - Corresponded to 1-32 bytes (variable-length) SSL Session IDs.
+  - Modify spec and initscripts to make them rpmlint free. (ultramonkey-l7.spec)
+  - Add Heartbeat resource agent scripts and example cib.xml as examples.
+    (doc/heartbeat-ra)
+  - Corresponded to gcc 4.3.
+  - Fix autotools files.
+    Note: To build this package, follow these steps.
+     1 Install automake, autoconf, libtool and other software required by
+       UltraMonkey-L7.
+     2 Checkout from git repository.
+       % git clone <repository>
+     3 Generate configure script, Makefile.in and other files.
+       % cd ultramonkey-l7-v2
+       % autoreconf -if
+     4 Build
+       % ./configure    [*]
+       % make
+     5 Install
+       % make install
+
+     [*] You should specify following options to install as previous releases.
+       % ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var \
+                --libdir='${prefix}/lib64'
+
+[May.5 2009] 2.1.2-2-rc Shinya TAKEBAYASHI
+  - Fixed rc-scripts: make a lockfile
+  - Fixed SPEC file: l7vsd/l7directord switched to off
+  - Optimized sequences in sslid module.
+
+[Apr.20 2009] 2.1.2-1 Shinya TAKEBAYASHI
+  - Removed cookie modules
+
+[Mar. 9 2009] 2.1.2-0 Shinya TAKEBAYASHI
+  - Added protocol modules(recently supported):
+    * cpassive(Cookie passive)
+    * crewrite(Cookie rewrite)
+    * ip(Source IP)
+    * pfilter(Packet filter)
+  - Implemented replication spec to sslid module.
+
+[Jan. 27 2009] 2.1.1-0 Shinya TAKEBAYASHI
+  - Added option for FAST SCHEDULE to sessionless module.
+    Establishing connection when clinent connection was established.
+  - Updated l7directord man file.
+  - Changed methods for sslid module.(liner list -> hash list)
+
+[Dec. 17 2008] 2.1.0-0 Shinya TAKEBAYASHI
+  - Added option for FAST SCHEDULE to sessionless module
+    Establishing connection when client connection was established.
+  - Implemented access logger ( CLIENT-DESTINATION mapping )
+  - Optimized event listener.
+  - Fixed algorithms for some check type.
+  - "Checkout" has been enabled.
+  - Created "man" page.(Japanese(UTF-8) only ;))
+  - Implemented flow control logic(sever).
+  - Eliminated flow control logic(client).
+
+[May. 26 2008] 2.0.0-0 Shinya TAKEBAYASHI
+  - Changed logger library( vanessa_logger -> log4cxx)
+  - Implemented configuration function(using configuration file: /etc/l7vs\l7vs.cf)
+  - Implemented replication system(for HA clustering)
+  - Added new protocol module(sessionless - Layer-4 LB like module)
+
+[Dec. 11 2007] 1.0.0-1 Shinya TAKEBAYASHI
+  - Implemented blocking mode switching function
+
+[Oct. 11 2007] 1.0.0-0 Shinya TAKEBAYASHI
+  - Change library from GLib1.2 to GLib2.0 (memory leak fix)
+  - Change from select() to epoll ET.
+  - Change blocking mode to non-blocking mode(recv() and send()).
+  - Change from service conn list to service conn hash.
+  - Change from iomux-list to hash-map and available list.
+  - Add QoS Control.
+  - Add Weighted Round-Robin scheduler.
+  - Add real server weight.
+  - Fixed some bugs.
+
+    * Following members helped us. Thanks!
+
+      Hideaki KONDO
+      Shunji FUKUSHIMA
+      Norihisa NAKAI
+      Hajime OKADA
+      Akira TAKAMARU
+      Hiroyuki BAN
+      Toru MORISHITA
+      Kouhei TANUMA
+      Tetsuya TAKATSURU
+      Masahiro SAKAMOTO
+      Yumi KITANI
+
+[May. 9 2007] 0.6.0-0 Shinya TAKEBAYASHI
+  - Extended maximum client connections.
+  - Fixed some bugs.
+
+[Feb. 19, 2007] 0.5.0-3 Shinya TAKEBAYASHI
+  - Fixed syntax errors.(umagent/umagent.c, umagent/Makefile)
+
+[Dec. 26, 2006] 0.5.0-2 Takahiro Kurosawa / Hideaki Kondo
+  - Rewrote to fix bug about Segmentation Fault.(conn.c)
+

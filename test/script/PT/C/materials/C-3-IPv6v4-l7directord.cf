@@ -1,0 +1,18 @@
+checktimeout=5
+checkinterval=3
+autoreload=yes
+logfile=/var/log/l7vs/l7directord.log
+quiescent=no
+ 
+virtual=[::1]:50000
+    real=127.0.0.1:50001 masq 1
+    real=127.0.0.1:50002 masq 1
+    fallback=127.0.0.1:50003 
+    maxconn=100
+    module=sessionless
+    scheduler=rr
+    protocol=tcp
+    checktype=connect
+
+
+

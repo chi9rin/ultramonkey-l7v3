@@ -1,0 +1,10 @@
+virtual=127.0.0.1:50000
+    real=127.0.0.1:50001 masq
+    customcheck=wget -q -O /dev/null http://127.0.0.1:50001/index.html
+    module=sessionless
+    scheduler=rr
+    protocol=tcp
+    checktype=custom
+    request="/index.html"
+    receive="Real"
+    service=http

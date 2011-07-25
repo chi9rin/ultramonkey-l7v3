@@ -1,0 +1,8 @@
+checktimeout=3
+retryinterval=1
+checkcount=3
+virtual=127.0.0.1:50000
+    real=127.0.0.1:50001
+    real=127.0.0.1:50002
+    checktype=connect
+

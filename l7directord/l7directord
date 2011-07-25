@@ -1,0 +1,5039 @@
+#!/usr/bin/perl
+######################################################################
+# l7directord
+# Linux Director Daemon - run "perldoc l7directord" for details
+#
+# Copyright (C) 2005-2010  NTT COMWARE Corporation.
+#
+# License:   GNU General Public License (GPL)
+#
+# This program is developed on similar lines of ldirectord. It handles
+# l7vsadm and monitoring of real servers.
+#
+# The version of ldirectord used as a reference for this l7directord is
+# ldirectord,v 1.77.2.32 2005/09/21 04:00:41
+#
+# Note : * The existing code of ldirectord that is not required for
+#          l7directord is also maintained in the program but is
+#          commented out.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+# 02110-1301 USA
+######################################################################
+
+# Revision History :
+#   0.5.0-0: Added code related to Sorry server and Max connection
+#            - 2006/11/03 NTT COMWARE
+#   1.0.0-0: Added code related to weight of real server and QoS
+#            - 2007/10/12 NTT COMWARE
+#   1.0.1-0: Added the code below.
+#            configuration of realdowncallback, realrecovercallback,
+#            and sessionless module.
+#            - 2007/12/28 NTT COMWARE
+#   1.0.2-0: Added the code below.
+#            cookie insert with X-Forwarded-For module(cinsert_xf)
+#            - 2008/1/14 Shinya TAKEBAYASHI
+#   2.0.0-0: Added code related to sslid module.
+#            cinsert_xf module is marged into cinsert module.
+#            Added code related to syntax test of configuration.
+#            Expanded checkcount setting to all service check.
+#            - 2008/03/25 Norihisa NAKAI
+#   2.1.0-0: Changed helthcheck logic to multi-process.
+#            - 2008/12/17 NTT COMWARE
+#   2.1.1-0: Fix 'Range iterator outside integer range' in parse_real.
+#            - 2009/01/06 NTT COMWARE
+#   2.1.2-0: Added code related to some module. See below.
+#            (cpassive, crewrite, pfilter, url, ip)
+#            Add custom healthcheck.
+#            (checktype=custom, customcheck=exec_command)
+#            - 2009/02/14 NTT COMWARE
+
+use 5.006;
+use strict;
+use warnings;
+use Getopt::Long qw(:config posix_default);
+use Sys::Hostname;
+use POSIX qw(:sys_wait_h :signal_h);
+use Sys::Syslog qw(:DEFAULT setlogsock);
+use English;
+use Fatal qw(open close);
+use Cwd qw(abs_path);
+use Data::Dumper;
+use Time::HiRes qw(sleep);
+use IO::Handle;
+use Socket;
+use Socket6;
+
+# current version
+our $VERSION     = '3.0.0-0';
+our $COPYRIGHT   = 'Copyright (C) 2010 NTT COMWARE CORPORATION';
+
+# default global config values
+our %GLOBAL = (
+    logfile          => '/var/log/l7vs/l7directord.log',
+    autoreload       => 0,
+    checkcount       => 1,
+    checkinterval    => 10,
+    retryinterval    => 10,
+    configinterval   => 5,
+    checktimeout     => 5,
+    negotiatetimeout => 5,
+    supervised       => 0,
+    quiescent        => 1,
+    virtual          => undef,
+    execute          => undef,
+    fallback         => undef,
+    callback         => undef,
+    );
+
+# default virtual config values
+our %VIRTUAL = (
+    real                => undef,
+    module              => { name => 'sessionless', key => q{} },
+    scheduler           => 'rr',
+    protocol            => 'tcp',
+    checktype           => 'negotiate',
+    service             => undef,
+    checkport           => undef,
+    maxconn             => 0,
+    qosup               => 0,
+    qosdown             => 0,
+    sorryserver         => { ip => '0.0.0.0', port => 0, forward => 'none' },
+    request             => undef,
+    receive             => undef,
+    httpmethod          => 'GET',
+    virtualhost         => undef,
+    login               => q{},
+    passwd              => q{},
+    database            => q{},
+    realdowncallback    => undef,
+    realrecovercallback => undef,
+    customcheck         => undef,
+    sslconfigfile       => undef,
+    accesslog           => undef,
+    accesslogfile       => undef,
+    socketoption        => undef,
+    accesslog_rotate_type                  => undef,
+    accesslog_rotate_max_backup_index      => undef,
+    accesslog_rotate_max_filesize          => undef,
+    accesslog_rotate_rotation_timing       => undef,
+    accesslog_rotate_rotation_timing_value => undef,
+    other_virtual_key                      => undef,
+    # can override
+    checkcount          => undef,
+    checkinterval       => undef,
+    retryinterval       => undef,
+    checktimeout        => undef,
+    negotiatetimeout    => undef,
+    quiescent           => undef,
+    fallback            => undef,
+    );
+
+# default real config values
+our %REAL = (
+    weight              => 1,
+    forward             => 'masq',
+    # can override
+    request             => undef,
+    receive             => undef,
+    );
+
+# current config data
+our %CONFIG = %GLOBAL;
+
+# config file data
+our %CONFIG_FILE = (
+    path            => undef,
+    filename        => undef,
+    checksum        => undef,
+    stattime        => undef,
+    );
+
+# process environment
+our %PROC_ENV = (
+    l7directord => $0,
+    l7vsadm     => undef,
+    pid_prefix  => '/var/run/l7directord',
+    hostname    => undef,
+    );
+
+# process status
+our %PROC_STAT = (
+    pid             => $PID,
+    initialized     => 0,
+    log_opened      => 0,
+    health_checked  => 0,
+    halt            => undef,
+    reload          => undef,
+    );
+
+# debug level
+our $DEBUG_LEVEL = 0;
+
+# health check process data
+our %HEALTH_CHECK  = ();
+
+# real server health flag
+our $SERVICE_UP   = 0;
+our $SERVICE_DOWN = 1;
+
+# section virtual sub config prefix
+our $SECTION_VIRTUAL_PREFIX = "    ";
+
+main();
+
+# main
+# Main method of this program.
+# parse command line and run each command method.
+sub main {
+    my $cmd_func = {
+        start         => \&cmd_start,
+        stop          => \&cmd_stop,
+        restart       => \&cmd_restart,
+        'try-restart' => \&cmd_try_restart,
+        reload        => \&cmd_reload,
+        status        => \&cmd_status,
+        configtest    => \&cmd_configtest,
+        version       => \&cmd_version,
+        help          => \&cmd_help,
+        usage         => \&cmd_usage,
+        };
+
+    # change program name for removing `perl' string from `ps' command result.
+    my $ps_name = @ARGV ? $PROGRAM_NAME . " @ARGV"
+                        : $PROGRAM_NAME;
+    $PROGRAM_NAME = $ps_name;
+
+    my $cmd_mode = parse_cmd();
+    if ( !defined $cmd_mode || !exists $cmd_func->{$cmd_mode} ) {
+        $cmd_mode = 'usage';
+    }
+    if ($cmd_mode ne 'help' && $cmd_mode ne 'version' && $cmd_mode ne 'usage') {
+        initial_setting();
+    }
+
+    # execute command.
+    my $cmd_result = &{ $cmd_func->{$cmd_mode} }();
+
+    ld_exit( $cmd_result, _message_only('INF0008') );
+}
+
+# parse_cmd
+# Parse command line (ARGV)
+sub parse_cmd {
+    # configtest or help command
+    my $cmd_mode = parse_option();
+
+    # other command
+    if (!defined $cmd_mode && @ARGV) {
+        $cmd_mode = pop @ARGV;
+    }
+    return $cmd_mode;
+}
+
+# parse_option
+# Parse option strings by Getopt::Long
+sub parse_option {
+    my $cmd_mode = undef;
+
+    # default option value
+    my $debug   = undef;
+    my $help    = undef;
+    my $test    = undef;
+    my $version = undef;
+
+    # parse command line options
+    my $result = GetOptions(
+        'd:3'       => \$debug,   # debug mode, arg: debug level (default 3)
+        'h|help'    => \$help,    # show help message
+        't'         => \$test,    # config syntax test
+        'v|version' => \$version, # show version
+        );
+
+    if ($result) {
+        # set debug level
+        if (defined $debug) {
+            $DEBUG_LEVEL = $debug;
+        }
+
+        # set command mode
+        if (defined $help) {
+            $cmd_mode = 'help';
+        }
+        elsif (defined $version) {
+            $cmd_mode = 'version';
+        }
+        elsif (defined $test) {
+            $cmd_mode = 'configtest';
+        }
+    }
+    else {
+        $cmd_mode = 'usage';
+    }
+
+    return $cmd_mode;
+}
+
+# initial_setting
+# Initialize file path settings.
+sub initial_setting {
+    # search config and l7vsadm
+    $PROC_ENV{l7vsadm} = search_l7vsadm_file();
+    $CONFIG_FILE{path} = search_config_file();
+
+    # get config file name exclude `.cf' or `.conf'
+    ( $CONFIG_FILE{filename} )
+        = $CONFIG_FILE{path} =~ m{([^/]+?)(?:\.cf|\.conf)?$};
+
+    # get hostname
+    $PROC_ENV{hostname}
+        = defined $ENV{HOSTNAME} ? $ENV{HOSTNAME}
+        :                          ( POSIX::uname() )[1]
+        ;
+}
+
+# search_config_file
+# Search l7directord.cf file from search path.
+sub search_config_file {
+    my $config_file = undef;
+    my @search_path = qw(
+        /etc/ha.d/conf/l7directord.cf
+        /etc/ha.d/l7directord.cf
+        ./l7directord.cf
+        );
+
+    if (@ARGV) {
+        $config_file = $ARGV[0];
+        if (!-f $ARGV[0]) {
+            init_error( _message_only('ERR0404', $config_file) );
+        }
+    }
+    else {
+        for my $file (@search_path) {
+            if (-f $file) {
+                $config_file = $file;
+                last;
+            }
+        }
+        if (!defined $config_file) {
+            init_error( _message_only('ERR0405', $config_file) );
+        }
+    }
+
+    return abs_path($config_file);
+}
+
+# search_l7vsadm_file
+# Search l7vsadm file from search path.
+sub search_l7vsadm_file {
+    my $l7vsadm_file = undef;
+    my @search_path = qw(
+        /usr/sbin/l7vsadm
+        /sbin/l7vsadm
+        ./l7vsadm
+        );
+
+    for my $file (@search_path) {
+        if (-x $file) {
+            $l7vsadm_file = $file;
+            last;
+        }
+    }
+    if (!defined $l7vsadm_file) {
+        init_error( _message_only('ERR0406', $l7vsadm_file) );
+    }
+
+    return abs_path($l7vsadm_file);
+}
+
+# cmd_start
+# Start process
+# Called if command argument is start
+# return: 0 if success
+#         1 if old process id is found.
+sub cmd_start {
+    set_ld_handler();
+    read_config();
+
+    ld_log( _message('INF0001', $PROGRAM_NAME) );
+
+    ld_setup();
+
+    my $oldpid = read_pid();
+
+    # already other process is running
+    if ($oldpid) {
+        print {*STDERR} _message_only('INF0103', $oldpid) . "\n";
+        return 1;
+    }
+    
+    # supervised or debug mode (not daemon)
+    if ($CONFIG{supervised} || $DEBUG_LEVEL > 0) {
+        ld_log( _message( 'INF0002', $VERSION, $PID, $CONFIG_FILE{path} ) );
+    }
+    # otherwise (daemon)
+    else {
+        ld_daemon();
+        ld_log( _message( 'INF0003', $VERSION, $CONFIG_FILE{path} ) );
+    }
+
+    write_pid( $PROC_STAT{pid} );
+    ld_cmd_children('start');
+    ld_main();
+    ld_cmd_children('stop');
+    remove_pid();
+
+    return 0;
+}
+
+# cmd_stop
+# Send stop signal (TERM)
+# Called if command argument is stop
+# return: 0 if success
+#         2 if old process id is not found.
+#         3 if signal failed.
+sub cmd_stop {
+    my ($oldpid, $stalepid) = read_pid();
+
+    # process is not running
+    if (!$oldpid) {
+        if ($stalepid) {
+            my $pid_file = $PROC_ENV{pid_prefix} . q{.} . $CONFIG_FILE{filename} . '.pid';
+            print {*STDERR} _message_only('INF0102', $pid_file, $CONFIG_FILE{path}) . "\n";
+        }
+        print {*STDERR} _message_only('INF0104') . "\n";
+        return 2;
+    }
+
+    # signal TERM
+    my $signaled = kill 15, $oldpid;
+    if ($signaled != 1) {
+        print {*STDERR} _message('WRN0003', $oldpid);
+        return 3;
+    }
+
+    # wait and see
+    while (1) {
+        read_pid() or last;
+        sleep 1;
+    }
+    return 0;
+}
+
+# cmd_restart
+# Restart process
+# Called if command argument is restart
+# return: see cmd_start return
+sub cmd_restart {
+    # stop and ignore result
+    cmd_stop();
+
+    # start
+    my $status = cmd_start();
+
+    return $status;
+}
+
+# cmd_try_restart
+# Trying restart process
+# Called if command argument is try-restart
+# return: see cmd_start, cmd_stop return
+sub cmd_try_restart {
+    # stop
+    my $stop_result = cmd_stop();
+
+    # start only if stop succeed
+    if ($stop_result != 0) {
+        return $stop_result;
+    }
+
+    # start
+    my $status = cmd_start();
+
+    return $status;
+}
+
+# cmd_reload
+# Send reload signal (HUP)
+# Called if command argument is reload
+# return: 0 if success
+#         2 if old process id is not found.
+#         3 if signal failed.
+sub cmd_reload {
+    read_config();
+    my ($oldpid, $stalepid) = read_pid();
+    if (!$oldpid) {
+        if ($stalepid) {
+            my $pid_file = $PROC_ENV{pid_prefix} . q{.} . $CONFIG_FILE{filename} . '.pid';
+            print {*STDERR} _message_only( 'INF0102', $pid_file, $CONFIG_FILE{path} ) . "\n";
+        }
+        print {*STDERR} _message_only('INF0104') . "\n";
+        return 2;
+    }
+
+    # signal HUP
+    my $signaled = kill 1, $oldpid;
+    if ($signaled != 1) {
+        print {*STDERR} _message('WRN0004', $oldpid);
+        return 3;
+    }
+    return 0;
+}
+
+# cmd_status
+# Show process id of running
+# Called if command argument is status
+# return: 0 if success
+#         2 if old process id is not found.
+sub cmd_status {
+    my ($oldpid, $stalepid) = read_pid();
+    if (!$oldpid) {
+        if ($stalepid) {
+            my $pid_file = $PROC_ENV{pid_prefix} . q{.} . $CONFIG_FILE{filename} . '.pid';
+            print {*STDERR} _message_only('INF0102', $pid_file, $CONFIG_FILE{path}) . "\n";
+        }
+        print {*STDERR} _message_only('INF0104') . "\n";
+        ld_cmd_children('status');
+
+        return 2;
+    }
+
+    print {*STDERR} _message_only('INF0101', $CONFIG_FILE{path}, $oldpid) . "\n";
+
+    read_config();
+    ld_cmd_children('status');
+
+    return 0;
+}
+
+# cmd_version
+# Configuration syntax check
+# Called if command argument is configtest
+# return: 0 if syntax ok
+#         otherwise, exit by read_config
+sub cmd_configtest {
+    read_config();
+    print {*STDOUT} "Syntax OK\n";
+    return 0;
+}
+
+# cmd_version
+# Show program version.
+# Called if command argument is version
+# return: 0
+sub cmd_version {
+    print {*STDOUT} "l7directord, version $VERSION\n$COPYRIGHT\n";
+    return 0;
+}
+
+# cmd_help
+# Show command manual.
+# Called if command argument is help
+# return: 0
+sub cmd_help {
+    system_wrapper( '/usr/bin/perldoc ' . $PROC_ENV{l7directord} );
+    return 0;
+}
+
+# cmd_usage
+# Show command usage.
+# Called if command argument is unknown or not specified.
+# return: 0
+sub cmd_usage {
+    print {*STDERR} 
+        "Usage: l7directord {start|stop|restart|try-restart|reload|status|configtest}\n"
+      . "Try `l7directord --help' for more information.\n";
+    return 0;
+}
+
+# set_ld_handler
+# Set signal handler function.
+sub set_ld_handler {
+    $SIG{ INT  } = \&ld_handler_term;
+    $SIG{ QUIT } = \&ld_handler_term;
+    $SIG{ ILL  } = \&ld_handler_term;
+    $SIG{ ABRT } = \&ld_handler_term;
+    $SIG{ FPE  } = \&ld_handler_term;
+    $SIG{ SEGV } = \&ld_handler_term;
+    $SIG{ TERM } = \&ld_handler_term;
+    $SIG{ BUS  } = \&ld_handler_term;
+    $SIG{ SYS  } = \&ld_handler_term;
+    $SIG{ XCPU } = \&ld_handler_term;
+    $SIG{ XFSZ } = \&ld_handler_term;
+    # HUP is actually used
+    $SIG{ HUP  } = \&ld_handler_hup;
+    # This used to call a signal handler, that logged a message
+    # However, this typically goes to syslog and if syslog
+    # is playing up a loop will occur.
+    $SIG{ PIPE } = 'IGNORE';
+    # handle perl warn signal
+    $SIG{__WARN__} = \&ld_handler_perl_warn;
+}
+
+# ld_handler_perl_warn
+# Handle Perl warnings for logging file.
+sub ld_handler_perl_warn {
+    my $warning = join q{, }, @_;
+    $warning =~ s/[\r\n]//g;
+    ld_log( _message('WRN0301', $warning) );
+}
+
+# read_pid
+# Read pid file and check if pid (l7directord) is still running
+sub read_pid {
+    my $old_pid  = undef;
+    my $file_pid = undef;
+    my $pid_file = $PROC_ENV{pid_prefix} . q{.} . $CONFIG_FILE{filename} . '.pid';
+    eval {
+        open my $pid_handle, '<', $pid_file;
+        $file_pid = <$pid_handle>;
+        close $pid_handle;
+        chomp $file_pid;
+
+        # Check to make sure this isn't a stale pid file
+        my $proc_file = "/proc/$file_pid/cmdline";
+        open my $proc_handle, '<', $proc_file;
+        my $line = <$proc_handle>;
+        if ($line =~ /l7directord/) {
+            $old_pid = $file_pid;
+        }
+        close $proc_handle;
+    };
+    
+    return wantarray ? ($old_pid, $file_pid) : $old_pid;
+}
+
+# write_pid
+# Write pid number to pid file.
+sub write_pid {
+    my $pid = shift;
+
+    my $pid_file = $PROC_ENV{pid_prefix} . q{.} . $CONFIG_FILE{filename} . '.pid';
+    if (!defined $pid || $pid !~ /^\d+$/ || $pid < 1) {
+        $pid = defined $pid ? $pid : 'undef';
+        init_error( _message_only('ERR0412', $pid) );
+    }
+    eval {
+        open my $pid_handle, '>', $pid_file;
+        print {$pid_handle} $pid . "\n";
+        close $pid_handle;
+    };
+    if ($EVAL_ERROR) {
+        init_error( _message_only('ERR0409', $pid_file, $EVAL_ERROR) );
+    }
+}
+
+# remove_pid
+# Remove pid file.
+sub remove_pid {
+    my $pid_file = $PROC_ENV{pid_prefix} . q{.} . $CONFIG_FILE{filename} . '.pid';
+    ld_rm_file($pid_file);
+}
+
+# init_error
+# Handle error during initialization and exit.
+sub init_error {
+    my $msg = shift;
+    if (defined $msg) {
+        if ($DEBUG_LEVEL == 0) {
+            print {*STDERR} $msg . "\n";
+        }
+        ld_log( _message('ERR0001', $msg) );
+    }
+    ld_exit( 4, _message_only('INF0004') );
+}
+
+# ld_handler_term
+# If we get a sinal then put a halt flag up
+sub ld_handler_term {
+    my $signal = shift;
+    $PROC_STAT{halt} = defined $signal ? $signal : 'undef';
+}
+
+# ld_handler_hup
+# If we get a sinal then put a reload flag up
+sub ld_handler_hup {
+    my $signal = shift;
+    $PROC_STAT{reload} = defined $signal ? $signal : 'undef';
+}
+
+# reread_config
+# Re-read config, and then re-setup l7vsd and child process.
+sub reread_config {
+    my $old_virtual = defined $CONFIG{virtual} ? [ @{ $CONFIG{virtual} } ]
+                    :                            []
+                    ;
+    my %old_sub_config = defined $CONFIG{execute} ? %{ $CONFIG{execute} }
+                       :                            ()
+                       ;
+
+    %CONFIG = %GLOBAL;
+    $CONFIG{old_virtual} = $old_virtual;
+
+    # analyze config and catch format error
+    eval {
+        read_config();
+        ld_setup();
+        ld_start();
+    };
+    if ($EVAL_ERROR) {
+        my $exception = $EVAL_ERROR;
+        chomp $exception;
+        ld_log( _message('ERR0122', $exception) );
+        $CONFIG{virtual} = [ @{ $CONFIG{old_virtual} } ];
+        $CONFIG{execute} = \%old_sub_config;
+    }
+
+    my %new_sub_config = defined $CONFIG{execute} ? %{ $CONFIG{execute} }
+                       :                            ()
+                       ;
+    for my $sub_config ( keys %old_sub_config ) {
+        if ( exists $new_sub_config{$sub_config} ) {
+            if ( system_wrapper($PROC_ENV{l7directord} . " $sub_config reload") ) {
+                 system_wrapper($PROC_ENV{l7directord} . " $sub_config start");
+            }
+            delete $new_sub_config{$sub_config};
+            delete $old_sub_config{$sub_config};
+        }
+    }
+    ld_cmd_children('stop',  \%old_sub_config);
+    ld_cmd_children('start', \%new_sub_config);
+}
+
+# read_config
+# Read configuration and parse settings.
+sub read_config {
+    my $line = 0;
+    my $current_global_name = q{};
+    my $config_handle;
+
+    eval {
+        open $config_handle, '<', $CONFIG_FILE{path};
+    };
+    if ($EVAL_ERROR) {
+        config_error( 0, 'ERR0407', $CONFIG_FILE{path} );
+    }
+
+    while (my $config_line = <$config_handle>) {
+        $line++;
+        chomp $config_line;
+        $config_line =~ s/#.*//mg; # remove comment (FIXME optimize regex for "foo='#'")
+        $config_line =~ s/^\t/$SECTION_VIRTUAL_PREFIX/mg; # convert tab to prefix
+
+        next if ($config_line =~ /^(?:$SECTION_VIRTUAL_PREFIX)?\s*$/);
+
+        # section global
+        if ($config_line !~ /^$SECTION_VIRTUAL_PREFIX/) {
+            my ($name, $value) = validate_config($line, $config_line);
+            $current_global_name = $name;
+            if ($name eq 'virtual') {
+                my %virtual = %VIRTUAL;
+                $virtual{server} = $value;
+                push @{ $CONFIG{virtual} }, \%virtual;
+                _ld_service_resolve(\%virtual, $value->{port});
+            }
+            elsif ($name eq 'execute') {
+                $CONFIG{execute}{$value} = 1;
+            }
+            else {
+                $CONFIG{$name} = $value;
+            }
+        }
+        # section virtual
+        else {
+            if ($current_global_name ne 'virtual') {
+                config_error($line, 'ERR0119', $config_line);
+            }
+            my ($name, $value) = validate_config($line, $config_line);
+            if ($name eq 'real' && defined $value) {
+                push @{ $CONFIG{virtual}[-1]{real} }, @$value;
+            }
+            elsif (defined $value) {
+                $CONFIG{virtual}[-1]{$name} = $value;
+            }
+        }
+    }
+
+    eval {
+        close $config_handle;
+    };
+    if ($EVAL_ERROR) {
+        config_error( 0, 'ERR0408', $CONFIG_FILE{path} );
+    }
+
+    ld_openlog( $CONFIG{logfile} ) if !$PROC_STAT{log_opened};
+    check_require_module();
+    undef $CONFIG_FILE{checksum};
+    undef $CONFIG_FILE{stattime};
+    check_cfgfile();
+
+    $PROC_STAT{initialized} = 1;
+}
+
+# validate_config
+# Validation check of configuration.
+sub validate_config {
+    my ($line, $config) = @_;
+    my ($name, $value) = split /\s*=\s*/, $config, 2;
+    if (defined $value) {
+        $value =~ s/\s*$//;
+        $value =~ s/^("|')(.*)\1$/$2/;
+    }
+
+    # section global validate
+    if ($name !~ /^$SECTION_VIRTUAL_PREFIX/) {
+        if (!exists $GLOBAL{$name}) {
+            config_error($line, 'ERR0120', $config);
+        }
+        if ($name eq 'virtual') {
+            $value = ld_gethostservbyname($value, 'tcp');
+            if (!defined $value) {
+                config_error($line, 'ERR0114', $config);
+            }
+        }
+        elsif (    $name eq 'checktimeout'
+                || $name eq 'negotiatetimeout'
+                || $name eq 'checkinterval'
+                || $name eq 'retryinterval'
+                || $name eq 'configinterval'
+                || $name eq 'checkcount'      ) {
+            if (!defined $value || $value !~ /^\d+$/ || $value == 0 ) {
+                config_error($line, 'ERR0101', $config);
+            }
+        }
+        elsif (    $name eq 'autoreload'
+                || $name eq 'quiescent'  ) {
+            $value = defined $value && $value =~ /^yes$/i ? 1
+                   : defined $value && $value =~ /^no$/i  ? 0
+                   :                                     undef
+                   ;
+            if (!defined $value) {
+                config_error($line, 'ERR0102', $config);
+            }
+        }
+        elsif ($name eq 'fallback') {
+            my $fallback = parse_fallback($line, $value, $config);
+            $value = {tcp => $fallback};
+        }
+        elsif ($name eq 'callback') {
+            if (!defined $value || !-f $value || !-x $value) {
+                config_error($line, 'ERR0117', $config);
+            }
+        }
+        elsif ($name eq 'execute') {
+            if (!defined $value || !-f $value) {
+                config_error($line, 'ERR0116', $config);
+            }
+        }
+        elsif ($name eq 'logfile') {
+            if (!defined $value || ld_openlog($value) ) {
+                config_error($line, 'ERR0118', $config);
+            }
+        }
+        elsif ($name eq 'supervised') {
+            $value = 1;
+        }
+    }
+    # section virtual validate
+    else {
+        $name =~ s/^$SECTION_VIRTUAL_PREFIX\s*//g;
+        if (!exists $VIRTUAL{$name}) {
+            config_error($line, 'ERR0120', $config);
+        }
+        if ($name eq 'real') {
+            $value = parse_real($line, $value, $config);
+        }
+        elsif (    $name eq 'request'
+                || $name eq 'receive'
+                || $name eq 'login'
+                || $name eq 'passwd'
+                || $name eq 'database'
+                || $name eq 'customcheck'
+                || $name eq 'virtualhost' ) {
+            if (!defined $value || $value !~ /^.+$/) {
+                config_error($line, 'ERR0103', $config);
+            }
+        }
+        elsif ($name eq 'checktype') {
+            my $valid_type = qr{custom|connect|negotiate|ping|off|on|\d+};
+            $value = lc $value;
+            if (!defined $value || $value !~ /^(?:$valid_type)$/) {
+                config_error($line, 'ERR0104', $config);
+            }
+            if ($value =~ /^\d+$/ && $value == 0) {
+                config_error($line, 'ERR0104', $config);
+            }
+        }
+        elsif (    $name eq 'checktimeout'
+                || $name eq 'negotiatetimeout'
+                || $name eq 'checkinterval'
+                || $name eq 'retryinterval'
+                || $name eq 'checkcount'
+                || $name eq 'maxconn'         ) {
+            if (!defined $value || $value !~ /^\d+$/ || ($name ne 'maxconn' && $value == 0) ) {
+                config_error($line, 'ERR0101', $config);
+            }
+        }
+        elsif ($name eq 'checkport') {
+            if (!defined $value || $value !~ /^\d+$/ || $value == 0 || $value > 65535) {
+                config_error($line, 'ERR0108', $config);
+            }
+        }
+        elsif ($name eq 'scheduler') {
+            my $valid_scheduler = qr{lc|rr|wrr};
+            $value = lc $value;
+            if (!defined $value || $value !~ /^(?:$valid_scheduler)$/) {
+                config_error($line, 'ERR0105', $config);
+            }
+        }
+        elsif ($name eq 'protocol') {
+            $value = lc $value;
+            if (!defined $value || $value !~ /^tcp$/) {
+                config_error($line, 'ERR0109', $config);
+            }
+        }
+        elsif ($name eq 'service') {
+            $value = lc $value;
+            my $valid_service = qr{http|https|ldap|ftp|smtp|pop|imap|nntp|dns|mysql|pgsql|sip|none};
+            if (!defined $value || $value !~ /^(?:$valid_service)$/) {
+                config_error($line, 'ERR0106', $config);
+            }
+        }
+        elsif ($name eq 'httpmethod') {
+            my $valid_method = qr{GET|HEAD};
+            $value = uc $value;
+            if (!defined $value || $value !~ /^(?:$valid_method)$/) {
+                config_error($line, 'ERR0110', $config);
+            }
+        }
+        elsif ($name eq 'fallback') {
+            my $fallback = parse_fallback($line, $value, $config);
+            $value = {tcp => $fallback};
+        }
+        elsif ( $name eq 'quiescent'
+             || $name eq 'accesslog') {
+            $value = defined $value && $value =~ /^yes$/i ? 1
+                   : defined $value && $value =~ /^no$/i  ? 0
+                   :                                        undef
+                   ;
+            if (!defined $value) {
+                config_error($line, 'ERR0102', $config);
+            }
+        }
+        elsif ($name eq 'module') {
+            ## V3  Un-offering (url,pfileter).
+            my %key_option = ( url         => ['--pattern-match', '--uri-pattern-match', '--host-pattern-match'],
+                               sessionless => [],
+                               ip          => [],
+                               sslid       => [],
+                             );
+            my $module = undef;
+            my $option = undef;
+            my $key    = q{};
+            if (defined $value) {
+                $value =~ s/["']//g;
+                ($module, $option) = split /\s+/, $value, 2;
+            }
+            $module = lc $module;
+            if ( !defined $module || !exists $key_option{$module} ) {
+                config_error($line, 'ERR0111', $config);
+            }
+            for my $key_opt ( @{$key_option{$module}} ) {
+                if (defined $option && $option =~ /$key_opt\s+(\S+)/) {
+                    $key .= q{ } if $key;
+                    $key .= $key_opt . q{ } . $1;
+                }
+            }
+            if ( !$key && @{$key_option{$module}} ) {
+                # when omit cookie module key option
+                my $key_opt = join q{' or `}, @{$key_option{$module}};
+                config_error($line, 'ERR0112', $module, $key_opt, $config);
+            }
+            $value = {name => $module, option => $option, key => $key};
+        }
+        elsif ($name eq 'sorryserver') {
+            my $forward = 'masq';
+            if ($value =~ /^(\S+)\s+(\S+)/) {
+                $value = $1;
+                $forward = lc $2;
+            }
+            my $sorry_server = ld_gethostservbyname($value, 'tcp');
+            if (!defined $sorry_server) {
+                config_error($line, 'ERR0114', $config);
+            }
+            if ($forward && $forward !~ /^(?:masq|tproxy)$/) {
+                config_error($line, 'ERR0107', $config);
+            }
+            $sorry_server->{forward} = $forward;
+            $value = $sorry_server;
+        }
+        elsif (    $name eq 'qosup'
+                || $name eq 'qosdown' ) {
+            $value = uc $value;
+            if ( !defined $value || ($value ne '0' && $value !~ /^[1-9]\d{0,2}[KMG]$/) ) {
+                config_error($line, 'ERR0113', $config);
+            }
+        }
+        elsif (    $name eq 'realdowncallback'
+                || $name eq 'realrecovercallback' ) {
+            if (!defined $value || !-f $value || !-x $value) {
+                config_error($line, 'ERR0117', $config);
+            }
+        }
+        elsif ( $name eq 'socketoption') {
+            $value = lc $value;
+            $value =~ s/ //g;
+            if (!defined $value) {
+                config_error($line, 'ERR0124', $config);
+            }
+            my @option_value = split /,/, $value;
+            # OPTION:transparent,deferaccept,nodelay,cork,quickackon|quickackoff
+            for my $option (@option_value) {
+		$option =~ s/ //g;
+                if($option !~ /^transparent|deferaccept|nodelay|cork|quickackon|quickackoff$/) {
+                    config_error($line, 'ERR0124', $config);
+                }
+            }
+        }
+        elsif ($name eq 'sslconfigfile') {
+            if (!defined $value || !-f $value) {
+                config_error($line, 'ERR0116', $config);
+            }
+        }
+        elsif ( $name eq 'accesslogfile') {
+            if (!defined $value || $value !~ /^\/.*/) {
+                config_error($line, 'ERR0116', $config);
+            }
+    
+        }
+        elsif ($name eq 'accesslog_rotate_type') {
+            $value = lc $value;
+            my $valid_rotate_type = qr{date|size|datesize};
+            if (!defined $value || $value !~ /^(?:$valid_rotate_type)$/) {
+                config_error($line, 'ERR0124', $config);
+            }
+        }
+        elsif ($name eq 'accesslog_rotate_max_backup_index') {
+            if (!defined $value || $value !~ /^\d+$/ || $value <= 0 || $value >= 13) {
+                config_error($line, 'ERR0126', $config);
+            }
+        }
+        elsif ($name eq 'accesslog_rotate_max_filesize') {
+            $value = uc $value;
+            if ( !defined $value || ($value ne '0' && $value !~ /^([1-9]\d{0,2}[KMG]|\d{1,3})$/) ) {
+                config_error($line, 'ERR0127', $config);
+            }
+        }
+        elsif ($name eq 'accesslog_rotate_rotation_timing') {
+            $value = lc $value;
+            my $valid_rotation_timing = qr{year|month|week|date|hour};
+            if (!defined $value || $value !~ /^(?:$valid_rotation_timing)$/) {
+                config_error($line, 'ERR0128', $config);
+            }
+        }
+        elsif ($name eq 'accesslog_rotate_rotation_timing_value') {
+            my $check = undef;
+            $value =~ s/["']//g;
+            if (!defined $value ) {
+                config_error($line, 'ERR0129', $config);
+            }
+            if ($value =~ /^\d{1,2}\/\d{1,2}\s\d{1,2}:\d{1,2}$/) {
+                ## MM/dd hh:mm Check
+                $check = 1;
+            }
+            elsif ($value =~ /^\d{1,2}\s\d{1,2}:\d{1,2}$/) {
+                ## dd hh:mm Check
+                $check = 1;
+            }
+            elsif ($value =~ /^(sun|mon|tue|wed|thu|fri|sat)\s\d{1,2}:\d{1,2}$/i) {
+                ## <week> hh:mm Check
+                $check = 1;
+            }
+            elsif ($value =~ /^\d{1,2}:\d{1,2}$/) {
+                ## hh:mm        Check
+                $check = 1;
+            }
+            elsif ($value =~ /^\d{1,2}$/) {
+                ## mm           Check
+                $check = 1;
+            }
+            if ( !defined $check ) {
+                config_error($line, 'ERR0129', $config);
+            }
+        }
+    }
+
+    return ($name, $value);
+}
+
+# check_require_module
+# Check service setting and require module.
+sub check_require_module {
+    my %require_module = (
+        http    => [ qw( LWP::UserAgent LWP::Debug ) ],
+        https   => [ qw( LWP::UserAgent LWP::Debug Crypt::SSLeay ) ],
+        ftp     => [ qw( Net::FTP ) ],
+        smtp    => [ qw( Net::SMTP ) ],
+        pop     => [ qw( Net::POP3 ) ],
+        imap    => [ qw( Mail::IMAPClient ) ],
+        ldap    => [ qw( Net::LDAP ) ],
+        nntp    => [ qw( IO::Socket IO::Select6 ) ],
+        dns     => [ qw( Net::DNS ) ],
+        mysql   => [ qw( DBI DBD::mysql ) ],
+        pgsql   => [ qw( DBI DBD::Pg ) ],
+        sip     => [ qw( IO::Socket::INET IO::Socket::INET6 ) ],
+        ping    => [ qw( Net::Ping ) ],
+        connect => [ qw( IO::Socket::INET IO::Socket::INET6 ) ],
+    );
+            
+    for my $v ( @{ $CONFIG{virtual} } ) {
+        next if !defined $v;
+        next if ( !defined $v->{service} || !defined $v->{checktype} );
+        my $check_service = q{};
+        if ( $v->{checktype} eq 'negotiate' && $require_module{ $v->{service} } ) {
+            $check_service = $v->{service};
+        }
+        elsif ($v->{checktype} eq 'ping' || $v->{checktype} eq 'connect') {
+            $check_service = $v->{checktype};
+        }
+        else {
+            next;
+        }
+        for my $module ( @{ $require_module{$check_service} } ) {
+            my $module_path = $module . '.pm';
+            $module_path =~ s{::}{/}g;
+            eval {
+                require $module_path;
+            };
+            if ($EVAL_ERROR) {
+                config_error(0, 'ERR0123', $module, $check_service);
+            }
+        }
+    }
+}
+
+# _ld_service_resolve
+# Set service name from port number
+# pre: vsrv: Virtual Service to resolve port
+#      port: port in the form
+# post: If $vsrv->{service} is not set, then set it to "http",
+#       "https", "ftp", "smtp", "pop", "imap", "ldap", "nntp" or "none"
+#       if $vsrv->{port} is 80, 443, 21, 25, 110, 143, 389 or
+#       any other value, respectivley
+# return: none
+sub _ld_service_resolve {
+    my ($vsrv, $port) = @_;
+
+    my %servname;
+    my @p = qw( 80   443   21  25   110 119  143  389  53  3306  5432  5060 );
+    my @s = qw( http https ftp smtp pop nntp imap ldap dns mysql pgsql sip  );
+    @servname{@p} = @s;
+
+    if (defined $vsrv && !defined $vsrv->{service} && defined $port) {
+        $vsrv->{service} = exists $servname{$port} ? $servname{$port}
+                         :                           'none'
+                         ;
+    }
+}
+
+# parse_fallback
+# Parse a fallback server
+# pre: line: line number fallback server was read from
+#      fallback: Should be of the form
+#                ip_address|hostname[:port|:service_name] [masq|tproxy]
+#      config_line: line read from configuration file
+# post: fallback is parsed
+# return: Reference to hash of the form
+#         { server => blah, forward => blah }
+#         Debugging message will be reported and programme will exit
+#         on error.
+sub parse_fallback {
+    my ($line, $fallback, $config_line) = @_;
+
+    if (!defined $fallback || $fallback !~ /^(\S+)(?:\s+(\S+))?$/) {
+        config_error($line, 'ERR0114', $config_line);
+    }
+    my ($ip_port, $forward) = ($1, $2);
+    $ip_port = ld_gethostservbyname($ip_port, 'tcp');
+    if ( !defined $ip_port ) {
+        config_error($line, 'ERR0114', $config_line);
+    }
+    if (defined $forward && $forward !~ /^(?:masq|tproxy)$/i) {
+        config_error($line, 'ERR0107', $config_line);
+    }
+
+    my %fallback = %REAL;
+    $fallback{server} = $ip_port;
+    $fallback{option}{forward} = get_forward_flag($forward);
+
+    return \%fallback;
+}
+
+# parse_real
+# Parse a real server
+# pre: line: line number real server was read from
+#      real: Should be of the form
+#                ip_address|hostname[:port|:service_name] [masq|tproxy]
+#      config_line: line read from configuration file
+# post: real is parsed
+# return: Reference to array include real server hash reference
+#         [ {server...}, {server...} ... ]
+#         Debugging message will be reported and programme will exit
+#         on error.
+sub parse_real {
+    my ($line, $real, $config_line) = @_;
+    
+    my $ip_host = qr{\d+\.\d+\.\d+\.\d+|[a-z0-9.-]+|\[[a-zA-Z0-9:]+\]};
+    my $port_service = qr{\d+|[a-z0-9-]+};
+    if (    !defined $real
+         || $real !~ /^
+                      ($ip_host)             # ip or host
+                      (?:->($ip_host))?      # range (optional)
+                      (?::($port_service))?  # port or service (optional)
+                      (?:\s+([a-z]+))?       # forwarding mode (optional)
+                      (?:\s+(\d+))?          # weight (optional)
+                      (?:\s+
+                         ([^,\s]+)           # "request
+                         \s*[ ,]\s*          #  separater
+                         (\S+)               #  receive"
+                      )?                     # (optional)
+                      $/ix) {
+        config_error($line, 'ERR0114', $config_line);
+    }
+    my ($ip1, $ip2, $port, $forward, $weight, $request, $receive)
+     = (  $1,   $2,    $3,       $4,      $5,       $6,       $7);
+    # set forward, weight and request-receive pair.
+    my %real = %REAL;
+    if (defined $forward) {
+        $forward = lc $forward;
+        if ($forward !~ /^(?:masq|tproxy)$/) {
+            config_error($line, 'ERR0107', $config_line);
+        }
+        $real{forward} = $forward;
+    }
+    if (defined $weight) {
+        $real{weight} = $weight;
+    }
+    if (defined $request && defined $receive) {
+        $request =~ s/^\s*("|')(.*)\1\s*/$2/;
+        $receive =~ s/^\s*("|')(.*)\1\s*/$2/;
+        $real{request} = $request;
+        $real{receive} = $receive;
+    }
+
+    my $resolved_port = undef;
+    if (defined $port) {
+        $resolved_port = ld_getservbyname($port);
+        if (!defined $resolved_port) {
+            config_error($line, 'ERR0108', $config_line);
+        }
+    }
+
+    my $resolved_ip1 = ld_gethostbyname($ip1);
+    if (!defined $resolved_ip1) {
+        config_error($line, 'ERR0114', $config_line);
+    }
+
+    my $resolved_ip2 = $resolved_ip1;
+    if (defined $ip2) {
+        $resolved_ip2 = ld_gethostbyname($ip2);
+        if (!defined $resolved_ip2) {
+            config_error($line, 'ERR0114', $config_line);
+        }
+    }
+
+    my ($ip_version , $int_ip1, $int_ip1_prefix ) = ip_to_int($resolved_ip1);
+    my ($ip_version2, $int_ip2, $int_ip2_prefix ) = ip_to_int($resolved_ip2);
+    my @reals = ();
+    if ( defined $int_ip1 && defined $int_ip2 ) {
+        if ($int_ip1 > $int_ip2) {
+            config_error($line, 'ERR0115', $resolved_ip1, $resolved_ip2, $config_line);
+        }
+        elsif ($int_ip1 eq $int_ip2) {
+            my %new_real = %real;
+            $new_real{server}{ip  } = $resolved_ip1;
+            $new_real{server}{port} = $resolved_port;
+            push @reals, \%new_real;
+        }
+        else {
+            for (my $int_ip = $int_ip1; $int_ip <= $int_ip2; $int_ip++) {
+                my %new_real = %real;
+                $new_real{server}{ip  } = int_to_ip($ip_version, $int_ip, $int_ip1_prefix);
+                $new_real{server}{port} = $resolved_port;
+                push @reals, \%new_real;
+            }
+        }
+    }
+    return \@reals;
+}
+
+# config_error
+# Handle error during read configuration and validation check
+sub config_error {
+    my ($line, $msg_code, @msg_args) = @_;
+
+    if ($DEBUG_LEVEL > 0 || $PROC_STAT{initialized} == 0) {
+        my $msg = _message_only($msg_code, @msg_args);
+        if (defined $line && $line > 0) {
+            print {*STDERR} _message_only('ERR0121', $CONFIG_FILE{path}, $line, $msg) . "\n";
+        }
+        else {
+            print {*STDERR} $msg . "\n";
+        }
+    }
+    else {
+        if ($line > 0) {
+            ld_log( _message('ERR0121', $CONFIG_FILE{path}, $line, q{}) );
+        }
+        ld_log( _message($msg_code, @msg_args) );
+    }
+    if ( $PROC_STAT{initialized} == 0 ) {
+        ld_exit(5, _message_only('ERR0002') );
+    }
+    else {
+        die "Configuration error.\n";
+    }
+}
+
+# ld_setup
+# Check configuration value and set default value, overwrite global config value and so on.
+sub ld_setup {
+    if ( defined $CONFIG{virtual} ) {
+        for my $v ( @{ $CONFIG{virtual} } ) {
+            next if !defined $v;
+            if (defined $v->{protocol} && $v->{protocol} eq 'tcp') {
+                $v->{option}{protocol} = "-t";
+            }
+    
+            if ( defined $v->{option} && defined $v->{option}{protocol} && defined $v->{module} && defined $v->{module}{name} ) {
+                my $module_option = $v->{module}{name};
+                if ( defined $v->{module}{option} ) {
+                    $module_option .= q{ } . $v->{module}{option};
+                }
+                $v->{option}{main} = sprintf "%s %s -m %s", $v->{option}{protocol}, get_ip_port($v), $module_option;
+                $v->{option}{flags} = $v->{option}{main};
+                if ( defined $v->{scheduler} ) {
+                    $v->{option}{flags} .= ' -s ' . $v->{scheduler};
+                }
+                if ( defined $v->{maxconn} ) {
+                    $v->{option}{flags} .= ' -u ' . $v->{maxconn};
+                }
+                if ( defined $v->{sorryserver} && defined $v->{sorryserver}{ip} && defined $v->{sorryserver}{port} ) {
+                    $v->{option}{flags} .= ' -b ' . $v->{sorryserver}{ip} . ':' . $v->{sorryserver}{port};
+                }
+                if ( defined $v->{sorryserver}{forward} ) {
+                    $v->{option}{flags} .= ' ' . get_forward_flag( $v->{sorryserver}{forward} );
+                }
+                if ( defined $v->{qosup} ) {
+                    $v->{option}{flags} .= ' -Q ' . $v->{qosup};
+                }
+                if ( defined $v->{qosdown} ) {
+                    $v->{option}{flags} .= ' -q ' . $v->{qosdown};
+                }
+                if ( defined $v->{sslconfigfile} ) {
+                    $v->{option}{flags} .= ' -z ' . $v->{sslconfigfile};
+                    $v->{other_virtual_key} .= ' ' . $v->{sslconfigfile};
+                }
+                else {
+                    $v->{other_virtual_key} .= ' none';
+                }
+                if ( defined $v->{socketoption} ) {
+                    $v->{option}{flags} .= ' -O ' . $v->{socketoption};
+                    $v->{other_virtual_key} .= ' ' . $v->{socketoption};
+                }
+                else {
+                    $v->{other_virtual_key} .= ' none';
+                }
+                if ( defined $v->{accesslog} ) {
+                    $v->{option}{flags} .= ' -L ' . $v->{accesslog};
+                }
+                if ( defined $v->{accesslogfile} ) {
+                    $v->{option}{flags} .= ' -a ' . $v->{accesslogfile};
+                    $v->{other_virtual_key} .=  ' ' . $v->{accesslogfile};
+                }
+                else {
+                    $v->{other_virtual_key} .= ' none';
+                }
+                my $option_key_flag = 0;
+                if ( defined $v->{accesslog_rotate_type} ) {
+                    $v->{option}{flags} 
+                       .= ' --ac-rotate-type ' . $v->{accesslog_rotate_type};
+                    $v->{other_virtual_key} 
+                       .= ' --ac-rotate-type ' . $v->{accesslog_rotate_type};
+                    $option_key_flag = 1;
+                }
+                if ( defined $v->{accesslog_rotate_max_backup_index} ) {
+                    $v->{option}{flags}
+                       .= ' --ac-rotate-max-backup-index ' 
+                             . $v->{accesslog_rotate_max_backup_index};
+                    $v->{other_virtual_key} 
+                       .= ' --ac-rotate-max-backup-index ' 
+                             . $v->{accesslog_rotate_max_backup_index};
+                    $option_key_flag = 1;
+                }
+                if ( defined $v->{accesslog_rotate_max_filesize} ) {
+                    $v->{option}{flags}
+                       .= ' --ac-rotate-max-filesize '
+                             . $v->{accesslog_rotate_max_filesize};
+                    $v->{other_virtual_key} 
+                       .= ' --ac-rotate-max-filesize '
+                             . $v->{accesslog_rotate_max_filesize};
+                    $option_key_flag = 1;
+                }
+                if ( defined $v->{accesslog_rotate_rotation_timing} ) {
+                    $v->{option}{flags}
+                       .= ' --ac-rotate-rotation-timing '
+                             . $v->{accesslog_rotate_rotation_timing};
+                    $v->{other_virtual_key} 
+                       .= ' --ac-rotate-rotation-timing '
+                             . $v->{accesslog_rotate_rotation_timing};
+                    $option_key_flag = 1;
+                }
+                if ( defined $v->{accesslog_rotate_rotation_timing_value} ) {
+                    $v->{option}{flags}
+                       .= ' --ac-rotate-rotation-timing-value '
+                          . q{"}. $v->{accesslog_rotate_rotation_timing_value}. q{"};
+                    $v->{other_virtual_key} 
+                       .= ' --ac-rotate-rotation-timing-value '
+                          .  $v->{accesslog_rotate_rotation_timing_value};
+                    $option_key_flag = 1;
+                }
+                if ( $option_key_flag == 0 ) {
+                    $v->{other_virtual_key} .= ' none';
+                }
+            }
+    
+            if ( !defined $v->{fallback} && defined $CONFIG{fallback} ) {
+                $v->{fallback} = { %{ $CONFIG{fallback} } };
+            }
+            if ( defined $v->{fallback} ) {
+                for my $proto ( keys %{ $v->{fallback} } ) {
+                    $v->{fallback}{$proto}{option}{flags} = '-r ' . get_ip_port( $v->{fallback}{$proto} )
+                        . ' ' . $v->{fallback}{$proto}{option}{forward};
+                }
+            }
+            if (defined $v->{checktype} && $v->{checktype} =~ /^\d+$/) {
+                $v->{num_connects} = $v->{checktype};
+                $v->{checktype} = 'combined';
+            }
+    
+            if ( defined $v->{login} && $v->{login} eq q{} ) {
+                $v->{login} = defined $v->{service} && $v->{service} eq 'ftp' ? 'anonymous'
+                            : defined $v->{service} && $v->{service} eq 'sip' ? 'l7directord@' . $PROC_ENV{hostname}
+                            :                                                   q{}
+                            ;
+            }
+            if ( defined $v->{passwd} && $v->{passwd} eq q{} ) {
+                $v->{passwd} = defined $v->{service} && $v->{service} eq 'ftp' ? 'l7directord@' . $PROC_ENV{hostname}
+                             :                                                   q{}
+                             ;
+            }
+    
+            if ( defined $v->{real} ) {
+                for my $r ( @{ $v->{real} } ) {
+                    next if !defined $r;
+                    if ( defined $r->{forward} ) {
+                        $r->{option}{forward} = get_forward_flag( $r->{forward} );
+                    }
+                    if ( !defined $r->{weight} || $r->{weight} !~ /^\d+$/ ) {
+                        $r->{weight} = 1;
+                    }
+        
+                    if ( !defined $r->{server}{port} ) {
+                        $r->{server}{port} = $v->{server}{port};
+                    }
+
+                    $r->{option}{flags} = '-r ' . get_ip_port($r) . ' ' . $r->{option}{forward};
+        
+                    # build request URL
+                    if ( defined $v->{service} && defined $r->{server} ) {
+                        my $port = defined $v->{checkport} ? $v->{checkport} : $r->{server}{port};
+                        my $ipaddress = $r->{server}{ip};
+                        if ( is_ip6($ipaddress)){
+                            $ipaddress = qq{ [$r->{server}{ip}] };
+                        }
+                        $r->{url} = sprintf "%s://%s:%s/",
+                                            $v->{service}, $ipaddress, $port;
+                        $r->{url} =~ s/\s//g;
+                    }
+                    if ( !defined $r->{request} && defined $v->{request} ) {
+                        $r->{request} = $v->{request};
+                    }
+                    if ( !defined $r->{receive} && defined $v->{receive} ) {
+                        $r->{receive} = $v->{receive};
+                    }
+                    if ( defined $r->{request} ) {
+                        my $uri = $r->{request};
+                        my $service = $v->{service};
+                        if ( defined $v->{service} && $uri =~ m{^$service://} ) {
+                            $r->{url} = $uri;
+                        }
+                        else {
+                            $uri =~ s{^/+}{}g;
+                            $r->{url} .= $uri;
+                        }
+                    }
+                    
+                    # set connect count for combine check
+                    if (defined $v->{checktype} && $v->{checktype} eq 'combined') {
+                        $r->{num_connects} = undef;
+                    }
+        
+                    $r->{fail_counts} = 0;
+                    $r->{healthchecked} = 0;
+                }
+            }
+            if ( !defined $v->{checkcount} || $v->{checkcount} <= 0 ) {
+                $v->{checkcount} = $CONFIG{checkcount};
+            }
+            if ( !defined $v->{checktimeout} || $v->{checktimeout} <= 0 ) {
+                $v->{checktimeout} = $CONFIG{checktimeout};
+            }
+            if ( !defined $v->{negotiatetimeout} || $v->{negotiatetimeout} <= 0 ) {
+                $v->{negotiatetimeout} = $CONFIG{negotiatetimeout};
+            }
+            if ( !defined $v->{checkinterval} || $v->{checkinterval} <= 0 ) {
+                $v->{checkinterval} = $CONFIG{checkinterval};
+            }
+            if ( !defined $v->{retryinterval} || $v->{retryinterval} <= 0 ) {
+                $v->{retryinterval} = $CONFIG{retryinterval};
+            }
+            if ( !defined $v->{quiescent} ) {
+                $v->{quiescent} = $CONFIG{quiescent};
+            }
+        }
+    }
+
+    if (defined $CONFIG{fallback}) {
+        $CONFIG{fallback}{tcp}{option}{flags} = '-r ' . get_ip_port( $CONFIG{fallback}{tcp} )
+            . ' ' . $CONFIG{fallback}{tcp}{option}{forward};
+    }
+}
+
+# Removed persistent and netmask related hash entries from the structure of l7vsadm since it is not used - NTT COMWARE
+# ld_read_l7vsadm
+# Parses the output of "l7vsadm -K -n" and puts into a structure of
+# the following from:
+#
+# {
+#   (vip_address:vport) protocol module_name module_key_value => {
+#     "scheduler" => scheduler,
+#     "real" => {
+#       rip_address:rport => {
+#         "forward" => forwarding_mechanism,
+#         "weight"  => weight
+#       },
+#       ...
+#     }
+#   },
+#   ...
+# }
+#
+# where:
+#   vip_address: IP address of virtual service
+#   vport: Port of virtual service
+#   module_name: Depicts the name of the module (For example, pfilter)
+#   module_key_value: Depicts the module key values (For example, --path-match xxxx)
+#   scheduler: Scheduler for virtual service
+#
+#   rip_address: IP address of real server
+#   rport: Port of real server
+#   forwarding_mechanism: Forwarding mechanism for real server.(masq or tproxy)
+#   weight: Weight of real server
+#
+# pre: none
+# post: l7vsadm -K -n is parsed
+# result: reference to structure detailed above.
+sub ld_read_l7vsadm {
+    my $current_service = {};
+    my $vip_id;
+
+    if ( !-f $PROC_ENV{l7vsadm} || !-x $PROC_ENV{l7vsadm} ) {
+        ld_log( _message( 'FTL0101', $PROC_ENV{l7vsadm} ) );
+        return $current_service;
+    }
+    # read status of current l7vsadm -K -n
+    # -K indicates Key parameters of the module included.
+    my $list_command = $PROC_ENV{l7vsadm} . " -K -n";
+    my $cmd_result = qx{$list_command};
+    my @list_line = split /\n/, $cmd_result;
+    my $other_virtual_flag = 'off';
+    my $other_virtual_count = 0;
+    my $other_virtual_option = undef;
+
+    # skip below header
+    # [cf] Layer-7 Virtual Server version 2.0.0-0
+    # [cf] Prot LocalAddress:Port ProtoMod Scheduler Reschedule Protomod_key_string
+    # [cf]   -> RemoteAddress:Port           Forward Weight ActiveConn InactConn
+    shift @list_line; shift @list_line; shift @list_line;
+
+    for my $line (@list_line) {
+        # check virtual service line format
+        # [cf] TCP 192.168.0.4:12121 sessionless rr
+        #      TCP [2031:130f:876a::130b]:1231 sessionless rr
+       ####         ((\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|\[[0-9a-fA-F:])(%.+)?\]:\d{1,5}) \s+ # ip port
+        if (($line =~ /
+                ^           # top
+                (\w+) \s+   # 'TCP'
+                (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{1,5}) \s+ # ip port
+                (\w+) \s+   # protocol module
+                \w+         # scheduler
+                $           # end
+                /x
+          
+            )
+           ||($line =~ /
+                ^           # top
+                (\w+) \s+   # 'TCP'
+                (\[[0-9a-fA-F:]+(?:%.+)?\]:\d{1,5}) \s+ # ip port
+                (\w+) \s+   # protocol module
+                \w+         # scheduler
+                $           # end
+                /x
+          
+            )) {
+            my ($proto, $ip_port, $module) = ($1, $2, $3);
+            # vip_id MUST be same format as get_virtual_id_str
+            $proto = lc $proto;
+            $vip_id = "$proto:$ip_port:$module";
+            $vip_id =~ s/\s+$//;
+            $current_service->{$vip_id} = undef;
+            $other_virtual_flag = 'on';
+            $other_virtual_option = undef;
+            $other_virtual_count = 0;
+            next;
+        }
+        # check real server line format
+        # [cf] -> 192.168.0.4:7780             Masq    1     10     123456      
+        if ((defined $vip_id && $line =~ /
+                ^           # top
+                \s+ -> \s+  # arrow
+                (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(\d{1,5}) \s+ # ip port
+                (\w+) \s+   # 'Masq'
+                (\d+) \s+   # weight
+                \d+ \s+     # active connections
+                \d+ \s*     # inactive connections
+                $           # end
+                /x
+            )
+          ||(defined $vip_id && $line =~ /
+                ^           # top
+                \s+ -> \s+  # arrow
+                (\[[0-9a-fA-F:]+(?:%.+)?\]):(\d{1,5}) \s+ # ip port
+                (\w+) \s+   # 'Masq'
+                (\d+) \s+   # weight
+                \d+ \s+     # active connections
+                \d+ \s*     # inactive connections
+                $           # end
+                /x
+            )) {
+            my ($ip, $port, $forward, $weight) = ($1, $2, $3, $4);
+            my $ip_port = "$ip:$port";
+            my $real = {
+                    server  => { ip => $ip, port => $port },
+                    weight  => $weight,
+                    forward => $forward,
+                    option  => {
+                                flags   => "-r $ip_port",
+                                forward => get_forward_flag($forward),
+                                },
+            };
+            $other_virtual_flag = 'off';
+            $current_service->{$vip_id}{$ip_port} = $real;
+        }
+        elsif ($other_virtual_flag eq 'on'){
+            ##  SSL_config_file  value set          D->A Command
+            ##  Socket option    value set          D->A Command
+            ##  Access_log_flag  value set          E    Command
+            ##  Access_log_file  value set          D->A Command
+            ##  Access_log_rotate option value set  D->A Command
+            if ($other_virtual_count != 2 ) {
+                $line =~ s/\s+/ /g;
+                $other_virtual_option .= $line;
+                $current_service->{$vip_id}{other_virtual_option}
+                                        = $other_virtual_option;
+            }
+            $other_virtual_count++;
+        }
+    }
+    return $current_service;
+}
+
+# ld_operate_virtual
+# Operate virtual service on l7vsd by l7vsadm command.
+sub ld_operate_virtual {
+    my ($v, $option, $success_code, $error_code) = @_;
+    if (!defined $v || !defined $option || !defined $success_code || !defined $error_code) {
+        ld_log( _message('ERR0501') );
+        return;
+    }
+
+    my $command = $PROC_ENV{l7vsadm} . " $option ";
+    if ($option ne '-D') {
+        $command .= $v->{option}{flags};
+    }
+    else {
+        $command .= $v->{option}{main};
+    }
+    $command .= ' 2>&1';
+
+    my ($result, $output) = command_wrapper($command);
+
+    my $module_key = $v->{module}{name};
+    if ( defined $v->{module}{key} ) {
+        $module_key .= q{ } . $v->{module}{key};
+    }
+    if ($result == 0) {
+        ld_log( _message($success_code, get_ip_port($v), $module_key) );
+    }
+    else {
+        ($output) = split /\n/, $output, 2;
+        ld_log( _message($error_code, get_ip_port($v), $module_key, $output) );
+    }
+}
+
+# ld_add_virtual
+# Call operate virtual with add option.
+sub ld_add_virtual {
+    my $v = shift;
+    ld_operate_virtual($v, '-A', 'INF0201', 'ERR0201');
+}
+
+# ld_edit_virtual
+# Call operate virtual with edit option.
+sub ld_edit_virtual {
+    my $v = shift;
+    ld_operate_virtual($v, '-E', 'INF0202', 'ERR0202');
+}
+
+# ld_delete_virtual
+# Call operate virtual with delete option.
+sub ld_delete_virtual {
+    my $v = shift;
+    ld_operate_virtual($v, '-D', 'INF0203', 'ERR0203');
+}
+
+# ld_operate_real
+# Operate real server on l7vsd by l7vsadm command.
+sub ld_operate_real {
+    my ($v, $r, $weight, $option, $success_code, $error_code) = @_;
+    if (!defined $v || !defined $r || !defined $option || !defined $success_code || !defined $error_code) {
+        ld_log( _message('ERR0501') );
+        return;
+    }
+
+    my $command
+        = $PROC_ENV{l7vsadm} . " $option " . $v->{option}{main} . q{ } . $r->{option}{flags};
+
+    # replace weight value
+    if (defined $weight) {
+        $command .= ' -w ' . $weight;
+    }
+    $command .= ' 2>&1';
+
+    my ($result, $output) = command_wrapper($command);
+
+    my $module_key = $v->{module}{name};
+    if ( defined $v->{module}{key} ) {
+        $module_key .= q{ } . $v->{module}{key};
+    }
+    if ($result == 0) {
+        ld_log( _message($success_code, get_ip_port($r), $r->{forward}, get_ip_port($v), $module_key, $weight) );
+    }
+    else {
+        ($output) = split /\n/, $output, 2;
+        ld_log( _message($error_code, get_ip_port($r), $r->{forward}, get_ip_port($v), $module_key, $output) );
+    }
+}
+
+# ld_add_real
+# Call operate real with add option.
+sub ld_add_real {
+    my ($v, $r, $weight) = @_;
+    ld_operate_real($v, $r, $weight, '-a', 'INF0204', 'ERR0204');
+}
+
+# ld_edit_real
+# Call operate real with edit option.
+sub ld_edit_real {
+    my ($v, $r, $weight) = @_;
+    ld_operate_real($v, $r, $weight, '-e', 'INF0205', 'ERR0205');
+}
+
+# ld_delete_real
+# Call operate real with delete option.
+sub ld_delete_real {
+    my ($v, $r) = @_;
+    ld_operate_real($v, $r, undef, '-d', 'INF0206', 'ERR0206');
+}
+
+# ld_start
+# Check l7vsd by l7vsadm command and create virtual service on l7vsd.
+sub ld_start {
+    # read status of current l7vsadm -K -n
+    my $current_service = ld_read_l7vsadm();
+    if (!defined $current_service ) {
+        ld_log( _message('FTL0201') );
+        return;
+    }
+
+    my %old_health_check = %HEALTH_CHECK;
+    %HEALTH_CHECK = ();
+
+    # make sure virtual servers are up to date
+    if ( defined $CONFIG{virtual} ) {
+        for my $nv ( @{ $CONFIG{virtual} } ) {
+            my $vip_id = get_virtual_id_str($nv);
+            if (!defined $vip_id) {
+                ld_log( _message('ERR0502') );
+                return;
+            }
+    
+            if ( exists( $current_service->{$vip_id} )){
+                if(( defined $current_service->{$vip_id}{other_virtual_option} 
+                  && defined $nv->{other_virtual_key})
+                  && $current_service->{$vip_id}{other_virtual_option}
+                   ne  $nv->{other_virtual_key} ) {
+                    ld_delete_virtual($nv);
+                    # no such service, create a new one
+                    ld_add_virtual($nv);
+                }
+                else {
+                    # service already exists, modify it
+                    ld_edit_virtual($nv);
+                }
+            }
+            else {
+                my $newipport;
+                my $del_vip_id;
+                # Module Change
+                for my $check ( keys  %{ $current_service }  ){
+                    next if !defined $check ;
+                    $del_vip_id = $check;
+                    # protcol name delete
+                    $check =~ s/(^[\w]+:)//;
+                    ## module name delete
+                    $check =~ s/(:[\w]+$)//;
+                    $newipport = get_ip_port($nv);
+                    if ( $check eq $newipport) {
+                        for ( @{ $CONFIG{old_virtual} } ) {
+                            my $virtual_id = get_virtual_id_str($_);
+                            next if !defined $virtual_id ;
+                            if ( $del_vip_id eq $virtual_id ) {
+                                ld_delete_virtual($_);
+                                delete $current_service->{$del_vip_id};
+                            }
+                        }
+                    }
+                }
+                # no such service, create a new one
+                ld_add_virtual($nv);
+            }
+    
+            my $or = $current_service->{$vip_id} || {};
+    
+            # Not delete fallback server from l7vsd if exist
+            my $fallback = fallback_find($nv);
+            if (defined $fallback) {
+                my $fallback_ip_port = get_ip_port( $fallback->{ $nv->{protocol} } );
+                delete $or->{$fallback_ip_port};
+                fallback_on($nv);
+            }
+    
+            if ( defined $nv->{real} ) {
+                CHECK_REAL:
+                for my $nr ( @{ $nv->{real} } ) {
+                    delete $or->{ get_ip_port($nr) };
+        
+                    my $health_check_id = get_health_check_id_str($nv, $nr);
+                    if (!defined $health_check_id) {
+                        ld_log( _message('ERR0503') );
+                        return;
+                    }
+        
+                    # search same health check process
+                    if ( exists $HEALTH_CHECK{$health_check_id} ) {
+                        # same health check process exist
+                        # then check real server and virtual service ($r, $v)
+                        for my $v_r_pair ( @{ $HEALTH_CHECK{$health_check_id}{manage} } ) {
+                            # completely same. check next real server
+                            next CHECK_REAL if ($nv eq $v_r_pair->[0] && $nr eq $v_r_pair->[1]);
+                        }
+        
+                        # add real server and virtual service to management list
+                        push @{ $HEALTH_CHECK{$health_check_id}{manage} }, [$nv, $nr];
+                    }
+                    else {
+                        # add to health check process list
+                        $HEALTH_CHECK{$health_check_id}{manage} = [ [$nv, $nr] ];
+                    }
+                }
+            }
+    
+            my $work_ip = undef;
+            # remove remaining entries for real servers
+            for my $remove_real_ip_port (keys %$or) {
+                if ( 'other_virtual_option' eq $remove_real_ip_port ){
+                    next;
+                }
+                $work_ip = $or->{$remove_real_ip_port}{server}{ip};
+                if ( !is_ip ($work_ip) 
+                  && !is_ip6($work_ip)){
+                    next;
+                }
+                ld_delete_real( $nv, $or->{$remove_real_ip_port} );
+                delete $or->{$remove_real_ip_port};
+            }
+    
+            delete $current_service->{$vip_id};
+        }
+    }
+
+    # terminate old health check process
+    # TODO should compare old and new, and only if different then re-create process...
+    for my $id (keys %old_health_check) { 
+        # kill old health check process
+        if ( defined $old_health_check{$id}{pid} ) {
+            # TODO cannot kill process during pinging to unreachable host?
+            {
+                local $SIG{ALRM} = sub { die; };
+                kill 15, $old_health_check{$id}{pid};
+                eval {
+                    alarm 3;
+                    waitpid $old_health_check{$id}{pid}, 0;
+                    alarm 0;
+                };
+                alarm 0;
+                if ($EVAL_ERROR) {
+                    kill 9, $old_health_check{$id}{pid};
+                    waitpid $old_health_check{$id}{pid}, WNOHANG;
+                }
+            }
+        }
+    }
+
+    # remove remaining entries for virtual servers
+    if ( defined $CONFIG{old_virtual} ) {
+        for my $nv ( @{ $CONFIG{old_virtual} } ) {
+            my $vip_id = get_virtual_id_str($nv);
+            next if !defined $vip_id ;
+            if ( exists $current_service->{$vip_id} ) {
+                # service still exists, remove it
+                ld_delete_virtual($nv);
+            }
+        }
+    }
+    delete $CONFIG{old_virtual};
+}
+
+# ld_cmd_children
+# Run l7directord command to child process.
+# Child process is not health check process,
+# but sub config (specified by configuration with `execute') process.
+sub ld_cmd_children {
+    my $command_type = shift;
+    my $execute = shift;
+
+    # instantiate other l7directord, if specified
+    if (!defined $execute) {
+        if ( defined $CONFIG{execute} ) {
+            for my $sub_config ( keys %{ $CONFIG{execute} } ) {
+                if (defined $command_type && defined $sub_config) {
+                    my $command = $PROC_ENV{l7directord} . " $sub_config $command_type";
+                    system_wrapper($command);
+                }
+            }
+        }
+    }
+    else {
+        for my $sub_config ( keys %$execute ) {
+            if (defined $command_type && defined $sub_config) {
+                my $command = $PROC_ENV{l7directord} . " $sub_config $command_type";
+                system_wrapper($command);
+            }
+        }
+    }
+}
+
+# ld_stop
+# Remove virtual service for stopping this program.
+sub ld_stop {
+    my $srv = ld_read_l7vsadm();
+    if (!defined $srv) {
+        ld_log( _message('FTL0201') );
+        return;
+    }
+    if ( defined $CONFIG{virtual} ) {
+        for my $v ( @{ $CONFIG{virtual} } ) {
+            my $vid = get_virtual_id_str($v);
+            if (!defined $vid) {
+                ld_log( _message('ERR0502') );
+                return;
+            }
+            if ( exists $srv->{$vid} ) {
+                for my $rid ( keys %{ $srv->{$vid} } ) {
+                    if ( defined $rid 
+                      &&(!is_ip ($rid)
+                      && !is_ip6($rid))){
+                        next;
+                    }
+                    ld_delete_real( $v, $srv->{$vid}{$rid} );
+                }
+            }
+            ld_delete_virtual($v);
+        }
+    }
+}
+
+# ld_main
+# Main function of this program.
+# Create virtual service and loop below 3 steps.
+# 1. Check health check sub process and (re-)create sub process as needed
+# 2. Check signal in sleep and start to terminate program or reload config as needed
+# 3. Check config file and reload config as needed
+sub ld_main {
+    ld_start();
+
+    # Main failover checking code
+    MAIN_LOOP:
+    while (1) {
+        # manage real server check process.
+        REAL_CHECK:
+        while (1) {
+            my @id_lists = check_child_process();
+            # if child process is not running
+            if (@id_lists) {
+                create_check_process(@id_lists);
+            }
+            my $signal = sleep_and_check_signal( $CONFIG{configinterval} );
+            last MAIN_LOOP  if defined $signal && $signal eq 'halt';
+            last REAL_CHECK if defined $signal && $signal eq 'reload';
+            last REAL_CHECK if check_cfgfile();
+        }
+
+        # reload config
+        reread_config();
+    }
+
+    # signal TERM to child process
+    for my $id (keys %HEALTH_CHECK) {
+        if ( defined $HEALTH_CHECK{$id}{pid} ) {
+            # TODO cannot kill process during pinging to unreachable host?
+            {
+                local $SIG{ALRM} = sub { die; };
+                kill 15, $HEALTH_CHECK{$id}{pid};
+                eval {
+                    alarm 3;
+                    waitpid $HEALTH_CHECK{$id}{pid}, 0;
+                    alarm 0;
+                };
+                alarm 0;
+                if ($EVAL_ERROR) {
+                    kill 9, $HEALTH_CHECK{$id}{pid};
+                    waitpid $HEALTH_CHECK{$id}{pid}, WNOHANG;
+                }
+            }
+        }
+    }
+    ld_stop();
+}
+
+# check_child_process
+# Check health check process by signal zero.
+# return: Health check id list that (re-)created later.
+sub check_child_process {
+    my @down_process_ids = ();
+    for my $id (sort keys %HEALTH_CHECK) {
+        if ( !defined $HEALTH_CHECK{$id}{pid} ) {
+            # not create ever
+            ld_log( _message('INF0401', $id) );
+            push @down_process_ids, $id;
+            next;
+        }
+        # signal 0
+        my $signaled = kill 0, $HEALTH_CHECK{$id}{pid};
+        if ($signaled != 1) {
+            # maybe killed from outside
+            ld_log( _message('ERR0603', $HEALTH_CHECK{$id}{pid}, $id) );
+            push @down_process_ids, $id;
+            next;
+        }
+    }
+    return @down_process_ids;
+}
+
+# create_check_process
+# Fork health check sub process.
+# And health check sub process run health_check sub function.
+sub create_check_process {
+    my @id_lists = @_;
+    for my $health_check_id (@id_lists) {
+        my $pid = fork();
+        if ($pid > 0) {
+            ld_log( _message('INF0402', $pid, $health_check_id) );
+            $HEALTH_CHECK{$health_check_id}{pid} = $pid;
+        }
+        elsif ($pid == 0) {
+            $PROC_STAT{parent_pid} = $PROC_STAT{pid};
+            $PROC_STAT{pid} = $PID;
+            health_check( $HEALTH_CHECK{$health_check_id}{manage} );
+        }
+        else {
+            ld_log( _message('ERR0604', $health_check_id) );
+        }
+        sleep 1;
+    }
+}
+
+# health_check
+# Main function of health check process.
+# Loop below.
+# 1. Health check.
+# 2. Status change and reflect to l7vsd as needed.
+# 3. Check signal in sleep.
+# pre: v_r_list: reference list of virtual service and real server pair
+#     $v_r_list = [ [$virtual, $real], [$virtual, $real], ... ];
+# return: none
+#         MUST use POSIX::_exit when terminate sub process.
+sub health_check {
+    my $v_r_list = shift;
+    if (!defined $v_r_list) {
+        ld_log( _message('ERR0501') );
+        ld_log( _message('FTL0001') );
+        POSIX::_exit(1);
+    }
+
+    # you can use any virtual, real pair in $v_r_list.
+    my ($v, $r) = @{ $v_r_list->[0] };
+    if (!defined $v || !defined $r) {
+        ld_log( _message('FTL0002') );
+        POSIX::_exit(2);
+    }
+
+    my $health_check_func = get_check_func($v);
+    my $current_status = get_status($v_r_list);
+
+    my $status = 'STARTING';
+    my $type = $v->{checktype} eq 'negotiate' ? $v->{service}
+             : $v->{checktype} eq 'combined'  ? $v->{service} . '(combined)'
+             :                                  $v->{checktype}
+             ;
+    $PROGRAM_NAME = 'l7directord: ' . $type . ':' . get_ip_port($r) . ':' . $status;
+    
+    while (1) {
+        # health check
+        my $service_status = &$health_check_func($v, $r);
+        
+        if ($service_status == $SERVICE_DOWN) {
+            if (!defined $current_status || $current_status == $SERVICE_UP) {
+                $r->{fail_counts}++;
+                undef $r->{num_connects};
+                if ($r->{fail_counts} >= $v->{checkcount}) {
+                    ld_log( _message( 'ERR0602', get_ip_port($r) ) );
+                    service_set($v_r_list, 'down');
+                    $current_status = $SERVICE_DOWN;
+                    $status = 'DOWN';
+                    $r->{fail_counts} = 0;
+                }
+                else {
+                    ld_log( _message( 'WRN1001', get_ip_port($r), $v->{checkcount} - $r->{fail_counts} ) );
+                    $status = sprintf "NG[%d/%d]", $r->{fail_counts}, $v->{checkcount};
+                }
+            }
+        }
+        if ($service_status == $SERVICE_UP) {
+            $r->{fail_counts} = 0;
+            if (!defined $current_status || $current_status == $SERVICE_DOWN) {
+                ld_log( _message( 'ERR0601', get_ip_port($r) ) );
+                service_set($v_r_list, 'up');
+                $current_status = $SERVICE_UP;
+            }
+            $status = 'UP';
+        }
+
+        $PROGRAM_NAME = 'l7directord: ' . $type . ':' . get_ip_port($r) . ':' . $status;
+
+        my $sleeptime = $r->{fail_counts} ? $v->{retryinterval} : $v->{checkinterval};
+        last if (sleep_and_check_signal($sleeptime, 1) eq 'halt');
+
+        my $parent_process = kill 0, $PROC_STAT{parent_pid};
+        if ($parent_process != 1) {
+            ld_log( _message( 'FTL0003', $PROC_STAT{parent_pid} ) );
+            POSIX::_exit(3);
+        }
+    }
+
+    ld_log( _message('INF0007') );
+    POSIX::_exit(0);
+}
+
+# sleep_and_check_signal
+# Check signal flag each 0.1 secound with sleeping specified seconds.
+sub sleep_and_check_signal {
+    my ($sec, $is_child) = @_;
+    if (!defined $sec || $sec !~ /^\d+$/) {
+        ld_log( _message('ERR0501') );
+        return 'halt';
+    }
+
+    my $sleeped = 0;
+    while ($sec > $sleeped) {
+        # non-blocking wait for zombie process
+        waitpid(-1, WNOHANG); # TODO should move to sigchld handler?
+
+        if ($is_child) {
+            if ( defined $PROC_STAT{halt} ) { 
+                ld_log( _message( 'WRN0001', $CONFIG_FILE{path}, $PROC_STAT{halt} ) );
+                return 'halt';
+            }
+        }
+        else {
+            if ( defined $PROC_STAT{halt} ) { 
+                ld_log( _message( 'WRN0001', $CONFIG_FILE{path}, $PROC_STAT{halt} ) );
+                return 'halt';
+            }
+            if ( defined $PROC_STAT{reload} ) {
+                ld_log( _message( 'WRN0002', $CONFIG_FILE{path}, $PROC_STAT{reload} ) );
+                undef $PROC_STAT{reload};
+                return 'reload';
+            }
+        }
+        sleep 0.1;
+        $sleeped += 0.1;
+    }
+    return 'run';
+}
+
+# get_check_func
+# Determine check function by checktype and service.
+sub get_check_func {
+    my $v = shift;
+    if (!defined $v) {
+        ld_log( _message('ERR0501') );
+        return \&check_off;
+    }
+
+    my $type = $v->{checktype};
+    my $service_func = {
+        http  => \&check_http,
+        https => \&check_http,
+        pop   => \&check_pop,
+        imap  => \&check_imap,
+        smtp  => \&check_smtp,
+        ftp   => \&check_ftp,
+        ldap  => \&check_ldap,
+        nntp  => \&check_nntp,
+        dns   => \&check_dns,
+        sip   => \&check_sip,
+        mysql => \&check_mysql,
+        pgsql => \&check_pgsql,
+    };
+
+    if ( defined $type && ($type eq 'negotiate' || $type eq 'combined') ) {
+        if (defined $v->{service} && exists $service_func->{ $v->{service} } ) {
+            my $negotiate_func = $service_func->{ $v->{service} };
+            if ($type eq 'negotiate') {
+                return $negotiate_func;
+            }
+            elsif ($type eq 'combined') {
+                my $combined_func =  make_combined_func($negotiate_func);
+                return $combined_func;
+            }
+        }
+        else {
+            return \&check_none;
+        }
+    }
+
+    if (defined $type && $type eq 'custom') {
+        my $custom_func = make_custom_func( $v->{customcheck} );
+        return $custom_func;
+    }
+
+    if (defined $type && $type eq 'connect') {
+        if (defined $v->{protocol} && $v->{protocol} eq 'tcp') {
+            return \&check_connect;
+        }
+        else {
+            return \&check_ping;
+        }
+    }
+
+    if (defined $type && $type eq 'ping') {
+        return \&check_ping;
+    }
+
+    if (defined $type && $type eq 'off') {
+        return \&check_off;
+    }
+
+    if (defined $type && $type eq 'on') {
+        return \&check_on;
+    }
+
+    return \&check_none;
+}
+
+# make_combined_func
+# Create combined function.
+sub make_combined_func {
+    my $negotiate_func = shift;
+    if (!defined $negotiate_func) {
+        ld_log( _message('ERR0504') );
+        return \&check_connect;
+    }
+
+    # closure
+    my $combined_func = sub {
+        my ($v, $r) = @_;
+        my $timing    = $v->{num_connects};
+        my $connected = $r->{num_connects};
+
+        if (!defined $connected ||
+            (defined $timing && $timing <= $connected) ) {
+            $r->{num_connects} = 0;
+            return &$negotiate_func($v, $r);
+        }
+        else {
+            $r->{num_connects}++;
+            return check_connect($v, $r);
+        }
+    };
+
+    return $combined_func;
+}
+
+# make_custom_func
+# Create custom check function.
+sub make_custom_func {
+    my $customcheck = shift;
+    if (!defined $customcheck) {
+        ld_log( _message('ERR0505') );
+        return \&check_off;
+    }
+
+    # closure
+    my $custom_func = sub {
+        my ($v, $r) = @_;
+        my $status = get_status([[$v, $r]]);
+        my $port = defined $v->{checkport} ? $v->{checkport} : $r->{server}{port};
+        my $ip_port  = $r->{server}{ip} . ':' . $port;
+
+        # expand macro
+        $customcheck =~ s/_IP_/$r->{server}{ip}/g;
+        $customcheck =~ s/_PORT_/$port/g;
+
+        my $res;
+        {
+            local $SIG{__DIE__} = 'DEFAULT';
+            local $SIG{ALRM} = sub { die "custom check timeout\n"; };
+            eval {
+                alarm $v->{checktimeout};
+                $res = system_wrapper($customcheck);
+                alarm 0;
+            };
+            alarm 0;
+            if ($EVAL_ERROR) {
+                ld_log( _message('WRN3301', $v->{checktimeout}, $ip_port) ) if (!defined $status || $status eq $SERVICE_UP);
+                return $SERVICE_DOWN;
+            }
+        }
+        if ($res) {
+                ld_log( _message('WRN3302', $customcheck, $res) ) if (!defined $status || $status eq $SERVICE_UP);
+                return $SERVICE_DOWN;
+        }
+        ld_log( _message('WRN0215', $ip_port) ) if (!defined $status || $status eq $SERVICE_DOWN || $r->{fail_counts} > 0);
+        return $SERVICE_UP;
+    };
+
+    return $custom_func;
+}
+
+# check_http
+# HTTP service health check.
+# Send GET/HEAD request, and check response
+sub check_http {
+    require LWP::UserAgent;
+    require LWP::Debug;
+    if ( $DEBUG_LEVEL > 2 ) {
+        LWP::Debug::level('+');
+    }
+    my ( $v, $r ) = @_;
+    my $status = get_status([[$v, $r]]);
+
+    my $port = defined $v->{checkport} ? $v->{checkport} : $r->{server}{port};
+
+    if ( $r->{url} !~ m{^https?://([^:/]+)} ) {
+        ld_log( _message( 'WRN1101', $r->{url}, $r->{server}{ip}, $port ) ) if (!defined $status || $status eq $SERVICE_UP);
+        return $SERVICE_DOWN;
+    }
+    my $host = $1;
+    my $virtualhost = defined $v->{virtualhost} ? $v->{virtualhost} : $host;
+
+    ld_debug(2, "check_http: url=\"$r->{url}\" " . "virtualhost=\"$virtualhost\"");
+    my $status_line ;
+
+    if ( is_ip($r->{server}{ip})){
+        my $ua = LWP::UserAgent->new( timeout => $v->{negotiatetimeout} );
+        my $req = new HTTP::Request( $v->{httpmethod}, $r->{url}, [ Host => $virtualhost ] );
+        my $res;
+        {
+            # LWP makes ungaurded calls to eval
+            # which throw a fatal exception if they fail
+            local $SIG{__DIE__} = 'DEFAULT';
+            local $SIG{ALRM} = sub { die "Can't connect to $r->{server}{ip}:$port (connect: timeout)\n"; };
+            eval {
+                alarm $v->{negotiatetimeout};
+                $res = $ua->request($req);
+                alarm 0;
+            };
+            alarm 0;
+        }
+    
+        $status_line = $res->status_line;
+        $status_line =~ s/[\r\n]//g;
+
+        my $recstr = $r->{receive};
+        if (!$res->is_success) {
+            ld_log( _message( 'WRN1102', $status_line, $r->{server}{ip}, $port ) ) if (!defined $status || $status eq $SERVICE_UP);
+            return $SERVICE_DOWN;
+        }
+            elsif (defined $recstr && $res->as_string !~ /$recstr/) {
+            ld_log( _message( 'WRN1103', $recstr, $r->{server}{ip}, $port ) ) if (!defined $status || $status eq $SERVICE_UP);
+            ld_debug(3, "Headers " . $res->headers->as_string);
+            ld_debug(2, "check_http: $r->{url} is down\n");
+            return $SERVICE_DOWN;
+        }
+    }
+    else{
+        ## ipv6 Check
+        ## Wget Comand Check
+        my $https_option = '';
+        if ( $v->{service} eq 'https'){
+            $https_option = '--no-check-certificate';
+        }
+        my $recstr = $r->{receive};
+        my $command = "/usr/bin/wget " . "-q -t 1 --timeout $v->{negotiatetimeout} $https_option ".  $r->{url} . ' -O - ';
+        my ($result, $output) = command_wrapper( $command );
+        if( $result ) {
+            ld_log( _message( 'WRN1103', 'web', $r->{server}{ip}, $port ) ) if (!defined $status || $status eq $SERVICE_UP);
+            return $SERVICE_DOWN;
+        }
+        elsif (defined $recstr && $output !~ /$recstr/) {
+            ld_log( _message( 'WRN1103', $recstr, $r->{server}{ip}, $port ) ) if (!defined $status || $status eq $SERVICE_UP);
+            ld_debug(2, "check_http: $r->{url} is down\n");
+            return $SERVICE_DOWN;
+        }
+
+        $status_line = '200 OK';
+
+    }
+
+    ld_debug(2, "check_http: $r->{url} is up\n");
+    ld_log( _message( 'WRN0203', $status_line, $r->{server}{ip}, $port ) ) if (!defined $status || $status eq $SERVICE_DOWN || $r->{fail_counts} > 0);
+    return $SERVICE_UP;
+}
+
+# check_smtp
+# SMTP service health check.
+# Connect SMTP server and check first response
+sub check_smtp {
+    require Net::SMTP;
+    my ($v, $r) = @_;
+    my $status = get_status([[$v, $r]]);
+
+    my $port = defined $v->{checkport} ? $v->{checkport} : $r->{server}{port};
+
+    ld_debug(2, "Checking http: server=$r->{server}{ip} port=$port");
+    my $debug_flag = $DEBUG_LEVEL ? 1 : 0;
+
+    my $smtp = Net::SMTP->new(
+        $r->{server}{ip},
+        Port    => $port,
+        Timeout => $v->{negotiatetimeout},
+        Debug   => $debug_flag,
+    );
+    if (!$smtp) {
+        ld_log( _message('WRN1201', $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+        return $SERVICE_DOWN;
+    }
+    $smtp->quit;
+
+    ld_log( _message('WRN0204', $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_DOWN || $r->{fail_counts} > 0);
+    return $SERVICE_UP;
+}
+
+# check_pop
+# POP3 service health check.
+# Connect POP3 server and login if user-pass specified.
+sub check_pop {
+    require Net::POP3;
+    my ($v, $r) = @_;
+    my $status = get_status([[$v, $r]]);
+
+    my $port = defined $v->{checkport} ? $v->{checkport} : $r->{server}{port};
+
+    ld_debug(2, "Checking pop server=$r->{server}{ip} port=$port");
+    my $debug_flag = $DEBUG_LEVEL ? 1 : 0;
+
+    my $pop = Net::POP3->new(
+        $r->{server}{ip},
+        Port    => $port,
+        Timeout => $v->{negotiatetimeout},
+        Debug   => $debug_flag,
+    );
+    if (!$pop) {
+        ld_log( _message('WRN1301', $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+        return $SERVICE_DOWN;
+    }
+
+    if ( defined $v->{login} && defined $v->{passwd} && $v->{login} ne q{} ) {
+        $pop->user( $v->{login} );
+        my $num = $pop->pass( $v->{passwd} );
+        if (!defined $num) {
+            ld_log( _message('WRN1302', $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+            $pop->quit();
+            return $SERVICE_DOWN;
+        }
+    }
+    $pop->quit();
+
+    ld_log( _message('WRN0205', $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_DOWN || $r->{fail_counts} > 0);
+    return $SERVICE_UP;
+}
+
+# check_imap
+# IMAP service health check.
+# Connect IMAP server and login if user-pass specified.
+sub check_imap {
+    require Mail::IMAPClient;
+    my ($v, $r) = @_;
+    my $status = get_status([[$v, $r]]);
+
+    my $port = defined $v->{checkport} ? $v->{checkport} : $r->{server}{port};
+
+    ld_debug(2, "Checking imap server=$r->{server}{ip} port=$port");
+    my $debug_flag = $DEBUG_LEVEL ? 1 : 0;
+
+    my $imap;
+    {
+        local $SIG{ALRM} = sub { die "Connection timeout\n"; };
+        eval {
+            alarm $v->{negotiatetimeout};
+            $imap = Mail::IMAPClient->new(
+                Server   => $r->{server}{ip},
+                Port     => $port,
+                Timeout  => $v->{negotiatetimeout},
+                Debug    => $debug_flag,
+            );
+            alarm 0;
+        };
+        alarm 0;
+        if ($EVAL_ERROR) {
+            ld_log( _message('WRN1403', $v->{negotiatetimeout}, $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+            return $SERVICE_DOWN;
+        }
+    }
+    if (!$imap) {
+        ld_log( _message('WRN1401', $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+        return $SERVICE_DOWN;
+    }
+
+    if ( defined $v->{login} && defined $v->{passwd} && $v->{login} ne q{} ) {
+        $imap->User( $v->{login} );
+        $imap->Password( $v->{passwd} );
+        my $authres = $imap->login();
+        if (!$authres) {
+            ld_log( _message('WRN1402', $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+            $imap->logout();
+            return $SERVICE_DOWN;
+        }
+    }
+    $imap->logout();
+
+    ld_log( _message('WRN0206', $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_DOWN || $r->{fail_counts} > 0);
+    return $SERVICE_UP;
+}
+
+# check_ldap
+# LDAP service health check.
+# Connect LDAP server and search if base-DN specified by 'request'
+sub check_ldap {
+    require Net::LDAP;
+    my ($v, $r) = @_;
+    my $status = get_status([[$v, $r]]);
+
+    my $port = defined $v->{checkport} ? $v->{checkport} : $r->{server}{port};
+
+    ld_debug(2, "Checking ldap server=$r->{server}{ip} port=$port");
+    my $debug_flag = $DEBUG_LEVEL ? 15 : 0;
+
+    my $ldap = Net::LDAP->new(
+        $r->{server}{ip},
+        port    => $port,
+        timeout => $v->{negotiatetimeout},
+        debug   => $debug_flag,
+    );
+    if (!$ldap) {
+        ld_log( _message('WRN1501', $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+        return $SERVICE_DOWN;
+    }
+
+    my $mesg;
+    {
+        local $SIG{ALRM} = sub { die "Connection timeout\n"; };
+        eval {
+            alarm $v->{negotiatetimeout};
+            $mesg = $ldap->bind;
+            alarm 0;
+        };
+        alarm 0;
+        if ($EVAL_ERROR) {
+            ld_log( _message('WRN1502', $v->{negotiatetimeout}, $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+            return $SERVICE_DOWN;
+        }
+    }
+    if ($mesg->is_error) {
+        ld_log( _message('WRN1503', $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+        return $SERVICE_DOWN;
+    }
+
+    if ( defined $r->{request} && $r->{request} ne q{} ) {
+        ld_debug( 4, "Base : " . $r->{request} );
+        my $result = $ldap->search(
+            base   => $r->{request},
+            scope  => 'base',
+            filter => '(objectClass=*)',
+        );
+    
+        if ($result->count != 1) {
+            ld_log( _message('WRN1504', $result->count, $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+            $ldap->unbind;
+            return $SERVICE_DOWN;
+        }
+    
+        if ( defined $r->{receive} ) {
+            my $href       = $result->as_struct;
+            my @arrayOfDNs = keys %$href;
+            my $recstr = $r->{receive};
+            if ($recstr =~ /.+/ && $arrayOfDNs[0] !~ /$recstr/) {
+                ld_log( _message('WRN1505', $recstr, $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+                $ldap->unbind;
+                return $SERVICE_DOWN;
+            }
+        }
+    }
+    $ldap->unbind;
+
+    ld_log( _message('WRN0207', $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_DOWN || $r->{fail_counts} > 0);
+    return $SERVICE_UP;
+}
+
+# check_nntp
+# NNTP service health check.
+# Connect NNTP server and check response start with '2**'
+sub check_nntp {
+    require IO::Socket;
+    require IO::Select;
+    my ($v, $r) = @_;
+    my $status = get_status([[$v, $r]]);
+
+    my $port = defined $v->{checkport} ? $v->{checkport} : $r->{server}{port};
+
+    ld_debug(2, "Checking nntp server=$r->{server}{ip} port=$port");
+
+    my $sock = ld_open_socket( $r->{server}{ip}, $port, $v->{protocol}, $v->{negotiatetimeout} );
+    if (!$sock) {
+        ld_log( _message('WRN1601', $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+        return $SERVICE_DOWN;
+    }
+
+    ld_debug(3, "Connected to $r->{server}{ip} (port $port)");
+    my $select = IO::Select->new();
+    $select->add($sock);
+    if ( !defined $select->can_read( $v->{negotiatetimeout} ) ) {
+        ld_log( _message('WRN1602', $v->{negotiatetimeout}, $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+        $select->remove($sock);
+        $sock->close;
+        return $SERVICE_DOWN;
+    }
+
+    my $buf;
+    sysread $sock, $buf, 64;
+    $select->remove($sock);
+    $sock->close;
+    my ($response) = split /[\r\n]/, $buf;
+
+    if ($response !~ /^2/) {
+        ld_log( _message('WRN1603', $response, $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+        return $SERVICE_DOWN;
+    }
+
+    ld_log( _message('WRN0208', $response, $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_DOWN || $r->{fail_counts} > 0);
+    return $SERVICE_UP;
+}
+
+# check_mysql
+# MySQL service health check.
+# call check_sql and use MySQL driver
+sub check_mysql {
+    return check_sql(@_, 'mysql', 'database');
+}
+
+# check_pgsql
+# PostgreSQL service health check.
+# call check_sql and use PostgreSQL driver
+sub check_pgsql {
+    return check_sql(@_, 'Pg', 'dbname');
+}
+
+# check_sql
+# DBI service health check.
+# Login DB and send query if query specified by 'request', check result row number same as 'receive'
+sub check_sql {
+    require DBI;
+    my ($v, $r, $dbd, $dbname) = @_;
+    my $status = get_status([[$v, $r]]);
+
+    my $port = defined $v->{checkport} ? $v->{checkport} : $r->{server}{port};
+
+    if ( !defined $v->{login} || !defined $v->{passwd} || !defined $v->{database} ||
+           $v->{login} eq q{} || $v->{database} eq q{} ) {
+        ld_log( _message('WRN1701', $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+        return $SERVICE_DOWN;
+    }
+
+    ld_debug(2, "Checking $v->{server}{ip} server=$r->{server}{ip} port=$port\n");
+
+    my $mask = POSIX::SigSet->new(SIGALRM);
+    my $action = POSIX::SigAction->new(
+        sub { die "Connection timeout\n" },
+        $mask,
+    );
+    my $oldaction = POSIX::SigAction->new();
+    sigaction(SIGALRM, $action, $oldaction);
+
+    my $dbh;
+    eval {
+        alarm $v->{negotiatetimeout};
+
+        DBI->trace(15) if $DEBUG_LEVEL;
+        $dbh = DBI->connect( "dbi:$dbd:$dbname=$v->{database};host=$r->{server}{ip};port=$port", $v->{login}, $v->{passwd} );
+        DBI->trace(0);
+
+        if (!defined $dbh) {
+            alarm 0;
+            sigaction(SIGALRM, $oldaction);
+            ld_log( _message('WRN1702', $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+            die;
+        }
+
+        local $dbh->{TraceLevel} = $DEBUG_LEVEL ? 15 : 0;
+
+        my $rows = 0;
+    
+        if ( defined $r->{request} && $r->{request} ne q{} ) {
+            my $sth  = $dbh->prepare( $r->{request} );
+            $rows = $sth->execute;
+            $sth->finish;
+        }
+    
+        $dbh->disconnect;
+    
+        alarm 0;
+        sigaction(SIGALRM, $oldaction);
+
+        if ( defined $r->{request} && $r->{request} ne q{} ) {
+            ld_debug(4, "Database search returned $rows rows");
+            if ($rows == 0) {
+                ld_log( _message('WRN1703', $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+                die;
+            }
+            # If user defined a receive string (number of rows returned), only do
+            # the check if the previous fetchall_arrayref succeeded.
+            if (defined $r->{receive} && $r->{receive} =~ /^\d+$/) {
+                # Receive string specifies an exact number of rows
+                if ( $rows ne $r->{receive} ) {
+                    ld_log( _message('WRN1704', $r->{receive}, $rows, $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+                    die;
+                }
+            }
+        }
+    };
+    alarm 0;
+    sigaction(SIGALRM, $oldaction);
+    if ($EVAL_ERROR) {
+        if ($EVAL_ERROR eq "Connection timeout\n") {
+            ld_log( _message('WRN1705', $v->{negotiatetimeout}, $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+        }
+        return $SERVICE_DOWN;
+    }
+
+    ld_log( _message('WRN0209', $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_DOWN || $r->{fail_counts} > 0);
+    return $SERVICE_UP;
+}
+
+# check_connect
+# Connect service health check.
+# Just connect port and close.
+sub check_connect {
+    my ($v, $r) = @_;
+    my $status = get_status([[$v, $r]]);
+
+    my $port = defined $v->{checkport} ? $v->{checkport} : $r->{server}{port};
+
+    ld_debug(2, "Checking connect: real server=$r->{server}{ip}:$port");
+
+    my $sock = ld_open_socket( $r->{server}{ip}, $port, $v->{protocol}, $v->{checktimeout} );
+    if (!defined $sock) {
+        ld_log( _message('WRN3201', $ERRNO, $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+
+        return $SERVICE_DOWN;
+    }
+    close($sock);
+
+    ld_debug(3, "Connected to: (port $port)");
+
+    ld_log( _message('WRN0210', $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_DOWN || $r->{fail_counts} > 0);
+    return $SERVICE_UP;
+}
+
+# check_sip
+# SIP service health check.
+# Send SIP OPTIONS request and check 200 response
+sub check_sip {
+    my ($v, $r) = @_;
+    my $status = get_status([[$v, $r]]);
+
+    my $port = defined $v->{checkport} ? $v->{checkport} : $r->{server}{port};
+
+    ld_debug(2, "Checking sip server=$r->{server}{ip} port=$port");
+
+    if ( !defined $v->{login} ) {
+        ld_log( _message('WRN1801', $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+        return $SERVICE_DOWN;
+    }
+
+    my $sock = ld_open_socket( $r->{server}{ip}, $port, $v->{protocol}, $v->{negotiatetimeout} );
+    if (!defined $sock) {
+        ld_log( _message('WRN1802', $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+        return $SERVICE_DOWN;
+    }
+
+    my $sip_s_addr = $sock->sockhost;
+    my $sip_s_port = $sock->sockport;
+
+    ld_debug(3, "Connected from $sip_s_addr:$sip_s_port to " . $r->{server} . ":$port");
+
+    my $id = $v->{login};
+    my $request =
+          "OPTIONS sip:$id SIP/2.0\r\n"
+        . "Via: SIP/2.0/UDP $sip_s_addr:$sip_s_port;branch=z9hG4bKhjhs8ass877\r\n"
+        . "Max-Forwards: 70\r\n"
+        . "To: <sip:$id>\r\n"
+        . "From: <sip:$id>;tag=1928301774\r\n"
+        . "Call-ID: a84b4c76e66710\r\n"
+        . "CSeq: 63104 OPTIONS\r\n"
+        . "Contact: <sip:$id>\r\n"
+        . "Accept: application/sdp\r\n"
+        . "Content-Length: 0\r\n"
+        . "\r\n";
+
+    ld_debug(3, "Request:\n$request");
+
+    my $response;
+    eval {
+        local $SIG{__DIE__} = 'DEFAULT';
+        local $SIG{ALRM   } = sub { die "Connection timeout\n"; };
+        ld_debug(4, "Timeout is $v->{negotiatetimeout}");
+        alarm $v->{negotiatetimeout};
+
+        print {$sock} $request;
+        $response = <$sock>;
+        close $sock;
+        alarm 0;
+
+        ld_debug(3, "Response:\n$response");
+
+        if ( $response !~ m{^SIP/2\.0 200 OK} ) {
+            ld_log( _message('WRN1803', $response, $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+            die;
+        }
+    };
+    alarm 0;
+    if ($EVAL_ERROR) {
+        if ($EVAL_ERROR eq "Connection timeout\n") {
+            ld_log( _message('WRN1804', $v->{negotiatetimeout}, $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+        }
+        return $SERVICE_DOWN;
+    }
+
+    ld_log( _message('WRN0211', $response, $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_DOWN || $r->{fail_counts} > 0);
+    return $SERVICE_UP;
+}
+
+# check_ftp
+# FTP service health check.
+# Login server and get file if 'request' specified, and check file include 'receive' string
+sub check_ftp {
+    require Net::FTP;
+    my ($v, $r) = @_;
+    my $status = get_status([[$v, $r]]);
+
+    my $ip_port = get_ip_port($r, $v->{checkport});
+
+    if (is_ip6($r->{server}{ip}) ){
+        ## IPv6 route
+        ## use 'lftp' Command
+        ## lftp 
+        ##   -e ' set net:max-retries 1;
+        ##        set net:reconnect-interval-multiplier 1;
+        ##        set cmd:fail-exit true;
+        ##        set net:reconnect-interval-base 1;
+        ##        ls;ls ;exit'
+        ##   -u user,passwd ipv6addr >/dev/null 2>&1
+
+        my $ftp_command     = "lftp ";
+        my $ftp_environment1 = "-e \"set net:max-retries 2;";
+        my $ftp_environment2 = "set net:reconnect-interval-multiplier 1;";
+        my $ftp_environment3 = "set cmd:fail-exit true;";
+        my $ftp_environment4 = "set net:reconnect-interval-base $v->{negotiatetimeout};";
+        my $ftp_environment5 = "ls;ls;exit\" ";
+        my $ftp_parameter   = "-u $v->{login},$v->{passwd} $ip_port >/dev/null 2>&1";
+        $ftp_command .= $ftp_environment1 . $ftp_environment2. $ftp_environment3. $ftp_environment4. $ftp_environment5. $ftp_parameter;
+
+## print "ftpCommand:". $ftp_command;
+        if( system_wrapper( $ftp_command )) {
+            ld_log( _message('WRN3101', $v->{checktimeout}, $r->{server}{ip}) ) if (!defined $status || $status eq $SERVICE_UP);
+            return $SERVICE_DOWN;
+        }
+        return $SERVICE_UP ;
+    }
+    ## IPv4 route
+
+    ld_debug(2, "Checking ftp server=$ip_port");
+    my $debug_flag = $DEBUG_LEVEL ? 1 : 0;
+
+    if ( !defined $v->{login} || !defined $v->{passwd} || $v->{login} eq q{} ) {
+        ld_log( _message('WRN1901', $ip_port) ) if (!defined $status || $status eq $SERVICE_UP);
+        return $SERVICE_DOWN;
+    }
+
+    my $ftp = Net::FTP->new(
+            $ip_port,
+            Timeout => $v->{negotiatetimeout},
+            Passive => 1,
+            Debug   => $debug_flag,
+         );
+    if (!defined $ftp) {
+        ld_log( _message('WRN1902', $ip_port) ) if (!defined $status || $status eq $SERVICE_UP);
+        return $SERVICE_DOWN;
+    }
+    if ( !$ftp->login( $v->{login}, $v->{passwd} ) ) {
+        ld_log( _message('WRN1903', $ip_port) ) if (!defined $status || $status eq $SERVICE_UP);
+        $ftp->quit();
+        return $SERVICE_DOWN;
+    }
+    if ( !$ftp->cwd('/') ) {
+        ld_log( _message('WRN1904', $ip_port) ) if (!defined $status || $status eq $SERVICE_UP);
+        $ftp->quit();
+        return $SERVICE_DOWN;
+    }
+    if ( $r->{request} ) {
+        my $fail_flag = 0;
+        eval {
+            local $SIG{__DIE__} = 'DEFAULT';
+            local $SIG{ALRM   } = sub { die "Connection timeout\n"; };
+            alarm $v->{negotiatetimeout};
+
+            open my $tmp, '+>', undef;
+            $ftp->binary();
+            if ( !$ftp->get( $r->{request}, *$tmp ) ) {
+                alarm 0;
+                ld_log( _message('WRN1905', $r->{request}, $ip_port) ) if (!defined $status || $status eq $SERVICE_UP);
+                close $tmp;
+                $ftp->quit();
+                $fail_flag = 1;
+            }
+            elsif ( $r->{receive} ) {
+                seek $tmp, 0, 0;
+                local $/;
+                my $memory = <$tmp>;
+                close $tmp;
+                if ($memory !~ /$r->{receive}/) {
+                    alarm 0;
+                    $ftp->quit();
+                    ld_log( _message('WRN1906', $r->{receive}, $r->{request}, $ip_port) ) if (!defined $status || $status eq $SERVICE_UP);
+                    $fail_flag = 1;
+                }
+            }
+        };
+        alarm 0;
+        if ($EVAL_ERROR) {
+            $ftp->quit();
+            my $error_message = $EVAL_ERROR;
+            $error_message =~ s/[\r\n]//g;
+            if ($error_message eq 'Connection timeout') {
+                ld_log( _message('WRN1908', $v->{negotiatetimeout}, $ip_port) ) if (!defined $status || $status eq $SERVICE_UP);
+            }
+            else {
+                ld_log( _message('WRN1907', $error_message, $ip_port) ) if (!defined $status || $status eq $SERVICE_UP);
+            }
+            return $SERVICE_DOWN;
+        }
+        if ($fail_flag) {
+            $ftp->quit();
+            return $SERVICE_DOWN;
+        }
+    }
+    $ftp->quit();
+
+    ld_log( _message('WRN0212', $ip_port) ) if (!defined $status || $status eq $SERVICE_DOWN || $r->{fail_counts} > 0);
+    return $SERVICE_UP;
+}
+
+# check_dns
+# DNS service health check.
+# Connect server and search 'request' A or PTR record and check result include 'response' string 
+sub check_dns {
+    my ($v, $r) = @_;
+    my $status = get_status([[$v, $r]]);
+
+    my $port = defined $v->{checkport} ? $v->{checkport} : $r->{server}{port}; 
+
+    {
+        # Net::DNS makes ungaurded calls to eval
+        # which throw a fatal exception if they fail
+        local $SIG{__DIE__} = 'DEFAULT';
+        require Net::DNS;
+    }
+    my $res = Net::DNS::Resolver->new();
+
+    if ($DEBUG_LEVEL) {
+        $res->debug(1);
+    }
+
+    if ( !defined $r->{request} || $r->{request} eq q{} || !defined $r->{receive} || $r->{receive} eq q{} ) {
+        ld_log( _message('WRN2001', $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+        return $SERVICE_DOWN;
+    }
+    ld_debug( 2, qq(Checking dns: request="$r->{request}" receive="$r->{receive}"\n) );
+
+    my $packet;
+    eval {
+        local $SIG{__DIE__} = 'DEFAULT';
+        local $SIG{ALRM   } = sub { die "Connection timeout\n"; };
+        alarm $v->{negotiatetimeout};
+        $res->nameservers( $r->{server}{ip} );
+        $res->port($port);
+        $packet = $res->search( $r->{request} );
+        alarm 0;
+    };
+    alarm 0;
+    if ($EVAL_ERROR) {
+        if ($EVAL_ERROR eq "Connection timeout\n") {
+            ld_log( _message('WRN2002', $v->{negotiatetimeout}, $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+        }
+        else {
+            ld_log( _message('WRN2003', $EVAL_ERROR, $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+        }
+        return $SERVICE_DOWN;
+    }
+    if (!$packet) {
+        ld_log( _message('WRN2004', $r->{request}, $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+        return $SERVICE_DOWN;
+    }
+
+    my $match = 0;
+    for my $rr ($packet->answer) {
+        if (   ( $rr->type eq 'A'   && $rr->address  eq $r->{receive} )
+            || ( $rr->type eq 'PTR' && $rr->ptrdname eq $r->{receive} ) ) {
+            $match = 1;
+            last;
+        }
+    }
+    if (!$match) {
+        ld_log( _message('WRN2005', $r->{receive}, $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_UP);
+        return $SERVICE_DOWN;
+    }
+
+    ld_log( _message('WRN0213', $r->{server}{ip}, $port) ) if (!defined $status || $status eq $SERVICE_DOWN || $r->{fail_counts} > 0);
+    return $SERVICE_UP;
+}
+
+# check_ping
+# ICMP ping service health check.
+# Ping server and check response.
+sub check_ping {
+    require Net::Ping;
+    my ($v, $r) = @_;
+    my $status = get_status([[$v, $r]]);
+
+    ld_debug( 2, qq(Checking ping: host="$r->{server}{ip}" checktimeout="$v->{checktimeout}"\n) );
+
+    if ( is_ip( $r->{server}{ip})) {
+        ## IPv4 PingCheck
+
+        my $p = Net::Ping->new('icmp', 1);
+        if ( !$p->ping( $r->{server}{ip}, $v->{checktimeout} ) ) {
+            ld_log( _message('WRN3101', $v->{checktimeout}, $r->{server}{ip}) ) if (!defined $status || $status eq $SERVICE_UP);
+            return $SERVICE_DOWN;
+        }
+    }
+    else {
+    ## IPv6 PingCheck
+        my $command
+            = sprintf "ping6 %s -c %d > /dev/null 2>&1",
+                                     $r->{server}{ip},
+                                     $v->{checktimeout};
+
+        if( system_wrapper( $command )) {
+            ld_log( _message('WRN3101', $v->{checktimeout}, $r->{server}{ip}) ) if (!defined $status || $status eq $SERVICE_UP);
+            return $SERVICE_DOWN;
+        }
+    }
+
+    ld_log( _message('WRN0214', $r->{server}{ip}) ) if (!defined $status || $status eq $SERVICE_DOWN || $r->{fail_counts} > 0);
+    return $SERVICE_UP;
+}
+
+# check_none
+# Dummy function to check service if service type is none.
+# Just activates the real server
+sub check_none {
+    my ($v, $r) = @_;
+    ld_debug(2, "Checking none");
+    return $SERVICE_UP;
+}
+
+# check_off
+# Check nothing and always return $SERVICE_DOWN
+sub check_off {
+    my ($v, $r) = @_;
+    return $SERVICE_DOWN;
+}
+
+# check_on
+# Check nothing and always return $SERVICE_UP
+sub check_on {
+    my ($v, $r) = @_;
+    return $SERVICE_UP;
+}
+
+# service_set
+# Used to bring up and down real servers.
+# This is the function you should call if you want to bring a real
+# server up or down.
+# This function is safe to call regrdless of the current state of a
+# real server.
+# Do _not_ call _service_up or _service_down directly.
+# pre: v_r_list: virtual and real pair list
+#                [ [$v, $r], [$v, $r] ... ]
+#      state: up or down
+#             up to bring the real service up
+#             down to bring the real service up
+# post: The real server is brough up or down for each virtual service
+#       it belongs to.
+# return: none
+sub service_set {
+    my ($v_r_list, $state) = @_;
+
+    if (defined $state && $state eq 'up') {
+        _service_up($v_r_list);
+    }
+    elsif (defined $state && $state eq 'down') {
+        _service_down($v_r_list);
+    }
+}
+
+# _service_up
+# Bring a real service up if it is down
+# Should be called by service_set only
+# I.e. If you want to change the state of a real server call service_set.
+#      If you call this function directly then l7directord will lose track
+#      of the state of real servers.
+# pre: v_r_list: virtual and real pair list
+#                [ [$v, $r], [$v, $r] ... ]
+# post: real service is taken up from the respective virtual service
+#       if it is inactive
+# return: none
+sub _service_up {
+    my $v_r_list = shift;
+    if ( !_status_up($v_r_list) ) {
+        return;
+    }
+
+    for my $v_r_pair (@$v_r_list) {
+        my ($v, $r) = @$v_r_pair;
+        _restore_service($v, $r, 'real');
+        fallback_off($v);
+    }
+}
+
+# _service_down
+# Bring a real service down if it is up
+# Should be called by service_set only
+# I.e. if you want to change the state of a real server call service_set.
+#      If you call this function directly then l7directord will lose track
+#      of the state of real servers.
+# pre: v_r_list: virtual and real pair list
+#                [ [$v, $r], [$v, $r] ... ]
+# post: real service is taken down from the respective virtual service
+#       if it is active
+# return: none
+sub _service_down {
+    my $v_r_list = shift;
+    if ( !_status_down($v_r_list) ) {
+        return;
+    }
+
+    for my $v_r_pair (@$v_r_list) {
+        my ($v, $r) = @$v_r_pair;
+        _remove_service($v, $r, 'real');
+        fallback_on($v);
+    }
+}
+
+# _status_up
+# Set the status of a server as up
+# Should only be called from _service_up or fallback_on
+sub _status_up {
+    my ($v_r_list, $is_fallback) = @_;
+    if (!defined $v_r_list) {
+        return 0;
+    }
+
+    if (!$is_fallback) {
+        my $current_status = get_status($v_r_list);
+        if (defined $current_status && $current_status eq $SERVICE_UP) {
+            return 0;
+        }
+    
+        my $id = get_health_check_id_str( @{ $v_r_list->[0] } );
+        if (!defined $id) {
+            ld_log( _message('ERR0503') );
+            return 0;
+        }
+        $HEALTH_CHECK{$id}{status} = $SERVICE_UP;
+    
+        return 1;
+    }
+    else {
+        my $current_service = ld_read_l7vsadm();
+        if (!defined $current_service) {
+            ld_log( _message('FTL0201') );
+            return 0;
+        }
+        my $vid = get_virtual_id_str( $v_r_list->[0][0] );
+        if ( exists $current_service->{$vid} ) {
+            # no real server
+            if ( !defined $current_service->{$vid} ) {
+                return 1;
+            }
+            my $weight = 0;
+            # all real server's weight are zero.
+            for my $real ( keys %{ $current_service->{$vid} } ) {
+                if ( 'other_virtual_option' eq $real ){
+                    next;
+                }
+                # already added fallback server.
+                if ( $real eq get_ip_port( $v_r_list->[0][1] ) ) {
+                    return 0;
+                }
+                $weight += $current_service->{$vid}{$real}{weight};
+            }
+            if ($weight == 0) {
+                return 1;
+            }
+        }
+        return 0;
+    }
+}
+
+# _status_down
+# Set the status of a server as down
+# Should only be called from _service_down or _ld_stop
+sub _status_down {
+    my ($v_r_list, $is_fallback) = (@_);
+    if (!defined $v_r_list) {
+        return 0;
+    }
+
+    if (!$is_fallback) {
+        my $current_status = get_status($v_r_list);
+        if ($current_status && $current_status eq $SERVICE_DOWN) {
+            return 0;
+        }
+    
+        my $id = get_health_check_id_str( @{ $v_r_list->[0] } );
+        if (!defined $id) {
+            ld_log( _message('ERR0503') );
+            return 0;
+        }
+        $HEALTH_CHECK{$id}{status} = $SERVICE_DOWN;
+    
+        return 1;
+    }
+    else {
+        my $current_service = ld_read_l7vsadm();
+        if (!defined $current_service) {
+            ld_log( _message('FTL0201') );
+            return 0;
+        }
+        my $vid = get_virtual_id_str( $v_r_list->[0][0] );
+        if ( defined $current_service->{$vid} ) {
+            my $weight = 0;
+            my $fallback_exist = 0;
+            # any real server has weight.
+            for my $real ( keys %{ $current_service->{$vid} } ) {
+                if ( 'other_virtual_option' eq $real ){
+                    next;
+                }
+                if ( $real eq get_ip_port( $v_r_list->[0][1] ) ) {
+                    $fallback_exist = 1;
+                }
+                $weight += $current_service->{$vid}{$real}{weight};
+            }
+            if ($fallback_exist && $weight) {
+                return 1;
+            }
+        }
+        return 0;
+    }
+}
+
+# get_status
+# Get health check server status
+# return $SERVICE_UP / $SERVICE_DOWN
+sub get_status {
+    my $v_r_list = shift;
+
+    my $id = get_health_check_id_str( @{ $v_r_list->[0] } );
+    if (!defined $id) {
+        ld_log( _message('ERR0503') );
+        return 0;
+    }
+    return $HEALTH_CHECK{$id}{status};
+}
+
+# _remove_service
+# Remove a real server by either making it quiescent or deleteing it
+# Should be called by _service_down or fallback_off
+# I.e. If you want to change the state of a real server call service_set.
+#      If you call this function directly then l7directord will lose track
+#      of the state of real servers.
+# If the real server exists (which it should) make it quiescent or
+# delete it, depending on the global and per virtual service quiecent flag.
+# If it # doesn't exist, just leave it as it will be added by the
+# _service_up code as appropriate.
+# pre: v: reference to virtual service to with the real server belongs
+#      rservice: service to restore. Of the form server:port for tcp
+#      rforw: Forwarding mechanism of service. Should be only "-m"
+#    rforw is kept as it is, even though not used - NTT COMWARE
+#      tag: Tag to use for logging. Should be either "real" or "fallback"
+# post: real service is taken up from the respective virtual service
+#       if it is inactive
+# return: none
+sub _remove_service {
+    my ($v, $r, $tag) = @_;
+    if (!defined $v || !defined $r) {
+        ld_log( _message('ERR0501') );
+        return;
+    }
+
+    my $vip_id = get_virtual_id_str($v);
+    if (!defined $vip_id) {
+        ld_log( _message('ERR0502') );
+        return;
+    }
+    my $oldsrv = ld_read_l7vsadm();
+    if (!defined $oldsrv) {
+        ld_log( _message('FTL0201') );
+        return;
+    }
+
+    if ( !exists $oldsrv->{$vip_id} ) {
+        ld_log( _message( 'ERR0208', get_ip_port($r), get_ip_port($v) ) );
+        return;
+    }
+
+    # quiescent check
+    my $is_quiescent = 0;
+    if (!defined $tag || $tag ne 'fallback') {
+        if ( defined $v->{quiescent} && $v->{quiescent} ) {
+            $is_quiescent = 1;
+        }
+    }
+
+    my $or = $oldsrv->{$vip_id}{ get_ip_port($r) };
+    # already removed server
+    if (!defined $or && !$is_quiescent) {
+        my $module_key = $v->{module}{name} . q{ } . $v->{module}{key};
+        ld_log( _message( 'ERR0210', get_ip_port($r), get_ip_port($v), $module_key ) );
+        return;
+    }
+    # already quiescent server
+    if ( defined $or && $is_quiescent && $or->{weight} == 0 &&
+         $or->{option}{forward} eq $r->{option}{forward} ) {
+        my $module_key = $v->{module}{name} . q{ } . $v->{module}{key};
+        ld_log( _message( 'ERR0211', get_ip_port($r), get_ip_port($v), $module_key ) );
+        return;
+    }
+
+    if ($is_quiescent) {
+        if (defined $or) {
+            ld_edit_real($v, $r, 0);
+        }
+        else {
+            ld_add_real($v, $r, 0);
+        }
+        if (!defined $tag || $tag eq 'real') {
+            ld_log( _message( 'INF0303', get_ip_port($r) ) );
+        }
+        elsif ($tag eq 'fallback') {
+            ld_log( _message( 'INF0304', get_ip_port($r) ) );
+        } 
+    }
+    else {
+        ld_delete_real($v, $r);
+        if (!defined $tag || $tag eq 'real') {
+            ld_log( _message( 'INF0305', get_ip_port($r) ) );
+        }
+        elsif ($tag eq 'fallback') {
+            ld_log( _message( 'INF0306', get_ip_port($r) ) );
+        } 
+    }
+
+    if ( defined $v->{realdowncallback} && $r->{healthchecked} ) {
+        system_wrapper( $v->{realdowncallback}, get_ip_port($r) );
+        ld_log( _message( 'INF0501',  $v->{realdowncallback}, get_ip_port($r) ) );
+    }
+    $r->{healthchecked} = 1;
+}
+
+# _restore_service
+# Make a retore a real server. The opposite of _quiescent_server.
+# Should be called by _service_up or fallback_on
+# I.e. If you want to change the state of a real server call service_set.
+#      If you call this function directly then l7directord will lose track
+#      of the state of real servers.
+# If the real server exists (which it should) make it quiescent. If it
+# doesn't exist, just leave it as it will be added by the _service_up code
+# as appropriate.
+# pre: v: reference to virtual service to with the real server belongs
+#      r: reference to real server to restore.
+#      tag: Tag to use for logging. Should be either "real" or "fallback"
+# post: real service is taken up from the respective virtual service
+#       if it is inactive
+# return: none
+sub _restore_service {
+    my ($v, $r, $tag) = @_;
+    if (!defined $v || !defined $r) {
+        ld_log( _message('ERR0501') );
+        return;
+    }
+
+    my $vip_id = get_virtual_id_str($v);
+    if (!defined $vip_id) {
+        ld_log( _message('ERR0502') );
+        return;
+    }
+    my $oldsrv = ld_read_l7vsadm();
+    if (!defined $oldsrv) {
+        ld_log( _message('FTL0201') );
+        return;
+    }
+
+    if ( !exists $oldsrv->{$vip_id} ) {
+        ld_log( _message( 'ERR0207', get_ip_port($r), get_ip_port($v) ) );
+        return;
+    }
+
+    my $or = $oldsrv->{$vip_id}{ get_ip_port($r) };
+    # already completely same server exist
+    if ( defined $or &&
+         $or->{weight} eq $r->{weight} &&
+         $or->{option}{forward} eq $r->{option}{forward} ) {
+        my $module_key = $v->{module}{name} . q{ } . $v->{module}{key};
+        ld_log( _message( 'ERR0209', get_ip_port($r), get_ip_port($v), $module_key ) );
+        return;
+    }
+
+    if (defined $or) {
+        ld_edit_real( $v, $r, $r->{weight} );
+    }
+    else {
+        ld_add_real( $v, $r, $r->{weight} );
+    }
+
+    if (!defined $tag || $tag eq 'real') {
+        ld_log( _message( 'INF0301', get_ip_port($r) ) );
+    }
+    elsif ($tag eq 'fallback') {
+        ld_log( _message( 'INF0302', get_ip_port($r) ) );
+    } 
+
+    if ( defined $v->{realrecovercallback} && $r->{healthchecked} ){
+        system_wrapper( $v->{realrecovercallback}, get_ip_port($r) );
+        ld_log( _message( 'INF0502',  $v->{realrecovercallback}, get_ip_port($r) ) );
+    }
+    $r->{healthchecked} = 1;
+}
+
+# fallback_on
+# Turn on the fallback server for a virtual service if it is inactive
+# pre: v: virtual to turn fallback service on for
+# post: fallback server is turned on if it was inactive
+# return: none
+sub fallback_on {
+    my $v = shift;
+
+    my $fallback = fallback_find($v);
+    if (defined $fallback) {
+        my $v_r_list = [ [ $v, $fallback->{tcp} ] ];
+        if ( _status_up($v_r_list, 'fallback') ) {
+            _restore_service($v, $fallback->{tcp}, 'fallback');
+        }
+    }
+}
+
+# fallback_off
+# Turn off the fallback server for a virtual service if it is active
+# pre: v: virtual to turn fallback service off for
+# post: fallback server is turned off if it was active
+# return: none
+sub fallback_off {
+    my $v = shift;
+
+    my $fallback = fallback_find($v);
+    if (defined $fallback) {
+        my $v_r_list = [ [ $v, $fallback->{tcp} ] ];
+        if ( _status_down($v_r_list, 'fallback') ) {
+            _remove_service($v, $fallback->{tcp}, 'fallback');
+        }
+    }
+}
+
+# fallback_find
+# Determine the fallback for a virtual service
+# pre: v: reference to a virtual service
+# post: none
+# return: $v->{fallback} if defined
+#         else undef
+sub fallback_find {
+    my $v = shift;
+    if (!defined $v) {
+        ld_log( _message('ERR0501') );
+        return;
+    }
+    return $v->{fallback};
+}
+
+# check_cfgfile
+# Check configfile change.
+# pre: none
+# post: check configfile size, and then check md5 sum
+# return: 1 if notice file change
+#         0 if not notice or not change
+sub check_cfgfile {
+    if (!defined $CONFIG_FILE{path}) {
+        ld_log( _message('FTL0102') );
+        return 0;
+    }
+
+    my $mtime = (stat $CONFIG_FILE{path})[9];
+    if (!defined $mtime) {
+        ld_log( _message( 'ERR0410', $CONFIG_FILE{path} ) );
+        return 0;
+    }
+
+    if ( defined $CONFIG_FILE{stattime} && $mtime == $CONFIG_FILE{stattime} ) {
+        # file mtime is not change
+        return 0;
+    }
+    $CONFIG_FILE{stattime} = $mtime;
+
+    my $digest = undef;;
+    eval {
+        require Digest::MD5;
+
+        my $ctx = Digest::MD5->new();
+        open my $config, '<', $CONFIG_FILE{path};
+        $ctx->addfile($config);
+        $digest = $ctx->hexdigest;
+        close $config;
+    };
+    if ($EVAL_ERROR) {
+        ld_log( _message( 'ERR0407', $CONFIG_FILE{path} ) );
+        return 0;
+    }
+
+    if (defined $CONFIG_FILE{checksum} && $digest && 
+                $CONFIG_FILE{checksum} ne $digest ) {
+        ld_log( _message('WRN0101', $CONFIG_FILE{path}) );
+        $CONFIG_FILE{checksum} = $digest;
+
+        if ( defined $CONFIG{callback} && -x $CONFIG{callback} ) {
+            system_wrapper( $CONFIG{callback} . q{ } . $CONFIG_FILE{path} );
+            ld_log( _message( 'INF0503',  $CONFIG{callback}, $CONFIG_FILE{path} ) );
+        }
+
+        if ( $CONFIG{autoreload} ) {
+            ld_log( _message('WRN0102') );
+            return 1;
+        }
+        else {
+            ld_log( _message('WRN0103') );
+            return 0;
+        }
+    }
+
+    $CONFIG_FILE{checksum} = $digest;
+    return 0;
+}
+
+# ld_openlog
+# Open logger
+# make log rotation work
+# pre: log setting
+# post: If logger is a file, it opened and closed again as a test
+#       If logger is syslog, it is opened so it can be used without
+#       needing to be opened again.
+#       Otherwiese, nothing is done.
+# return: 0 on success
+#         1 on error
+sub ld_openlog {
+    my $log_config = shift;
+    if (!defined $log_config) {
+        ld_log( _message('ERR0501') );
+        return 1;
+    }
+
+    if ( $DEBUG_LEVEL > 0 or $CONFIG{supervised} ) {
+        # Instantly do nothing
+        return 0;
+    }
+
+    if ( $log_config =~ m{^/}) {
+        # Open and close the file as a test.
+        # We open the file each time we want to log to it
+        eval {
+            open my $log_file, ">>", $log_config;
+            close $log_file;
+        };
+        if ($EVAL_ERROR) {
+            ld_log( _message('ERR0118', $log_config) );
+            return 1;
+        }
+    }
+    else {
+        # Assume $log_config is a logfacility, log to syslog
+        setlogsock("unix");
+        openlog("l7directord", "pid", $log_config);
+        # FIXME "closelog" not found
+    }
+
+    $PROC_STAT{log_opened} = 1;
+    return 0;
+}
+
+# ld_log
+# Log a message.
+# pre: message: Message to write
+# post: message and timetsamp is written to loged
+#       If logger is a file, it is opened and closed again as a
+#       primative means to make log rotation work
+# return: 0 on success
+#         1 on error
+sub ld_log {
+    my $message = shift;
+    if (!defined $message) {
+        ld_log( _message('ERR0501') );
+        return 1;
+    }
+
+    ld_debug(2, $message);
+    chomp $message;
+
+    if ( !$CONFIG{supervised} && !$PROC_STAT{log_opened} ) {
+        return 1;
+    }
+
+    my $now = localtime();
+    my $line_header = sprintf "[%s|%d] ", $now, $PROC_STAT{pid};
+    $message =~ s/^/$line_header/mg;
+
+    if ( $CONFIG{supervised} ) {
+        print {*STDOUT} $message . "\n";
+    }
+    elsif ( $CONFIG{logfile} =~ m{^/} ) {
+        eval {
+            open my $log_file, '>>', $CONFIG{logfile};
+            flock $log_file, 2; # LOCK_EX
+            print {$log_file} $message . "\n";
+            close $log_file;
+        };
+        if ($EVAL_ERROR) {
+            print {*STDERR} _message_only( 'FTL0103', $CONFIG{logfile}, $message ) . "\n";
+            return 1;
+        }
+    }
+    else {
+        # Assume LOGFILE is a logfacility, log to syslog
+        syslog('info', $message);
+    }
+    return 0;
+}
+
+# ld_debug
+# Log a message to a STDOUT.
+# pre: priority: priority of message
+#      message: Message to write
+# post: message is written to STDOUT if $DEBUG_LEVEL >= priority
+# return: none
+sub ld_debug {
+    my ($priority, $message) = @_;
+
+    if (defined $priority && $priority =~ /^\d+$/ &&
+        defined $message  && $DEBUG_LEVEL >= $priority) {
+        chomp $message;
+        $message =~ s/^/DEBUG[$priority]: /mg;
+        print {*STDERR} $message . "\n";
+    }
+}
+
+# command_wrapper
+# Wrapper around command(qx) to get output
+# pre: command to execute
+# post: execute command and if it returns non-zero a failure
+#       message is logged
+# return: return value of command, and output
+sub command_wrapper {
+    my $command = shift;
+
+    if ($DEBUG_LEVEL > 2) {
+        ld_log( _message( 'INF0506', $command) );
+    }
+
+    $command =~ s/([{}\\])/\\$1/g;
+    my $output = qx($command);
+    if ($CHILD_ERROR != 0) {
+        ld_log( _message('ERR0303', $command, $CHILD_ERROR) );
+    }
+    return ($CHILD_ERROR, $output);
+}
+
+# system_wrapper
+# Wrapper around system() to log errors
+# pre: LIST: arguments to pass to system()
+# post: system() is called and if it returns non-zero a failure
+#       message is logged
+# return: return value of system()
+sub system_wrapper {
+    my @args = @_;
+
+    if ($DEBUG_LEVEL > 2) {
+        ld_log( _message( 'INF0504', join(q{ }, @args) ) );
+    }
+    my $status = system(@args);
+    if ($DEBUG_LEVEL > 2) {
+        if ($status != 0) {
+            ld_log( _message('ERR0301', join(q{ }, @args), $status) );
+        }
+    }
+    return $status;
+}
+
+# exec_wrapper
+# Wrapper around exec() to log errors
+# pre: LIST: arguments to pass to exec()
+# post: exec() is called and if it returns non-zero a failure
+#       message is logged
+# return: return value of exec() on failure
+#         does not return on success
+sub exec_wrapper {
+    my @args = @_;
+
+    if ($DEBUG_LEVEL > 2) {
+        ld_log( _message( 'INF0505', join(q{ }, @args) ) );
+    }
+    my $status = exec(@args);
+    if (!$status) {
+        ld_log( _message('ERR0302', join(q{ }, @args), $status) );
+    }
+    return $status;
+}
+
+# ld_rm_file
+# Remove a file, symink, or anything that isn't a directory
+# and exists
+# pre: filename: file to delete
+# post: If filename does not exist or is a directory an
+#       error state is reached
+#       Else filename is delete
+#       If $DEBUG_LEVEL >=2 errors are logged
+# return:  0 on success
+#         -1 on error
+sub ld_rm_file {
+    my $filename = shift;
+    if (!defined $filename) {
+        ld_log( _message('ERR0411') );
+        return -1;
+    }
+    if (-d $filename) {
+        ld_log( _message('ERR0401', $filename) );
+        return -1;
+    }
+    if (!-e $filename) {
+        ld_log( _message('ERR0402', $filename) );
+        return -1;
+    }
+    my $status = unlink $filename;
+    if ($status != 1) {
+        ld_log( _message('ERR0403', $filename, $ERRNO) );
+        return -1;
+    }
+    return 0;
+}
+
+# is_octet
+# See if a number is an octet, that is >=0 and <=255
+# pre: alleged_octet: the octect to test
+# post: alleged_octect is checked to see if it is valid
+# return: 1 if the alleged_octet is an octet
+#         0 otherwise
+sub is_octet {
+    my $alleged_octet = shift;
+    if (!defined $alleged_octet || $alleged_octet !~ /^\d+$/ || $alleged_octet > 255) {
+        ld_log( _message('ERR0501') );
+        return 0;
+    }
+    return 1;
+}
+
+# is_ip
+# Check that a given string is an IP address
+# pre: alleged_ip: string representing ip address
+# post: alleged_ip is checked to see if it is valid
+# return: 1 if alleged_ip is a valid ip address
+#         0 otherwise
+sub is_ip {
+    my $alleged_ip = shift;
+
+    # If we don't have four, . delimited numbers then we have no hope
+    if (!defined $alleged_ip || $alleged_ip !~ m/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/) {
+##        ld_log( _message('ERR0501') );
+        return 0;
+    }
+
+    # Each octet must be >=0 and <=255
+    is_octet($1) or return 0;
+    is_octet($2) or return 0;
+    is_octet($3) or return 0;
+    is_octet($4) or return 0;
+
+    return 1;
+}
+
+# is_ip6
+# Check that a given string is an IPv6 address
+# pre: alleged_ip6: string representing ip address
+# post: alleged_ip6 is checked to see if it is valid
+# return: 1 if alleged_ip is a valid ipv6 address
+#         0 otherwise
+sub is_ip6 {
+    my $alleged_ip = shift;
+    my @return_array = (0, undef);
+
+    if (!defined $alleged_ip ) {
+        ld_log( _message('ERR0501') );
+        return 0;
+    }
+
+    ## Change IPv6 Address 
+    $alleged_ip =~ s/[\[\]]//g;
+    ## get LinkLocal 
+    my ($work, $link_local) = split /%/, $alleged_ip;
+    my @address;
+    if ( $alleged_ip =~ /::/ ){
+        my ($adr_a, $adr_b) = split /::/, $alleged_ip;
+        my @adr_a           = split /:/ , $adr_a;
+        my @adr_b           = split /:/ , $adr_b;
+        for(scalar @adr_a .. 7 - scalar @adr_b){
+            push @adr_a,0; 
+        }
+        @address = (@adr_a, @adr_b);
+    }
+    else {
+        @address = split /:/, $alleged_ip;
+    }
+    $alleged_ip  = join ":", @address;
+    if ( defined $link_local ){
+        $alleged_ip .= '%' . $link_local;
+    }
+    if (!defined $alleged_ip || 
+            $alleged_ip !~ m/^([0-9a-fA-F]{1,4}):
+                              ([0-9a-fA-F]{1,4}):
+                              ([0-9a-fA-F]{1,4}):
+                              ([0-9a-fA-F]{1,4}):
+                              ([0-9a-fA-F]{1,4}):
+                              ([0-9a-fA-F]{1,4}):
+                              ([0-9a-fA-F]{1,4}):
+                              ([0-9a-fA-F]{1,4})(%.+)?$/x) {
+        return 0;
+    }
+    @return_array = (1, @address);
+    return @return_array;
+}
+
+
+# ip_to_int
+# Turn an IP address given as a dotted quad into an integer
+# pre: ip_address: string representing IP address
+# post: post ip_address is converted to an integer
+# return: -1 if an error occurs
+#         integer representation of IP address otherwise
+sub ip_to_int {
+    my $ip_address = shift;
+    my $ip_version = 'ipv4';
+    my $result = undef;
+    my $result2 = undef;
+    my @return_array = (undef, -1);
+
+
+    if ( is_ip($ip_address) ) {
+        my ($oct1, $oct2, $oct3, $oct4)
+            = $ip_address =~ m/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
+        $result = ($oct1 << 24) + ($oct2 << 16) + ($oct3 << 8) + $oct4;
+    }
+    else {
+        my ( $ret, @address ) = is_ip6($ip_address);
+        if ( $ret == 1 ) {
+            my ( $hex1, $hex2, $hex3, $hex4, $hex5, $hex6, $hex7, $hex8, $linklocal) = @address;
+            $result  = (hex($hex5) << 48)  + (hex($hex6) << 32) + (hex($hex7) << 16)  + hex($hex8);
+            $result2 = (hex($hex1) << 48)  + (hex($hex2) << 32) + (hex($hex3) << 16)  + hex($hex4);                      
+            $ip_version = 'ipv6';
+        }
+        else {
+            return @return_array;
+        }
+    }
+    @return_array = ($ip_version, $result, $result2);
+    return @return_array;
+}
+
+# int_to_ip
+# Turn an IP address given as an integer into a dotted quad
+# pre: ip_address: integer representation of IP address
+# post: Decimal is converted to a dotted quad
+# return: string representing IP address
+sub int_to_ip {
+    my ($ip_version, $ip_address,$ip_address2) = @_;
+    if (!defined $ip_address || $ip_address !~ /^\d+$/ ) {
+     ##|| !defined $ip_version || $ip_version !~ /ipv[46]/ ) {
+        ld_log( _message('ERR0501') );
+        return;
+    }
+
+    my $result = undef;
+    if ($ip_version eq 'ipv6') {
+    ## IPv6 Address Change
+        $result = sprintf "%0x:%0x:%0x:%0x:%0x:%0x:%0x:%0x",
+                         ($ip_address2 >>  48) & 0xffff,
+                         ($ip_address2 >>  32) & 0xffff,
+                         ($ip_address2 >>  16) & 0xffff,
+                         ($ip_address2   ) & 0xffff,
+                         ($ip_address >>  48) & 0xffff,
+                         ($ip_address >>  32) & 0xffff,
+                         ($ip_address >>  16) & 0xffff,
+                         ($ip_address       ) & 0xffff;
+    }
+    else {
+    ## IPv4 Address Change
+        $result = sprintf "%d.%d.%d.%d",
+                         ($ip_address >> 24) & 0xff,
+                         ($ip_address >> 16) & 0xff,
+                         ($ip_address >> 8 ) & 0xff,
+                         ($ip_address      ) & 0xff;
+    }
+    return $result;
+}
+
+# get_ip_port
+# Get the service for a virtual or a real
+# pre: host: virtual or real to get the service for
+# post: none
+# return: ip_address:port
+sub get_ip_port {
+    my ($host, $checkport) = @_;
+    my $server = defined $host && defined $host->{server} && defined $host->{server}{ip}
+                    ? $host->{server}{ip  } : q{};
+    if (is_ip6($server)) {
+        $server = sprintf "[%s]" , $server;
+    }
+    my $port   = defined $checkport ? $checkport
+               : defined $host && defined $host->{server} && defined $host->{server}{port}
+                    ? $host->{server}{port} : q{};
+
+    my $ip_port = $server ne q{} && $port ne q{} ? "$server:$port" : q{};
+    return $ip_port;
+}
+
+# get_health_check_id_str
+# Get an id string for a health check process
+# pre: r: Real service.
+#      v: Virtual service
+# post: none
+# return: Id string for the health check process
+sub get_health_check_id_str {
+    my ($v, $r) = @_;
+    if ( !defined $v || !defined $r || !defined $r->{server} ) {
+        ld_log( _message('ERR0501') );
+        return;
+    }
+
+    my $ip   = defined $r->{server}{ip  } ? $r->{server}{ip  } : q{};
+    my $port = defined $v->{checkport   } ? $v->{checkport   } :
+               defined $r->{server}{port} ? $r->{server}{port} : q{};
+    my $checktype    = defined $v->{checktype   } ? $v->{checktype   } : q{};
+    my $service      = defined $v->{service     } ? $v->{service     } : q{};
+    my $protocol     = defined $v->{protocol    } ? $v->{protocol    } : q{};
+    my $num_connects = defined $v->{num_connects} ? $v->{num_connects} : q{};
+    my $request      = defined $r->{request     } ? $r->{request     } : q{};
+    my $receive      = defined $r->{receive     } ? $r->{receive     } : q{};
+    my $httpmethod   = defined $v->{httpmethod  } ? $v->{httpmethod  } : q{};
+    my $virtualhost  = defined $v->{virtualhost } ? $v->{virtualhost } : q{};
+    my $login        = defined $v->{login       } ? $v->{login       } : q{};
+    my $password     = defined $v->{passwd      } ? $v->{passwd      } : q{};
+    my $database     = defined $v->{database    } ? $v->{database    } : q{};
+    ## fumei
+    my $customcheck  = defined $v->{customcheck } ? $v->{customcheck } : q{};
+    my $checkinterval    = defined $v->{checkinterval    } ? $v->{checkinterval    } : q{};
+    my $checkcount       = defined $v->{checkcount       } ? $v->{checkcount       } : q{};
+    my $checktimeout     = defined $v->{checktimeout     } ? $v->{checktimeout     } : q{};
+    my $negotiatetimeout = defined $v->{negotiatetimeout } ? $v->{negotiatetimeout } : q{};
+    my $retryinterval    = defined $v->{retryinterval    } ? $v->{retryinterval    } : q{};
+
+    # FIXME SHOULD change separator. (request, receive, login, passwd ,database may include ':')
+    my $id = "$ip:$port:$checktype:$service:$protocol:$num_connects:$request:$receive:" .
+             "$httpmethod:$virtualhost:$login:$password:$database:$customcheck:" .
+             "$checkinterval:$checkcount:$checktimeout:$negotiatetimeout:$retryinterval";
+
+    return $id;
+}
+
+# get_virtual_id_str
+# Get an id string for a virtual service
+# pre: v: Virtual service
+# post: none
+# return: Id string for the virtual service
+sub get_virtual_id_str {
+    my $v = shift;
+    if ( !defined $v || !defined $v->{module} ) {
+        ld_log( _message('ERR0501') );
+        return;
+    }
+
+    my $ip_port     = get_ip_port($v);
+    my $protocol    = defined $v->{protocol    } ? $v->{protocol    } : q{};
+    my $module_name = defined $v->{module}{name} ? $v->{module}{name} : q{};
+    my $module_key  = defined $v->{module}{key } ? $v->{module}{key } : q{};
+
+    my $id = "$protocol:$ip_port:$module_name $module_key";
+    $id =~ s/ +$//;
+
+    return $id;
+    # [cf] id = "tcp:127.0.0.1:80:cinsert --cookie-name 'monkey'"
+}
+
+# get_forward_flag
+# Get the l7vsadm flag corresponging to a forwarding mechanism
+# pre: forward: Name of forwarding mechanism. (masq or tproxy)
+# post: none
+# return: l7vsadm flag corresponding to the forwading mechanism
+#         " " if $forward is unknown
+sub get_forward_flag {
+    my $forward = shift;
+
+    if (defined $forward && $forward =~ /^masq$/i) {
+        return '--masq';
+    }
+    elsif (defined $forward && $forward =~ /^tproxy$/i) {
+        return '--tproxy';
+    }
+    return q{};
+}
+
+# ld_exit
+# Exit and log a message
+# pre: exit_status: Integer exit status to exit with
+#                   0 wiil be used if parameter is omitted
+#      message: Message to log when exiting. May be omitted
+# post: If exit_status is non-zero or $DEBUG_LEVEL>2 then
+#       message logged.
+#       Programme exits with exit_status
+# return: does not return
+sub ld_exit {
+    my ($exit_status, $message) = @_;
+    if (defined $exit_status && defined $message) {
+        ld_log( _message('INF0006', $exit_status, $message) );
+    }
+    exit $exit_status;
+}
+
+# ld_open_socket
+# Open a socket connection
+# pre: remote: IP address as a dotted quad of remote host to connect to
+#      port: port to connect to
+#      protocol: Prococol to use. Should be either "tcp" or "udp"
+# post: A Socket connection is opened to the remote host
+# return: Open socket
+sub ld_open_socket {
+    require IO::Socket::INET6;
+    my ($remote, $port, $protocol, $timeout) = @_;
+    my $sock_handle = IO::Socket::INET6->new(
+            PeerAddr => $remote,
+            PeerPort => $port,
+            Proto    => $protocol,
+            Timeout  => $timeout,
+        );
+
+    return $sock_handle;
+}
+
+# daemon
+# Close and fork to become a daemon.
+#
+# Notes from unix programmer faq
+# http://www.landfield.com/faqs/unix-faq/programmer/faq/
+#
+# Almost none of this is necessary (or advisable) if your daemon is being
+# started by `inetd'.  In that case, stdin, stdout and stderr are all set up
+# for you to refer to the network connection, and the `fork()'s and session
+# manipulation should *not* be done (to avoid confusing `inetd').  Only the
+# `chdir()' step remains useful.
+sub ld_daemon {
+    ld_daemon_become_child();
+
+    if (POSIX::setsid() < 0) {
+        ld_exit( 7, _message_only('ERR0702') );
+    }
+
+    ld_daemon_become_child();
+
+    if (chdir('/') < 0) {
+        ld_exit( 8, _message_only('ERR0703') );
+    }
+
+    close *STDIN;
+    close *STDOUT;
+    close *STDERR;
+
+    eval { open  *STDIN, '<', '/dev/null'; };
+    ld_exit(9, _message_only('ERR0704') ) if ($EVAL_ERROR);
+    eval { open *STDOUT, '>>', '/dev/console'; };
+    ld_exit(10, _message_only('ERR0705') ) if ($EVAL_ERROR);
+    eval { open *STDERR, '>>', '/dev/console'; };
+    ld_exit(10, _message_only('ERR0705') ) if ($EVAL_ERROR);
+}
+
+# ld_daemon_become_child
+# Fork, kill parent and return child process
+# pre: none
+# post: process forkes and parent exits
+#       All preocess exit with exit status -1 if an error occurs
+# return: parent: exits
+#         child: none  (this is the process that returns)
+sub ld_daemon_become_child {
+    my $status = fork();
+    $PROC_STAT{pid} = $PID;
+
+    if ($status < 0) {
+        ld_exit( 6, _message_only('ERR0701', $ERRNO) );
+    }
+    if ($status > 0) {
+        ld_exit( 0, _message_only('INF0005') );
+    }
+}
+
+# ld_gethostbyname
+# Wrapper to gethostbyname. Look up the/an IP address of a hostname
+# If an IP address is given is it returned
+# pre: name: Hostname of IP address to lookup
+# post: gethostbyname is called to find an IP address for $name
+#       This is converted to a string
+# return: IP address
+#         undef on error
+sub ld_gethostbyname {
+    require IO::Socket::INET6;
+    my $name = shift;
+    $name = q{} if !defined $name;
+    my $addrs = ( gethostbyname($name) )[4];
+    if ( defined $addrs && $addrs ){
+        return Socket::inet_ntoa($addrs);
+    }
+    else {
+        $name =~ s/\[|\]//g;
+        my $addrs = ( gethostbyname2($name, AF_INET6) )[4] or return;
+        return inet_ntop(AF_INET6,$addrs);
+    }
+    return;
+}
+
+# ld_getservbyname
+# Wraper for getservbyname. Look up the port for a service name
+# If a port is given it is returned.
+# pre: name: Port or Service name to look up
+# post: if $name is a number
+#         if 0<=$name<=65536 $name is returned
+#         else undef is returned
+#       else getservbyname is called to look up the port for the service
+# return: Port
+#         undef on error
+sub ld_getservbyname {
+    my ($name, $protocol) = @_;
+    $name     = q{} if !defined $name;
+    $protocol = q{} if !defined $protocol;
+
+    if ($name =~ /^\d+$/) {
+        if ($name > 65535) {
+            return;
+        }
+        return $name;
+    }
+
+    my $port = ( getservbyname($name, $protocol) )[2];
+    return $port;
+}
+
+# ld_gethostservbyname
+# Wraper for ld_gethostbyname and ld_getservbyname. Given a server of the
+# form ip_address|hostname:port|servicename return hash refs of ip_address and port
+# pre: hostserv: Servver of the form ip_address|hostname:port|servicename
+#      protocol: Protocol for service. Should be either "tcp" or "udp"
+# post: lookups performed as per ld_getservbyname and ld_gethostbyname
+# return: { ip => ip_address, port => port }
+#         undef on error
+sub ld_gethostservbyname {
+    my ($hostserv, $protocol) = @_;
+    my $ip   = undef;
+    my $port = undef;
+
+    if (!defined $hostserv || $hostserv !~ /
+            ^
+            (\d+\.\d+\.\d+\.\d+|[a-z0-9.-]+) # host or ip
+            :                                # colon
+            (\d+|[a-z0-9-]+)                 # serv or port
+            $
+        /ix) {
+        if ( !defined $hostserv || $hostserv !~ /
+                 ^
+	     (\[[a-z0-9.-:%]+\]) # host or ip
+                 :                           # colon
+                 (\d+|[a-z0-9-]+)            # serv or port
+                 $
+             /ix) {
+            return;
+        }
+        $ip   = $1;
+        $port = $2;
+        $ip   =~ s/\[|\]//g;
+
+    }
+    else {
+        $ip   = $1;
+        $port = $2;
+    }
+
+    $ip   = ld_gethostbyname($ip) or return;
+    $port = ld_getservbyname($port, $protocol);
+
+    return if !defined $port;
+
+    return {ip => $ip, port => $port};
+}
+
+# _message_only
+# Create message only.
+sub _message_only {
+    my ($code, @message_args) = @_;
+
+    my $message_list = {
+        # health check process exit
+        FTL0001 => "health_check argument is invalid. Exit this monitor process with status: 1",
+        FTL0002 => "health_check argument pair, virtual or real structure is invalid. Exit this monitor process with status: 2",
+        FTL0003 => "Detected down management process (pid: %s). Exit this monitor process with status: 3",
+        # file fatal error
+        FTL0101 => "l7vsadm file `%s' is not found or cannot execute.",
+        FTL0102 => "Config file is not defined. So cannot check configuration change.",
+        FTL0103 => "Cannot open logfile `%s'. Log message: `%s'",
+        # command fatal error
+        FTL0201 => "Result of read from l7vsadm is not defined.",
+
+        # exit
+        ERR0001 => "Initialization error: %s",
+        ERR0002 => "Configuration error and exit.",
+        # validation error
+        ERR0101 => "Invalid value (set natural number) `%s'.",
+        ERR0102 => "Invalid value (set `yes' or `no') `%s'.",
+        ERR0103 => "Invalid value (set any word) `%s'.",
+        ERR0104 => "Invalid value (set `custom', `connect', `negotiate', `ping', `off', `on' "
+                 . "or positive number) `%s'.",
+        ERR0105 => "Invalid value (set `lc', `rr' or `wrr') `%s'.",
+        ERR0106 => "Invalid value (set `http', `https', `ftp', `smtp', `pop', `imap', "
+                 . "`ldap', `nntp', `dns', `mysql', `pgsql', `sip', or `none') `%s'.",
+        ERR0107 => "Invalid value (forwarding mode must be `masq' or `tproxy') `%s'.",
+        ERR0108 => "Invalid port number `%s'.",
+        ERR0109 => "Invalid protocol (protocol must be `tcp') `%s'.",
+        ERR0110 => "Invalid HTTP method (set `GET' or `HEAD') `%s'.",
+        ERR0111 => "Invalid module (set `url', `pfilter', `ip', `sslid' or `sessionless') `%s'.",
+        # ERR0111 => "Invalid module (set `cinsert', `cpassive', `crewrite', `url', `pfilter', `ip', `sslid' or `sessionless') `%s'.",
+        ERR0112 => "Invalid module key option (`%s' module must set `%s' option) `%s'.",
+        ERR0113 => "Invalid QoS value (set 0 or 1-999[KMG]. must specify unit(KMG)) `%s'.",
+        ERR0114 => "Invalid address `%s'.",
+        ERR0115 => "Invalid address range (first value(%s) must be less than or equal to the second value(%s)) `%s'.",
+        ERR0116 => "File not found `%s'.",
+        ERR0117 => "File not found or cannot execute `%s'.",
+        ERR0118 => "Unable to open logfile `%s'.",
+        ERR0119 => "Virtual section not found for `%s'.",
+        ERR0120 => "Unknown config `%s'.",
+        ERR0121 => "Configuration error. Reading file `%s' at line %d: %s",
+        ERR0122 => "Caught exception during re-read config file and re-setup l7vsd. (message: %s) "
+                 . "So config setting will be rollbacked.",
+        ERR0123 => "`%s' is a required module for checking %s service.",
+        ERR0124 => "Invalid value `%s'.",
+        ERR0125 => "Invalid accesslog rotate type (set 'date', 'size' or 'datesize') `%s'.",
+        ERR0126 => "Invalid accesslog rotate max backup index number  `%s'.",
+        ERR0127 => "Invalid accesslog rotate max filesize value (set 0 or 1-999[KMG]. must specify unit(KMG)) `%s'.",
+        ERR0128 => "Invalid accesslog rotate rotation timing (set 'year','month','week','date', or 'hour') `%s'.",
+        ERR0129 => "Invalid accesslog rotate rotation timing value `%s'.",
+        # operate l7vsd error
+        ERR0201 => "Failed to add virtual service to l7vsd: `%s %s', output: `%s'",
+        ERR0202 => "Failed to edit virtual service on l7vsd: `%s %s', output: `%s'",
+        ERR0203 => "Failed to delete virtual service from l7vsd: `%s %s', output: `%s'",
+        ERR0204 => "Failed to add server to l7vsd: `%s %s' ( x `%s %s'), output: `%s'",
+        ERR0205 => "Failed to edit server on l7vsd: `%s %s' ( x `%s %s'), output: `%s'",
+        ERR0206 => "Failed to delete server from l7vsd: `%s %s' ( x `%s %s'), output: `%s'",
+        ERR0207 => "Trying add server `%s', but virtual service `%s' is not found.",
+        ERR0208 => "Trying delete server `%s', but virtual service `%s' is not found.",
+        ERR0209 => "`%s' was already existed on l7vsd. ( x `%s %s')",
+        ERR0210 => "`%s' was already deleted on l7vsd. ( x `%s %s')",
+        ERR0211 => "`%s' was already changed to quiescent state on l7vsd. ( x `%s %s')",
+        # command error
+        ERR0301 => "Failed to system `%s' with return: %s",
+        ERR0302 => "Failed to exec `%s' with return: %s",
+        ERR0303 => "Failed to command `%s' with return: %s",
+        # file error
+        ERR0401 => "Failed to delete file `%s': `Is a directory'",
+        ERR0402 => "Failed to delete file `%s': `No such file'",
+        ERR0403 => "Failed to delete file `%s': `%s'",
+        ERR0404 => "Config file `%s' is not found.",
+        ERR0405 => "`l7directord.cf' is not found at default search paths.",
+        ERR0406 => "`l7vsadm' file is not found at default search paths.",
+        ERR0407 => "Cannot open config file `%s'.",
+        ERR0408 => "Cannot close config file `%s'.",
+        ERR0409 => "Cannot open pid file (%s): %s",
+        ERR0410 => "Cannot get mtime of configuration file `%s'",
+        ERR0411 => "No delete file specified.",
+        ERR0412 => "Invalid pid specified. (pid: %s)",
+        # undefined
+        ERR0501 => "Some method arguments are undefined.",
+        ERR0502 => "VirtualService ID is undefined.",
+        ERR0503 => "HealthCheck ID is undefined.",
+        ERR0504 => "negotiate function is undefined. So use check_connect function.",
+        ERR0505 => "custom check script is undefined. So use check_off function.",
+        # health check process
+        ERR0601 => "Service up detected. (Real server `%s')",
+        ERR0602 => "Service down detected. (Real server `%s')",
+        ERR0603 => "Detected down monitor process (pid: %s). Prepare to re-start health check process. (id: `%s')",
+        ERR0604 => "Failed to fork() on sub process creation. (id: `%s')",
+        # daemon
+        ERR0701 => "Cannot fork for become daemon (errno: `%s') and exit.",
+        ERR0702 => "Cannot setsid for become daemon and exit.",
+        ERR0703 => "Cannot chdir for become daemon and exit.",
+        ERR0704 => "Cannot open /dev/null for become daemon and exit.",
+        ERR0705 => "Cannot open /dev/console for become daemon and exit.",
+
+        # signal
+        WRN0001 => "l7directord `%s' received signal: %s. Terminate process.",
+        WRN0002 => "l7directord `%s' received signal: %s. Reload configuration.",
+        WRN0003 => "Signal TERM send error(pid: %d)",
+        WRN0004 => "Signal HUP send error(pid: %d)",
+        # config
+        WRN0101 => "Configuration file `%s' has changed on disk.",
+        WRN0102 => "Reread new configuration.",
+        WRN0103 => "Ignore new configuration.",
+        # service check OK
+        WRN0203 => "Service check OK. HTTP response is valid. HTTP response status line is `%s' (real - `%s:%s')",
+        WRN0204 => "Service check OK. Successfully connect SMTP server. (real - `%s:%s')",
+        WRN0205 => "Service check OK. Successfully connect POP3 server. (real - `%s:%s')",
+        WRN0206 => "Service check OK. Successfully connect IMAP server. (real - `%s:%s')",
+        WRN0207 => "Service check OK. Successfully bind LDAP server. (real - `%s:%s')",
+        WRN0208 => "Service check OK. NNTP response is valid. `%s' (real - `%s:%s')",
+        WRN0209 => "Service check OK. Database response is valid. (real - `%s:%s')",
+        WRN0210 => "Service check OK. Successfully connect socket to server. (real - `%s:%s')",
+        WRN0211 => "Service check OK. SIP response is valid. `%s' (real - `%s:%s')",
+        WRN0212 => "Service check OK. Successfully login FTP server. (real - `%s')",
+        WRN0213 => "Service check OK. Successfully lookup DNS. (real - `%s:%s')",
+        WRN0214 => "Service check OK. Successfully receive ping response. (real - `%s')",
+        WRN0215 => "Custom check result OK. (real - `%s')",
+        # perl warn
+        WRN0301 => "Perl warning: `%s'",
+        # service check NG
+        WRN1001 => "Retry service check `%s' %d more time(s).",
+        # - http
+        WRN1101 => "Service check NG. Check URL `%s' is not valid. (real - `%s:%s')",
+        WRN1102 => "Service check NG. HTTP response is not ok. Response status line is `%s' (real - `%s:%s')",
+        WRN1103 => "Service check NG. Check string `%s' is not found in HTTP response. (real - `%s:%s')",
+        # - smtp
+        WRN1201 => "Service check NG. Cannot connect SMTP server. (real - `%s:%s')",
+        # - pop3
+        WRN1301 => "Service check NG. Cannot connect POP3 server. (real - `%s:%s')",
+        WRN1302 => "Service check NG. Cannot login POP3 server. (real - `%s:%s')",
+        # - imap
+        WRN1401 => "Service check NG. Cannot connect IMAP server. (real - `%s:%s')",
+        WRN1402 => "Service check NG. Cannot login IMAP server. (real - `%s:%s')",
+        WRN1403 => "Service check NG. Connection timeout from IMAP server in %d seconds. (real - `%s:%s')",
+        # - ldap
+        WRN1501 => "Service check NG. Cannot connect LDAP server. (real - `%s:%s')",
+        WRN1502 => "Service check NG. Connection timeout from LDAP server in %d seconds. (real - `%s:%s')",
+        WRN1503 => "Service check NG. LDAP bind error. (real - `%s:%s')",
+        WRN1504 => "Service check NG. Exists %d results (not one) on search Base DN. (real - `%s:%s')",
+        WRN1505 => "Service check NG. Check string `%s' is not found in Base DN search result. (real - `%s:%s')",
+        # - nntp
+        WRN1601 => "Service check NG. Cannot connect NNTP server. (real - `%s:%s')",
+        WRN1602 => "Service check NG. Connection timeout from NNTP server in %d seconds. (real - `%s:%s')",
+        WRN1603 => "Service check NG. NNTP response is not ok. `%s' (real - `%s:%s')",
+        # - sql
+        WRN1701 => "Service check NG. SQL check must set `database', `login', `passwd' by configuration. (real - `%s:%s')",
+        WRN1702 => "Service check NG. Cannot connect database or cannot login database. (real - `%s:%s')",
+        WRN1703 => "Service check NG. Query result has no row. (real - `%s:%s')",
+        WRN1704 => "Service check NG. Expected %d rows of query results, but got %d rows. (real - `%s:%s')",
+        WRN1705 => "Service check NG. Connection timeout from database in %d seconds. (real - `%s:%s')",
+        # - sip
+        WRN1801 => "Service check NG. SIP check must set `login' by configuration. (real - `%s:%s')",
+        WRN1802 => "Service check NG. Cannot connect SIP server. (real - `%s:%s')",
+        WRN1803 => "Service check NG. SIP response is not ok. `%s' (real - `%s:%s')",
+        WRN1804 => "Service check NG. Connection timeout from SIP server in %d seconds. (real - `%s:%s')",
+        # - ftp
+        WRN1901 => "Service check NG. FTP check must set `login', `passwd' by configuration. (real - `%s')",
+        WRN1902 => "Service check NG. Cannot connect FTP server. (real - `%s')",
+        WRN1903 => "Service check NG. Cannot login FTP server. (real - `%s')",
+        WRN1904 => "Service check NG. Cannot chdir to / of FTP server. (real - `%s')",
+        WRN1905 => "Service check NG. Cannot get file `%s' (real - `%s')",
+        WRN1906 => "Service check NG. Check string `%s' is not found in file `%s' (real - `%s')",
+        WRN1907 => "Service check NG. Exception occur during FTP check `%s' (real - `%s')",
+        WRN1908 => "Service check NG. Connection timeout from FTP server in %d seconds. (real - `%s')",
+        # - dns
+        WRN2001 => "Service check NG. DNS check must set `request', `receive' by configuration. (real - `%s:%s')",
+        WRN2002 => "Service check NG. Connection timeout from DNS server in %d seconds. (real - `%s:%s')",
+        WRN2003 => "Service check NG. Net::DNS exception occur `%s' (real - `%s:%s')",
+        WRN2004 => "Service check NG. DNS search `%s' not respond. (real - `%s:%s')",
+        WRN2005 => "Service check NG. Check string `%s' is not found in search result. (real - `%s:%s')",
+        # - ping
+        WRN3101 => "Service check NG. Ping timeout in %d seconds. (real - `%s')",
+        # - connect
+        WRN3201 => "Service check NG. Cannot connect socket to server. (errno: `%s') (real - `%s:%s')",
+        # - custom
+        WRN3301 => "Custom check NG. Check timeout in %d seconds. (real - `%s')",
+        WRN3302 => "Custom check NG. `%s' returns %d",
+
+        # start stop
+        INF0001 => "Starting program with command: `%s'",
+        INF0002 => "Starting l7directord v%s with pid: %d (configuration: `%s')",
+        INF0003 => "Starting l7directord v%s as daemon. (configuration: `%s')",
+        INF0004 => "Exit by initialize error.",
+        INF0005 => "Exit parent process for become daemon",
+        INF0006 => "Exiting with exit status %d: %s",
+        INF0007 => "Detected halt flag. Exit this monitor process with status: 0",
+        INF0008 => "Reached end of `main'",
+        # stderr
+        INF0101 => "l7directord for `%s' is running with pid: %d",
+        INF0102 => "l7directord stale pid file %s for %s",
+        INF0103 => "Other l7directord process is running. (pid: %d)",
+        INF0104 => "l7directord process is not running.",
+        # l7vsd
+        INF0201 => "Add virtual service to l7vsd: `%s %s'",
+        INF0202 => "Edit virtual service on l7vsd: `%s %s'",
+        INF0203 => "Delete virtual service from l7vsd: `%s %s'",
+        INF0204 => "Add server to l7vsd: `%s %s' ( x `%s %s') (weight set to %d)",
+        INF0205 => "Edit server on l7vsd: `%s %s' ( x `%s %s') (weight set to %d)",
+        INF0206 => "Delete server from l7vsd: `%s %s' ( x `%s %s')",
+        # server change
+        INF0301 => "Added real server. (`%s')",
+        INF0302 => "Added fallback server. (`%s')",
+        INF0303 => "Changed real server to quiescent state. (`%s')",
+        INF0304 => "Changed fallback server to quiescent state. (`%s')",
+        INF0305 => "Deleted real server. (`%s')",
+        INF0306 => "Deleted fallback server. (`%s')",
+        # health check
+        INF0401 => "Prepare to start health check process. (id: `%s')",
+        INF0402 => "Create health check process with pid: %d. (id `%s')",
+        # run
+        INF0501 => "Real server down shell execute: `%s %s'",
+        INF0502 => "Real server recovery shell execute: `%s %s'",
+        INF0503 => "Config callback shell execute: `%s %s'",
+        INF0504 => "Running system: `%s'",
+        INF0505 => "Running exec: `%s'",
+        INF0506 => "Running command: `%s'",
+        };
+
+    my $message
+        = exists $message_list->{$code} ? sprintf $message_list->{$code}, @message_args
+        : "Unknown message. (code:[$code] args:[" . join(q{, }, @message_args) . '])';
+
+    return $message;
+}
+
+# _message
+# Create message by _message_only and add code header.
+sub _message {
+    my ($code, @message_args) = @_;
+    my $message = _message_only($code, @message_args);
+    $message = "[$code] $message";
+    return $message;
+}
+
+1;
+
+__END__
+
+=head1 NAME
+
+l7directord - UltraMonkey-L7 Director Daemon
+
+Daemon to monitor remote services and control UltraMonkey-L7
+
+
+=head1 SYNOPSIS
+
+B<l7directord> [B<-d>] [I<configuration>] {B<start>|B<stop>|B<restart>|B<try-restart>|B<reload>|B<status>|B<configtest>}
+
+B<l7directord> B<-t> [I<configuration>]
+
+B<l7directord> B<-h|--help>
+
+B<l7directord> B<-v|--version>
+
+=head1 DESCRIPTION
+
+B<l7directord> is a daemon to monitor and administer real servers in a
+cluster of load balanced virtual servers. B<l7directord> is similar to B<ldirectord>
+in terms of functionality except that it triggers B<l7vsadm>.
+B<l7directord> typically is started from command line but can be included
+to start from heartbeat. On startup B<l7directord> reads the file
+B</etc/ha.d/conf/>I<configuration>.
+After parsing the file, entries for virtual servers are created on the UltraMonkey-L7.
+Now at regular intervals the specified real servers are monitored and if
+they are considered alive, added to a list for each virtual server. If a
+real server fails, it is removed from that list. Only one instance of
+B<l7directord> can be started for each configuration, but more instances of
+B<l7directord> may be started for different configurations. This helps to
+group clusters of services.  This can be done by putting an entry inside
+B</etc/ha.d/haresources>
+
+I<nodename virtual-ip-address l7directord::configuration>
+
+to start l7directord from heartbeat.
+
+
+=head1 OPTIONS
+
+=over
+
+=item I<configuration>:
+
+This is the name for the configuration as specified in the file
+B</etc/ha.d/conf/>I<configuration>
+
+=item B<-d>
+
+Don't start as daemon. Useful for debugging.
+
+=item B<-h>
+
+Help. Print user manual of l7directord.
+
+=item B<-v>
+
+Version. Print version of l7directord.
+
+=item B<-t>
+
+Run syntax tests for configuration files only. The program immediately exits after these syntax parsing tests
+with either a return code of 0 (Syntax OK) or return code not equal to 0 (Syntax Error).
+
+=item B<start>
+
+Start the daemon for the specified configuration.
+
+=item B<stop>
+
+Stop the daemon for the specified configuration. This is the same as sending
+a TERM signal to the running daemon.
+
+=item B<restart>
+
+Restart the daemon for the specified configuration. The same as stopping and starting.
+
+=item B<try-restart>
+
+Try to restart the daemon for the specified configuration. If l7directord is already running for the
+specified configuration, then the same is stopped and started (Similar to restart).
+However, if l7directord is not already running for the specified configuration, then an error message
+is thrown and the program exits.
+
+=item B<reload>
+
+Reload the configuration file. This is only useful for modifications
+inside a virtual server entry. It will have no effect on adding or
+removing a virtual server block. This is the same as sending a HUP signal to
+the running daemon.
+
+=item B<status>
+
+Show status of the running daemon for the specified configuration.
+
+=item B<configtest>
+
+This is the same as B<-t>.
+
+=back
+
+
+=head1 SYNTAX
+
+=head2 Description how to write configuration files
+
+=over
+
+=item B<virtual = >I<(ip_address|hostname:portnumber|servicename)>
+
+Defines a virtual service by IP-address (or hostname) and port (or
+servicename). All real services and flags for a virtual
+service must follow this line immediately and be indented.
+For ldirectord, Firewall-mark settings could be set. But for l7directord
+Firewall-mark settings cannot be set.
+
+=item B<checktimeout = >I<n>
+
+Timeout in seconds for connect checks. If the timeout is exceeded then the
+real server is declared dead.  Default is 5 seconds. If defined in virtual
+server section then the global value is overridden.
+
+=item B<negotiatetimeout = >I<n>
+
+Timeout in seconds for negotiate checks. Default is 5 seconds.
+If defined in virtual server section then the global value is overridden.
+
+=item B<checkinterval = >I<n>
+
+Defines the number of second between server checks. Default is 10 seconds.
+If defined in virtual server section then the global value is overridden.
+
+=item B<retryinterval = >I<n>
+
+Defines the number of second between server checks when server status is NG.
+Default is 10 seconds. If defined in virtual server section then the global
+value is overridden.
+
+=item B<checkcount = >I<n>
+
+The number of times a check will be attempted before it is considered
+to have failed. Note that the checktimeout is additive, so if checkcount
+is 3 and checktimeout is 2 seconds and retryinterval is 1 second,
+then a total of 8 seconds (2 + 1 + 2 + 1 + 2) worth of timeout will occur
+before the check fails. Default is 1. If defined in virtual server section
+then the global value is overridden.
+
+=item B<configinterval = >I<n>
+
+Defines the number of second between configuration checks.
+Default is 5 seconds.
+
+=item B<autoreload = >[B<yes>|B<no>]
+
+Defines if <l7directord> should continuously check the configuration file
+for modification each B<configinterval> seconds. If this is set to B<yes>
+and the configuration file changed on disk and its modification time (mtime)
+is newer than the previous version, the configuration is automatically reloaded.
+Default is B<no>.
+
+=item B<callback = ">I</path/to/callback>B<">
+
+If this directive is defined, B<l7directord> automatically calls
+the executable I</path/to/callback> after the configuration
+file has changed on disk. This is useful to update the configuration
+file through B<scp> on the other heartbeated host. The first argument
+to the callback is the name of the configuration.
+
+This directive might also be used to restart B<l7directord> automatically
+after the configuration file changed on disk. However, if B<autoreload>
+is set to B<yes>, the configuration is reloaded anyway.
+
+=item B<fallback = >I<ip_address|hostname[:portnumber|servicename]> [B<masq>|B<tproxy>]
+
+the server onto which a web service is redirected if all real
+servers are down. Typically this would be 127.0.0.1 with
+an emergency page.
+
+This directive may also appear within a virtual server, in which
+case it will override the global fallback server, if set.
+Also you can set either B<masq> or B<tproxy> as fallback forwarding
+mechanism. The default is B<masq>.
+
+=item B<logfile = ">I</path/to/logfile>B<">|syslog_facility
+
+An alternative logfile might be specified with this directive. If the logfile
+does not have a leading '/', it is assumed to be a syslog(3) facility name.
+
+The default is to log directly to the file I</var/log/l7vs/l7directord.log>.
+
+=item B<execute = ">I<configuration>B<">
+
+Use this directive to start an instance of l7directord for
+the named I<configuration>.
+
+=item B<supervised>
+
+If this directive is specified, the daemon does not go into background mode.
+All log-messages are redirected to stdout instead of a logfile.
+This is useful to run B<l7directord> supervised from daemontools.
+See http://untroubled.org/rpms/daemontools/ or http://cr.yp.to/daemontools.html
+for details.
+
+=item B<quiescent = >[B<yes>|B<no>]
+
+If B<yes>, then when real or fallback servers are determined
+to be down, they are not actually removed from the UltraMonkey-L7,
+but set weight to zero.
+If B<no>, then the real or fallback servers will be removed
+from the UltraMonkey-L7. The default is B<yes>.
+
+This directive may also appear within a virtual server, in which
+case it will override the global fallback server, if set.
+
+=back
+
+
+=head2 Section virtual
+
+The following commands must follow a B<virtual> entry and must be indented
+with a minimum of 4 spaces or one tab.
+
+=over
+
+=item B<real => I<ip_address|hostname[-E<gt>ip_address|hostname][:portnumber|servicename>] [B<masq>|B<tproxy>] [I<n>] [B<">I<request>B<", ">I<receive>B<">]
+
+Defines a real service by IP-address (or hostname) and port (or
+servicename). If the port is omitted then a 0 will be used.
+Optionally a range of IP addresses (or two hostnames) may be
+given, in which case each IP address in the range will be treated as a real
+server using the given port. The second argument defines the forwarding
+mechanism, it must be B<masq> or B<tproxy>.  The third argument defines the weight of
+each real service. This argument is optional. Default is 1. The last two
+arguments are optional too. They define a request-receive pair to be used to
+check if a server is alive. They override the request-receive pair in the
+virtual server section. These two strings must be quoted. If the request
+string starts with I<http://...> the IP-address and port of the real server
+is overridden, otherwise the IP-address and port of the real server is used.
+
+=item B<module => I<proto-module module-args [opt-module-args]>
+
+Indicates the module parameter of B<l7directord>. Here B<proto-module>
+denotes the protocol module name (For example, pfilter). B<module-args> denotes the
+arguments for the protocol module (For example, --pattern-match '*.html*').
+B<module-args> is optional only when set B<sessionless>, B<ip> and B<sslid> module to B<proto-module>.
+The last argument is optional (For example, --reschedule).
+
+=back
+
+=head2 More than one of these entries may be inside a virtual section:
+
+=over
+
+=item B<maxconn => I<n>
+
+Defines the maximum connection that the virtual service can handle. If the number of
+requests cross the maxconn limit, the requests would be redirected to the
+sorry server.
+
+=item B<qosup => I<n>[B<K>|B<M>|B<G>]
+
+Defines the bandwidth quota size in bps for up stream. If the number of the
+bandwidth is over the qosup limit, a packet to the virtual service will be delayed
+until the number of bandwidth become below the qosup limit.
+B<K>(kilo), B<M>(mega) and B<G>(giga) unit are available.
+
+=item B<qosdown => I<n>[B<K>|B<M>|B<G>]
+
+Defines the bandwidth quota size in bps for down stream. If the number of the
+bandwidth is over the qosdown limit, a packet to the client will be delayed
+until the number of bandwidth become below the qosdown limit.
+B<K>(kilo), B<M>(mega) and B<G>(giga) unit are available.
+
+=item B<sorryserver =>I<ip_address|hostname[:portnumber|servicename]> [B<masq>|B<tproxy>]
+
+Defines a sorry server by IP-address (or hostname) and port (or
+servicename). The second argument defines the forwarding mechanism, it must be B<masq> or B<tproxy>.
+Firewall-mark settings cannot be set.
+If the number of requests to the virtual service cross the maxconn limit, or no available
+real server exists, then the requests would be redirected to the sorry server.
+
+=item B<checktype = negotiate>|B<connect>|I<N>|B<ping>|B<custom>|B<off>|B<on>
+
+Type of check to perform. Negotiate sends a request and matches a receive
+string. Connect only attempts to make a TCP/IP connection, thus the
+request and receive strings may be omitted.  If checktype is a number then
+negotiate and connect is combined so that after each N connect attempts one
+negotiate attempt is performed. This is useful to check often if a service
+answers and in much longer intervals a negotiating check is done. Ping
+means that ICMP ping will be used to test the availability of real servers.
+Ping is also used as the connect check for UDP services. Custom means that
+custom command will be used to test the availability of real servers.
+Off means no checking will take place and no real or fallback servers will
+be activated.  On means no checking will take place and real servers will
+always be activated. Default is I<negotiate>.
+
+=item B<service = ftp>|B<smtp>|B<http>|B<pop>|B<nntp>|B<imap>|B<ldap>|B<https>|B<dns>|B<mysql>|B<pgsql>|B<sip>|B<none>
+
+The type of service to monitor when using checktype=negotiate. None denotes
+a service that will not be monitored. If the port specified for the virtual
+server is 21, 25, 53, 80, 110, 119, 143, 389, 443, 3306, 5432 or 5060 then
+the default is B<ftp>, B<smtp>, B<dns>, B<http>, B<pop>, B<nntp>, B<imap>,
+B<ldap>, B<https>, B<mysql>, B<pgsql> or B<sip> respectively.  Otherwise the
+default service is B<none>.
+
+=item B<checkport = >I<n>
+
+Number of port to monitor. Sometimes check port differs from service port.
+Default is port specified for the real server.
+
+=item B<request = ">I<uri to requested object>B<">
+
+This object will be requested each checkinterval seconds on each real
+server.  The string must be inside quotes. Note that this string may be
+overridden by an optional per real-server based request-string.
+
+For a DNS check this should the name of an A record, or the address
+of a PTR record to look up.
+
+For a MySQL or PostgreSQL checks, this should be a SQL query.
+The data returned is not checked, only that the
+answer is one or more rows.  This is a required setting.
+
+=item B<receive = ">I<regexp to compare>B<">
+
+If the requested result contains this I<regexp to compare>, the real server
+is declared alive. The regexp must be inside quotes. Keep in mind that
+regexps are not plain strings and that you need to escape the special
+characters if they should as literals. Note that this regexp may be
+overridden by an optional per real-server based receive regexp.
+
+For a DNS check this should be any one the A record's addresses or
+any one of the PTR record's names.
+
+For a MySQL check, the receive setting is not used.
+
+=item B<httpmethod = GET>|B<HEAD>
+
+Sets the HTTP method, which should be used to fetch the URI specified in
+the request-string. GET is the method used by default if the parameter is
+not set. If HEAD is used, the receive-string should be unset.
+
+=item B<virtualhost = ">I<hostname>B<">
+
+Used when using a negotiate check with HTTP or HTTPS. Sets the host header
+used in the HTTP request.  In the case of HTTPS this generally needs to
+match the common name of the SSL certificate. If not set then the host
+header will be derived from the request url for the real server if present.
+As a last resort the IP address of the real server will be used.
+
+=item B<login = ">I<username>B<">
+
+Username to use to login to FTP, POP, IMAP, MySQL and PostgreSQL servers.
+For FTP, the default is anonymous. For POP and IMAP, the default is the
+empty string, in which case authentication will not be attempted.
+For a MySQL and PostgreSQL, the username must be provided.
+
+For SIP the username is used as both the to and from address
+for an OPTIONS query. If unset it defaults to l7directord\@<hostname>,
+hostname is derived as per the passwd option below.
+
+=item B<passwd = ">I<password>B<">
+
+Password to use to login to FTP, POP, IMAP, MySQL and PostgreSQL servers.
+Default is for FTP is l7directord\@<hostname>, where hostname is the
+environment variable HOSTNAME evaluated at run time, or sourced from uname
+if unset. The default for all other services is an empty password, in the
+case of MySQL and PostgreSQL this means authentication will not be
+performed.
+
+=item B<database = ">I<databasename>B<">
+
+Database to use for MySQL and PostgreSQL servers, this is the database that
+the query (set by B<receive> above) will be performed against.  This is a
+required setting.
+
+=item B<scheduler => I<scheduler_name>
+
+Scheduler to be used by UltraMonkey-L7 for load balancing.
+The available schedulers are only B<lc> and B<rr>. The default is I<rr>.
+
+=item B<protocol = tcp>
+
+Protocol to be used. B<l7vsadm> supports only B<tcp>.
+Since the virtual is specified as an IP address and port, it would be tcp
+and will default to tcp.
+
+=item B<realdowncallback = ">I</path/to/realdowncallback>B<">
+
+If this directive is defined, B<l7directord> automatically calls
+the executable I</path/to/realdowncallback> after a real server's status
+changes to down. The first argument to the realdowncallback is the real 
+server's IP-address and port (ip_address:portnumber).
+
+=item B<realrecovercallback = ">I</path/to/realrecovercallback>B<">
+
+If this directive is defined, B<l7directord> automatically calls
+the executable I</path/to/realrecovercallback> after a real server's status
+changes to up. The first argument to the realrecovercallback is the real 
+server's IP-address and port (ip_address:portnumber).
+
+=item B<customcheck = ">I<custom check command>B<">
+
+If this directive is defined and set B<checktype> to custom, B<l7directord>
+exec custom command for real servers health checking. Only if custom command
+returns 0, real servers will change to up. Otherwise real servers will change
+to down. Custom check command has some macro string. See below.
+
+=over
+
+=item B<_IP_>
+
+Change to real server IP address.
+
+=item B<_PORT_>
+
+Change to real server port number.
+
+=back
+
+=item B<sslconfigfile = ">I</path/to/sslconfigfile>B<">
+
+When communication with Client is SSL, the file name for SSL setting is
+designated.
+
+
+=item B<socketoption = ">I<OPTION...>B<">
+
+An option of the socket used in VirtualService is designated.
+The setting possible value is described.
+
+=over
+
+=item B<transparent>
+
+Set IP_TRANSPARENT option to the RealServer socket.
+
+=item B<deferaccept>
+
+Set TCP_DEFER_ACCEPT option to the listener socket of VirtualService.
+
+=item B<nodelay>
+
+Set TCP_NODELAY option to the Client and RealServer socket.
+
+=item B<cork>
+
+Set TCP_CORK option to the Client and RealServer socket.
+
+=item B<quickackon> or B<quickackoff>
+
+Set or unset TCP_QUICKACK option to the Client and RealServer socket.
+
+=back
+
+=item B<accesslog = >[B<yes>|B<no>]
+
+If B<yes>, then output client access log. The default is B<no>.
+
+=item B<accesslog_rotate_type = >[B<date>|B<size>|B<datesize>]
+
+B<date> means rotate access log with the specified date/time. B<size> means rotate access log when that file size exceeds the specified size. B<datesize> means both B<date> and B<size>.
+
+=item B<accesslog_rotate_max_backup_index = >I<n>
+
+Maximum number of backup files.
+
+=item B<accesslog_rotate_max_filesize = > I<n>[B<K>|B<M>|B<G>]
+
+Threshold file size of access log when B<accesslog_rotate_type> is set to B<size> or B<datesize>. B<K>(kilo), B<M>(mega) and B<G>(giga) units are available.
+
+=item B<accesslog_rotate_rotation_timing = >[B<year>|B<month>|B<week>|B<date>|B<hour>]
+
+Rotate timing type when B<accesslog_rotate_type> is set to B<date> or B<datesize>.
+
+=item B<accesslog_rotate_rotation_timing_value = ">I<rotation_timing_value>B<">
+
+Rotate timing. The formats are different by B<accesslog_rotate_rotation_timing> setting.
+
+=over
+
+=item B<accesslog_rotate_rotation_timing=year>
+
+FORMAT: B<"MM/dd HH:mm">
+
+=item B<accesslog_rotate_rotation_timing=month>
+
+FORMAT: B<"dd HH:mm">
+
+=item B<accesslog_rotate_rotation_timing=week>
+
+FORMAT: B<">[B<sun>|B<mon>|B<tue>|B<wed>|B<thu>|B<fri>|B<sat>] B<HH:mm">
+
+=item B<accesslog_rotate_rotation_timing=date>
+
+FORMAT: B<"HH:mm">
+
+=item B<accesslog_rotate_rotation_timing=hour>
+
+FORMAT: B<"mm">
+
+=back
+
+=back
+
+
+=head1 FILES
+
+B</etc/ha.d/conf/l7directord.cf>
+
+B</var/log/l7vs/l7directord.log>
+
+B</var/run/l7directord.>I<configuration>B<.pid>
+
+B</etc/services>
+
+=head1 SEE ALSO
+
+L<l7vsadm>, L<heartbeat>
+
+
+=head1 AUTHORS
+
+NTT COMWARE
+
+=cut

@@ -1,0 +1,150 @@
+#!/bin/sh
+#
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of version 2 of the GNU General Public License as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it would be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# Further, this software is distributed without any warranty that it is
+# free of the rightful claim of any third person regarding infringement
+# or the like.  Any license provided herein, whether implied or
+# otherwise, applies only to this software file.  Patent licenses, if
+# any, provided herein do not apply to combinations of this program with
+# other software, or any other product whatsoever.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write the Free Software Foundation,
+# Inc., 59 Temple Place - Suite 330, Boston MA 02111-1307, USA.
+#
+
+#######################################################################
+# Initialization:
+
+. ${OCF_ROOT}/resource.d/heartbeat/.ocf-shellfuncs
+#. /usr/lib/ocf/resource.d/heartbeat/.ocf-shellfuncs
+
+#######################################################################
+
+meta_data() {
+	cat <<END
+<?xml version="1.0"?>
+<!DOCTYPE resource-agent SYSTEM "ra-api-1.dtd">
+<resource-agent name="VIPcheck" version="0.1">
+<version>1.0</version>
+
+<longdesc lang="en">
+This is a VIPcheck Resource Agent.
+</longdesc>
+<shortdesc lang="en">VIPcheck resource agent</shortdesc>
+
+<parameters>
+<parameter name="target_ip" unique="1">
+<longdesc lang="en">
+ping target VIP address.
+</longdesc>
+<shortdesc lang="en">target ip</shortdesc>
+<content type="string" default="" />
+</parameter>
+
+<parameter name="count" unique="1">
+<longdesc lang="en">
+repeat times
+</longdesc>
+<shortdesc lang="en">repeat times</shortdesc>
+<content type="integer" default="1" />
+</parameter>
+
+<parameter name="wait" unique="1">
+<longdesc lang="en">
+wait times
+</longdesc>
+<shortdesc lang="en">wait times</shortdesc>
+<content type="integer" default="10" />
+</parameter>
+
+</parameters>
+
+<actions>
+<action name="start"        timeout="60" />
+<action name="stop"         timeout="60" />
+<action name="monitor"      timeout="60" interval="10" depth="0" start-delay="0" />
+<action name="meta-data"    timeout="5" />
+</actions>
+</resource-agent>
+END
+}
+
+#######################################################################
+
+VIPcheck_usage() {
+	cat <<END
+usage: $0 {start|stop|monitor|meta-data}
+
+Expects to have a fully populated OCF RA-compliant environment set.
+END
+}
+
+VIPcheck_start() {
+	VIPcheck_monitor
+	if [ $? =  $OCF_SUCCESS ]; then
+		return $OCF_SUCCESS
+	fi 
+
+	ping ${OCF_RESKEY_target_ip} -c ${OCF_RESKEY_count} -w ${OCF_RESKEY_wait} > /dev/null 2>&1
+	prc=$?
+	ocf_log debug "target_ip = $OCF_RESKEY_target_ip, count = $OCF_RESKEY_count, wait = $OCF_RESKEY_wait"
+	ocf_log debug "ping return code = $prc"
+	if [ $prc = 0 ]; then 
+		# pingが通った-->ERROR
+		return $OCF_ERR_GENERIC
+	else 
+		# pingが通らない --> 成功
+		touch ${OCF_RESKEY_state}
+		return $OCF_SUCCESS
+	fi
+}
+
+VIPcheck_stop() {
+	VIPcheck_monitor
+	if [ $? =  $OCF_SUCCESS ]; then
+		rm ${OCF_RESKEY_state}
+	fi
+	return $OCF_SUCCESS
+}
+
+VIPcheck_monitor() {
+	if [ -f ${OCF_RESKEY_state} ]; then
+		return $OCF_SUCCESS
+	fi
+	if false ; then
+		return $OCF_ERR_GENERIC
+	fi
+	return $OCF_NOT_RUNNING
+}
+
+: ${OCF_RESKEY_wait=10}
+: ${OCF_RESKEY_count=1}
+: ${OCF_RESKEY_state=${HA_RSCTMP}/VIPcheck-${OCF_RESOURCE_INSTANCE}.state}
+
+case $__OCF_ACTION in
+meta-data)	meta_data
+		exit $OCF_SUCCESS
+		;;
+start)		VIPcheck_start;;
+stop)		VIPcheck_stop;;
+monitor)	VIPcheck_monitor;;
+usage|help)	VIPcheck_usage
+		exit $OCF_SUCCESS
+		;;
+*)		VIPcheck_usage
+		exit $OCF_ERR_UNIMPLEMENTED
+		;;
+esac
+rc=$?
+ocf_log debug "${OCF_RESOURCE_INSTANCE} $__OCF_ACTION : $rc"
+exit $rc
+

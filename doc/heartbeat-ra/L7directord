@@ -1,0 +1,245 @@
+#!/bin/sh
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of version 2 of the GNU General Public License as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it would be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# Further, this software is distributed without any warranty that it is
+# free of the rightful claim of any third person regarding infringement
+# or the like.  Any license provided herein, whether implied or
+# otherwise, applies only to this software file.  Patent licenses, if
+# any, provided herein do not apply to combinations of this program with
+# other software, or any other product whatsoever.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write the Free Software Foundation,
+# Inc., 59 Temple Place - Suite 330, Boston MA 02111-1307, USA.
+#
+
+#######################################################################
+# Initialization:
+
+. ${OCF_ROOT}/resource.d/heartbeat/.ocf-shellfuncs
+#. /usr/lib/ocf/resource.d/heartbeat/.ocf-shellfuncs
+
+#######################################################################
+
+meta_data() {
+	cat <<END
+<?xml version="1.0"?>
+<!DOCTYPE resource-agent SYSTEM "ra-api-1.dtd">
+<resource-agent name="L7directord" version="1.0">
+<version>1.0</version>
+
+<longdesc lang="en">
+This is a L7directord Resource Agent.
+</longdesc>
+<shortdesc lang="en">L7directord resource agent</shortdesc>
+
+<parameters>
+<parameter name="state" unique="1">
+<longdesc lang="en">
+Location to store the resource state in.
+</longdesc>
+<shortdesc lang="en">State file</shortdesc>
+<content type="string" default="" />
+</parameter>
+
+</parameters>
+
+<actions>
+<action name="start"        timeout="60" />
+<action name="stop"         timeout="60" />
+<action name="monitor"      timeout="60" interval="10" depth="0" start-delay="0" />
+<action name="meta-data"    timeout="5" />
+</actions>
+</resource-agent>
+END
+}
+
+#######################################################################
+
+l7directord_usage() {
+	cat <<END
+usage: $0 {start|stop|monitor|meta-data}
+END
+}
+
+###############################
+# Logging Method
+###############################
+outputLog(){
+	MODE=$1
+	shift
+	case $MODE in
+		info)	RET=$1; shift;
+			ocf_log $MODE "[$0 ${__OCF_ACTION}] OK;return=$RET" "$@";;
+		err)	RET=$1; shift;
+			ocf_log $MODE "[$0 ${__OCF_ACTION}] NG;return=$RET" "$@";;
+	esac
+}
+
+###############################
+# kill process
+###############################
+l7directord_pkill(){
+	pkill -9 l7directord
+	MSG="kill l7directord process!"
+	outputLog info $MSG
+	while true
+	do
+		sleep 1
+		isRunning
+		RET=$?
+		if [ $RET -eq 0 ]; then
+			# stop OK
+			MSG="l7directord process stopped!"	
+        		outputLog info $MSG
+			return ${OCF_SUCCESS}
+		fi
+	done 
+}
+
+###############################
+# Resource Running Check Method
+###############################
+isRunning(){
+	RET=0
+        RET=`pgrep -fox "/usr/sbin/l7directord start" | wc -l`
+	return $RET
+}
+
+# 2008-11-05-start: l7vsd_flush
+###############################
+# Flush Virtual Service Method
+###############################
+l7vsd_flush(){
+        PS=`pgrep -fox "/usr/sbin/l7vsd" | wc -l`
+        if [ $PS -eq 1 ]; then
+                  ocf_log info "[l7vsadm]: flush virtual service!"
+                  l7vsadm -C
+        fi
+}
+# 2008-11-05-end: l7vsd_flush
+
+###############################
+# Get Resource Status Method
+###############################
+l7directord_status(){
+	/etc/init.d/l7directord status > /dev/null 2>&1
+	RET=$?
+	if [ $RET -eq 0 ]; then
+		return ${OCF_SUCCESS}
+	else
+		MSG="l7directord status ERROR!: $RET"
+		outputLog err ${OCF_ERR_GENERIC} ${MSG}
+		return ${OCF_ERR_GENERIC}
+	fi
+}
+
+###############################
+# Get Resource Monitor Method
+###############################
+l7directord_monitor() {
+	isRunning;
+	RET=$?
+	if [ $RET -eq 1 ]; then
+		# l7directord is running
+		l7directord_status
+		if [ $? -eq ${OCF_SUCCESS} ]; then
+			# status OK
+			return ${OCF_SUCCESS}
+		else
+			break
+		fi
+	elif [ $RET -eq 0 ]; then
+		MSG="l7direcotrd is not running."
+		outputLog err ${OCF_NOT_RUNNING} ${MSG}
+		return ${OCF_NOT_RUNNING}
+	fi
+	MSG="l7direcotrd does not work. (ps=$RET) "
+	outputLog err ${OCF_ERR_GENERIC} ${MSG}
+	return ${OCF_ERR_GENERIC}
+}
+
+###############################
+# Resource start Method
+###############################
+l7directord_start() {
+	outputLog info "l7directord is starting ..."
+	l7directord_monitor
+	RET=$?
+	if [ $RET -eq ${OCF_SUCCESS} ]; then
+		MSG="l7directord is already running."
+		outputLog info ${OCF_SUCCESS} $MSG
+		return $OCF_SUCCESS
+  	fi
+	while true
+	do
+		isRunning;
+		RET=$?
+		if [ $RET -eq 1 ]; then
+			# l7directord is running
+			outputLog info "l7directord starts."
+			return ${OCF_SUCCESS}	
+		elif [ $RET -eq 0 ]; then
+			/etc/init.d/l7directord start > /dev/null 2>&1
+			RET=$?
+			if [ $RET -ne 0 ]; then
+				MSG="l7directord start fatal error!: $RET"
+				outputLog err ${OCF_ERR_GENERIC} $MSG
+			fi
+		fi
+		sleep 1
+	done
+}
+
+###############################
+# Resource stop Method
+###############################
+l7directord_stop() {
+	outputLog info "l7directord is stopping ..."
+	isRunning;
+	RET=$?
+	if [ $RET -eq 0 ]; then
+		outputLog info "l7directord stopped."
+                l7vsd_flush
+		return ${OCF_SUCCESS}
+	elif [ $RET -eq 1 ]; then
+		/etc/init.d/l7directord stop > /dev/null 2>&1
+		RET=$?
+		if [ $RET -ne 0 ]; then
+			MSG="l7directord stop fatal error!: $RET"
+			outputLog err ${OCF_ERR_GENERIC} $MSG
+			l7directord_pkill
+			RET=$?
+		fi
+	else
+		l7directord_pkill
+		RET=$?
+	fi
+        l7vsd_flush
+        return $RET
+}
+
+case $__OCF_ACTION in
+meta-data)	meta_data
+		exit $OCF_SUCCESS ;;
+start)		l7directord_start ;;
+stop)		l7directord_stop ;;
+monitor)	l7directord_monitor ;;
+usage|help)	l7directord_usage
+		exit $OCF_SUCCESS
+		;;
+*)		l7directord_usage
+		exit $OCF_ERR_UNIMPLEMENTED
+		;;
+esac
+rc=$?
+ocf_log debug "${OCF_RESOURCE_INSTANCE} $__OCF_ACTION : $rc"
+#ocf_log info "${OCF_RESOURCE_INSTANCE} $__OCF_ACTION : $rc"
+exit $rc

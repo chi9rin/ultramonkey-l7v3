@@ -1,0 +1,17 @@
+logfile=mail
+virtual=127.0.0.1:10000
+    real=127.0.0.2:80
+    real=127.0.0.3:80
+    service=http
+virtual=127.0.0.1:20000
+    real=127.0.0.2:80
+    real=127.0.0.3:80
+    service=https
+virtual=127.0.0.1:30000
+    real=127.0.0.2:80
+    real=127.0.0.3:80
+    checktype=connect
+virtual=127.0.0.1:40000
+    real=127.0.0.2:80
+    real=127.0.0.3:80
+    checktype=ping
