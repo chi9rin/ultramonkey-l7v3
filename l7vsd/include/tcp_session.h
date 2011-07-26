@@ -398,10 +398,6 @@ protected:
 		//! connecting socket
         tcp_socket_ptr	connecting_socket;
 
-        //! reset ssl object for reuse
-        //! @param[in/out]    clear_ssl is clear target SSL structure pointer
-        virtual bool ssl_clear_keep_cache(SSL *clear_ssl);
-
 	//! endpoint data to string information
 	//! @param[in]        endpoint is target endpoint object
 	virtual std::string endpoint_to_string(
