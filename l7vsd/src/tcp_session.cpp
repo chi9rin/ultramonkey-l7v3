@@ -1409,13 +1409,31 @@ void tcp_session::up_thread_client_disconnect(const TCP_PROCESS_TYPE_TAG process
                        fmt % boost::this_thread::get_id() % ec.message();
                        Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
                }
+		func_tag = UP_FUNC_CLIENT_DISCONNECT_EVENT;
         }else{
                client_ssl_socket.shutdown(ec);
-               if( ec ){
-                       boost::format   fmt( "Thrad ID[%d] client ssl shutcown error : %s " );
+	       if(ec == boost::asio::error::try_again ){
+#ifdef  DEBUG
+                       boost::format   fmt( "Thread ID[%d] ssl_shutdown fail: %s" );
                        fmt % boost::this_thread::get_id() % ec.message();
-                       Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
-               }
+                       Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+#endif
+			func_tag = UP_FUNC_CLIENT_DISCONNECT;
+                }else if(ec == boost::asio::error::eof ){
+#ifdef  DEBUG
+                       boost::format   fmt( "Thread ID[%d] ssl_shutdown fail: %s" );
+                       fmt % boost::this_thread::get_id() % ec.message();
+                       Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+#endif
+			func_tag = UP_FUNC_CLIENT_DISCONNECT_EVENT;
+                }else{
+#ifdef  DEBUG
+                       boost::format   fmt( "Thread ID[%d] ssl_shutdown fail: %s" );
+                       fmt % boost::this_thread::get_id() % ec.message();
+                       Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+#endif
+			func_tag = UP_FUNC_CLIENT_DISCONNECT_EVENT;
+                }	
         }
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -1426,7 +1444,6 @@ void tcp_session::up_thread_client_disconnect(const TCP_PROCESS_TYPE_TAG process
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
         }
 	upthread_status = UPTHREAD_ACTIVE;
-	func_tag = UP_FUNC_CLIENT_DISCONNECT_EVENT;
 	up_thread_next_call_function = up_thread_function_array[func_tag];
 }
 //! up thread raise module event of handle_client_disconnect

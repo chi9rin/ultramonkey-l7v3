@@ -124,30 +124,6 @@ public:
        virtual bool shutdown( boost::system::error_code& error_code ){
 	       boost::mutex::scoped_lock	lock( ssl_mutex );
                my_socket->shutdown( error_code );
-                while (unlikely(error_code)){
-                        if(error_code == boost::asio::error::try_again ){
-#ifdef  DEBUG
-                                boost::format   fmt( "Thread ID[%d] ssl_shutdown fail: %s" );
-                                fmt % boost::this_thread::get_id() % error_code.message();
-                                Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
-#endif
-                                my_socket->shutdown( error_code );
-                        }else if(error_code == boost::asio::error::eof ){
-#ifdef  DEBUG
-                                boost::format   fmt( "Thread ID[%d] ssl_shutdown fail: %s" );
-                                fmt % boost::this_thread::get_id() % error_code.message();
-                                Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
-#endif
-                                break;
-			}else{
-#ifdef  DEBUG
-                                boost::format   fmt( "Thread ID[%d] ssl_shutdown fail: %s" );
-                                fmt % boost::this_thread::get_id() % error_code.message();
-                                Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
-#endif
-				break;
-			}
-                }
                return error_code ? false : true;
        }
 
