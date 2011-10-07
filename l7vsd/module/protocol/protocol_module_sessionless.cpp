@@ -1205,9 +1205,16 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_accept(const
                         putLogDebug(100035, formatter.str(), __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
-
-				// first action is client recv
-				status	= CLIENT_RECV;
+		//sorry flag on 
+                if (session_data->sorry_flag == SORRY_FLAG_ON) { 
+                        //set return status 
+                        status = SORRYSERVER_SELECT; 
+                } 
+                //sorry flag off 
+                else { 
+                        //set return status 
+                        status = REALSERVER_SELECT; 
+                } 
 
         } catch (int e) {
                 /*-------- DEBUG LOG --------*/
@@ -2192,11 +2199,11 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                         if (it_find != recv_data.send_status_list.end()) {
                                 //sorry flag is on
                                 if (session_data->sorry_flag == SORRY_FLAG_ON) {
-                                        status = SORRYSERVER_SELECT;
+                                        status = SORRYSERVER_CONNECT;
                                 }
                                 //sorry flag is off
                                 else {
-                                        status = REALSERVER_SELECT;
+                                        status = REALSERVER_CONNECT;
                                 }
                         }
                         //the data that can be sent possible is not exist

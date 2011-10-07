@@ -1572,9 +1572,16 @@ protocol_module_base::EVENT_TAG protocol_module_ip::handle_accept(const boost::t
                         putLogDebug(600051, formatter.str(), __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
-
-		// first action is client recv
-		status = CLIENT_RECV;
+	        //sorry flag on 
+	        if (session_data_ptr->sorry_flag == SORRY_FLAG_ON) { 
+		        //set return status 
+		        status = SORRYSERVER_SELECT; 
+	        } 
+	        //sorry flag off 
+	        else { 
+	                //set return status 
+	                status = REALSERVER_SELECT; 
+                } 
 
                 //set last status
                 session_data_ptr->last_status = status;
@@ -1853,12 +1860,12 @@ protocol_module_base::EVENT_TAG protocol_module_ip::handle_client_recv(const boo
                                         //sorry flag is on
                                         if (session_data_ptr->sorry_flag == SORRY_FLAG_ON) {
                                                 //set return status
-                                                status = SORRYSERVER_SELECT;
+                                                status = SORRYSERVER_CONNECT;
                                         }
                                         //sorry flag is off
                                         else {
                                                 //set return status
-                                                status = REALSERVER_SELECT;
+                                                status = REALSERVER_CONNECT;
                                         }
                                 }
                         }

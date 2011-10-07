@@ -1680,6 +1680,30 @@ void tcp_session::up_thread_realserver_connect(const TCP_PROCESS_TYPE_TAG proces
 
 	boost::system::error_code	error_code;
 
+	if( realserver_socket && realserver_socket->is_open() ){
+		up_thread_data_dest_side.initialize();
+	        boost::array<char, MAX_BUFFER_SIZE>& data_buff = up_thread_data_dest_side.get_data();
+        	size_t data_size = 0;
+	        protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_connect(up_thread_id, data_buff, data_size);
+        	#ifdef  DEBUG
+        	{
+		        boost::format   fmt( "Thread ID[%d] protocol_module->handle_realserver_connect() return: %s" );
+		        fmt % boost::this_thread::get_id()
+		        % func_tag_to_string( module_event );
+		        Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+	        }
+        	#endif
+        	up_thread_data_dest_side.set_size(data_size);
+	        // next call function setup.
+        	up_thread_next_call_function = up_thread_function_array[ up_thread_module_event_map[module_event] ];
+	        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+	                boost::format formatter("Thread ID[%d] FUNC OUT up_thread_realserver_connect_event: NEXT_FUNC[%s]");
+        	        formatter % boost::this_thread::get_id() % func_tag_to_string( up_thread_module_event_map[module_event] );
+                	Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+		}
+		return ;
+	}
+
 	connecting_socket.reset( new tcp_socket( parent_dispatcher, socket_opt_info ) );
 
 	upthread_status = UPTHREAD_LOCK;
