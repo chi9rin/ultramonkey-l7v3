@@ -95,6 +95,7 @@ protected:
         boost::mutex                vslist_mutex;        //!< virtual service list mutex
 
         bool                        help;                //!< help mode
+		bool						debug;				//!< debug mode
 
         boost::posix_time::ptime    starttime;            //!< l7vsd startup time
 
@@ -141,8 +142,9 @@ public:
                 bool find_module_name = false) const; //!< vs_list search function
 
 protected:
-        bool    check_options(int, char*[]);              //!< check option func
-        bool    parse_help(int &, int, char*[]);         //!< parse help func
+        bool    check_options(int, char*[]);			//!< check option func
+        bool    parse_help(int &, int, char*[]);		//!< parse help func
+		bool	parse_debug( int &, int, char*[] );		//!< pase debug func
 
         std::string    usage();                            //!< make usage message
 

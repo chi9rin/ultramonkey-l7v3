@@ -141,7 +141,7 @@ public:
                                         boost::asio::ip::tcp::endpoint &) >
         tcp_schedule_func_type;
 
-        typedef l7vs::atomic<unsigned long long> AUUL;
+        typedef l7vs::atomic<unsigned long long> AULL;
         //typedef l7vs::atomic<unsigned int> AUI;
 
 
@@ -190,6 +190,7 @@ public:
         //! Default session pool alert off threshold
         const static int  SESSIONPOOL_ALERT_OFF_SIZE_DEFAULT= 8;
 
+        static const int IO_SERVICE_THREADS_NUM = 1;
 protected:
 
         struct    parameter_data {
@@ -221,8 +222,9 @@ protected:
         const replication      &rep;                  //! replication reference
 
         Logger                  log;
-
-        boost::asio::io_service dispatcher;           //! dispatcher service
+		boost::shared_ptr< boost::asio::io_service >
+        						dispatcher;           //! dispatcher service
+	boost::shared_ptr< boost::asio::io_service::work >      work;
         deadline_timer_ptr_type calc_bps_timer;       //! timer object
         deadline_timer_ptr_type replication_timer;    //! timer object
         deadline_timer_ptr_type protomod_rep_timer;   //! timer object
@@ -236,28 +238,28 @@ protected:
         schedule_module_base   *schedmod;      //! schedule module smart pointer
 
         std::list<realserver>   rs_list;              //! realserver list
-        AUUL                    rs_list_ref_count;    //! reference count of
+        AULL                    rs_list_ref_count;    //! reference count of
         //! realserver list
         wr_mutex                rs_list_ref_count_inc_mutex; //! mutex for
         //! increase reference count
 
-        AUUL recvsize_up;           //! upstream total receive data size
-        AUUL current_up_recvsize;   //! current upstream receive data size
+        AULL recvsize_up;           //! upstream total receive data size
+        AULL current_up_recvsize;   //! current upstream receive data size
         //!  for calculate upstream throughput
-        AUUL sendsize_up;           //! upstream total send data size
-        AUUL recvsize_down;         //! downstream total receive data size
-        AUUL current_down_recvsize; //! current downstream receive data size for
+        AULL sendsize_up;           //! upstream total send data size
+        AULL recvsize_down;         //! downstream total receive data size
+        AULL current_down_recvsize; //! current downstream receive data size for
         //! calculate upstream throughput
-        AUUL sendsize_down;         //! downstream total send data size
+        AULL sendsize_down;         //! downstream total send data size
 
-        AUUL throughput_up;         //! upstream throughput value
-        AUUL throughput_down;       //! downstream throughput value
+        AULL throughput_up;         //! upstream throughput value
+        AULL throughput_down;       //! downstream throughput value
 
-        AUUL wait_count_up;         //! upstream recv wait count
-        AUUL wait_count_down;       //! downstream recv wait count
+        AULL wait_count_up;         //! upstream recv wait count
+        AULL wait_count_down;       //! downstream recv wait count
 
-        AUUL interrupt_running_flag;    //! interrupt routine is running
-        AUUL virtualservice_stop_flag;  //! virtualservice is now shutting down
+        AULL interrupt_running_flag;    //! interrupt routine is running
+        AULL virtualservice_stop_flag;  //! virtualservice is now shutting down
 
         // protocol module option string
         std::string             protocol_module_for_indication_options;
@@ -320,8 +322,8 @@ public:
                                      const replication &,
                                      const virtualservice_element &);
         virtual ~virtualservice_base() {
-                dispatcher.reset();
-                dispatcher.stop();
+                dispatcher->reset();
+                dispatcher->stop();
         };
 
         virtual void initialize(error_code &) = 0;
@@ -330,8 +332,7 @@ public:
         virtual bool operator==(const virtualservice_base &) = 0;
         virtual bool operator!=(const virtualservice_base &) = 0;
 
-        void rs_list_lock() {
-                rd_scoped_lock lock(rs_list_ref_count_inc_mutex);
+        void rs_list_lock() {	// rs_list_ref_cont is atomic numeric. this numeric not use lock.
                 rs_list_ref_count++;
         }
         void rs_list_unlock() {
@@ -422,6 +423,8 @@ public:
         }
 
         virtual void clear_inact();
+
+		virtual bool is_realserver_transparent( const boost::asio::ip::tcp::endpoint& );
 };
 
 //!
@@ -437,11 +440,10 @@ public:
         typedef std::map< std::string, std::string >
         accesslog_argument_map_type;
 protected:
-        boost::asio::ip::tcp::acceptor
-        acceptor_;
+        boost::shared_ptr<	boost::asio::ip::tcp::acceptor > acceptor_;
 
         session_queue_type          pool_sessions;
-        session_map_type            waiting_sessions;
+		tcp_session*				waiting_session;
         session_map_type            active_sessions;
         l7vs::atomic<unsigned long long>
         active_count;
@@ -457,7 +459,8 @@ protected:
         bool                        ssl_virtualservice_mode_flag;
         std::string                 ssl_file_name;
         // SSL context
-        boost::asio::ssl::context   sslcontext;
+        boost::shared_ptr<boost::asio::ssl::context>
+									sslcontext;
         // SSL context parameter
         std::string                 ca_dir;
         std::string                 ca_file;
@@ -535,10 +538,6 @@ public:
 
         int get_pool_sessions_count() {
                 return pool_sessions.size();
-        }
-
-        int get_waiting_sessions_count() {
-                return waiting_sessions.size();
         }
 
         int get_active_sessions_count() {
@@ -641,10 +640,6 @@ public:
                 return vs->get_pool_sessions_count();
         }
 
-        int get_waiting_sessions_count() {
-                return vs->get_waiting_sessions_count();
-        }
-
         int get_active_sessions_count() {
                 return vs->get_active_sessions_count();
         }
@@ -652,6 +647,10 @@ public:
         void clear_inact() {
                 return vs->clear_inact();
         }
+
+	bool is_realserver_transparent( const boost::asio::ip::tcp::endpoint& endpoint ){
+		return vs->is_realserver_transparent( endpoint );
+	}
 };
 
 } //namespace l7vs

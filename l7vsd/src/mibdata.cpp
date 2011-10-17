@@ -257,7 +257,7 @@ namespace l7vs
                                 //set session information
                                 pool_session_count = (*it)->get_pool_sessions_count();
                                 active_session_count = (*it)->get_active_sessions_count();
-                                waiting_session_count = (*it)->get_waiting_sessions_count();
+                                waiting_session_count = 1; // (*it)->get_waiting_sessions_count(); this count is allways 1
 
                                 //set vs table row information
                                 netsnmp_set_row_column(row, COLUMN_L7VSVSINDEX, ASN_INTEGER, (char *)&vs_index, sizeof(int));

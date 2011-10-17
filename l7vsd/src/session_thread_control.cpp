@@ -102,7 +102,6 @@ void    session_thread_control::upstream_run()
         for (;;) {  // thread loop
                 if (state == WAIT) {    // after create or session end. this thread is pooling mode
                         boost::mutex::scoped_lock    lock(upthread_condition_mutex);
-//             upthread_condition.wait( lock );    // thread is condition wait.( start at notify_all() )
                         boost::xtime    wait;
                         boost::xtime_get(&wait, boost::TIME_UTC);
                         wait.sec += 1;

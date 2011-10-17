@@ -29,6 +29,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 #include <sys/socket.h>
+#include <linux/version.h>
 
 #include "virtualservice.h"
 #include "logger_enum.h"
@@ -46,11 +47,15 @@ l7vs::virtualservice_tcp::virtualservice_tcp(const l7vsd &invsd,
                 const replication &inrep,
                 const virtualservice_element &inelement)
         :
-        virtualservice_base(invsd, inrep, inelement),
-        acceptor_(dispatcher),
-        sslcontext(dispatcher, DEFAULT_SSL_METHOD),
-        access_log_file_name("")
-{
+        virtualservice_base(invsd, inrep, inelement){
+		access_log_file_name = "";
+		dispatcher.reset( new boost::asio::io_service( 10 ) );
+		calc_bps_timer.reset(new boost::asio::deadline_timer(*dispatcher));
+		replication_timer.reset(new boost::asio::deadline_timer(*dispatcher));
+		protomod_rep_timer.reset(new boost::asio::deadline_timer(*dispatcher));
+		schedmod_rep_timer.reset(new boost::asio::deadline_timer(*dispatcher));
+		acceptor_.reset( new boost::asio::ip::tcp::acceptor( *dispatcher ) );
+		sslcontext.reset( new boost::asio::ssl::context( *dispatcher, DEFAULT_SSL_METHOD ) );
         active_count = 0;
         ca_dir = "";
         ca_file = "";
@@ -334,25 +339,49 @@ void l7vs::virtualservice_tcp::read_replicationdata()
  */
 void l7vs::virtualservice_tcp::handle_accept(const l7vs::session_thread_control *stc_ptr, const boost::system::error_code &err)
 {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
-                boost::format funclog_fmt("in_function: void virtualservice_tcp::handle_accept( "
-                        "const boost::shared_ptr<session_thread_control> , "
-                        "const boost::system::error_code& err ): err = %s, err.message = %s");
-                funclog_fmt % (err ? "true" : "false") % err.message();
-                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 27, funclog_fmt.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+		boost::format fmt(	"in_function: void virtualservice_tcp::handle_accept( "
+							"const boost::shared_ptr<session_thread_control> , "
+							"const boost::system::error_code& err ): err = %s, err.message = %s");
+		fmt % (err ? "true" : "false") % err.message();
+		Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 27, fmt.str(), __FILE__, __LINE__);
+	}
 
-        session_thread_control *stc_ptr_noconst = const_cast<session_thread_control *>(stc_ptr);
+	if(unlikely(virtualservice_stop_flag.get())){
+		return;
+	}
 
-        if (unlikely(err)) {
-                //ERROR case
-                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 2, err.message(), __FILE__, __LINE__);
-                return;
-        }
+	session_thread_control *stc_ptr_noconst = const_cast<session_thread_control *>(stc_ptr);
 
-        tcp_session *tmp_session = stc_ptr_noconst->get_session().get();
+	if( unlikely( err == boost::asio::error::operation_aborted ) ){ // nomal exit case
+		boost::format	fmt( "Thread ID[%d] handle accept cancel : %s" );
+		fmt % boost::this_thread::get_id() % err.message();
+		Logger::putLogInfo( LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
+		return;
+	}
+	else if (unlikely(err)) { // register next accept handle when error mode.
+		if(!ssl_virtualservice_mode_flag ){
+			waiting_session->get_client_socket().get_socket().close();
+			acceptor_->async_accept(	waiting_session->get_client_socket().get_socket(),
+									 	boost::bind(	&virtualservice_tcp::handle_accept,
+														this,
+														stc_ptr,
+														boost::asio::placeholders::error ) );
+		}else{
+			waiting_session->get_client_ssl_socket().lowest_layer().close();
+			acceptor_->async_accept(	waiting_session->get_client_ssl_socket().lowest_layer(),
+										boost::bind(	&virtualservice_tcp::handle_accept,
+														this,
+														stc_ptr,
+														boost::asio::placeholders::error ) );
+		}
+           	Logger::putLogInfo(LOG_CAT_L7VSD_VIRTUALSERVICE, 2, err.message(), __FILE__, __LINE__);
+		return;
+	}
 
-        if (ssl_file_name != "") {
+	tcp_session *tmp_session = stc_ptr_noconst->get_session().get();
+
+	if (ssl_file_name != "") {
 
                 //*-------- DEBUG LOG --------*/
                 if (unlikely(LOG_LV_DEBUG ==
@@ -363,13 +392,13 @@ void l7vs::virtualservice_tcp::handle_accept(const l7vs::session_thread_control 
                         get_ssl_session_cache_info(buf);
                         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 28,
                                             buf.str(),
-                                            __FILE__, __LINE__);
+                                           __FILE__, __LINE__);
                 }
                 //*------ DEBUG LOG END ------*/
 
                 // ssl session cache flush
                 if (is_session_cache_use == true) {
-                        long ssl_cache_num = SSL_CTX_sess_number(sslcontext.impl());
+                        long ssl_cache_num = SSL_CTX_sess_number(sslcontext->impl());
                         if (ssl_cache_num >= session_cache_size) {
                                 flush_ssl_session();
                         }
@@ -386,113 +415,125 @@ void l7vs::virtualservice_tcp::handle_accept(const l7vs::session_thread_control 
                                             buf.str(),
                                             __FILE__, __LINE__);
                 }
-                //*------ DEBUG LOG END ------*/
-        }
+		//*------ DEBUG LOG END ------*/
+	}
 
-        // send access log output ON or OFF message to tcp_session
-        stc_ptr_noconst->session_access_log_output_mode_change(access_log_flag);
+	// initialize session
+	stc_ptr_noconst->get_session()->initialize();
 
-        active_sessions.insert(tmp_session, stc_ptr_noconst);
+	// send access log output ON or OFF message to tcp_session
+	stc_ptr_noconst->session_access_log_output_mode_change(access_log_flag);
 
-        //check sorry flag and status
-        if (unlikely((0 != element.sorry_flag) ||
-                     ((0 < element.sorry_maxconnection) &&
-                      ((active_count.get() >= static_cast<size_t>(element.sorry_maxconnection)))))) {
-                if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
-                        boost::format fmt("Connection switch Sorry mode. "
-                                "active_session.size = %d, active_count.get = %d");
-                        fmt % active_sessions.size() % active_count.get();
-                        Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 30, fmt.str(), __FILE__, __LINE__);
-                }
-                stc_ptr_noconst->get_session()->set_virtual_service_message(tcp_session::SORRY_STATE_ENABLE);
-        }
+	active_sessions.insert(tmp_session, stc_ptr_noconst);
 
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
-                boost::format fmt1("active session thread id = %d");
-                fmt1 % stc_ptr_noconst->get_upthread_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 31, fmt1.str(), __FILE__, __LINE__);
-                boost::format fmt2("pool_session.size = %d");
-                fmt2 % pool_sessions.size();
-                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 32, fmt2.str(), __FILE__, __LINE__);
-                boost::format fmt3("active_session.size = %d");
-                fmt3 % active_sessions.size();
-                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 33, fmt3.str(), __FILE__, __LINE__);
-                boost::format fmt4("active_count = %d");
-                fmt4 % active_count.get();
-                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 34, fmt4.str(), __FILE__, __LINE__);
-        }
+	//check sorry flag and status
+	if (unlikely(
+		(0 != element.sorry_flag) ||
+		((0 < element.sorry_maxconnection) && ((active_count.get() >= static_cast<size_t>(element.sorry_maxconnection)))
+		)
+	)) {
+		if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+			boost::format fmt("Connection switch Sorry mode. "
+			"active_session.size = %d, active_count.get = %d");
+			fmt % active_sessions.size() % active_count.get();
+			Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 30, fmt.str(), __FILE__, __LINE__);
+		}
 
-        session_thread_control *tmp_stc_ptr = waiting_sessions.find(stc_ptr_noconst->get_session().get());
-        waiting_sessions.erase(tmp_stc_ptr->get_session().get());
+		stc_ptr_noconst->get_session()->set_virtual_service_message(tcp_session::SORRY_STATE_ENABLE, boost::asio::ip::tcp::endpoint() );
+	}
 
-        stc_ptr_noconst->startupstream();
-        stc_ptr_noconst->startdownstream();
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+		boost::format fmt1("active session thread id = %d");
+		fmt1 % stc_ptr_noconst->get_upthread_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 31, fmt1.str(), __FILE__, __LINE__);
+		boost::format fmt2("pool_session.size = %d");
+		fmt2 % pool_sessions.size();
+		Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 32, fmt2.str(), __FILE__, __LINE__);
+		boost::format fmt3("active_session.size = %d");
+		fmt3 % active_sessions.size();
+		Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 33, fmt3.str(), __FILE__, __LINE__);
+		boost::format fmt4("active_count = %d");
+		fmt4 % active_count.get();
+		Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 34, fmt4.str(), __FILE__, __LINE__);
+	}
 
-        //left session is less than the threshold
-        if ((sessionpool_alert_flag == false) &&
-            ((pool_sessions.size() + waiting_sessions.size()) < param_data.session_pool_alert_on)) {
-                //create trap message
-                trapmessage trap_msg;
-                trap_msg.type = trapmessage::SESSIONPOOL_ALERT_ON;
-                trap_msg.message = "TRAP00020011,Warning: The left-session has fell below the threshold of left-session warning.";
-                error_code err_code;
-                //push the trap message
-                snmpagent::push_trapmessage(trap_msg, err_code);
-                if (err_code) {
-                        std::string msg("Push trap message failed.");
-                        Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 38, msg, __FILE__, __LINE__);
-                }
-                //set sessionpool alert flag true
-                sessionpool_alert_flag = true;
-        }
+	stc_ptr_noconst->startupstream();
+	stc_ptr_noconst->startdownstream();
 
-        //waiting, pool_sessions.size become over 1
-        //pick up session from pool
-        session_thread_control *stc_ptr_register_accept;
-        stc_ptr_register_accept = pool_sessions.pop();
-        while (unlikely(!stc_ptr_register_accept)) {
-                boost::this_thread::yield();
-                stc_ptr_register_accept = pool_sessions.pop();
-        }
+	//left session is less than the threshold
+	if ((sessionpool_alert_flag == false) &&
+		((pool_sessions.size() + 1) < param_data.session_pool_alert_on)) {
+		//create trap message
+		trapmessage trap_msg;
+		trap_msg.type = trapmessage::SESSIONPOOL_ALERT_ON;
+		trap_msg.message = "TRAP00020011,Warning: The left-session has fell below the threshold of left-session warning.";
+		error_code err_code;
+		//push the trap message
+		snmpagent::push_trapmessage(trap_msg, err_code);
+		if (err_code) {
+			std::string	str("Push trap message failed :");
+			Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 38, str , __FILE__, __LINE__);
+		}
+		//set sessionpool alert flag true
+		sessionpool_alert_flag = true;
+	}
 
-        //session add wait_sessions
-        boost::mutex::scoped_lock up_wait_lk(stc_ptr_register_accept->get_upthread_mutex());
-        boost::mutex::scoped_lock down_wait_lk(stc_ptr_register_accept->get_downthread_mutex());
+	//waiting, pool_sessions.size become over 1
+	//pick up session from pool
+	session_thread_control*		stc_ptr_register_accept;
 
-        waiting_sessions.insert(stc_ptr_register_accept->get_session().get(), stc_ptr_register_accept);
+	for(;;){
+		stc_ptr_register_accept = pool_sessions.pop();
+		if( stc_ptr_register_accept ) break;
+		else if( pool_sessions.empty() ) dispatcher->poll();
+		timespec	ts = { 0, 50 };
+		nanosleep( &ts, NULL );
+	}
 
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
-                boost::format fmt1("active session thread id = %d");
-                fmt1 % stc_ptr_register_accept->get_upthread_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 35, fmt1.str(), __FILE__, __LINE__);
-                boost::format fmt2("pool_session.size = %d");
-                fmt2 % pool_sessions.size();
-                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 36, fmt2.str(), __FILE__, __LINE__);
-                boost::format fmt3("active_session.size = %d");
-                fmt3 % active_sessions.size();
-                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 37, fmt3.str(), __FILE__, __LINE__);
-                boost::format fmt4("active_count = %d");
-                fmt4 % active_count.get();
-                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 38, fmt4.str(), __FILE__, __LINE__);
-        }
+	//session add wait_sessions
+	boost::mutex::scoped_lock up_wait_lk(stc_ptr_register_accept->get_upthread_mutex());
+	boost::mutex::scoped_lock down_wait_lk(stc_ptr_register_accept->get_downthread_mutex());
 
-        //register accept event handler
-        if (!ssl_virtualservice_mode_flag) {
-                acceptor_.async_accept(stc_ptr_register_accept->get_session()->get_client_socket(),
-                        boost::bind(&virtualservice_tcp::handle_accept, this, stc_ptr_register_accept,
-                                boost::asio::placeholders::error));
-        } else {
-                acceptor_.async_accept(stc_ptr_register_accept->get_session()->get_client_ssl_socket().lowest_layer(),
-                        boost::bind(&virtualservice_tcp::handle_accept, this, stc_ptr_register_accept,
-                                boost::asio::placeholders::error));
-        }
+	waiting_session = stc_ptr_register_accept->get_session().get();
 
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
-                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 39, "out_function: "
-                        "void virtualservice_tcp::handle_accept( "
-                        "const boost::shared_ptr<session_thread_control> , "
-                        "const boost::system::error_code& err )", __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+		boost::format fmt1("active session thread id = %d");
+		fmt1 % stc_ptr_register_accept->get_upthread_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 35, fmt1.str(), __FILE__, __LINE__);
+		boost::format fmt2("pool_session.size = %d");
+		fmt2 % pool_sessions.size();
+		Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 36, fmt2.str(), __FILE__, __LINE__);
+		boost::format fmt3("active_session.size = %d");
+		fmt3 % active_sessions.size();
+		Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 37, fmt3.str(), __FILE__, __LINE__);
+		boost::format fmt4("active_count = %d");
+		fmt4 % active_count.get();
+		Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 38, fmt4.str(), __FILE__, __LINE__);
+	}
+
+	//register accept event handler
+	if (!ssl_virtualservice_mode_flag) {
+		acceptor_->async_accept(waiting_session->get_client_socket().get_socket(),
+								boost::bind(&virtualservice_tcp::handle_accept,
+											this,
+											stc_ptr_register_accept,
+											boost::asio::placeholders::error));
+	}
+	else {
+		acceptor_->async_accept(waiting_session->get_client_ssl_socket().lowest_layer(),
+								boost::bind(&virtualservice_tcp::handle_accept,
+											this,
+											stc_ptr_register_accept,
+											boost::asio::placeholders::error));
+	}
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+		Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 39,
+			"out_function: "
+			"void virtualservice_tcp::handle_accept( "
+			"const boost::shared_ptr<session_thread_control> , "
+			"const boost::system::error_code& err )", __FILE__, __LINE__);
+	}
 }
 
 /*!
@@ -569,14 +610,14 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
 
         //bind acceptor
         boost::system::error_code acceptor_err;
-        acceptor_.open(element.tcp_accept_endpoint.protocol(), acceptor_err);
+        acceptor_->open(element.tcp_accept_endpoint.protocol(), acceptor_err);
         if (acceptor_err) {
                 Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 5, acceptor_err.message(),
                         __FILE__, __LINE__);
                 err.setter(true, acceptor_err.message());
                 return;
         }
-        acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true), acceptor_err);
+        acceptor_->set_option(boost::asio::ip::tcp::acceptor::reuse_address(true), acceptor_err);
         if (acceptor_err) {
                 Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 6, acceptor_err.message(),
                         __FILE__, __LINE__);
@@ -585,7 +626,7 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
         }
         if (likely(address.is_v6())) {
                 boost::asio::ip::v6_only option(true);
-                acceptor_.set_option(option, acceptor_err);
+                acceptor_->set_option(option, acceptor_err);
                 if (acceptor_err) {
                         Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 7, acceptor_err.message(),
                                 __FILE__, __LINE__);
@@ -593,7 +634,7 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
                         return;
                 }
         }
-        acceptor_.bind(element.tcp_accept_endpoint, acceptor_err);
+        acceptor_->bind(element.tcp_accept_endpoint, acceptor_err);
         if (acceptor_err) {
                 Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 8, acceptor_err.message(),
                         __FILE__, __LINE__);
@@ -754,11 +795,11 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
                 for (int i = 0; i < param_data.session_pool_size; ++i) {
                         try {
                                 tcp_session *sess = new tcp_session(*this,
-                                        dispatcher,
+										*dispatcher,
                                         set_sock_opt,
                                         element.tcp_accept_endpoint,
                                         ssl_virtualservice_mode_flag,
-                                        sslcontext,
+                                        *sslcontext,
                                         is_session_cache_use,
                                         handshake_timeout,
                                         access_log_instance);
@@ -778,6 +819,7 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
                                 }
                                 session_thread_control *p_stc = new session_thread_control(
                                         sess, vsnic_cpumask, rsnic_cpumask, -1);
+
                                 p_stc->start_thread();
                                 while (!pool_sessions.push(p_stc)) {}
                         } catch (...) {
@@ -849,28 +891,6 @@ void l7vs::virtualservice_tcp::finalize(l7vs::error_code &err)
                         __FILE__, __LINE__);
         }
 
-        //stop main loop
-        //stop();
-        while (active_sessions.size()) {
-                boost::this_thread::yield();
-        }
-
-        if (waiting_sessions.size() > 0) {
-                for (;;) {
-                        tcp_session *tmp_session = NULL;
-                        session_thread_control *tmp_stc = NULL;
-                        waiting_sessions.pop(tmp_session, tmp_stc);
-                        if (!tmp_stc) {
-                                break;
-                        }
-                        for (;;) {
-                                if (likely(pool_sessions.push(tmp_stc))) {
-                                        break;
-                                }
-                        }
-                }
-        }
-
         //release sessions[i]->join();
         while (!pool_sessions.empty()) {
                 session_thread_control *stc = pool_sessions.pop();
@@ -888,6 +908,9 @@ void l7vs::virtualservice_tcp::finalize(l7vs::error_code &err)
                                 __FILE__, __LINE__);
                 }
         }
+		//waiting session delete
+		delete waiting_session;
+		waiting_session = NULL;
 
         //unload ProtocolModule
         if (protomod) {
@@ -1475,6 +1498,7 @@ void l7vs::virtualservice_tcp::del_realserver(const l7vs::virtualservice_element
                      rs_itr != rs_list.end(); ++rs_itr) {
                         if (itr->tcp_endpoint == rs_itr->tcp_endpoint) {
                                 rs_list.erase(rs_itr);
+				active_sessions.do_all( boost::bind( &session_thread_control::session_realserver_remove, _1, rs_itr->tcp_endpoint ) );
                                 break;
                         }
                 }
@@ -1509,11 +1533,11 @@ void l7vs::virtualservice_tcp::run()
                 return;
         }
         boost::asio::socket_base::receive_buffer_size option(8192 * 192);
-        acceptor_.set_option(option);
+        acceptor_->set_option(option);
         //set socket option TCP_DEFER_ACCEPT
         if (defer_accept_opt) {
                 size_t len = sizeof(defer_accept_val);
-                int err = ::setsockopt(acceptor_.native(), IPPROTO_TCP, TCP_DEFER_ACCEPT, &defer_accept_val, len);
+                int err = ::setsockopt(acceptor_->native(), IPPROTO_TCP, TCP_DEFER_ACCEPT, &defer_accept_val, len);
                 if (unlikely(err)) {
                         //ERROR
                         Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 17,
@@ -1521,7 +1545,7 @@ void l7vs::virtualservice_tcp::run()
                 }
         }
         //start listen
-        acceptor_.listen();
+        acceptor_->listen();
 
         //left session is less than the threshold
         if ((sessionpool_alert_flag == false) &&
@@ -1544,20 +1568,19 @@ void l7vs::virtualservice_tcp::run()
 
         //switch active a session
         session_thread_control *stc_ptr;
-        {
-                stc_ptr = pool_sessions.pop();
-                if (!stc_ptr) {
-                        return;
-                }
-                //register accept event handler
-                waiting_sessions.insert(stc_ptr->get_session().get(), stc_ptr);
-        }
+		do{
+			stc_ptr = pool_sessions.pop();
+		}
+		while( !stc_ptr );
+
+		waiting_session  = stc_ptr->get_session().get();
+
         if (!ssl_virtualservice_mode_flag) {
-                acceptor_.async_accept(stc_ptr->get_session()->get_client_socket(),
+                acceptor_->async_accept( waiting_session->get_client_socket().get_socket(),
                         boost::bind(&virtualservice_tcp::handle_accept, this, stc_ptr,
                                 boost::asio::placeholders::error));
         } else {
-                acceptor_.async_accept(stc_ptr->get_session()->get_client_ssl_socket().lowest_layer(),
+                acceptor_->async_accept( waiting_session->get_client_ssl_socket().lowest_layer(),
                         boost::bind(&virtualservice_tcp::handle_accept, this, stc_ptr,
                                 boost::asio::placeholders::error));
         }
@@ -1580,7 +1603,15 @@ void l7vs::virtualservice_tcp::run()
                                        this, boost::asio::placeholders::error));
 
         //run dispatcher(start io_service loop)
-        dispatcher.run();
+        work.reset(new boost::asio::io_service::work(*dispatcher));
+	boost::thread_group dispatcher_thread_group;
+
+	for(int i = 0; i < IO_SERVICE_THREADS_NUM; i++){
+		dispatcher_thread_group.create_thread(boost::bind(&boost::asio::io_service::run, dispatcher));
+	}
+
+	//join dispatcher_thread_group when virtualservice_tcp::stop() executed.
+	dispatcher_thread_group.join_all();
 
         //stop all active sessions
         {
@@ -1605,9 +1636,17 @@ void l7vs::virtualservice_tcp::stop()
                 boost::this_thread::yield();
         }
 
-        acceptor_.close(err);
+        acceptor_->close(err);
         if (err) {
                 Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 18, err.message(), __FILE__, __LINE__);
+        }
+
+        //stop main loop
+        //stop()
+	active_sessions.do_all( boost::bind( &session_thread_control::session_pause_off, _1 ) );
+	active_sessions.do_all( boost::bind( &session_thread_control::session_stop, _1 ) );
+        while (active_sessions.size()) {
+                boost::this_thread::yield();
         }
 
         //stop dispatcher
@@ -1616,8 +1655,10 @@ void l7vs::virtualservice_tcp::stop()
         protomod_rep_timer->cancel();
         schedmod_rep_timer->cancel();
 
-        dispatcher.reset();
-        dispatcher.stop();
+	work.reset();
+        dispatcher->reset();
+	dispatcher->poll();
+        dispatcher->stop();
 }
 
 /*!
@@ -1681,7 +1722,7 @@ void l7vs::virtualservice_tcp::connection_inactive(const boost::asio::ip::tcp::e
 
         //left session is more than the release threshold
         if ((sessionpool_alert_flag == true) &&
-                 ((pool_sessions.size() + waiting_sessions.size()) > param_data.session_pool_alert_off)) {
+                 ((pool_sessions.size() + 1 ) > param_data.session_pool_alert_off)) {
                 //create trap message
                 trapmessage trap_msg;
                 trap_msg.type = trapmessage::SESSIONPOOL_ALERT_OFF;
@@ -1745,12 +1786,8 @@ void l7vs::virtualservice_tcp::release_session(const tcp_session *session_ptr)
                 Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 91, fmt3.str(), __FILE__, __LINE__);
         }
         active_sessions.erase(session_ptr);
-        stc_ptr->get_session()->initialize();
-        for (;;) {
-                if (likely(pool_sessions.push(stc_ptr))) {
-                        break;
-                }
-        }
+
+		while( !pool_sessions.push( stc_ptr ) ){}
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                 boost::format fmt1("pool_session.size = %d");
@@ -2501,7 +2538,7 @@ bool l7vs::virtualservice_tcp::set_ssl_config()
                 if (ca_file.size() == 0) {
                         // specified CA path.
                         try {
-                                sslcontext.add_verify_path(ca_dir);
+                                sslcontext->add_verify_path(ca_dir);
                         } catch (std::exception &e) {
                                 std::stringstream buf;
                                 buf << "Set root CA path error: " << e.what() << ".";
@@ -2513,7 +2550,7 @@ bool l7vs::virtualservice_tcp::set_ssl_config()
                 } else {
                         // specified CA file.
                         try {
-                                sslcontext.load_verify_file(ca_dir + ca_file);
+                                sslcontext->load_verify_file(ca_dir + ca_file);
                         } catch (std::exception &e) {
                                 std::stringstream buf;
                                 buf << "Set root CA file error: " << e.what() << ".";
@@ -2526,7 +2563,7 @@ bool l7vs::virtualservice_tcp::set_ssl_config()
 
                 // Set certificate chain file.
                 try {
-                        sslcontext.use_certificate_chain_file(
+                        sslcontext->use_certificate_chain_file(
                                 cert_chain_dir + cert_chain_file);
                 } catch (std::exception &e) {
                         std::stringstream buf;
@@ -2538,7 +2575,7 @@ bool l7vs::virtualservice_tcp::set_ssl_config()
 
                 // Set password callback function.
                 try {
-                        sslcontext.set_password_callback(
+                        sslcontext->set_password_callback(
                                 boost::bind(&virtualservice_tcp::get_ssl_password, this));
                 } catch (std::exception &e) {
                         std::stringstream buf;
@@ -2550,7 +2587,7 @@ bool l7vs::virtualservice_tcp::set_ssl_config()
 
                 // Set private key file and filetype.
                 try {
-                        sslcontext.use_private_key_file(
+                        sslcontext->use_private_key_file(
                                 private_key_dir + private_key_file, private_key_filetype);
                 } catch (std::exception &e) {
                         std::stringstream buf;
@@ -2562,7 +2599,7 @@ bool l7vs::virtualservice_tcp::set_ssl_config()
 
                 // Set verify options on the context.
                 try {
-                        sslcontext.set_verify_mode(verify_options);
+                        sslcontext->set_verify_mode(verify_options);
                 } catch (std::exception &e) {
                         std::stringstream buf;
                         buf << "Set verify option error: " << e.what() << ".";
@@ -2572,11 +2609,11 @@ bool l7vs::virtualservice_tcp::set_ssl_config()
                 }
 
                 // Set verify depth on the context.
-                SSL_CTX_set_verify_depth(sslcontext.impl(), verify_cert_depth);
+                SSL_CTX_set_verify_depth(sslcontext->impl(), verify_cert_depth);
 
                 // Set SSL options on the context.
                 try {
-                        sslcontext.set_options(ssl_options);
+                        sslcontext->set_options(ssl_options);
                 } catch (std::exception &e) {
                         std::stringstream buf;
                         buf << "Set SSL option error: " << e.what() << ".";
@@ -2588,7 +2625,7 @@ bool l7vs::virtualservice_tcp::set_ssl_config()
                 // Set temporary Diffie-Hellman parameters file.
                 if (is_tmp_dh_use) {
                         try {
-                                sslcontext.use_tmp_dh_file(tmp_dh_dir + tmp_dh_file);
+                                sslcontext->use_tmp_dh_file(tmp_dh_dir + tmp_dh_file);
                         } catch (std::exception &e) {
                                 std::stringstream buf;
                                 buf << "Set tmp DH file error: " << e.what() << ".";
@@ -2601,7 +2638,7 @@ bool l7vs::virtualservice_tcp::set_ssl_config()
                 }
 
                 // Set cipher list on the context.
-                if (unlikely(SSL_CTX_set_cipher_list(sslcontext.impl(),
+                if (unlikely(SSL_CTX_set_cipher_list(sslcontext->impl(),
                                                      cipher_list.c_str()) != 1)) {
                         std::stringstream buf;
                         buf << "Set cipher list error.";
@@ -2615,7 +2652,7 @@ bool l7vs::virtualservice_tcp::set_ssl_config()
                 if (is_session_cache_use) {
                         // Set session id context on the context.
                         if (unlikely(SSL_CTX_set_session_id_context(
-                                             sslcontext.impl(),
+                                             sslcontext->impl(),
                                              (const unsigned char *)"ultramonkey", 11) != 1)) {
                                 std::stringstream buf;
                                 buf << "Set session id context error.";
@@ -2627,17 +2664,17 @@ bool l7vs::virtualservice_tcp::set_ssl_config()
 
                         // Set session cache mode on the context.
                         SSL_CTX_set_session_cache_mode(
-                                sslcontext.impl(), session_cache_mode);
+                                sslcontext->impl(), session_cache_mode);
 
                         // Set session cache size on the context.
-                        SSL_CTX_sess_set_cache_size(sslcontext.impl(), session_cache_size);
+                        SSL_CTX_sess_set_cache_size(sslcontext->impl(), session_cache_size);
 
                         // Set session cache timeout on the context.
-                        SSL_CTX_set_timeout(sslcontext.impl(), session_cache_timeout);
+                        SSL_CTX_set_timeout(sslcontext->impl(), session_cache_timeout);
 
                 } else {
                         // session cache OFF.
-                        SSL_CTX_set_session_cache_mode(sslcontext.impl(),
+                        SSL_CTX_set_session_cache_mode(sslcontext->impl(),
                                                        SSL_SESS_CACHE_OFF);
                 }
 
@@ -2665,7 +2702,7 @@ void l7vs::virtualservice_tcp::flush_ssl_session()
 {
         // check expired cached sessions and do flushing
         // Need ssl_context lock?
-        SSL_CTX_flush_sessions(sslcontext.impl(), time(0));
+        SSL_CTX_flush_sessions(sslcontext->impl(), time(0));
 }
 
 //!
@@ -2673,12 +2710,12 @@ void l7vs::virtualservice_tcp::flush_ssl_session()
 void l7vs::virtualservice_tcp::get_ssl_config(std::stringstream &buf)
 {
         buf << "SSL configuration information: ";
-        buf << "Verify mode["   << SSL_CTX_get_verify_mode(sslcontext.impl())        << "] ";
-        buf << "Verify depth["  << SSL_CTX_get_verify_depth(sslcontext.impl())       << "] ";
-        buf << "SSL options["   << SSL_CTX_get_options(sslcontext.impl())            << "] ";
-        buf << "Cache mode["    << SSL_CTX_get_session_cache_mode(sslcontext.impl()) << "] ";
-        buf << "Cache size["    << SSL_CTX_sess_get_cache_size(sslcontext.impl())    << "] ";
-        buf << "Cache timeout[" << SSL_CTX_get_timeout(sslcontext.impl())            << "] ";
+        buf << "Verify mode["   << SSL_CTX_get_verify_mode(sslcontext->impl())        << "] ";
+        buf << "Verify depth["  << SSL_CTX_get_verify_depth(sslcontext->impl())       << "] ";
+        buf << "SSL options["   << SSL_CTX_get_options(sslcontext->impl())            << "] ";
+        buf << "Cache mode["    << SSL_CTX_get_session_cache_mode(sslcontext->impl()) << "] ";
+        buf << "Cache size["    << SSL_CTX_sess_get_cache_size(sslcontext->impl())    << "] ";
+        buf << "Cache timeout[" << SSL_CTX_get_timeout(sslcontext->impl())            << "] ";
 }
 
 //!
@@ -2686,12 +2723,12 @@ void l7vs::virtualservice_tcp::get_ssl_config(std::stringstream &buf)
 void l7vs::virtualservice_tcp::get_ssl_session_cache_info(std::stringstream &buf)
 {
         buf << "SSL session cache information: ";
-        buf << "Session number["     << SSL_CTX_sess_number(sslcontext.impl())             << "] ";
-        buf << "Accept["             << SSL_CTX_sess_accept(sslcontext.impl())             << "] ";
-        buf << "Accept good["        << SSL_CTX_sess_accept_good(sslcontext.impl())        << "] ";
-        buf << "Accept renegotiate[" << SSL_CTX_sess_accept_renegotiate(sslcontext.impl()) << "] ";
-        buf << "Hits["               << SSL_CTX_sess_hits(sslcontext.impl())               << "] ";
-        buf << "Misses["             << SSL_CTX_sess_misses(sslcontext.impl())             << "] ";
-        buf << "Timeouts["           << SSL_CTX_sess_timeouts(sslcontext.impl())           << "] ";
-        buf << "Cache full["         << SSL_CTX_sess_cache_full(sslcontext.impl())         << "] ";
+        buf << "Session number["     << SSL_CTX_sess_number(sslcontext->impl())             << "] ";
+        buf << "Accept["             << SSL_CTX_sess_accept(sslcontext->impl())             << "] ";
+        buf << "Accept good["        << SSL_CTX_sess_accept_good(sslcontext->impl())        << "] ";
+        buf << "Accept renegotiate[" << SSL_CTX_sess_accept_renegotiate(sslcontext->impl()) << "] ";
+        buf << "Hits["               << SSL_CTX_sess_hits(sslcontext->impl())               << "] ";
+        buf << "Misses["             << SSL_CTX_sess_misses(sslcontext->impl())             << "] ";
+        buf << "Timeouts["           << SSL_CTX_sess_timeouts(sslcontext->impl())           << "] ";
+        buf << "Cache full["         << SSL_CTX_sess_cache_full(sslcontext->impl())         << "] ";
 }

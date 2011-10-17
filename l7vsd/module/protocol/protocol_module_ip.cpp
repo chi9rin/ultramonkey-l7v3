@@ -1446,17 +1446,14 @@ protocol_module_base::EVENT_TAG protocol_module_ip::handle_session_finalize(
         }
         /*------DEBUG LOG END------*/
         EVENT_TAG status = STOP;
-        thread_data_ptr p_up;
-        thread_data_ptr p_down;
-        session_thread_data_map_it session_thread_data_it;
 
         //session thread free
         try {
                 boost::mutex::scoped_lock slock(session_thread_data_map_mutex);
 
-                session_thread_data_it = session_thread_data_map.find(up_thread_id);
+                session_thread_data_map_it session_thread_data_it = session_thread_data_map.find(up_thread_id);
                 if (session_thread_data_it != session_thread_data_map.end()) {
-                        p_up = session_thread_data_it->second;
+                        thread_data_ptr p_up = session_thread_data_it->second;
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel())) {
                                 boost::format formatter("delete : address = &(%d).");
@@ -1480,11 +1477,11 @@ protocol_module_base::EVENT_TAG protocol_module_ip::handle_session_finalize(
                 session_thread_data_it = session_thread_data_map.find(down_thread_id);
                 if (session_thread_data_it != session_thread_data_map.end()) {
 
-                        p_down = session_thread_data_it->second;
+                        thread_data_ptr p_down = session_thread_data_it->second;
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel())) {
                                 boost::format formatter("delete : address = &(%d).");
-                                formatter % static_cast<void *>(p_up->data_buffer);
+                                formatter % static_cast<void *>(p_down->data_buffer);
                                 putLogDebug(600047, formatter.str(), __FILE__, __LINE__);
                         }
                         /*------DEBUG LOG END------*/
@@ -1575,17 +1572,16 @@ protocol_module_base::EVENT_TAG protocol_module_ip::handle_accept(const boost::t
                         putLogDebug(600051, formatter.str(), __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
-
-                //sorry flag on
-                if (session_data_ptr->sorry_flag == SORRY_FLAG_ON) {
-                        //set return status
-                        status = SORRYSERVER_SELECT;
-                }
-                //sorry flag off
-                else {
-                        //set return status
-                        status = REALSERVER_SELECT;
-                }
+	        //sorry flag on 
+	        if (session_data_ptr->sorry_flag == SORRY_FLAG_ON) { 
+		        //set return status 
+		        status = SORRYSERVER_SELECT; 
+	        } 
+	        //sorry flag off 
+	        else { 
+	                //set return status 
+	                status = REALSERVER_SELECT; 
+                } 
 
                 //set last status
                 session_data_ptr->last_status = status;
@@ -1658,8 +1654,8 @@ protocol_module_base::EVENT_TAG protocol_module_ip::handle_client_recv(const boo
         size_t http_header_content_length_offset    = 0;
         size_t http_header_content_length_len        = 0;
         int content_length_value            = 0;
-        const size_t CR_LF_LEN                = 2; //length of "\r\n"
-        const size_t CR_LF_CR_LF_LEN            = 4; //length of "\r\n\r\n"
+        const size_t CR_LF_LEN                = strlen("\r\n");
+        const size_t CR_LF_CR_LF_LEN            = strlen("\r\n\r\n");
         session_thread_data_map_it            session_thread_it;
         thread_data_ptr                    session_data_ptr;
         http_utility::CHECK_RESULT_TAG             check_ret;
@@ -2242,29 +2238,28 @@ protocol_module_base::EVENT_TAG protocol_module_ip::handle_realserver_connect(
         size_t send_possible_size        = 0;
         size_t x_forwarded_for_insert_pos   = 0;
         thread_data_ptr                session_data_ptr;
-        session_thread_data_map_it        session_thread_it;
         std::pair<char *, size_t>        buffer_element;
         std::string                x_forwarded_for_context;
 
         try {
-                {
-                        boost::mutex::scoped_lock slock(session_thread_data_map_mutex);
+			session_thread_data_map_mutex.lock();
 
                         //thread id check
-                        session_thread_it = session_thread_data_map.find(thread_id);
+                        session_thread_data_map_it session_thread_it = session_thread_data_map.find(thread_id);
                         if (unlikely(session_thread_it == session_thread_data_map.end() || session_thread_it->second == NULL)) {
                                 boost::format formatter("Invalid thread id. thread id : %d.");
                                 formatter % boost::this_thread::get_id();
                                 putLogError(600045, formatter.str(), __FILE__, __LINE__);
+				session_thread_data_map_mutex.unlock();
                                 throw - 1;
                         }
 
                         session_data_ptr = session_thread_it->second;
-                }
 
                 send_possible_size = std::min(session_data_ptr->current_message_rest_size,
                                               session_data_ptr->data_length
                                              );
+		session_thread_data_map_mutex.unlock();
 
                 //buffer sequence is empty
                 if (session_data_ptr->buffer_sequence.empty()) {

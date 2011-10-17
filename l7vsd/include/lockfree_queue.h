@@ -94,7 +94,7 @@ start:
 private:
         //get next value head and tail cyclic over elemental number
         size_t get_num_next(const size_t num) {
-                if (unlikely(num >= element_num)) {
+                if (unlikely(num + 1 >= element_num)) {
                         return 0;
                 } else {
                         return num + 1;

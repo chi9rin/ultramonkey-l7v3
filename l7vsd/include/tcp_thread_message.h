@@ -38,6 +38,9 @@ namespace l7vs
 class tcp_thread_message : private boost::noncopyable
 {
 public:
+#ifdef	DEBUG
+		std::string			func_tag_name;
+#endif
         //! constructor
         tcp_thread_message() {}
         //! destructor

@@ -70,10 +70,6 @@ l7vs::virtualservice_base::virtualservice_base(const l7vs::l7vsd &invsd,
         downqos_alert_flag = false;
         sessionpool_alert_flag = false;
 
-        calc_bps_timer.reset(new boost::asio::deadline_timer(dispatcher));
-        replication_timer.reset(new boost::asio::deadline_timer(dispatcher));
-        protomod_rep_timer.reset(new boost::asio::deadline_timer(dispatcher));
-        schedmod_rep_timer.reset(new boost::asio::deadline_timer(dispatcher));
         rs_list.clear();
         protomod = NULL;
         schedmod = NULL;
@@ -436,9 +432,18 @@ void    l7vs::virtualservice_base::handle_throughput_update(const boost::system:
                         formatter2 % throughput_down.get() % wait_count_down.get();
                         l7vs::Logger::putLogDebug(l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 9, formatter2.str(), __FILE__, __LINE__);
                 }
-        } else
-                //ERROR case
-                l7vs::Logger::putLogError(l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 5, err.message(), __FILE__, __LINE__);
+        }
+		else if( err == boost::asio::error::operation_aborted ){ //nomal exit case
+			boost::format	fmt( "Thread ID[%d] throughput update timer cancel : %s" );
+			fmt % boost::this_thread::get_id() % err.message();
+			Logger::putLogInfo( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, fmt.str(), __FILE__, __LINE__ );
+		}
+		else{	// error case
+			boost::format	fmt( "Thread ID[%d] throughput update timer error : %s" );
+			fmt % boost::this_thread::get_id() % err.message();
+			Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 5, fmt.str(), __FILE__, __LINE__ );
+		}
+
 
         if (unlikely(LOG_LV_DEBUG == l7vs::Logger::getLogLevel(l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD))) {
                 boost::format formatter("out_function : void virtualservice_base::handle_throughput_update( "
@@ -649,4 +654,20 @@ void l7vs::virtualservice_base::clear_inact()
         }
 }
 
+//! realserver transparent mode check.
+// @param[in] realserver_endpoint realserver endpoint
+// @return    mode check result
+//
+bool l7vs::virtualservice_base::is_realserver_transparent( const boost::asio::ip::tcp::endpoint& realserver_endpoint ){
 
+	rs_list_lock();
+	for( std::list<realserver>::iterator itr = rs_list.begin(); itr != rs_list.end(); ++itr ){
+		if( (itr->tcp_endpoint == realserver_endpoint) &&
+			(itr->fwdmode == realserver_element::FWD_TPROXY ) ){
+			 rs_list_unlock();
+			 return true;
+		}
+	}
+	rs_list_unlock();
+	return false;
+}

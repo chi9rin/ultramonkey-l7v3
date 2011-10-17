@@ -45,6 +45,7 @@ namespace l7vs
 //! constructor
 l7vsd::l7vsd()
         :    help(false),
+			 debug(false),
              exit_requested(0),
              received_sig(0)
 {
@@ -52,6 +53,8 @@ l7vsd::l7vsd()
 
         option_dic["-h"]        = boost::bind(&l7vsd::parse_help, this, _1, _2, _3);
         option_dic["--help"]    = boost::bind(&l7vsd::parse_help, this, _1, _2, _3);
+		option_dic["-d"]		= boost::bind(&l7vsd::parse_debug, this, _1, _2, _3);
+		option_dic["--debug"]	= boost::bind(&l7vsd::parse_debug, this, _1, _2, _3);
 
         starttime = boost::posix_time::second_clock::local_time();
 }
@@ -1215,13 +1218,15 @@ int    l7vsd::run(int argc, char *argv[])
                         return 0;
                 }
 
-                if (0 > daemon(0, 0)) {
+				if( !debug ){
+	                if (0 > daemon(0, 0)) {
                         std::stringstream buf;
                         buf << "daemon() failed: " << strerror(errno);
                         logger.putLogError(LOG_CAT_L7VSD_MAINTHREAD, 3, buf.str(), __FILE__, __LINE__);
                         munlockall();
                         return -1;
-                }
+	                }
+				}
 
                 //set max file open num
                 Parameter    param;
@@ -1459,6 +1464,13 @@ bool    l7vsd::parse_help(int &pos, int argc, char *argv[])
 
         help = true;        //help_mode flag on
         return true;
+}
+
+//! command debug parse
+bool	l7vsd::parse_debug( int& pos, int argc, char* argv[] ){
+		Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 38, "l7vsd::parse_help", __FILE__, __LINE__);
+		debug = true;
+		return true;
 }
 
 //! create usage string

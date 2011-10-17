@@ -1,3 +1,5 @@
+[Oct. 17 2011] 3.0.2-1 HIBARI Michiro
+  - Change transport method sync to async. (ex. connect -> async_connect)
 [Jan. 25 2011] 3.0.1-1 HIBARI Michiro
   - Fix L7directord RA.(Remove need less option "-b".)
 

@@ -126,11 +126,9 @@ l7vsd_SOURCES = \
 	../include/virtualservice_element.h \
 	../include/data_buff_base.h \
 	../include/session_result_message.h \
-	../include/tcp_data.h \
-	../include/tcp_socket.h \
+	../include/basic_tcp_socket.h \
 	../include/tcp_ssl_socket.h \
 	../include/tcp_socket_option.h \
-	../include/tcp_realserver_connetc_socket_list.h \
 	../include/tcp_thread_message.h \
 	../include/tcp_session.h \
 	../include/udp_data.h \
@@ -155,10 +153,6 @@ l7vsd_SOURCES = \
 	command_session.cpp \
 	replication.cpp \
 	data_buff_base.cpp \
-	tcp_data.cpp \
-	tcp_socket.cpp \
-	tcp_ssl_socket.cpp \
-	tcp_realserver_connect_socket_list.cpp \
 	udp_data.cpp \
 	udp_request_thread_control.cpp \
 	udp_request.cpp \

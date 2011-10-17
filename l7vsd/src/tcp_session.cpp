@@ -55,237 +55,303 @@ tcp_session::tcp_session(
         const int set_ssl_handshake_time_out,
         logger_implement_access *set_access_logger)
         :
-        io(session_io),
+		parent_dispatcher(session_io),
         parent_service(vs),
         exit_flag(0),
-        upthread_status(UPTHREAD_SLEEP),
-        downthread_status(DOWNTHREAD_SLEEP),
-        realserver_connect_status(false),
+       	upthread_status(UPTHREAD_SLEEP),
+       	downthread_status(DOWNTHREAD_SLEEP),
         protocol_module(NULL),
-        client_socket(session_io, set_option),
+		client_socket( session_io, set_option ),
         upstream_buffer_size(-1),
         downstream_buffer_size(-1),
         virtualservice_endpoint(listen_endpoint),
         access_log_flag(false),
         access_logger(set_access_logger),
         ssl_flag(ssl_mode),
-        client_ssl_socket(session_io, set_ssl_context, set_option),
+		client_ssl_socket( session_io, set_option, set_ssl_context ),
         ssl_context(set_ssl_context),
         ssl_cache_flag(set_ssl_cache_flag),
-        ssl_handshake_timer_flag(false),
-        ssl_handshake_time_out(set_ssl_handshake_time_out),
-        ssl_handshake_time_out_flag(false),
+		ssl_handshake_time_out(set_ssl_handshake_time_out),
         socket_opt_info(set_option)
 {
-        // sorryserver socket
-        tcp_socket_ptr sorry_socket(new tcp_socket(session_io, socket_opt_info));
-        sorryserver_socket.second = sorry_socket;
 
         // set up_thread_module_event_map
-        std::pair<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG> add_up_thread_event;
-        add_up_thread_event.first = protocol_module_base::ACCEPT;
-        add_up_thread_event.second = UP_FUNC_CLIENT_ACCEPT;
-        up_thread_module_event_map.insert(add_up_thread_event);
-        add_up_thread_event.first = protocol_module_base::CLIENT_DISCONNECT;
-        add_up_thread_event.second = UP_FUNC_CLIENT_DISCONNECT;
-        up_thread_module_event_map.insert(add_up_thread_event);
-        add_up_thread_event.first = protocol_module_base::CLIENT_RECV;
-        add_up_thread_event.second = UP_FUNC_CLIENT_RECEIVE;
-        up_thread_module_event_map.insert(add_up_thread_event);
-        add_up_thread_event.first = protocol_module_base::CLIENT_RESPONSE_SEND;
-        add_up_thread_event.second = UP_FUNC_CLIENT_RESPOND_SEND;
-        up_thread_module_event_map.insert(add_up_thread_event);
-        add_up_thread_event.first = protocol_module_base::REALSERVER_SELECT;
-        add_up_thread_event.second = UP_FUNC_REALSERVER_GET_DEST_EVENT;
-        up_thread_module_event_map.insert(add_up_thread_event);
-        add_up_thread_event.first = protocol_module_base::REALSERVER_CONNECT;
-        add_up_thread_event.second = UP_FUNC_REALSERVER_CONNECT;
-        up_thread_module_event_map.insert(add_up_thread_event);
-        add_up_thread_event.first = protocol_module_base::REALSERVER_SEND;
-        add_up_thread_event.second = UP_FUNC_REALSERVER_SEND;
-        up_thread_module_event_map.insert(add_up_thread_event);
-        add_up_thread_event.first = protocol_module_base::REALSERVER_DISCONNECT;
-        add_up_thread_event.second = UP_FUNC_REALSERVER_ALL_DISCONNECT;
-        up_thread_module_event_map.insert(add_up_thread_event);
-        add_up_thread_event.first = protocol_module_base::SORRYSERVER_SELECT;
-        add_up_thread_event.second = UP_FUNC_SORRYSERVER_GET_DEST;
-        up_thread_module_event_map.insert(add_up_thread_event);
-        add_up_thread_event.first = protocol_module_base::SORRYSERVER_CONNECT;
-        add_up_thread_event.second = UP_FUNC_SORRYSERVER_CONNECT;
-        up_thread_module_event_map.insert(add_up_thread_event);
-        add_up_thread_event.first = protocol_module_base::SORRYSERVER_SEND;
-        add_up_thread_event.second = UP_FUNC_SORRYSERVER_SEND;
-        up_thread_module_event_map.insert(add_up_thread_event);
-        add_up_thread_event.first = protocol_module_base::SORRYSERVER_DISCONNECT;
-        add_up_thread_event.second = UP_FUNC_SORRYSERVER_MOD_DISCONNECT;
-        up_thread_module_event_map.insert(add_up_thread_event);
-        add_up_thread_event.first = protocol_module_base::FINALIZE;
-        add_up_thread_event.second = UP_FUNC_EXIT;
-        up_thread_module_event_map.insert(add_up_thread_event);
+		up_thread_module_event_map[protocol_module_base::ACCEPT] 				= UP_FUNC_CLIENT_ACCEPT;
+		up_thread_module_event_map[protocol_module_base::CLIENT_DISCONNECT] 	= UP_FUNC_CLIENT_DISCONNECT;
+		up_thread_module_event_map[protocol_module_base::CLIENT_RECV]			= UP_FUNC_CLIENT_RECEIVE;
+		up_thread_module_event_map[protocol_module_base::CLIENT_RESPONSE_SEND]	= UP_FUNC_CLIENT_RESPOND_SEND;
+		up_thread_module_event_map[protocol_module_base::REALSERVER_SELECT]		= UP_FUNC_REALSERVER_GET_DEST_EVENT;
+		up_thread_module_event_map[protocol_module_base::REALSERVER_CONNECT]	= UP_FUNC_REALSERVER_CONNECT;
+		up_thread_module_event_map[protocol_module_base::REALSERVER_SEND]		= UP_FUNC_REALSERVER_SEND;
+		up_thread_module_event_map[protocol_module_base::REALSERVER_DISCONNECT]	= UP_FUNC_REALSERVER_ALL_DISCONNECT;
+		up_thread_module_event_map[protocol_module_base::SORRYSERVER_SELECT]	= UP_FUNC_SORRYSERVER_GET_DEST;
+		up_thread_module_event_map[protocol_module_base::SORRYSERVER_CONNECT]	= UP_FUNC_SORRYSERVER_CONNECT;
+		up_thread_module_event_map[protocol_module_base::SORRYSERVER_SEND]		= UP_FUNC_SORRYSERVER_SEND;
+		up_thread_module_event_map[protocol_module_base::SORRYSERVER_DISCONNECT]= UP_FUNC_SORRYSERVER_MOD_DISCONNECT;
+		up_thread_module_event_map[protocol_module_base::FINALIZE]				= UP_FUNC_EXIT;
+
+        // set up_que_function_map
+                up_que_function_map[UP_FUNC_CLIENT_DISCONNECT]          =
+                        boost::bind( &tcp_session::up_thread_client_disconnect, this, _1 );
+		up_que_function_map[UP_FUNC_CLIENT_DISCONNECT_EVENT]		=
+			boost::bind( &tcp_session::up_thread_client_disconnect_event, this, _1 );
+		up_que_function_map[UP_FUNC_REALSERVER_DISCONNECT] 			=
+			boost::bind( &tcp_session::up_thread_realserver_disconnect, this, _1 );
+		up_que_function_map[UP_FUNC_SORRYSERVER_DISCONNECT_EVENT]	=
+			boost::bind( &tcp_session::up_thread_sorryserver_disconnect_event, this, _1 );
+		up_que_function_map[UP_FUNC_PAUSE_ON_EVENT]					=
+			boost::bind( &tcp_session::up_thread_session_pause_on_event, this, _1 );
+		up_que_function_map[UP_FUNC_PAUSE_OFF_EVENT]				=
+			boost::bind( &tcp_session::up_thread_session_pause_off_event, this, _1 );
+		up_que_function_map[UP_FUNC_CLIENT_ACCEPT_EVENT] 			=
+			boost::bind( &tcp_session::up_thread_client_accept_event, this, _1 );
+		up_que_function_map[UP_FUNC_CLIENT_ACCEPT_FAIL_EVENT] 		=
+			boost::bind( &tcp_session::up_thread_client_accept_fail_event, this, _1 );
 
         // set up_thread_function_array
-
-
         up_thread_function_array[UP_FUNC_CLIENT_ACCEPT] =
-                std::make_pair(UP_FUNC_CLIENT_ACCEPT,  boost::bind(&tcp_session::up_thread_client_accept, this, _1));
+			std::make_pair(	
+				UP_FUNC_CLIENT_ACCEPT,
+				boost::bind(&tcp_session::up_thread_client_accept,this,_1));
         up_thread_function_array[UP_FUNC_CLIENT_ACCEPT_EVENT] =
-                std::make_pair(UP_FUNC_CLIENT_ACCEPT_EVENT,  boost::bind(&tcp_session::up_thread_client_accept_event, this, _1));
+			std::make_pair(
+				UP_FUNC_CLIENT_ACCEPT_EVENT,
+				boost::bind(&tcp_session::up_thread_client_accept_event,this,_1));
         up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT] =
-                std::make_pair(UP_FUNC_CLIENT_DISCONNECT, boost::bind(&tcp_session::up_thread_client_disconnect, this, _1));
+			std::make_pair(
+				UP_FUNC_CLIENT_DISCONNECT,
+				boost::bind(&tcp_session::up_thread_client_disconnect,this,_1));
         up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT_EVENT] =
-                std::make_pair(UP_FUNC_CLIENT_DISCONNECT_EVENT,  boost::bind(&tcp_session::up_thread_client_disconnect_event, this, _1));
+			std::make_pair(
+				UP_FUNC_CLIENT_DISCONNECT_EVENT,
+				boost::bind(&tcp_session::up_thread_client_disconnect_event,this,_1));
         up_thread_function_array[UP_FUNC_CLIENT_RECEIVE] =
-                std::make_pair(UP_FUNC_CLIENT_RECEIVE, boost::bind(&tcp_session::up_thread_client_receive, this, _1));
-        up_thread_function_array[UP_FUNC_CLIENT_RESPOND_SEND] =
-                std::make_pair(UP_FUNC_CLIENT_RESPOND_SEND, boost::bind(&tcp_session::up_thread_client_respond, this, _1));
+			std::make_pair(
+				UP_FUNC_CLIENT_RECEIVE,
+				boost::bind(&tcp_session::up_thread_client_receive,this,_1));
+		up_thread_function_array[UP_FUNC_CLIENT_HANDLE_ARECIEVE] =
+			std::make_pair(
+				UP_FUNC_CLIENT_HANDLE_ARECIEVE,
+				boost::bind(&tcp_session::up_thread_client_handle_async_read_some,this,_1));
+		up_thread_function_array[UP_FUNC_CLIENT_RESPOND_SEND] =
+			std::make_pair(
+				UP_FUNC_CLIENT_RESPOND_SEND,
+				boost::bind(&tcp_session::up_thread_client_respond,this,_1));
         up_thread_function_array[UP_FUNC_CLIENT_RESPOND_SEND_EVENT] =
-                std::make_pair(UP_FUNC_CLIENT_RESPOND_SEND_EVENT, boost::bind(&tcp_session::up_thread_client_respond_event, this, _1));
+			std::make_pair(
+				UP_FUNC_CLIENT_RESPOND_SEND_EVENT,
+				boost::bind(&tcp_session::up_thread_client_respond_event,this,_1));
         up_thread_function_array[UP_FUNC_REALSERVER_GET_DEST_EVENT] =
-                std::make_pair(UP_FUNC_REALSERVER_GET_DEST_EVENT, boost::bind(&tcp_session::up_thread_realserver_get_destination_event, this, _1));
+			std::make_pair(
+				UP_FUNC_REALSERVER_GET_DEST_EVENT,
+				boost::bind(&tcp_session::up_thread_realserver_get_destination_event,this,_1));
         up_thread_function_array[UP_FUNC_REALSERVER_CONNECT] =
-                std::make_pair(UP_FUNC_REALSERVER_CONNECT, boost::bind(&tcp_session::up_thread_realserver_connect, this, _1));
+			std::make_pair(
+				UP_FUNC_REALSERVER_CONNECT,
+				boost::bind(&tcp_session::up_thread_realserver_connect,this,_1));
         up_thread_function_array[UP_FUNC_REALSERVER_CONNECT_EVENT] =
-                std::make_pair(UP_FUNC_REALSERVER_CONNECT_EVENT, boost::bind(&tcp_session::up_thread_realserver_connect_event, this, _1));
+			std::make_pair(
+				UP_FUNC_REALSERVER_CONNECT_EVENT,
+				boost::bind(&tcp_session::up_thread_realserver_connect_event,this,_1));
         up_thread_function_array[UP_FUNC_REALSERVER_CONNECT_FAIL_EVENT] =
-                std::make_pair(UP_FUNC_REALSERVER_CONNECT_FAIL_EVENT, boost::bind(&tcp_session::up_thread_realserver_connection_fail_event, this, _1));
+			std::make_pair(
+				UP_FUNC_REALSERVER_CONNECT_FAIL_EVENT,
+				boost::bind(&tcp_session::up_thread_realserver_connection_fail_event,this,_1));
         up_thread_function_array[UP_FUNC_REALSERVER_SEND] =
-                std::make_pair(UP_FUNC_REALSERVER_SEND, boost::bind(&tcp_session::up_thread_realserver_send, this, _1));
+			std::make_pair(
+				UP_FUNC_REALSERVER_SEND,
+				boost::bind(&tcp_session::up_thread_realserver_send,this,_1));
+		up_thread_function_array[UP_FUNC_REALSERVER_HANDLE_ASEND] =
+			std::make_pair(
+				UP_FUNC_REALSERVER_HANDLE_ASEND,
+				boost::bind(&tcp_session::up_thread_realserver_handle_async_write_some,this,_1));
         up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT] =
-                std::make_pair(UP_FUNC_REALSERVER_DISCONNECT, boost::bind(&tcp_session::up_thread_realserver_disconnect, this, _1));
+			std::make_pair(
+				UP_FUNC_REALSERVER_DISCONNECT,
+				boost::bind(&tcp_session::up_thread_realserver_disconnect,this,_1));
         up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT_EVENT] =
-                std::make_pair(UP_FUNC_REALSERVER_DISCONNECT_EVENT, boost::bind(&tcp_session::up_thread_realserver_disconnect_event, this, _1));
-        up_thread_function_array[UP_FUNC_REALSERVER_ALL_DISCONNECT] =
-                std::make_pair(UP_FUNC_REALSERVER_ALL_DISCONNECT, boost::bind(&tcp_session::up_thread_all_realserver_disconnect, this, _1));
+			std::make_pair(
+				UP_FUNC_REALSERVER_DISCONNECT_EVENT,
+				boost::bind(&tcp_session::up_thread_realserver_disconnect_event,this,_1));
+        up_thread_function_array[UP_FUNC_REALSERVER_CHECK] =
+			std::make_pair(
+				UP_FUNC_REALSERVER_CHECK,
+				boost::bind(&tcp_session::up_thread_realserver_check,this,_1));
         up_thread_function_array[UP_FUNC_SORRYSERVER_GET_DEST] =
-                std::make_pair(UP_FUNC_SORRYSERVER_GET_DEST, boost::bind(&tcp_session::up_thread_sorryserver_get_destination_event, this, _1));
+			std::make_pair(
+				UP_FUNC_SORRYSERVER_GET_DEST,
+				boost::bind(&tcp_session::up_thread_sorryserver_get_destination_event,this,_1));
         up_thread_function_array[UP_FUNC_SORRYSERVER_CONNECT] =
-                std::make_pair(UP_FUNC_SORRYSERVER_CONNECT, boost::bind(&tcp_session::up_thread_sorryserver_connect, this, _1));
+			std::make_pair(
+				UP_FUNC_SORRYSERVER_CONNECT,
+				boost::bind(&tcp_session::up_thread_sorryserver_connect,this,_1));
         up_thread_function_array[UP_FUNC_SORRYSERVER_CONNECT_EVENT] =
-                std::make_pair(UP_FUNC_SORRYSERVER_CONNECT_EVENT, boost::bind(&tcp_session::up_thread_sorryserver_connect_event, this, _1));
+			std::make_pair(
+				UP_FUNC_SORRYSERVER_CONNECT_EVENT,
+				boost::bind(&tcp_session::up_thread_sorryserver_connect_event,this,_1));
         up_thread_function_array[UP_FUNC_SORRYSERVER_CONNECT_FAIL_EVENT] =
-                std::make_pair(UP_FUNC_SORRYSERVER_CONNECT_FAIL_EVENT, boost::bind(&tcp_session::up_thread_sorryserver_connection_fail_event, this, _1));
+			std::make_pair(
+				UP_FUNC_SORRYSERVER_CONNECT_FAIL_EVENT,
+				boost::bind(&tcp_session::up_thread_sorryserver_connection_fail_event,this,_1));
         up_thread_function_array[UP_FUNC_SORRYSERVER_SEND] =
-                std::make_pair(UP_FUNC_SORRYSERVER_SEND, boost::bind(&tcp_session::up_thread_sorryserver_send, this, _1));
+			std::make_pair(
+				UP_FUNC_SORRYSERVER_SEND,
+				boost::bind(&tcp_session::up_thread_sorryserver_send,this,_1));
+		up_thread_function_array[UP_FUNC_SORRYSERVER_HANDLE_ASEND] =
+			std::make_pair(
+				UP_FUNC_SORRYSERVER_HANDLE_ASEND,
+				boost::bind(&tcp_session::up_thread_sorryserver_handle_async_write_some,this,_1));
         up_thread_function_array[UP_FUNC_SORRYSERVER_DISCONNECT] =
-                std::make_pair(UP_FUNC_SORRYSERVER_DISCONNECT, boost::bind(&tcp_session::up_thread_sorryserver_disconnect, this, _1));
+			std::make_pair(
+				UP_FUNC_SORRYSERVER_DISCONNECT,
+				boost::bind(&tcp_session::up_thread_sorryserver_disconnect,this,_1));
         up_thread_function_array[UP_FUNC_SORRYSERVER_MOD_DISCONNECT] =
-                std::make_pair(UP_FUNC_SORRYSERVER_MOD_DISCONNECT, boost::bind(&tcp_session::up_thread_sorryserver_mod_disconnect, this, _1));
+			std::make_pair(
+				UP_FUNC_SORRYSERVER_MOD_DISCONNECT,
+				boost::bind(&tcp_session::up_thread_sorryserver_mod_disconnect,this,_1));
         up_thread_function_array[UP_FUNC_SORRYSERVER_DISCONNECT_EVENT] =
-                std::make_pair(UP_FUNC_SORRYSERVER_DISCONNECT_EVENT, boost::bind(&tcp_session::up_thread_sorryserver_disconnect_event, this, _1));
+			std::make_pair(
+				UP_FUNC_SORRYSERVER_DISCONNECT_EVENT,
+				boost::bind(&tcp_session::up_thread_sorryserver_disconnect_event,this,_1));
+		up_thread_function_array[UP_FUNC_SORRY_ENABLE_EVENT] =
+			std::make_pair(
+				UP_FUNC_SORRY_ENABLE_EVENT,
+				boost::bind(&tcp_session::up_thread_sorry_enable_event,this,_1));
+		up_thread_function_array[UP_FUNC_SORRY_DISABLE_EVENT] =
+			std::make_pair(
+				UP_FUNC_SORRY_DISABLE_EVENT,
+				boost::bind(&tcp_session::up_thread_sorry_disable_event,this,_1));
+		up_thread_function_array[UP_FUNC_PAUSE_ON_EVENT] =
+			std::make_pair(
+				UP_FUNC_PAUSE_ON_EVENT,
+				boost::bind(&tcp_session::up_thread_session_pause_on_event,this,_1 ));
+		up_thread_function_array[UP_FUNC_PAUSE_OFF_EVENT] =
+			std::make_pair(
+				UP_FUNC_PAUSE_OFF_EVENT,
+				boost::bind(&tcp_session::up_thread_session_pause_off_event,this,_1));
         up_thread_function_array[UP_FUNC_EXIT] =
-                std::make_pair(UP_FUNC_EXIT, boost::bind(&tcp_session::up_thread_exit, this, _1));
+			std::make_pair(
+				UP_FUNC_EXIT,
+				boost::bind(&tcp_session::up_thread_exit,this,_1));
 
-        // set up_thread_message_down_thread_function_map
-        std::pair<DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func> add_up_thread_message_func;
-        add_up_thread_message_func.first = DOWN_FUNC_CLIENT_DISCONNECT_EVENT;
-        add_up_thread_message_func.second = boost::bind(&tcp_session::down_thread_client_disconnect_event, this, _1);
-        up_thread_message_down_thread_function_map.insert(add_up_thread_message_func);
-        add_up_thread_message_func.first = DOWN_FUNC_CLIENT_RESPOND_SEND_EVENT;
-        add_up_thread_message_func.second = boost::bind(&tcp_session::down_thread_client_respond_event, this, _1);
-        up_thread_message_down_thread_function_map.insert(add_up_thread_message_func);
-        add_up_thread_message_func.first = DOWN_FUNC_REALSERVER_DISCONNECT_EVENT;
-        add_up_thread_message_func.second = boost::bind(&tcp_session::down_thread_realserver_disconnect_event, this, _1);
-        up_thread_message_down_thread_function_map.insert(add_up_thread_message_func);
-        add_up_thread_message_func.first = DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT;
-        add_up_thread_message_func.second = boost::bind(&tcp_session::down_thread_sorryserver_disconnect_event, this, _1);
-        up_thread_message_down_thread_function_map.insert(add_up_thread_message_func);
-        add_up_thread_message_func.first = DOWN_FUNC_SORRY_ENABLE_EVENT;
-        add_up_thread_message_func.second = boost::bind(&tcp_session::down_thread_sorry_enable_event, this, _1);
-        up_thread_message_down_thread_function_map.insert(add_up_thread_message_func);
 
         // set down_thread_module_event_map
-        std::pair<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG> add_down_thread_event;
-        add_down_thread_event.first = protocol_module_base::CLIENT_SEND;
-        add_down_thread_event.second = DOWN_FUNC_CLIENT_SEND;
-        down_thread_module_event_map.insert(add_down_thread_event);
-        add_down_thread_event.first = protocol_module_base::CLIENT_DISCONNECT;
-        add_down_thread_event.second = DOWN_FUNC_CLIENT_DISCONNECT;
-        down_thread_module_event_map.insert(add_down_thread_event);
-        add_down_thread_event.first = protocol_module_base::CLIENT_CONNECTION_CHECK;
-        add_down_thread_event.second = DOWN_FUNC_CLIENT_CONNECTION_CHK;
-        down_thread_module_event_map.insert(add_down_thread_event);
-        add_down_thread_event.first = protocol_module_base::REALSERVER_RECV;
-        add_down_thread_event.second = DOWN_FUNC_REALSERVER_RECEIVE;
-        down_thread_module_event_map.insert(add_down_thread_event);
-        add_down_thread_event.first = protocol_module_base::REALSERVER_DISCONNECT;
-        add_down_thread_event.second = DOWN_FUNC_REALSERVER_ALL_DISCONNECT;
-        down_thread_module_event_map.insert(add_down_thread_event);
-        add_down_thread_event.first = protocol_module_base::SORRYSERVER_RECV;
-        add_down_thread_event.second = DOWN_FUNC_SORRYSERVER_RECEIVE;
-        down_thread_module_event_map.insert(add_down_thread_event);
-        add_down_thread_event.first = protocol_module_base::SORRYSERVER_DISCONNECT;
-        add_down_thread_event.second = DOWN_FUNC_SORRYSERVER_MOD_DISCONNECT;
-        down_thread_module_event_map.insert(add_down_thread_event);
-        add_down_thread_event.first = protocol_module_base::FINALIZE;
-        add_down_thread_event.second = DOWN_FUNC_EXIT;
-        down_thread_module_event_map.insert(add_down_thread_event);
+		down_thread_module_event_map[protocol_module_base::CLIENT_SEND]				= DOWN_FUNC_CLIENT_SEND;
+		down_thread_module_event_map[protocol_module_base::CLIENT_DISCONNECT]		= DOWN_FUNC_CLIENT_DISCONNECT;
+		down_thread_module_event_map[protocol_module_base::CLIENT_CONNECTION_CHECK]	= DOWN_FUNC_CLIENT_CONNECTION_CHK;
+		down_thread_module_event_map[protocol_module_base::REALSERVER_RECV]			= DOWN_FUNC_REALSERVER_RECEIVE;
+		down_thread_module_event_map[protocol_module_base::REALSERVER_DISCONNECT]	= DOWN_FUNC_REALSERVER_ALL_DISCONNECT;
+		down_thread_module_event_map[protocol_module_base::SORRYSERVER_RECV]		= DOWN_FUNC_SORRYSERVER_RECEIVE;
+		down_thread_module_event_map[protocol_module_base::SORRYSERVER_DISCONNECT]	= DOWN_FUNC_SORRYSERVER_MOD_DISCONNECT;
+		down_thread_module_event_map[protocol_module_base::FINALIZE]				= DOWN_FUNC_EXIT;
 
         // set down_thread_function_array
-        down_thread_function_array[DOWN_FUNC_CLIENT_DISCONNECT]    = std::make_pair(DOWN_FUNC_CLIENT_DISCONNECT, boost::bind(&tcp_session::down_thread_client_disconnect, this, _1));
-        down_thread_function_array[DOWN_FUNC_CLIENT_DISCONNECT_EVENT]    = std::make_pair(DOWN_FUNC_CLIENT_DISCONNECT_EVENT, boost::bind(&tcp_session::down_thread_client_disconnect_event, this, _1));
-        down_thread_function_array[DOWN_FUNC_CLIENT_CONNECTION_CHK]    = std::make_pair(DOWN_FUNC_CLIENT_CONNECTION_CHK, boost::bind(&tcp_session::down_thread_client_connection_chk_event, this, _1));
-        down_thread_function_array[DOWN_FUNC_CLIENT_SEND]    = std::make_pair(DOWN_FUNC_CLIENT_SEND, boost::bind(&tcp_session::down_thread_client_send, this, _1));
-        down_thread_function_array[DOWN_FUNC_REALSERVER_RECEIVE]    = std::make_pair(DOWN_FUNC_REALSERVER_RECEIVE, boost::bind(&tcp_session::down_thread_realserver_receive, this, _1));
-        down_thread_function_array[DOWN_FUNC_REALSERVER_DISCONNECT]    = std::make_pair(DOWN_FUNC_REALSERVER_DISCONNECT, boost::bind(&tcp_session::down_thread_realserver_disconnect, this, _1));
-        down_thread_function_array[DOWN_FUNC_REALSERVER_DISCONNECT_EVENT]    = std::make_pair(DOWN_FUNC_REALSERVER_DISCONNECT_EVENT, boost::bind(&tcp_session::down_thread_realserver_disconnect_event, this, _1));
-        down_thread_function_array[DOWN_FUNC_REALSERVER_ALL_DISCONNECT]    = std::make_pair(DOWN_FUNC_REALSERVER_ALL_DISCONNECT, boost::bind(&tcp_session::down_thread_all_realserver_disconnect, this, _1));
-        down_thread_function_array[DOWN_FUNC_SORRYSERVER_RECEIVE]    = std::make_pair(DOWN_FUNC_SORRYSERVER_RECEIVE, boost::bind(&tcp_session::down_thread_sorryserver_receive, this, _1));
-        down_thread_function_array[DOWN_FUNC_SORRYSERVER_DISCONNECT]    = std::make_pair(DOWN_FUNC_SORRYSERVER_DISCONNECT, boost::bind(&tcp_session::down_thread_sorryserver_disconnect, this, _1));
-        down_thread_function_array[DOWN_FUNC_SORRYSERVER_MOD_DISCONNECT]    = std::make_pair(DOWN_FUNC_SORRYSERVER_MOD_DISCONNECT, boost::bind(&tcp_session::down_thread_sorryserver_mod_disconnect, this, _1));
-        down_thread_function_array[DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT]    = std::make_pair(DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT, boost::bind(&tcp_session::down_thread_sorryserver_disconnect_event, this, _1));
-        down_thread_function_array[DOWN_FUNC_EXIT]    = std::make_pair(DOWN_FUNC_EXIT, boost::bind(&tcp_session::down_thread_exit, this, _1));
+        down_thread_function_array[DOWN_FUNC_CLIENT_DISCONNECT] = 
+			std::make_pair(
+				DOWN_FUNC_CLIENT_DISCONNECT,
+				boost::bind(&tcp_session::down_thread_client_disconnect, this, _1));
+        down_thread_function_array[DOWN_FUNC_CLIENT_DISCONNECT_EVENT] =
+			std::make_pair(
+				DOWN_FUNC_CLIENT_DISCONNECT_EVENT,
+				boost::bind(&tcp_session::down_thread_client_disconnect_event, this, _1));
+        down_thread_function_array[DOWN_FUNC_CLIENT_CONNECTION_CHK] =
+			std::make_pair(
+				DOWN_FUNC_CLIENT_CONNECTION_CHK,
+				boost::bind(&tcp_session::down_thread_client_connection_chk_event, this, _1));
+        down_thread_function_array[DOWN_FUNC_CLIENT_SEND] =
+			std::make_pair(
+				DOWN_FUNC_CLIENT_SEND,
+				boost::bind(&tcp_session::down_thread_client_send, this, _1));
+		down_thread_function_array[DOWN_FUNC_CLIENT_HANDLE_ASEND] = 
+			std::make_pair(
+				DOWN_FUNC_CLIENT_HANDLE_ASEND,
+				boost::bind(&tcp_session::down_thread_client_handle_async_write_some, this, _1));
+        down_thread_function_array[DOWN_FUNC_REALSERVER_RECEIVE] =
+			std::make_pair(
+				DOWN_FUNC_REALSERVER_RECEIVE,
+				boost::bind(&tcp_session::down_thread_realserver_receive, this, _1));
+		down_thread_function_array[DOWN_FUNC_REALSERVER_HANDLE_ARECEIVE] =
+			std::make_pair(
+				DOWN_FUNC_REALSERVER_HANDLE_ARECEIVE,
+				boost::bind(&tcp_session::down_thread_realserver_handle_async_read_some, this, _1));
+        down_thread_function_array[DOWN_FUNC_REALSERVER_DISCONNECT] =
+			std::make_pair(
+				DOWN_FUNC_REALSERVER_DISCONNECT,
+				boost::bind(&tcp_session::down_thread_realserver_disconnect, this, _1));
+        down_thread_function_array[DOWN_FUNC_REALSERVER_DISCONNECT_EVENT] =
+			std::make_pair(
+				DOWN_FUNC_REALSERVER_DISCONNECT_EVENT,
+				boost::bind(&tcp_session::down_thread_realserver_disconnect_event, this, _1));
+        down_thread_function_array[DOWN_FUNC_SORRYSERVER_RECEIVE] =
+			std::make_pair(
+				DOWN_FUNC_SORRYSERVER_RECEIVE,
+				boost::bind(&tcp_session::down_thread_sorryserver_receive, this, _1));
+		down_thread_function_array[DOWN_FUNC_SORRYSERVER_HANDLE_ARECEIVE] =
+			std::make_pair(
+				DOWN_FUNC_SORRYSERVER_HANDLE_ARECEIVE,
+				boost::bind(&tcp_session::down_thread_sorryserver_handle_async_read_some, this, _1)); 
+        down_thread_function_array[DOWN_FUNC_SORRYSERVER_DISCONNECT] =
+			std::make_pair(
+				DOWN_FUNC_SORRYSERVER_DISCONNECT,
+				boost::bind(&tcp_session::down_thread_sorryserver_disconnect, this, _1));
+        down_thread_function_array[DOWN_FUNC_SORRYSERVER_MOD_DISCONNECT] =
+			std::make_pair(
+				DOWN_FUNC_SORRYSERVER_MOD_DISCONNECT,
+				boost::bind(&tcp_session::down_thread_sorryserver_mod_disconnect, this, _1));
+        down_thread_function_array[DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT] =
+			std::make_pair(
+				DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT,
+				boost::bind(&tcp_session::down_thread_sorryserver_disconnect_event, this, _1));
+		down_thread_function_array[DOWN_FUNC_SORRY_ENABLE_EVENT] =
+			std::make_pair(
+				DOWN_FUNC_SORRY_ENABLE_EVENT,
+				boost::bind(&tcp_session::down_thread_sorry_enable_event , this, _1 ));
+		down_thread_function_array[DOWN_FUNC_SORRY_DISABLE_EVENT] =
+			std::make_pair(
+				DOWN_FUNC_SORRY_DISABLE_EVENT,
+				boost::bind(&tcp_session::down_thread_sorry_disable_event , this, _1 ));
+		down_thread_function_array[DOWN_FUNC_PAUSE_ON_EVENT] =
+			std::make_pair(
+				DOWN_FUNC_PAUSE_ON_EVENT,
+				boost::bind(&tcp_session::down_thread_session_pause_on_event , this, _1 ));
+		down_thread_function_array[DOWN_FUNC_PAUSE_OFF_EVENT] =
+			std::make_pair(
+				DOWN_FUNC_PAUSE_OFF_EVENT,
+				boost::bind(&tcp_session::down_thread_session_pause_off_event , this, _1 ));
+        down_thread_function_array[DOWN_FUNC_EXIT] =
+			std::make_pair(
+				DOWN_FUNC_EXIT,
+				boost::bind(&tcp_session::down_thread_exit, this, _1));
 
-        // set down_thread_message_up_thread_function_map
-        std::pair<UP_THREAD_FUNC_TYPE_TAG, tcp_session_func> add_down_thread_message_func;
-        add_down_thread_message_func.first = UP_FUNC_CLIENT_DISCONNECT_EVENT;
-        add_down_thread_message_func.second = boost::bind(&tcp_session::up_thread_client_disconnect_event, this, _1);
-        down_thread_message_up_thread_function_map.insert(add_down_thread_message_func);
-        add_down_thread_message_func.first = UP_FUNC_REALSERVER_DISCONNECT_EVENT;
-        add_down_thread_message_func.second = boost::bind(&tcp_session::up_thread_realserver_disconnect_event, this, _1);
-        down_thread_message_up_thread_function_map.insert(add_down_thread_message_func);
-        add_down_thread_message_func.first = UP_FUNC_SORRYSERVER_DISCONNECT_EVENT;
-        add_down_thread_message_func.second = boost::bind(&tcp_session::up_thread_sorryserver_disconnect_event, this, _1);
-        down_thread_message_up_thread_function_map.insert(add_down_thread_message_func);
+        // set down_que_function_map
+		down_que_function_map[DOWN_FUNC_CLIENT_DISCONNECT_EVENT] =
+			boost::bind( &tcp_session::down_thread_client_disconnect_event, this, _1 );
+		down_que_function_map[DOWN_FUNC_CLIENT_RESPOND_SEND_EVENT] =
+			boost::bind( &tcp_session::down_thread_client_respond_event, this, _1 );
+		down_que_function_map[DOWN_FUNC_REALSERVER_DISCONNECT_EVENT] =
+			boost::bind( &tcp_session::down_thread_realserver_disconnect_event, this, _1 );
+		down_que_function_map[DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT] =
+			boost::bind( &tcp_session::down_thread_sorryserver_disconnect_event, this, _1 );
+		down_que_function_map[DOWN_FUNC_SORRY_ENABLE_EVENT] =
+			boost::bind( &tcp_session::down_thread_sorry_enable_event, this, _1 );
+		down_que_function_map[DOWN_FUNC_EXIT] =
+			boost::bind( &tcp_session::down_thread_exit, this, _1 );
+		down_que_function_map[DOWN_FUNC_PAUSE_ON_EVENT] =
+			boost::bind( &tcp_session::down_thread_session_pause_on_event, this, _1 );
+		down_que_function_map[DOWN_FUNC_PAUSE_OFF_EVENT] =
+			boost::bind( &tcp_session::down_thread_session_pause_off_event, this, _1 );
 
         // set virtual_service_message_up_thread_function_map
-        std::pair<TCP_VIRTUAL_SERVICE_MESSAGE_TAG, tcp_session_func> add_up_thread_vs_message_func;
-        add_up_thread_vs_message_func.first = SORRY_STATE_ENABLE;
-        add_up_thread_vs_message_func.second = boost::bind(&tcp_session::up_thread_sorry_enable_event, this, _1);
-        virtual_service_message_up_thread_function_map.insert(add_up_thread_vs_message_func);
-        add_up_thread_vs_message_func.first = SORRY_STATE_DISABLE;
-        add_up_thread_vs_message_func.second = boost::bind(&tcp_session::up_thread_sorry_disable_event, this, _1);
-        virtual_service_message_up_thread_function_map.insert(add_up_thread_vs_message_func);
-        add_up_thread_vs_message_func.first = SESSION_END;
-        add_up_thread_vs_message_func.second = boost::bind(&tcp_session::up_thread_exit, this, _1);
-        virtual_service_message_up_thread_function_map.insert(add_up_thread_vs_message_func);
+		virtual_service_message_up_thread_function_map[SORRY_STATE_ENABLE]	= boost::bind( &tcp_session::up_thread_sorry_enable_event , this, _1 );
+		virtual_service_message_up_thread_function_map[SORRY_STATE_DISABLE] = boost::bind( &tcp_session::up_thread_sorry_disable_event , this, _1 );
+		virtual_service_message_up_thread_function_map[SESSION_END]			= boost::bind( &tcp_session::up_thread_exit , this, _1 );
+		virtual_service_message_up_thread_function_map[REALSERVER_REMOVE]	= boost::bind( &tcp_session::up_thread_realserver_check , this, _1 );
 
         // set virtual_service_message_down_thread_function_map
-        std::pair<TCP_VIRTUAL_SERVICE_MESSAGE_TAG, tcp_session_func> add_down_thread_vs_message_func;
-        add_down_thread_vs_message_func.first = SORRY_STATE_ENABLE;
-        add_down_thread_vs_message_func.second = boost::bind(&tcp_session::down_thread_sorry_enable_event, this, _1);
-        virtual_service_message_down_thread_function_map.insert(add_down_thread_vs_message_func);
-        add_down_thread_vs_message_func.first = SORRY_STATE_DISABLE;
-        add_down_thread_vs_message_func.second = boost::bind(&tcp_session::down_thread_sorry_disable_event, this, _1);
-        virtual_service_message_down_thread_function_map.insert(add_down_thread_vs_message_func);
-        add_down_thread_vs_message_func.first = SESSION_END;
-        add_down_thread_vs_message_func.second = boost::bind(&tcp_session::down_thread_exit, this, _1);
-        virtual_service_message_down_thread_function_map.insert(add_down_thread_vs_message_func);
-
-        // epoll implement
-        up_client_epollfd = epoll_create(EVENT_NUM);
-        up_realserver_epollfd = epoll_create(EVENT_NUM);
-        up_sorryserver_epollfd = epoll_create(EVENT_NUM);
-        down_client_epollfd = epoll_create(EVENT_NUM);
-        down_realserver_epollfd = epoll_create(EVENT_NUM);
-        down_sorryserver_epollfd = epoll_create(EVENT_NUM);
-        up_client_epollfd_registered = false;
-        up_realserver_epollfd_registered = false;
-        up_sorryserver_epollfd_registered = false;
-        down_client_epollfd_registered = false;
-        down_realserver_epollfd_registered = false;
-        down_sorryserver_epollfd_registered = false;
-        is_epoll_edge_trigger = true;
-        epoll_timeout = 50;
+		virtual_service_message_down_thread_function_map[SORRY_STATE_ENABLE]	= boost::bind( &tcp_session::down_thread_sorry_enable_event ,this, _1 );
+		virtual_service_message_down_thread_function_map[SORRY_STATE_DISABLE]	= boost::bind( &tcp_session::down_thread_sorry_disable_event ,this, _1 );
+		virtual_service_message_down_thread_function_map[SESSION_END]			= boost::bind( &tcp_session::down_thread_exit ,this, _1 );
+		virtual_service_message_down_thread_function_map[REALSERVER_REMOVE]		= boost::bind( &tcp_session::down_thread_realserver_check ,this, _1 );
 }
 
 //! destructor
@@ -299,75 +365,70 @@ tcp_session::~tcp_session()
 
         // up_thread_module_event_map
         up_thread_module_event_map.clear();
-        // up_thread_message_down_thread_function_map
-        up_thread_message_down_thread_function_map.clear();
+        // down_que_function_map
+        down_que_function_map.clear();
         // down_thread_module_event_map
         down_thread_module_event_map.clear();
         // down_thread_message_down_thread_function_map
-        down_thread_message_up_thread_function_map.clear();
+        up_que_function_map.clear();
         // virtual_service_message_up_thread_function_map
         virtual_service_message_up_thread_function_map.clear();
         // virtual_service_message_down_thread_function_map
         virtual_service_message_down_thread_function_map.clear();
+		// realserver socket clear
+		realserver_socket.reset();
+		// realserver endpoint clear
+		realserver_endpoint = boost::asio::ip::tcp::endpoint();
+		// connectiing socket clear
+		connecting_socket.reset();
+		// connecting endpoint clear
+		connecting_endpoint = boost::asio::ip::tcp::endpoint();
         // up_thread_message_que
-        tcp_thread_message *msg;
-        while (1) {
-                msg = up_thread_message_que.pop();
-                if (msg) {
-                        delete msg;
-                        msg = NULL;
-                } else
-                        break;
-        }
+        tcp_thread_message* msg = NULL;
+		msg = up_thread_message_que.pop();
+		while( msg ){
+			delete msg;
+			msg = up_thread_message_que.pop();
+		}
         // down_thread_message_que
-        while (1) {
-                msg = down_thread_message_que.pop();
-                if (msg) {
-                        delete msg;
-                        msg = NULL;
-                } else
-                        break;
-        }
-        close(up_client_epollfd);
-        close(up_realserver_epollfd);
-        close(up_sorryserver_epollfd);
-        close(down_client_epollfd);
-        close(down_realserver_epollfd);
-        close(down_sorryserver_epollfd);
+		msg = down_thread_message_que.pop();
+		while( msg ){
+			delete msg;
+			msg = down_thread_message_que.pop();
+		}
 }
 
 //! initialize
 session_result_message tcp_session::initialize()
 {
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN initialize");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
+
         session_result_message msg;
         msg.flag = false;
         msg.message = "";
         exit_flag = 0;
         up_thread_id = boost::thread::id();
         down_thread_id = boost::thread::id();
-        ssl_handshake_timer_flag = false;
-        ssl_handshake_time_out_flag = false;
         upthread_status = UPTHREAD_SLEEP;
         downthread_status = DOWNTHREAD_SLEEP;
-        realserver_connect_status = false;
         protocol_module = NULL;
         tcp_thread_message *tmp_msg;
-        while (1) {
-                tmp_msg = up_thread_message_que.pop();
-                if (tmp_msg) {
-                        delete tmp_msg;
-                        tmp_msg = NULL;
-                } else
-                        break;
-        }
-        while (1) {
-                tmp_msg = down_thread_message_que.pop();
-                if (tmp_msg) {
-                        delete tmp_msg;
-                        tmp_msg = NULL;
-                } else
-                        break;
-        }
+		tmp_msg = up_thread_message_que.pop();
+		while( tmp_msg ){
+			delete tmp_msg;
+			tmp_msg = up_thread_message_que.pop();
+		}
+
+		tmp_msg = down_thread_message_que.pop();
+		while( tmp_msg ){
+			delete tmp_msg;
+			tmp_msg = down_thread_message_que.pop();
+		}
 
         //load parameter
         l7vs::Parameter param;
@@ -383,21 +444,6 @@ session_result_message tcp_session::initialize()
         if ((likely(!vs_err)) && (int_val > 0)) {
                 downstream_buffer_size = int_val;
         }
-
-        int_val = param.get_int(PARAM_COMP_SESSION, PARAM_EPOLL_TRIGGER, vs_err);
-        if ((likely(!vs_err)) && (int_val >= 0)) {
-                if (int_val == 0) {
-                        is_epoll_edge_trigger = false;
-                } else {
-                        is_epoll_edge_trigger = false;
-                }
-        }
-
-        int_val = param.get_int(PARAM_COMP_SESSION, PARAM_EPOLL_TIMEOUT, vs_err);
-        if ((likely(!vs_err)) && (int_val > 0)) {
-                epoll_timeout = int_val;
-        }
-
         protocol_module = parent_service.get_protocol_module();
 
         if (unlikely(protocol_module == NULL)) {
@@ -410,71 +456,8 @@ session_result_message tcp_session::initialize()
                 msg.message = "Protocol module not found";
         }
 
-        // Reset SSL structure to allow another connection.
-        if (ssl_flag) {
-                if (client_ssl_socket.is_handshake_error()) {
-                        // remake socket
-                        client_ssl_socket.clear_socket();
-                } else {
-                        if (ssl_cache_flag) {
-                                if (unlikely(ssl_clear_keep_cache(client_ssl_socket.get_socket().impl()->ssl) == false)) {
-                                        //Error ssl_clear_keep_cache
-                                        std::stringstream buf;
-                                        buf << "Thread ID[";
-                                        buf << boost::this_thread::get_id();
-                                        buf << "] ssl_clear_keep_cache failed";
-                                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, 110, buf.str(), __FILE__, __LINE__);
-                                        msg.flag = true;
-                                        msg.message = "ssl_clear_keep_cache failed";
-                                } else {
-                                        //----Debug log----------------------------------------------------------------------
-                                        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                                                std::stringstream buf;
-                                                buf << "Thread ID[";
-                                                buf << boost::this_thread::get_id();
-                                                buf << "] ssl_clear_keep_cache ok";
-                                                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 81,
-                                                                    buf.str(),
-                                                                    __FILE__, __LINE__);
-                                        }
-                                        //----Debug log----------------------------------------------------------------------
-                                }
-                        } else {
-                                if (unlikely(SSL_clear(client_ssl_socket.get_socket().impl()->ssl) == 0)) {
-                                        //Error SSL_clear
-                                        std::stringstream buf;
-                                        buf << "Thread ID[";
-                                        buf << boost::this_thread::get_id();
-                                        buf << "] SSL_clear failed";
-                                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, 111, buf.str(), __FILE__, __LINE__);
-                                        msg.flag = true;
-                                        msg.message = "SSL_clear failed";
-                                } else {
-                                        //----Debug log----------------------------------------------------------------------
-                                        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                                                std::stringstream buf;
-                                                buf << "Thread ID[";
-                                                buf << boost::this_thread::get_id();
-                                                buf << "] SSL_clear ok";
-                                                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 82,
-                                                                    buf.str(),
-                                                                    __FILE__, __LINE__);
-                                        }
-                                        //----Debug log----------------------------------------------------------------------
-                                }
-                        }
-                }
-        }
-
-        up_client_epollfd_registered = false;
-        up_realserver_epollfd_registered = false;
-        up_sorryserver_epollfd_registered = false;
-        down_client_epollfd_registered = false;
-        down_realserver_epollfd_registered = false;
-        down_sorryserver_epollfd_registered = false;
-
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT ~tcp_session");
+                boost::format formatter("Thread ID[%d] FUNC OUT initialize");
                 formatter % boost::this_thread::get_id();
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
         }
@@ -482,153 +465,9 @@ session_result_message tcp_session::initialize()
         return msg;
 }
 
-//! ssl clear keep cache
-//! @param[in] ssl object
-//! @return    true is clear OK.
-//! @return    false is not clear
-bool tcp_session::ssl_clear_keep_cache(SSL *clear_ssl)
-{
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN ssl_clear_keep_cache");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
-
-        if (clear_ssl->method == NULL) {
-                //----Debug log----------------------------------------------------------------------
-                if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                        std::stringstream buf;
-                        buf << "Thread ID[";
-                        buf << boost::this_thread::get_id();
-                        buf << "] clear ssl method is NULL";
-                        Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 83,
-                                            buf.str(),
-                                            __FILE__, __LINE__);
-                }
-                //----Debug log----------------------------------------------------------------------
-                return (false);
-        }
-
-        if (clear_ssl->new_session) {
-                //----Debug log----------------------------------------------------------------------
-                if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                        std::stringstream buf;
-                        buf << "Thread ID[";
-                        buf << boost::this_thread::get_id();
-                        buf << "] clear ssl new_session is not NULL";
-                        Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 84,
-                                            buf.str(),
-                                            __FILE__, __LINE__);
-                }
-                //----Debug log----------------------------------------------------------------------
-                return (false);
-        }
-
-        if (clear_ssl->session != NULL) {
-                //----Debug log----------------------------------------------------------------------
-                if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                        std::stringstream buf;
-                        buf << "Thread ID[";
-                        buf << boost::this_thread::get_id();
-                        buf << "] SSL_SESSION_free call";
-                        Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 88,
-                                            buf.str(),
-                                            __FILE__, __LINE__);
-                }
-                //----Debug log----------------------------------------------------------------------
-                SSL_SESSION_free(clear_ssl->session);
-        }
-
-        // init member
-        clear_ssl->session = NULL;
-        clear_ssl->type = 0;
-        clear_ssl->error = 0;
-        clear_ssl->hit = 0;
-        clear_ssl->shutdown = 0;
-        clear_ssl->version = clear_ssl->method->version;
-        clear_ssl->client_version = clear_ssl->version;
-        clear_ssl->rwstate = SSL_NOTHING;
-        clear_ssl->rstate = SSL_ST_READ_HEADER;
-        clear_ssl->state = SSL_ST_BEFORE | clear_ssl->server ? SSL_ST_ACCEPT : SSL_ST_CONNECT;
-
-        // init_buf free
-        if (clear_ssl->init_buf != NULL) {
-                BUF_MEM_free(clear_ssl->init_buf);
-                clear_ssl->init_buf = NULL;
-        }
-
-        // enc_read_ctx free
-        if (clear_ssl->enc_read_ctx != NULL) {
-                EVP_CIPHER_CTX_cleanup(clear_ssl->enc_read_ctx);
-                OPENSSL_free(clear_ssl->enc_read_ctx);
-                clear_ssl->enc_read_ctx = NULL;
-        }
-
-        // enc_write_ctx free
-        if (clear_ssl->enc_write_ctx != NULL) {
-                EVP_CIPHER_CTX_cleanup(clear_ssl->enc_write_ctx);
-                OPENSSL_free(clear_ssl->enc_write_ctx);
-                clear_ssl->enc_write_ctx = NULL;
-        }
-
-        // expand free
-        if (clear_ssl->expand != NULL) {
-                COMP_CTX_free(clear_ssl->expand);
-                clear_ssl->expand = NULL;
-        }
-
-        // compress free
-        if (clear_ssl->compress != NULL) {
-                COMP_CTX_free(clear_ssl->compress);
-                clear_ssl->compress = NULL;
-        }
-
-        clear_ssl->first_packet = 0;
-
-        if (!clear_ssl->in_handshake && (clear_ssl->method != clear_ssl->ctx->method)) {
-                //----Debug log----------------------------------------------------------------------
-                if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                        std::stringstream buf;
-                        buf << "Thread ID[";
-                        buf << boost::this_thread::get_id();
-                        buf << "] In ssl_clear_keep_cache() method changed";
-                        Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 86,
-                                            buf.str(),
-                                            __FILE__, __LINE__);
-                }
-                //----Debug log----------------------------------------------------------------------
-                clear_ssl->method->ssl_free(clear_ssl);
-                clear_ssl->method = clear_ssl->ctx->method;
-                if (!clear_ssl->method->ssl_new(clear_ssl)) {
-                        //----Debug log----------------------------------------------------------------------
-                        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                                std::stringstream buf;
-                                buf << "Thread ID[";
-                                buf << boost::this_thread::get_id();
-                                buf << "] clear ssl method ssl_new error";
-                                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 85,
-                                                    buf.str(),
-                                                    __FILE__, __LINE__);
-                        }
-                        //----Debug log----------------------------------------------------------------------
-                        return (false);
-                }
-        } else {
-                clear_ssl->method->ssl_clear(clear_ssl);
-        }
-
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT ssl_clear_keep_cache");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
-
-        return (true);
-}
-
 //! get reference client side socket
 //! @return            reference client side socket
-boost::asio::ip::tcp::socket &tcp_session::get_client_socket()
+tcp_socket& tcp_session::get_client_socket()
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                 boost::format formatter("Thread ID[%d] FUNC IN/OUT get_client_socket");
@@ -636,7 +475,7 @@ boost::asio::ip::tcp::socket &tcp_session::get_client_socket()
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
         }
 
-        return client_socket.get_socket();
+        return client_socket;
 }
 //! get reference client side ssl socket
 //! @return            reference client side ssl socket
@@ -652,7 +491,7 @@ ssl_socket &tcp_session::get_client_ssl_socket()
 }
 //! message from parent virtualservice
 //! @param[in]        message is tcp virtualservice message type
-void tcp_session::set_virtual_service_message(const TCP_VIRTUAL_SERVICE_MESSAGE_TAG  message)
+void tcp_session::set_virtual_service_message(const TCP_VIRTUAL_SERVICE_MESSAGE_TAG  message, const boost::asio::ip::tcp::endpoint endpoint_ )
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                 boost::format formatter("Thread ID[%d] FUNC IN set_virtual_service_message");
@@ -661,92 +500,112 @@ void tcp_session::set_virtual_service_message(const TCP_VIRTUAL_SERVICE_MESSAGE_
         }
 
         switch (message) {
-        case SESSION_PAUSE_ON: {
-                {
-                        boost::mutex::scoped_lock up_lock(upthread_status_mutex);
-                        upthread_status = UPTHREAD_LOCK;
-                }
-                {
-                        boost::mutex::scoped_lock down_lock(downthread_status_mutex);
-                        downthread_status = DOWNTHREAD_LOCK;
-                }
-        }
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                std::stringstream buf;
-                buf << "Thread ID[";
-                buf << boost::this_thread::get_id();
-                buf << "] FUNC OUT set_virtual_service_message message:[SESSION_PAUSE_ON]";
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 12, buf.str(), __FILE__, __LINE__);
-        }
-        //----Debug log----------------------------------------------------------------------
-        return;
-        case SESSION_PAUSE_OFF: {
-                {
-                boost::mutex::scoped_lock lock(upthread_status_mutex);
-                        if (upthread_status == UPTHREAD_LOCK) {
-                                upthread_status = UPTHREAD_ACTIVE;
-                                upthread_status_cond.notify_one();
-                        }
-                }
-                {
-                boost::mutex::scoped_lock lock(downthread_status_mutex);
-                        if (downthread_status == DOWNTHREAD_LOCK) {
-                                downthread_status = DOWNTHREAD_ACTIVE;
-                                downthread_status_cond.notify_one();
-                        }
-                }
-        }
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                std::stringstream buf;
-                buf << "Thread ID[";
-                buf << boost::this_thread::get_id();
-                buf << "] FUNC OUT set_virtual_service_message message:[SESSION_PAUSE_OFF]";
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 13, buf.str(), __FILE__, __LINE__);
-        }
-        //----Debug log----------------------------------------------------------------------
-        return;
-        case ACCESS_LOG_ON: {
-                rw_scoped_lock scope_lock(access_log_flag_mutex);
-                access_log_flag = true;
-        }
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                std::stringstream buf;
-                buf << "Thread ID[";
-                buf << boost::this_thread::get_id();
-                buf << "] FUNC OUT set_virtual_service_message message:[ACCESS_LOG_ON]";
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 49, buf.str(), __FILE__, __LINE__);
-        }
-        //----Debug log----------------------------------------------------------------------
-        return;
-        case ACCESS_LOG_OFF: {
+        	case SESSION_PAUSE_ON:{
+				tcp_thread_message*	up_msg = new tcp_thread_message();
+				up_msg->message = up_que_function_map[UP_FUNC_PAUSE_ON_EVENT];
+				#ifdef	DEBUG
+				up_msg->func_tag_name = func_tag_to_string( UP_FUNC_PAUSE_ON_EVENT );
+				{
+					boost::format   fmt( "Thread ID[%d] up_queue.push : %s" );
+					fmt % boost::this_thread::get_id() % func_tag_to_string( UP_FUNC_PAUSE_ON_EVENT );
+					Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+				}
+				#endif
+				while( !up_thread_message_que.push( up_msg ) ){}
+				upthread_status_cond.notify_one();
+
+				tcp_thread_message* down_msg = new tcp_thread_message();
+				down_msg->message = down_que_function_map[DOWN_FUNC_PAUSE_ON_EVENT];
+				#ifdef	DEBUG
+				down_msg->func_tag_name = func_tag_to_string( DOWN_FUNC_PAUSE_ON_EVENT );
+				{
+					boost::format   fmt( "Thread ID[%d] down_queue.push : %s" );
+					fmt % boost::this_thread::get_id() % func_tag_to_string( DOWN_FUNC_PAUSE_ON_EVENT );
+					Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+				}
+				#endif
+				while( !down_thread_message_que.push( down_msg ) ){}
+				downthread_status_cond.notify_one();
+
+				if(unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
+					boost::format	fmt("Thread ID[%d] FUNC OUT set_virtual_service_message SESSION_PAUSE_ON" );
+					fmt % boost::this_thread::get_id();
+					Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__,__LINE__);
+				}
+        		return;
+			}
+        	case SESSION_PAUSE_OFF:{
+				tcp_thread_message* up_msg = new tcp_thread_message();
+				up_msg->message = up_que_function_map[UP_FUNC_PAUSE_OFF_EVENT];
+				#ifdef	DEBUG
+				up_msg->func_tag_name = func_tag_to_string( UP_FUNC_PAUSE_OFF_EVENT );
+				{
+					boost::format   fmt( "Thread ID[%d] up_queue.push : %s" );
+					fmt % boost::this_thread::get_id() % func_tag_to_string( UP_FUNC_PAUSE_OFF_EVENT );
+					Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+				}
+				#endif
+				while( !up_thread_message_que.push( up_msg ) ){}
+				upthread_status_cond.notify_one();
+
+				tcp_thread_message* down_msg = new tcp_thread_message();
+				down_msg->message = down_que_function_map[DOWN_FUNC_PAUSE_OFF_EVENT];
+				#ifdef	DEBUG
+				down_msg->func_tag_name = func_tag_to_string( DOWN_FUNC_PAUSE_OFF_EVENT );
+				{
+					boost::format   fmt( "Thread ID[%d] down_queue.push : %s" );
+					fmt % boost::this_thread::get_id() % func_tag_to_string( DOWN_FUNC_PAUSE_OFF_EVENT );
+					Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+				}
+				#endif
+				while( !down_thread_message_que.push( down_msg ) ){}
+				downthread_status_cond.notify_one();
+
+				if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION)) ){
+					boost::format	fmt("Thread ID[%d] FUNC OUT set_virtual_service_message SESSION_PAUSE_OFF" );
+					fmt % boost::this_thread::get_id();
+					Logger::putLogDebug(LOG_CAT_L7VSD_SESSION,999, fmt.str(), __FILE__, __LINE__);
+				}
+				return;
+			}
+	        case ACCESS_LOG_ON: {
+	        	rw_scoped_lock scope_lock(access_log_flag_mutex);
+	        	access_log_flag = true;
+				if(unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
+					boost::format	fmt("Thread ID[%d] FUNC OUT set_virtual_service_message ACCESS_LOG_ON" );
+					fmt % boost::this_thread::get_id();
+					Logger::putLogDebug(LOG_CAT_L7VSD_SESSION,999, fmt.str(), __FILE__, __LINE__);
+				}
+        		return;
+			}
+			case ACCESS_LOG_OFF: {
                 rw_scoped_lock scope_lock(access_log_flag_mutex);
                 access_log_flag = false;
-        }
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                std::stringstream buf;
-                buf << "Thread ID[";
-                buf << boost::this_thread::get_id();
-                buf << "] FUNC OUT set_virtual_service_message message:[ACCESS_LOG_OFF]";
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 68, buf.str(), __FILE__, __LINE__);
-        }
-        //----Debug log----------------------------------------------------------------------
-        return;
-        case SORRY_STATE_ENABLE:
+				if(unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
+					boost::format	fmt("Thread ID[%d] FUNC OUT set_virtual_service_message ACCESS_LOG_OFF" );
+					fmt % boost::this_thread::get_id();
+					Logger::putLogDebug(LOG_CAT_L7VSD_SESSION,999, fmt.str(), __FILE__, __LINE__ );
+        		}
+				return;
+			}
+			case REALSERVER_REMOVE:
+			//---Debug Log------
+				if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
+					boost::format	fmt( "Thread ID[%d] set_virtual_service_message message:[REALSERVER_REMOVE]");
+					fmt % boost::this_thread::get_id();
+					Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__,__LINE__);
+				}
+				break;
+			case SORRY_STATE_ENABLE:
                 //----Debug log----------------------------------------------------------------------
                 if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                        std::stringstream buf;
-                        buf << "Thread ID[";
-                        buf << boost::this_thread::get_id();
-                        buf << "] set_virtual_service_message message:[SORRY_STATE_ENABLE]";
-                        Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 14, buf.str(), __FILE__, __LINE__);
+					boost::format	fmt( "Thread ID[%d] set_virtual_service_message message:[SORRY_STATE_ENABLE]");
+					fmt % boost::this_thread::get_id();
+                    Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 14, fmt.str(), __FILE__, __LINE__);
                 }
                 //----Debug log----------------------------------------------------------------------
                 break;
-        case SORRY_STATE_DISABLE:
+			case SORRY_STATE_DISABLE:
                 //----Debug log----------------------------------------------------------------------
                 if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                         std::stringstream buf;
@@ -757,7 +616,7 @@ void tcp_session::set_virtual_service_message(const TCP_VIRTUAL_SERVICE_MESSAGE_
                 }
                 //----Debug log----------------------------------------------------------------------
                 break;
-        case SESSION_END:
+			 case SESSION_END:
                 //----Debug log----------------------------------------------------------------------
                 if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                         std::stringstream buf;
@@ -771,17 +630,32 @@ void tcp_session::set_virtual_service_message(const TCP_VIRTUAL_SERVICE_MESSAGE_
         }
         // set message
         tcp_thread_message *up_msg = new tcp_thread_message;
-        std::map< TCP_VIRTUAL_SERVICE_MESSAGE_TAG, tcp_session_func>::iterator up_func;
-        up_func = virtual_service_message_up_thread_function_map.find(message);
-
-        up_msg->message = up_func->second;
-        while (!up_thread_message_que.push(up_msg)) {}
+		up_msg->message = virtual_service_message_up_thread_function_map[message];
+		up_msg->endpoint_info = endpoint_;
+		#ifdef	DEBUG
+		up_msg->func_tag_name = func_tag_to_string( message );
+		{
+			boost::format   fmt( "Thread ID[%d] up_queue.push : %s" );
+			fmt % boost::this_thread::get_id() % func_tag_to_string( message );
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+		#endif
+		while (!up_thread_message_que.push(up_msg)) {}
+		upthread_status_cond.notify_one();
 
         tcp_thread_message *down_msg = new tcp_thread_message;
-        std::map< TCP_VIRTUAL_SERVICE_MESSAGE_TAG, tcp_session_func>::iterator down_func;
-        down_func = virtual_service_message_down_thread_function_map.find(message);
-        down_msg->message = down_func->second;
-        while (!down_thread_message_que.push(down_msg)) {}
+        down_msg->message = virtual_service_message_down_thread_function_map[message];
+		down_msg->endpoint_info = endpoint_;
+#ifdef	DEBUG
+		down_msg->func_tag_name = func_tag_to_string( message );
+		{
+			boost::format   fmt( "Thread ID[%d] down_queue.push : %s" );
+			fmt % boost::this_thread::get_id() % func_tag_to_string( message );
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+#endif
+		while (!down_thread_message_que.push(down_msg)) {}
+		downthread_status_cond.notify_one();
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                 boost::format formatter("Thread ID[%d] FUNC OUT set_virtual_service_message");
@@ -792,420 +666,400 @@ void tcp_session::set_virtual_service_message(const TCP_VIRTUAL_SERVICE_MESSAGE_
 //! up stream thread main function
 void tcp_session::up_thread_run()
 {
-        boost::system::error_code ec;
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN up_thread_run");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 17, formatter.str(), __FILE__, __LINE__);
+	}
 
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN up_thread_run");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 17, formatter.str(), __FILE__, __LINE__);
-        }
-        //----Debug log----------------------------------------------------------------------
+	boost::system::error_code	ec;
+	boost::xtime				xt;
 
-        up_thread_id = boost::this_thread::get_id();
-        {
-                boost::mutex::scoped_lock lock1(upthread_status_mutex);
-                boost::mutex::scoped_lock lock2(realserver_connect_mutex);
-                upthread_status = UPTHREAD_ALIVE;
-                realserver_connect_status = false;
-        }
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                std::stringstream buf;
-                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                buf << "up thread down thread alive wait start";
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 18, buf.str(), __FILE__, __LINE__);
-        }
-        //----Debug log----------------------------------------------------------------------
-        {
-                boost::mutex::scoped_lock lock(downthread_status_mutex);
-                while (downthread_status < DOWNTHREAD_ALIVE) {
-                        to_time(LOCKTIMEOUT, xt);
-                        downthread_status_cond.timed_wait(lock, xt);
-                }
-        }
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                std::stringstream buf;
-                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                buf << "up thread down thread alive wait end";
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 19, buf.str(), __FILE__, __LINE__);
-        }
-        //----Debug log----------------------------------------------------------------------
-        if (likely(!exit_flag)) {
-                bool bres = !ssl_flag ? client_socket.get_socket().lowest_layer().is_open()
-                            : client_ssl_socket.get_socket().lowest_layer().is_open();
-                if (unlikely(!bres)) {
-                        // cannot get client socket
-                        std::stringstream buf;
-                        buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                        buf << "cannot get client socket";
-                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, 9, buf.str(), __FILE__, __LINE__);
-                        __sync_bool_compare_and_swap(&exit_flag, 0, 1);
-                }
-        }
+	// down thread active waiting.
+	up_thread_id = boost::this_thread::get_id();
+	{
+		boost::mutex::scoped_lock	lock( downthread_status_mutex );
+		while( downthread_status < DOWNTHREAD_ALIVE ){
+			to_time( LOCKTIMEOUT, xt );
+			downthread_status_cond.timed_wait(lock, xt);
+		}
+	}
 
-        if (!ssl_flag)
-                client_socket.accept();
-        else
-                client_ssl_socket.accept();
+	// socket option check
+	if(!exit_flag ){
+		boost::system::error_code	error_code;
+		!ssl_flag ? client_socket.setoption( error_code ) // error output in tcp_socket.h
+				  : client_ssl_socket.setoption( error_code );
+	}
 
-        if (likely(!exit_flag)) {
-                client_endpoint = (!ssl_flag) ? client_socket.get_socket().lowest_layer().remote_endpoint(ec)
-                                  : client_ssl_socket.get_socket().lowest_layer().remote_endpoint(ec);
-                if (unlikely(ec)) {
-                        //cannot get client endpoint
-                        std::stringstream buf;
-                        buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                        buf << "cannot get client endpoint: ";
-                        buf << ec.message();
-                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, 10, buf.str(), __FILE__, __LINE__);
-                        __sync_bool_compare_and_swap(&exit_flag, 0, 1);
-                }
-        }
-        if (likely(!exit_flag)) {
-                bool bres = !ssl_flag ? client_socket.set_non_blocking_mode(ec)
-                            : client_ssl_socket.set_non_blocking_mode(ec);
-                if (unlikely(!bres)) {
-                        // cannot set socket to non-blocking mode
-                        std::stringstream buf;
-                        buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                        buf << "cannot set socket to non-blocking mode:";
-                        buf << ec.message();
-                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, 11, buf.str(), __FILE__, __LINE__);
-                        __sync_bool_compare_and_swap(&exit_flag, 0, 1);
-                }
-        }
-        if (likely(!exit_flag)) {
-                // set client socket options(receive buffer size)
-                if (upstream_buffer_size > 0) {
-                        boost::asio::socket_base::receive_buffer_size opt(upstream_buffer_size);
+	if( !exit_flag ){
+		// get client endpoint
+		client_endpoint = !ssl_flag ? client_socket.get_socket().lowest_layer().remote_endpoint(ec)
+									: client_ssl_socket.get_socket().lowest_layer().remote_endpoint(ec);
+		if( unlikely( ec ) ){
+			boost::format	fmt( "Thread ID[%d] cannot get client endpoint: %s" );
+			fmt % boost::this_thread::get_id() % ec.message();
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 10, fmt.str(), __FILE__, __LINE__ );
+			!ssl_flag ? client_socket.close(ec) : client_ssl_socket.close(ec);
+			if( ec ){
+				boost::format   fmt2( "Thread ID[%s] cannot close endpoint : %s" );
+                                fmt2 % boost::this_thread::get_id() % ec.message();
+                                Logger::putLogError( LOG_CAT_L7VSD_SESSION, 11, fmt2.str(), __FILE__, __LINE__ );
+			}
+			__sync_bool_compare_and_swap(&exit_flag, 0, 1);	// set exit flag true
+		}
+	}
 
-                        if (!ssl_flag)
-                                client_socket.get_socket().lowest_layer().set_option(opt, ec);
-                        else
-                                client_ssl_socket.get_socket().lowest_layer().set_option(opt, ec);
 
-                        if (unlikely(ec)) {
-                                // cannot set socket option
-                                std::stringstream buf;
-                                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                                buf << "cannot set client socket receive buffer size: ";
-                                buf << ec.message();
-                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, 12, buf.str(), __FILE__, __LINE__);
-                                __sync_bool_compare_and_swap(&exit_flag, 0, 1);
-                        }
-                }
-        }
-        if (likely(!exit_flag)) {
-                // set client socket options(send buffer size)
-                if (downstream_buffer_size > 0) {
-                        boost::asio::socket_base::send_buffer_size opt(downstream_buffer_size);
+	// set client socket options(receive buffer size)
+	if (likely(!exit_flag) && likely( upstream_buffer_size > 0 ) ) {
+		boost::asio::socket_base::receive_buffer_size opt(upstream_buffer_size);
 
-                        if (!ssl_flag)
-                                client_socket.get_socket().lowest_layer().set_option(opt, ec);
-                        else
-                                client_ssl_socket.get_socket().lowest_layer().set_option(opt, ec);
+		!ssl_flag ? client_socket.get_socket().lowest_layer().set_option(opt, ec)
+		          : client_ssl_socket.get_socket().lowest_layer().set_option(opt, ec);
 
-                        if (unlikely(ec)) {
-                                // cannot set socket option
-                                std::stringstream buf;
-                                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                                buf << "cannot set client socket send buffer size: ";
-                                buf << ec.message();
-                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, 13, buf.str(), __FILE__, __LINE__);
-                                __sync_bool_compare_and_swap(&exit_flag, 0, 1);
-                        }
-                }
-        }
-        if (likely(!exit_flag)) {
-                boost::asio::ip::udp::endpoint dummy_end;
-                protocol_module_base::EVENT_TAG module_event;
-                std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type;
-                up_thread_function_pair func;
-                module_event = protocol_module->handle_session_initialize(up_thread_id, down_thread_id, client_endpoint, dummy_end);
-                func_type = up_thread_module_event_map.find(module_event);
-                func = up_thread_function_array[func_type->second];
-                up_thread_next_call_function = func;
-        }
-        if (likely(!exit_flag)) {
-                boost::mutex::scoped_lock lock(upthread_status_mutex);
-                upthread_status = UPTHREAD_ACTIVE;
-                upthread_status_cond.notify_one();
-        }
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                std::stringstream buf;
-                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                buf << "up thread loop start";
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 20, buf.str(), __FILE__, __LINE__);
-        }
-        //----Debug log----------------------------------------------------------------------
-        while (!exit_flag) {
-                {
-                        boost::mutex::scoped_lock lock(upthread_status_mutex);
-                        while ( unlikely(upthread_status == UPTHREAD_LOCK) ) {
-                                to_time(LOCKTIMEOUT, xt);
-                                upthread_status_cond.timed_wait(lock, xt);
-                        }
-                }
-                tcp_thread_message *msg = up_thread_message_que.pop();
-                if (unlikely(msg)) {
-                        if (unlikely(UP_FUNC_EXIT == up_thread_next_call_function.first)) {
-                                up_thread_next_call_function.second(LOCAL_PROC);
-                        } else {
-                                up_thread_message_data.set_endpoint(msg->endpoint_info);
-                                msg->message(MESSAGE_PROC);
-                        }
-                        delete  msg;
-                        msg = NULL;
-                } else {
-                        up_thread_next_call_function.second(LOCAL_PROC);
-                }
-        }
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                std::stringstream buf;
-                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                buf << "up thread loop end";
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 21, buf.str(), __FILE__, __LINE__);
-        }
-        //----Debug log----------------------------------------------------------------------
+		if( unlikely( ec ) ){
+			boost::format	fmt( "Thread ID[%d] cannot set client socket receive buffer size : %s" );
+			Logger::putLogError(LOG_CAT_L7VSD_SESSION, 12, fmt.str(), __FILE__, __LINE__);
+			__sync_bool_compare_and_swap(&exit_flag, 0, 1);
+		}
+	}
 
-        up_thread_all_socket_close();
+	// set client socket options(send buffer size)
+	if( likely(!exit_flag) && likely(downstream_buffer_size > 0) ){
+		boost::asio::socket_base::send_buffer_size opt(downstream_buffer_size);
+		!ssl_flag ? client_socket.get_socket().lowest_layer().set_option(opt, ec)
+				  : client_ssl_socket.get_socket().lowest_layer().set_option(opt, ec);
+		if( unlikely( ec ) ){
+			boost::format	fmt( "Thread ID[%d] cannot set client socket send buffer size : %s" );
+			Logger::putLogError(LOG_CAT_L7VSD_SESSION, 13, fmt.str(), __FILE__, __LINE__);
+			__sync_bool_compare_and_swap(&exit_flag, 0, 1);
+		}
+	}
 
-        {
-                boost::mutex::scoped_lock lock(upthread_status_mutex);
-                upthread_status = UPTHREAD_COMPLETE;
-                upthread_status_cond.notify_one();
-        }
+	// module initialize
+	if(likely(!exit_flag)) {
+		protocol_module_base::EVENT_TAG module_event;
+		module_event = protocol_module->handle_session_initialize(	up_thread_id,
+																	down_thread_id,
+																	client_endpoint,
+																	boost::asio::ip::udp::endpoint() );
+#ifdef	DEBUG
+{	boost::format	fmt( "Thread ID[%d] protocol_module->handle_session_initialize( upthread_id = %d , downthread_id = %d ) return: %s" );
+	fmt % boost::this_thread::get_id()
+		% up_thread_id
+		% down_thread_id
+		% func_tag_to_string( module_event );
+	Logger::putLogInfo(LOG_CAT_L7VSD_SESSION,0,fmt.str(),__FILE__,__LINE__ ); }
+#endif
+		up_thread_next_call_function = up_thread_function_array[up_thread_module_event_map[module_event]];
+#ifdef	DEBUG
+	{
+	boost::format	fmt( "Thread ID[%d] first module event : %s" );
+	fmt %	boost::this_thread::get_id()
+		%	func_tag_to_string( up_thread_next_call_function.first );
+	Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+	}
+#endif
+	}
+	upthread_status_mutex.lock();
+	upthread_status = UPTHREAD_ACTIVE;
+	upthread_status_mutex.unlock();
+	upthread_status_cond.notify_one();
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		std::stringstream buf;
+		buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
+		buf << "up thread loop start";
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 20, buf.str(), __FILE__, __LINE__);
+	}
+	while (!exit_flag) {
 
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                std::stringstream buf;
-                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                buf << "down thread complete wait start";
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 22, buf.str(), __FILE__, __LINE__);
-        }
-        //----Debug log----------------------------------------------------------------------
-        {
-                boost::mutex::scoped_lock lock(downthread_status_mutex);
-                while (downthread_status != DOWNTHREAD_COMPLETE && downthread_status != DOWNTHREAD_SLEEP) {
-                        to_time(LOCKTIMEOUT, xt);
-                        downthread_status_cond.timed_wait(lock, xt);
-                }
-        }
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                std::stringstream buf;
-                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                buf << "down thread complete wait end";
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 23, buf.str(), __FILE__, __LINE__);
-        }
-        //----Debug log----------------------------------------------------------------------
+		// LOCK WAIT MODE
+		{
+		boost::mutex::scoped_lock lock(upthread_status_mutex);
+		while ( unlikely(upthread_status == UPTHREAD_LOCK) ) {
+			to_time(LOCKTIMEOUT, xt);
+			upthread_status_cond.timed_wait(lock, xt);
+			tcp_thread_message *msg = up_thread_message_que.pop();
+			if(msg) {	// message is alive.
+				if (UP_FUNC_EXIT == up_thread_next_call_function.first){ // don't execute message when UP_FUNC_EXIT
+					up_thread_next_call_function.second(LOCAL_PROC);
+					delete msg;
+					break;
+				}
+				else{
+					up_thread_message_data.set_endpoint(msg->endpoint_info);
+					#ifdef	DEBUG
+					boost::format	fmt( "Thread ID[%d] message execute : %s" );
+					fmt % boost::this_thread::get_id() % msg->func_tag_name;
+					Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+					#endif
+					msg->message(MESSAGE_PROC);	// execute message
+					delete msg;
+					msg = NULL;
+				}
+				if( !(client_socket.is_open() || client_ssl_socket.is_open()) ){	//client connection check
+					upthread_status = UPTHREAD_ACTIVE;
+					up_thread_next_call_function = up_thread_function_array[UP_FUNC_EXIT];
+					#ifdef	DEBUG
+					boost::format   fmt( "Thread ID[%d] client socket is close. goto finalize" );
+ 		                        fmt % boost::this_thread::get_id() ;
+                            		Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+					#endif
+				}
+			}	//message alive end.
+			if( ssl_flag && up_thread_next_call_function.first == UP_FUNC_CLIENT_ACCEPT_EVENT ){	//handshake timeout check
+				boost::xtime	now_time;
+				boost::xtime_get(&now_time, boost::TIME_UTC );
+				if( (now_time.sec - start_handshake_time.sec) > ssl_handshake_time_out ){	// timeout detect.
+					boost::system::error_code error_code;
+					client_ssl_socket.close( error_code );
+					if( error_code ){
+						boost::format	fmt( "Thread ID[%d] client SSL socket close fail when handshake timeout : %s" );
+						fmt % boost::this_thread::get_id() % error_code.message();
+						Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__, __LINE__ );
+					}
+				}
+			}
+			}
+		}	// lockmode while loop end.
 
-        if (likely(protocol_module != NULL)) {
-                protocol_module->handle_session_finalize(up_thread_id, down_thread_id);
-        }
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                std::stringstream buf;
-                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                buf << "up thread called handle_session_finalize";
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 24, buf.str(), __FILE__, __LINE__);
-        }
-        //----Debug log----------------------------------------------------------------------
-        {
-                boost::mutex::scoped_lock lock(upthread_status_mutex);
-                upthread_status = UPTHREAD_SLEEP;
-        }
-        if ( !__sync_bool_compare_and_swap(&exit_flag, 1, 2) ) {
-                parent_service.release_session(this);
-        }
+		// ACTIVE MODE
+		tcp_thread_message *msg = up_thread_message_que.pop(); //message checking
+		if (unlikely(msg)) {	//message execute mode
+			if (unlikely(UP_FUNC_EXIT == up_thread_next_call_function.first) ||
+				unlikely(UP_FUNC_CLIENT_DISCONNECT == up_thread_next_call_function.first) ) {
+				up_thread_next_call_function.second(LOCAL_PROC);
+			}
+			else {
+				#ifdef	DEBUG
+				boost::format   fmt( "Thread ID[%d] message execute : %s" );
+				fmt % boost::this_thread::get_id() % msg->func_tag_name;
+				Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+				#endif
+				up_thread_message_data.set_endpoint(msg->endpoint_info);
+				msg->message(MESSAGE_PROC);	//execute message
+			}
+			delete  msg;
+			msg = NULL;
+		}
+		else {	// function exec mode
+			#ifdef	DEBUG
+			boost::format	fmt("Thread ID[%d] up_thread_next_call_function : %s" );
+			fmt % boost::this_thread::get_id() % func_tag_to_string( up_thread_next_call_function.first );
+				Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+			#endif
+			up_thread_next_call_function.second(LOCAL_PROC);
+		}
+	}	// thread main loop end.
 
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT up_thread_run");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 18, formatter.str(), __FILE__, __LINE__);
-        }
-        //----Debug log----------------------------------------------------------------------
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format	fmt( "Thread ID[%d] up thread loop end" );
+		fmt % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 21, fmt.str(), __FILE__, __LINE__);
+	}
+
+	{	// down thread waiting start
+		boost::mutex::scoped_lock lock(downthread_status_mutex);
+		while (downthread_status != DOWNTHREAD_COMPLETE && downthread_status != DOWNTHREAD_SLEEP) {
+			to_time(LOCKTIMEOUT, xt);
+			downthread_status_cond.timed_wait(lock, xt);
+
+			tcp_thread_message *down_msg = new tcp_thread_message();
+			down_msg->message = down_que_function_map[DOWN_FUNC_EXIT];
+			#ifdef	DEBUG
+			down_msg->func_tag_name = func_tag_to_string( DOWN_FUNC_EXIT );
+			{
+				boost::format   fmt( "Thread ID[%d] up_queue.push : %s" );
+				fmt % boost::this_thread::get_id() % func_tag_to_string( DOWN_FUNC_EXIT );
+				Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+			}
+			#endif
+			while (!down_thread_message_que.push(down_msg)) {}
+			downthread_status_cond.notify_one();
+		}
+	}
+
+	up_thread_all_socket_close();
+	connecting_socket.reset();
+
+	if (likely(protocol_module != NULL))	protocol_module->handle_session_finalize(up_thread_id, down_thread_id);
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		std::stringstream buf;
+		buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
+		buf << "up thread called handle_session_finalize";
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 24, buf.str(), __FILE__, __LINE__);
+	}
+
+	if( ssl_flag ){
+		client_ssl_socket.wait_async_event_all_end();
+		client_ssl_socket.clear_socket();
+	}
+	
+	upthread_status = UPTHREAD_SLEEP;
+	// sockets finalize
+	realserver_socket_mutex.lock();
+	if( realserver_socket ) realserver_socket.reset();
+	realserver_socket_mutex.unlock();
+	realserver_endpoint = boost::asio::ip::tcp::endpoint();
+
+
+	// clear messages
+	tcp_thread_message*	msg = up_thread_message_que.pop();
+	while( msg ){
+		delete msg;
+		msg = up_thread_message_que.pop();
+	}
+
+	msg = down_thread_message_que.pop();
+	while( msg ){
+		delete msg;
+		msg = down_thread_message_que.pop();
+	}
+
+	if ( !__sync_bool_compare_and_swap(&exit_flag, 1, 2) ) {	// release session onece time.
+		parent_service.release_session(this);
+	}
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT up_thread_run");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 18, formatter.str(), __FILE__, __LINE__);
+	}
 }
 
 //! down stream thread main function
 void tcp_session::down_thread_run()
 {
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN down_thread_run");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 27, formatter.str(), __FILE__, __LINE__);
-        }
-        //----Debug log----------------------------------------------------------------------
-        down_thread_id = boost::this_thread::get_id();
-        {
-                boost::mutex::scoped_lock lock(downthread_status_mutex);
-                downthread_status = DOWNTHREAD_ALIVE;
-                downthread_status_cond.notify_one();
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN down_thread_run");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 27, formatter.str(), __FILE__, __LINE__);
+	}
 
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                std::stringstream buf;
-                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                buf << "down_thread_run up thread active wait start";
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 28, buf.str(), __FILE__, __LINE__);
-        }
-        //----Debug log----------------------------------------------------------------------
-        {
-                boost::mutex::scoped_lock lock(upthread_status_mutex);
-                while (upthread_status < UPTHREAD_ACTIVE) {
-                        to_time(LOCKTIMEOUT, xt);
-                        upthread_status_cond.timed_wait(upthread_status_mutex, xt);
-                }
-        }
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                std::stringstream buf;
-                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                buf << "down_thread_run up thread active wait end";
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 29, buf.str(), __FILE__, __LINE__);
-        }
-        //----Debug log----------------------------------------------------------------------
+	down_thread_id = boost::this_thread::get_id();
+	boost::xtime	xt;
 
-        {
-                boost::mutex::scoped_lock lock(downthread_status_mutex);
-                downthread_status = DOWNTHREAD_ACTIVE;
-                downthread_status_cond.notify_one();
-        }
+	downthread_status_mutex.lock();
+	downthread_status = DOWNTHREAD_LOCK;
+	downthread_status_mutex.unlock();
+    down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_REALSERVER_RECEIVE];
+	{
+		boost::mutex::scoped_lock	lock( upthread_status_mutex );
+		while( upthread_status < UPTHREAD_ACTIVE ){
+			to_time( LOCKTIMEOUT, xt );
+			upthread_status_cond.timed_wait( lock, xt ); 
+		}
+	}
 
-        down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_REALSERVER_RECEIVE];
+	if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format	fmt( "Therad ID[%d] down thread loop start" );
+		fmt % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 30, fmt.str(), __FILE__, __LINE__ );
+	}
 
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                std::stringstream buf;
-                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                buf << "down thread loop start";
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 30, buf.str(), __FILE__, __LINE__);
-        }
-        //----Debug log----------------------------------------------------------------------
-        while (!exit_flag) {
-                {
-                        boost::mutex::scoped_lock lock(downthread_status_mutex);
-                        while ( unlikely(downthread_status == DOWNTHREAD_LOCK) ) {
-                                to_time(LOCKTIMEOUT, xt);
-                                downthread_status_cond.timed_wait(lock, xt);
-                        }
-                }
-                while (unlikely(!down_thread_connect_socket_list.empty())) {
-                        socket_element push_rs_socket = down_thread_connect_socket_list.get_socket();
-                        down_thread_receive_realserver_socket_list.push_back(push_rs_socket);
-                        down_thread_current_receive_realserver_socket = down_thread_receive_realserver_socket_list.begin();
-                }
+	while (!exit_flag) { // down thread main loop.
 
-                tcp_thread_message *msg = down_thread_message_que.pop();
-                if (unlikely(msg)) {
-                        if (unlikely(DOWN_FUNC_EXIT == down_thread_next_call_function.first)) {
-                                down_thread_next_call_function.second(LOCAL_PROC);
-                        } else {
-                                down_thread_message_data.set_endpoint(msg->endpoint_info);
-                                msg->message(MESSAGE_PROC);
-                        }
-                        delete  msg;
-                        msg = NULL;
-                } else {
-                        down_thread_next_call_function.second(LOCAL_PROC);
-                }
-        }
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                std::stringstream buf;
-                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                buf << "down thread loop end";
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 31, buf.str(), __FILE__, __LINE__);
-        }
-        //----Debug log----------------------------------------------------------------------
+		#ifdef	DEBUG
+		down_thread_function_pair old_func;
+		#endif
+		{
+		boost::mutex::scoped_lock lock(downthread_status_mutex);
+		while ( unlikely(downthread_status == DOWNTHREAD_LOCK) ) { // waiting loop
+			to_time(LOCKTIMEOUT, xt);
+			downthread_status_cond.timed_wait(lock, xt);
+			tcp_thread_message* msg = down_thread_message_que.pop();
+			if( msg ){
+				if( DOWN_FUNC_EXIT == down_thread_next_call_function.first ){
+					down_thread_next_call_function.second(LOCAL_PROC);
+					delete msg;
+					msg = NULL;
+					break;
+				}
+				else{
+					down_thread_message_data.set_endpoint( msg->endpoint_info );
+					#ifdef  DEBUG
+					boost::format   fmt( "Thread ID[%d] message execute : %s" );
+					fmt % boost::this_thread::get_id() % msg->func_tag_name;
+					Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+					#endif
+					msg->message(MESSAGE_PROC);
+					delete msg;
+					msg = NULL;
+				}
+			}
+		}	// waiting loop end
+		}
+		tcp_thread_message *msg = down_thread_message_que.pop();
+		if (unlikely(msg)) {
+			if (unlikely(DOWN_FUNC_EXIT == down_thread_next_call_function.first) ){
+				down_thread_next_call_function.second(LOCAL_PROC);
+			}
+			else {
+				#ifdef  DEBUG
+				boost::format   fmt( "Thread ID[%d] message execute : %s" );
+				fmt % boost::this_thread::get_id() % msg->func_tag_name;
+				Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+				#endif
+				down_thread_message_data.set_endpoint(msg->endpoint_info);
+				msg->message(MESSAGE_PROC);
+			}
+			delete  msg;
+			msg = NULL;
+		} else {
+			#ifdef	DEBUG
+			boost::format	fmt( "Thread ID[%d] down_thread_next_call_function : %s" );
+			fmt % boost::this_thread::get_id() % func_tag_to_string( down_thread_next_call_function.first );
+			Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__, __LINE__ );
 
-        down_thread_all_socket_close();
-        {
-                boost::mutex::scoped_lock lock(downthread_status_mutex);
-                downthread_status = DOWNTHREAD_COMPLETE;
-                downthread_status_cond.notify_one();
-        }
+			#endif
+			down_thread_next_call_function.second(LOCAL_PROC);
+			#ifdef	DEBUG
+			old_func = down_thread_next_call_function;
+			#endif
+		}
+	}	// down thread main loop end.
 
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                std::stringstream buf;
-                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                buf << "up thread complete wait start";
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, /*XXX*/999, buf.str(), __FILE__, __LINE__);
-        }
-        //----Debug log----------------------------------------------------------------------
-        {
-                boost::mutex::scoped_lock lock(upthread_status_mutex);
-                while (upthread_status != UPTHREAD_COMPLETE && upthread_status != UPTHREAD_SLEEP) {
-                        to_time(LOCKTIMEOUT, xt);
-                        upthread_status_cond.timed_wait(lock, xt);
-                }
-        }
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                std::stringstream buf;
-                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                buf << "up thread complete wait start";
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, /*XXX*/999, buf.str(), __FILE__, __LINE__);
-        }
-        //----Debug log----------------------------------------------------------------------
+	if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format	fmt( "Thread ID[%d] down thread loop end" );
+		fmt % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 31,  fmt.str(), __FILE__, __LINE__);
+	}
 
-        {
-                boost::mutex::scoped_lock lock(downthread_status_mutex);
-                downthread_status = DOWNTHREAD_SLEEP;
-                downthread_status_cond.notify_one();
-        }
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT down_thread_run");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 32, formatter.str(), __FILE__, __LINE__);
-        }
-        if ( !__sync_bool_compare_and_swap(&exit_flag, 1, 2) ) {
-                parent_service.release_session(this);
-        }
+	{ // waiting down thread loop.
+		if( unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+			boost::format   fmt( "Thread ID[%d] downthread_status = DOWNTHREAD_SLEEP" );
+			fmt % boost::this_thread::get_id();
+			Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 31,  fmt.str(), __FILE__, __LINE__);
+		}
+		boost::mutex::scoped_lock lock(downthread_status_mutex);
+		downthread_status = DOWNTHREAD_SLEEP;
+		downthread_status_cond.notify_one();
+	}
 
-        //----Debug log----------------------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT down_thread_run");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, /*XXX*/999, formatter.str(), __FILE__, __LINE__);
-        }
-        //----Debug log----------------------------------------------------------------------
+	// clear down thread message
+	{
+		tcp_thread_message* msg = down_thread_message_que.pop();
+		while( msg ){
+			delete msg;
+			msg = down_thread_message_que.pop();
+		} 
+
+	}
+
+	if ( !__sync_bool_compare_and_swap(&exit_flag, 1, 2) ) { // execute onetime on 2 threads.
+		parent_service.release_session(this);
+	}
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT down_thread_run");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, /*XXX*/999, formatter.str(), __FILE__, __LINE__);
+	}
 }
 
-//! endpoint data to string information
-//! @param[in]        endpoint is target endpoint object
-std::string tcp_session::endpoint_to_string(
-        const endpoint &target_endpoint)
-{
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN endpoint_to_string");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
-
-        std::stringstream ret;
-        if (target_endpoint.address().is_v6()) {
-                ret << "[" << target_endpoint.address().to_string() << "]:" << target_endpoint.port();
-        } else {
-                ret << target_endpoint.address().to_string() << ":" << target_endpoint.port();
-        }
-
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT endpoint_to_string");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
-
-        return ret.str();
-}
 
 //! up thread accept client side
 //! @param[in]        process_type is process type
@@ -1217,74 +1071,22 @@ void tcp_session::up_thread_client_accept(const TCP_PROCESS_TYPE_TAG process_typ
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
         }
 
-        UP_THREAD_FUNC_TYPE_TAG func_tag;
+        UP_THREAD_FUNC_TYPE_TAG func_tag = UP_FUNC_CLIENT_ACCEPT_EVENT;
+
+		boost::system::error_code	error_code;
 
         if (ssl_flag) {
-                //SSL Mode
-                rd_scoped_lock scoped_lock(ssl_handshake_time_out_flag_mutex);
-                if (ssl_handshake_time_out_flag) {
-                        // SSL handshake time out or timer error
-                        func_tag = UP_FUNC_CLIENT_DISCONNECT;
-                        std::stringstream buf;
-                        buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                        buf << "handshake timer timeout " << ssl_handshake_time_out << "sec: ";
-                        buf << "handshaking not end";
-                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, 112, buf.str(), __FILE__, __LINE__);
-                } else {
-                        if (ssl_handshake_timer_flag == false) {
-                                // set handshake timer
-                                //register handshake timer event handler
-                                ssl_handshake_timer.reset(new boost::asio::deadline_timer(io));
-                                ssl_handshake_timer->expires_from_now(boost::posix_time::seconds(ssl_handshake_time_out));
-                                ssl_handshake_timer->async_wait(boost::bind(&tcp_session::handle_ssl_handshake_timer,
-                                                                this,
-                                                                boost::asio::placeholders::error));
-                                ssl_handshake_timer_flag = true;
-                                //----Debug log----------------------------------------------------------------------
-                                if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                                        std::stringstream buf;
-                                        buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                                        buf << "ssl session handshaking start: ";
-                                        buf << "set handshake timer " << ssl_handshake_time_out << "sec";
-                                        Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 70, buf.str(), __FILE__, __LINE__);
-                                }
-                                //----Debug log----------------------------------------------------------------------
-                        }
-                        // try ssl handshake
-                        boost::system::error_code ec;
-                        client_ssl_socket.handshake(ec);
-
-                        if (!ec) {
-                                // handshake ok
-                                ssl_handshake_timer->cancel();
-                                func_tag = UP_FUNC_CLIENT_ACCEPT_EVENT;
-                        } else {
-                                // handshake fail
-                                if (ec == boost::asio::error::try_again) {
-                                        func_tag = UP_FUNC_CLIENT_ACCEPT;
-                                        boost::this_thread::yield();
-                                } else {
-                                        //ERROR
-                                        ssl_handshake_timer->cancel();
-                                        func_tag = UP_FUNC_CLIENT_DISCONNECT;
-                                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, 113, "ssl socket handshaking failed", __FILE__, __LINE__);
-                                        //----Debug log----------------------------------------------------------------------
-                                        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                                                std::stringstream buf;
-                                                buf << "Thread ID[";
-                                                buf << boost::this_thread::get_id();
-                                                buf << "] tcp_ssl_socket::handshake [";
-                                                buf << ec.message();
-                                                buf << "]";
-                                                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 71, buf.str(), __FILE__, __LINE__);
-                                        }
-                                        //----Debug log----------------------------------------------------------------------
-                                }
-                        }
-                }
-        } else {
-                func_tag = UP_FUNC_CLIENT_ACCEPT_EVENT;
+			upthread_status = UPTHREAD_LOCK;
+			// try ssl handshake
+			boost::xtime_get(&start_handshake_time, boost::TIME_UTC);
+			client_ssl_socket.setoption( error_code );
+			client_ssl_socket.async_handshake( boost::bind( &tcp_session::up_thread_client_handshake_handle, 
+															this,
+															boost::asio::placeholders::error) );
         }
+		else{
+			upthread_status = UPTHREAD_ACTIVE;
+		}
         up_thread_next_call_function = up_thread_function_array[func_tag];
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -1292,6 +1094,41 @@ void tcp_session::up_thread_client_accept(const TCP_PROCESS_TYPE_TAG process_typ
                 formatter % boost::this_thread::get_id() % func_tag_to_string(func_tag);
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
         }
+}
+
+//! up thread message after client handshake
+void tcp_session::up_thread_client_handshake_handle( const boost::system::error_code& error_code ){
+
+	if( ssl_flag ){
+		client_ssl_socket.decrement_handshake_con();
+	}
+
+	tcp_thread_message*	up_msg = new tcp_thread_message();
+	if( !error_code ){
+		up_msg->message = up_que_function_map[UP_FUNC_CLIENT_ACCEPT_EVENT];
+		#ifdef	DEBUG
+		up_msg->func_tag_name = func_tag_to_string( UP_FUNC_CLIENT_ACCEPT_EVENT );
+		{
+			boost::format   fmt( "Thread ID[%d] up_queue.push : %s" );
+			fmt % boost::this_thread::get_id() % func_tag_to_string( UP_FUNC_CLIENT_ACCEPT_EVENT );
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+		#endif
+	}
+	else{
+		handshake_error_code = error_code;
+		up_msg->message = up_que_function_map[UP_FUNC_CLIENT_ACCEPT_FAIL_EVENT];
+		#ifdef	DEBUG
+		up_msg->func_tag_name = func_tag_to_string( UP_FUNC_CLIENT_ACCEPT_FAIL_EVENT );
+		{
+			boost::format   fmt( "Thread ID[%d] up_queue.push : %s / error_code = %s" );
+			fmt % boost::this_thread::get_id() % func_tag_to_string( UP_FUNC_CLIENT_ACCEPT_FAIL_EVENT ) % error_code.message();
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+		#endif
+	}
+	while( !up_thread_message_que.push( up_msg ) ){}
+	upthread_status_cond.notify_one();
 }
 
 //! up thread raise module event of handle_accept and do handshake
@@ -1304,67 +1141,85 @@ void tcp_session::up_thread_client_accept_event(const TCP_PROCESS_TYPE_TAG proce
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
         }
 
+		if( ssl_flag ) upthread_status = UPTHREAD_ACTIVE;
+
         protocol_module_base::EVENT_TAG module_event;
         module_event = protocol_module->handle_accept(up_thread_id);
+#ifdef	DEBUG
+		boost::format	fmt( "Thread ID[%d] protocol_module->handle_accept() return : %s" );
+		fmt % boost::this_thread::get_id()
+			% func_tag_to_string( module_event );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION,0, fmt.str(), __FILE__,__LINE__ );
+#endif
         up_thread_data_client_side.set_endpoint(client_endpoint);
-        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
 
-        up_thread_function_pair func = up_thread_function_array[func_type->second];
-        up_thread_next_call_function = func;
+        up_thread_next_call_function = up_thread_function_array[up_thread_module_event_map[module_event]];
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                 boost::format formatter("Thread ID[%d] FUNC OUT up_thread_client_accept_event: NEXT_FUNC[%s]");
-                formatter % boost::this_thread::get_id() % func_tag_to_string(func_type->second);
+                formatter % boost::this_thread::get_id() % func_tag_to_string(up_thread_next_call_function.first);
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
         }
 }
 
-//! handshake timer handler
-//! @param[in]        error is timer operation result error code
-void tcp_session::handle_ssl_handshake_timer(const boost::system::error_code &error)
-{
-        //----Debug log--------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN handle_ssl_handshake_timer");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 72, formatter.str(), __FILE__, __LINE__);
-        }
-        //----Debug log--------------------------------------------------------
 
-        if (!error) {
-                rw_scoped_lock scoped_lock(ssl_handshake_time_out_flag_mutex);
-                ssl_handshake_time_out_flag = true;
-        } else {
-                if (error.value() == ECANCELED) {
-                        //----Debug log----------------------------------------
-                        if (unlikely(LOG_LV_DEBUG ==
-                                     Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                                std::stringstream buf;
-                                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                                buf << "handshake timer operation cancel: ";
-                                buf << "handshaking normal end";
-                                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION,
-                                                    87, buf.str(), __FILE__, __LINE__);
-                        }
-                        //----Debug log----------------------------------------
-                } else {
-                        std::stringstream buf;
-                        buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                        buf << "handshake timer operation failed: ";
-                        buf << error.message();
-                        Logger::putLogError(LOG_CAT_L7VSD_SESSION,
-                                            116, buf.str(), __FILE__, __LINE__);
-                }
-        }
+//! accept error event.
+void tcp_session::up_thread_client_accept_fail_event(const TCP_PROCESS_TYPE_TAG proc ){
 
-        //----Debug log--------------------------------------------------------
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT handle_ssl_handshake_timer");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 73, formatter.str(), __FILE__, __LINE__);
-        }
-        //----Debug log--------------------------------------------------------
+	UP_THREAD_FUNC_TYPE_TAG func_tag = UP_FUNC_CLIENT_ACCEPT_EVENT;
+
+	if( handshake_error_code == boost::asio::error::try_again ){
+		upthread_status = UPTHREAD_LOCK;
+		tcp_ssl_socket::async_handshake_handler_t   handler;
+		handler = boost::bind( &tcp_session::up_thread_client_handshake_handle, this, boost::asio::placeholders::error );
+		client_ssl_socket.async_handshake( handler );
+	}
+	else{	//error
+		func_tag = UP_FUNC_CLIENT_DISCONNECT;
+		upthread_status = UPTHREAD_ACTIVE;
+		tcp_thread_message* mes = new tcp_thread_message();
+		mes->message = down_que_function_map[DOWN_FUNC_PAUSE_OFF_EVENT];
+		#ifdef	DEBUG
+		mes->func_tag_name = func_tag_to_string( DOWN_FUNC_PAUSE_OFF_EVENT );
+		{
+			boost::format   fmt( "Thread ID[%d] down_queue.push : %s" );
+			fmt % boost::this_thread::get_id() % func_tag_to_string( DOWN_FUNC_PAUSE_OFF_EVENT );
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+		#endif
+
+		while( !down_thread_message_que.push( mes ) ){}
+		downthread_status_cond.notify_one();
+
+		boost::format	fmt( "Thread ID[%d] tcp_ssl_socket::handshake[%s]" );
+		fmt % boost::this_thread::get_id() % handshake_error_code.message();
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 71, fmt.str(), __FILE__, __LINE__);
+
+	}
+	up_thread_next_call_function = up_thread_function_array[func_tag];
 }
+
+//! real server remove
+//! @param[in]        target endpoint
+void tcp_session::realserver_remove(endpoint& target_endpoint)
+{
+        tcp_thread_message *up_msg = new tcp_thread_message;
+        up_thread_function_pair up_func = up_thread_function_array[UP_FUNC_REALSERVER_CHECK];
+        up_msg->message = up_func.second;
+		up_msg->endpoint_info = target_endpoint;
+#ifdef	DEBUG
+		up_msg->func_tag_name = func_tag_to_string( UP_FUNC_REALSERVER_CHECK );
+		{
+			boost::format   fmt( "Thread ID[%d] up_queue.push : %s" );
+			fmt % boost::this_thread::get_id() % func_tag_to_string( UP_FUNC_REALSERVER_CHECK );
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+#endif
+        while (!up_thread_message_que.push(up_msg)) {}
+		upthread_status_cond.notify_one();
+}
+
+
 
 //! up thread receive client side and raise module event of handle_client_recv
 //! @param[in]        process_type is process type
@@ -1394,10 +1249,10 @@ void tcp_session::up_thread_client_receive(const TCP_PROCESS_TYPE_TAG process_ty
         UP_THREAD_FUNC_TYPE_TAG func_tag;
 
         recv_size = !ssl_flag ? client_socket.read_some(
-                            boost::asio::buffer(data_buff, MAX_BUFFER_SIZE),
+                            boost::asio::buffer(data_buff),
                             ec)
                     : client_ssl_socket.read_some(
-                            boost::asio::buffer(data_buff, MAX_BUFFER_SIZE),
+                            boost::asio::buffer(data_buff),
                             ec);
         if (!ec) {
                 if (recv_size > 0) {
@@ -1413,16 +1268,13 @@ void tcp_session::up_thread_client_receive(const TCP_PROCESS_TYPE_TAG process_ty
                         up_thread_data_client_side.set_size(recv_size);
                         parent_service.update_up_recv_size(recv_size);
                         protocol_module_base::EVENT_TAG module_event = protocol_module->handle_client_recv(up_thread_id, data_buff, recv_size);
-                        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
-                        if (unlikely(func_type == up_thread_module_event_map.end())) {
-                                //Error unknown protocol_module_base::EVENT_TAG return
-                                boost::format formatter("Thread ID[%d] protocol_module returned illegal EVENT_TAG: %d");
-                                formatter % boost::this_thread::get_id() % module_event;
-                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, 20, formatter.str(), __FILE__, __LINE__);
-                                up_thread_exit(process_type);
-                                return;
-                        }
-                        func_tag = func_type->second;
+#ifdef	DEBUG
+{	boost::format	fmt( "Thread ID[%d] protocol_module->handle_client_recv() return: %s" );
+	fmt % boost::this_thread::get_id()
+		% func_tag_to_string( module_event );
+	Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );}
+#endif
+                        func_tag = up_thread_module_event_map[module_event];
                 } else {
                         func_tag = UP_FUNC_CLIENT_DISCONNECT;
                 }
@@ -1430,61 +1282,29 @@ void tcp_session::up_thread_client_receive(const TCP_PROCESS_TYPE_TAG process_ty
                 if (ec == boost::asio::error::eof) {
                         func_tag = UP_FUNC_CLIENT_DISCONNECT;
                 } else if (ec == boost::asio::error::try_again) {
-                        // epoll
-                        struct epoll_event event;
-                        event.data.fd = !ssl_flag ? client_socket.get_socket().native()
-                                        : client_ssl_socket.get_socket().lowest_layer().native();
-                        if (event.data.fd == -1) {
-                                up_thread_next_call_function  = up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT];
-                                return;
-                        }
-                        // epoll add
-                        if (!up_client_epollfd_registered) {
-                                if (is_epoll_edge_trigger) {
-                                        event.events = EPOLLIN | EPOLLHUP | EPOLLET;
-                                } else {
-                                        event.events = EPOLLIN | EPOLLHUP;
-                                }
-                                if (epoll_ctl(up_client_epollfd, EPOLL_CTL_ADD, event.data.fd, &event) < 0) {
-                                        std::stringstream buf;
-                                        buf << "up_thread_client_receive: epoll_ctl EPOLL_CTL_ADD error: ";
-                                        buf << strerror(errno);
-                                        Logger::putLogWarn(LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__);
-                                        return;
-                                }
-                                up_client_epollfd_registered = true;
-                        }
-                        // epoll wait
-                        int ret_fds = epoll_wait(up_client_epollfd, up_client_events, EVENT_NUM, epoll_timeout);
-                        if (ret_fds <= 0) {
-                                if (ret_fds < 0) {
-                                        boost::format formatter("up_thread_client_receive: epoll_wait error: %s");
-                                        formatter % strerror(errno);
-                                        Logger::putLogWarn(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-                                        up_thread_next_call_function = up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT];
-                                }
-                                return;
-                        }
+                        upthread_status = UPTHREAD_LOCK;
+                        func_tag = UP_FUNC_CLIENT_HANDLE_ARECIEVE;
+			basic_tcp_socket<boost::asio::ip::tcp>::async_rw_handler_t	handler 
+						= boost::bind( &tcp_session::up_thread_client_async_read_some_handler,
+																			this,
+																			boost::asio::placeholders::error,
+																			boost::asio::placeholders::bytes_transferred );
+						!ssl_flag ? client_socket.async_read_some( boost::asio::buffer( data_buff ), handler )
+								  : client_ssl_socket.async_read_some( boost::asio::buffer( data_buff ), handler );
 
-                        for (int i = 0; i < ret_fds; ++i) {
-                                if (up_client_events[i].data.fd == event.data.fd) {
-                                        if (up_client_events[i].events & EPOLLIN) {
-                                                break;
-                                        }
-                                        if (up_client_events[i].events & EPOLLHUP) {
-                                                up_thread_next_call_function = up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT];
-                                                return;
-                                        }
-                                }
-                        }
-                        func_tag = UP_FUNC_CLIENT_RECEIVE;
+#ifdef	DEBUG
+						boost::format	fmt( "Thread ID[%d] async_read_some execute" );
+						fmt % boost::this_thread::get_id();
+						Logger::putLogInfo(LOG_CAT_L7VSD_SESSION,0, fmt.str(), __FILE__,__LINE__ );
+#endif
                 } else {
                         boost::format formatter("Thread ID[%d] client read error: %s");
                         formatter % boost::this_thread::get_id() % ec.message();
-                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+                        Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
                         func_tag = UP_FUNC_CLIENT_DISCONNECT;
                 }
         }
+
         up_thread_next_call_function  = up_thread_function_array[func_tag];
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -1504,15 +1324,31 @@ void tcp_session::up_thread_client_respond(const TCP_PROCESS_TYPE_TAG process_ty
         }
 
         tcp_thread_message *up_msg = new tcp_thread_message;
-        tcp_thread_message *down_msg = new tcp_thread_message;
         up_thread_function_pair up_func = up_thread_function_array[UP_FUNC_CLIENT_RESPOND_SEND_EVENT];
-
         up_msg->message = up_func.second;
-        std::map<DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func>::iterator down_func
-        = up_thread_message_down_thread_function_map.find(DOWN_FUNC_CLIENT_RESPOND_SEND_EVENT);
-        down_msg->message = down_func->second;
+#ifdef	DEBUG
+		up_msg->func_tag_name = func_tag_to_string( UP_FUNC_CLIENT_RESPOND_SEND_EVENT );
+		{
+			boost::format   fmt( "Thread ID[%d] up_queue.push : %s" );
+			fmt % boost::this_thread::get_id() % func_tag_to_string( UP_FUNC_CLIENT_RESPOND_SEND_EVENT );
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+#endif
         while (!up_thread_message_que.push(up_msg)) {}
+		upthread_status_cond.notify_one();
+
+        tcp_thread_message *down_msg = new tcp_thread_message;
+        down_msg->message = down_que_function_map[DOWN_FUNC_CLIENT_RESPOND_SEND_EVENT];
+#ifdef	DEBUG
+		down_msg->func_tag_name = func_tag_to_string( DOWN_FUNC_CLIENT_RESPOND_SEND_EVENT );
+		{
+			boost::format   fmt( "Thread ID[%d] down_queue.push : %s" );
+			fmt % boost::this_thread::get_id() % func_tag_to_string( DOWN_FUNC_CLIENT_RESPOND_SEND_EVENT );
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+#endif
         while (!down_thread_message_que.push(down_msg)) {}
+		downthread_status_cond.notify_one();
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                 boost::format formatter("Thread ID[%d] FUNC OUT up_thread_client_respond");
@@ -1534,11 +1370,18 @@ void tcp_session::up_thread_client_respond_event(const TCP_PROCESS_TYPE_TAG proc
         {
                 rw_scoped_lock scope_lock(module_function_response_send_inform_mutex);
                 module_event = protocol_module->handle_response_send_inform(up_thread_id);
+#ifdef	DEBUG
+{	boost::format	fmt( "Thread ID[%d] protocol_module->handle_response_send_inform() return: %s" );
+	fmt % boost::this_thread::get_id()
+		% func_tag_to_string( module_event );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+}
+#endif
+
         }
         std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
         up_thread_function_pair func = up_thread_function_array[func_type->second];
         up_thread_next_call_function = func;
-
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                 boost::format formatter("Thread ID[%d] FUNC OUT up_thread_client_respond_event: NEXT_FUNC[%s]");
                 formatter % boost::this_thread::get_id() % func_tag_to_string(func_type->second);
@@ -1549,6 +1392,8 @@ void tcp_session::up_thread_client_respond_event(const TCP_PROCESS_TYPE_TAG proc
 //! @param[in]        process_type is process type
 void tcp_session::up_thread_client_disconnect(const TCP_PROCESS_TYPE_TAG process_type)
 {
+        UP_THREAD_FUNC_TYPE_TAG func_tag;
+
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                 boost::format formatter("Thread ID[%d] FUNC IN func up_thread_client_disconnect");
                 formatter % boost::this_thread::get_id();
@@ -1556,20 +1401,41 @@ void tcp_session::up_thread_client_disconnect(const TCP_PROCESS_TYPE_TAG process
         }
 
         boost::system::error_code ec;
-        bool bres = !ssl_flag ? client_socket.close(ec)
-                    : client_ssl_socket.close(ec);
 
-        if (bres) {
-                tcp_thread_message *up_msg = new tcp_thread_message;
-                tcp_thread_message *down_msg = new tcp_thread_message;
-                up_thread_function_pair up_func = up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT_EVENT];
-                up_msg->message = up_func.second;
-                down_thread_function_pair down_func = down_thread_function_array[DOWN_FUNC_CLIENT_DISCONNECT_EVENT];
-                down_msg->message = down_func.second;
-
-                while (!up_thread_message_que.push(up_msg)) {}
-                while (!down_thread_message_que.push(down_msg)) {}
+	if(!ssl_flag){
+               client_socket.shutdown(ec);
+               if( ec ){
+                       boost::format   fmt( "Thrad ID[%d] client shutdown error : %s " );
+                       fmt % boost::this_thread::get_id() % ec.message();
+                       Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+               }
+		func_tag = UP_FUNC_CLIENT_DISCONNECT_EVENT;
+        }else{
+               client_ssl_socket.shutdown(ec);
+	       if(ec == boost::asio::error::try_again ){
+#ifdef  DEBUG
+                       boost::format   fmt( "Thread ID[%d] ssl_shutdown fail: %s" );
+                       fmt % boost::this_thread::get_id() % ec.message();
+                       Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+#endif
+			func_tag = UP_FUNC_CLIENT_DISCONNECT;
+                }else if(ec == boost::asio::error::eof ){
+#ifdef  DEBUG
+                       boost::format   fmt( "Thread ID[%d] ssl_shutdown fail: %s" );
+                       fmt % boost::this_thread::get_id() % ec.message();
+                       Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+#endif
+			func_tag = UP_FUNC_CLIENT_DISCONNECT_EVENT;
+                }else{
+#ifdef  DEBUG
+                       boost::format   fmt( "Thread ID[%d] ssl_shutdown fail: %s" );
+                       fmt % boost::this_thread::get_id() % ec.message();
+                       Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+#endif
+			func_tag = UP_FUNC_CLIENT_DISCONNECT_EVENT;
+                }	
         }
+
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                 boost::format formatter("Thread ID[%d] FUNC_OUT up_thread_client_disconnect up_func[%s] down_func[%s]");
                 formatter % boost::this_thread::get_id()
@@ -1577,6 +1443,8 @@ void tcp_session::up_thread_client_disconnect(const TCP_PROCESS_TYPE_TAG process
                 % func_tag_to_string(DOWN_FUNC_CLIENT_DISCONNECT_EVENT);
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
         }
+	upthread_status = UPTHREAD_ACTIVE;
+	up_thread_next_call_function = up_thread_function_array[func_tag];
 }
 //! up thread raise module event of handle_client_disconnect
 //! @param[in]        process_type is process type
@@ -1589,16 +1457,38 @@ void tcp_session::up_thread_client_disconnect_event(const TCP_PROCESS_TYPE_TAG p
         }
         protocol_module_base::EVENT_TAG module_event;
         {
-                rw_scoped_lock scope_lock(module_function_client_disconnect_mutex);
-                module_event = protocol_module->handle_client_disconnect(up_thread_id);
+            rw_scoped_lock scope_lock(module_function_client_disconnect_mutex);
+            module_event = protocol_module->handle_client_disconnect(up_thread_id);
+			#ifdef	DEBUG
+			{
+				boost::format	fmt( "Thread ID[%d] protocol_module->handle_client_disconnect() return: %s" );
+				fmt % boost::this_thread::get_id()
+					% func_tag_to_string( module_event );
+				Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+			}
+			#endif
+
         }
-        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
-        up_thread_function_pair func = up_thread_function_array[func_type->second];
-        up_thread_next_call_function = func;
+		up_thread_next_call_function = up_thread_function_array[up_thread_module_event_map[module_event]];
+
+
+		tcp_thread_message*	mes = new tcp_thread_message();
+		mes->message = down_que_function_map[DOWN_FUNC_PAUSE_OFF_EVENT];
+		#ifdef	DEBUG
+		mes->func_tag_name = func_tag_to_string( DOWN_FUNC_PAUSE_OFF_EVENT );
+		{
+			boost::format   fmt( "Thread ID[%d] down_queue.push : %s" );
+			fmt % boost::this_thread::get_id() % func_tag_to_string( DOWN_FUNC_PAUSE_OFF_EVENT );
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+		#endif
+		while( !down_thread_message_que.push( mes ) ){}
+
+		upthread_status = UPTHREAD_ACTIVE;
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                 boost::format formatter("Thread ID[%d] FUNC OUT up_thread_client_disconnect_event: NEXT_FUNC[%s]");
-                formatter % boost::this_thread::get_id() % func_tag_to_string(func_type->second);
+                formatter % boost::this_thread::get_id() % func_tag_to_string(down_thread_next_call_function.first);
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
         }
 }
@@ -1612,85 +1502,70 @@ void tcp_session::up_thread_realserver_send(const TCP_PROCESS_TYPE_TAG process_t
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
         }
 
-        boost::system::error_code ec;
-        endpoint server_endpoint = up_thread_data_dest_side.get_endpoint();
-        std::map<endpoint, tcp_socket_ptr>::iterator send_socket =  up_thread_send_realserver_socket_map.find(server_endpoint);
+        boost::system::error_code	error_code;
         boost::array<char, MAX_BUFFER_SIZE>& data_buff = up_thread_data_dest_side.get_data();
         std::size_t data_size = up_thread_data_dest_side.get_size();
         std::size_t send_data_size = up_thread_data_dest_side.get_send_size();
-        std::size_t send_size;
+        std::size_t send_size = 0;
         UP_THREAD_FUNC_TYPE_TAG func_tag;
+        if( realserver_socket )
+			send_size = realserver_socket->write_some( 
+							boost::asio::const_buffers_1(
+								data_buff.data() + send_data_size,
+								data_size - send_data_size
+								),
+							error_code
+						);
+	else
+			error_code = boost::asio::error::connection_reset;
+		
 
-        send_size = send_socket->second->write_some(
-                            boost::asio::buffer(
-                                    data_buff.data() + send_data_size,
-                                    data_size - send_data_size),
-                            ec);
-        if (!ec) {
-                send_data_size += send_size;
-                up_thread_data_dest_side.set_send_size(send_data_size);
-                parent_service.update_up_send_size(send_size);
-                //----Debug log----------------------------------------------------------------------
-                if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                        boost::format formatter("Thread ID[%d] up_thread_realserver_send send data size[%d] for [%d]");
-                        formatter % boost::this_thread::get_id() % send_size % server_endpoint;
-                        Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 37, formatter.str(), __FILE__, __LINE__);
-                }
-                //----Debug log----------------------------------------------------------------------
-                if (data_size > send_data_size) {
-                        func_tag = UP_FUNC_REALSERVER_SEND;
-                } else {
-                        protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_send(up_thread_id);
-                        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
-                        func_tag = func_type->second;
-                }
-        } else {
-                if (ec == boost::asio::error::try_again) {
-                        // epoll
-                        struct epoll_event event;
-                        event.data.fd = send_socket->second->get_socket().native();
-                        // epoll add
-                        if (!up_realserver_epollfd_registered) {
-                                if (is_epoll_edge_trigger) {
-                                        event.events = EPOLLOUT | EPOLLHUP | EPOLLET;
-                                } else {
-                                        event.events = EPOLLOUT | EPOLLHUP;
-                                }
-                                if (epoll_ctl(up_realserver_epollfd, EPOLL_CTL_ADD, event.data.fd, &event) < 0) {
-                                        std::stringstream buf;
-                                        buf << "up_thread_realserver_send: epoll_ctl EPOLL_CTL_ADD error: ";
-                                        buf << strerror(errno);
-                                        Logger::putLogWarn(LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__);
-                                        return;
-                                }
-                                up_realserver_epollfd_registered = true;
-                        }
-                        // epoll wait
-                        int ret_fds = epoll_wait(up_realserver_epollfd, up_realserver_events, EVENT_NUM, epoll_timeout);
-                        if (ret_fds <= 0) {
-                                if (ret_fds < 0) {
-                                        std::stringstream buf;
-                                        buf << "up_thread_realserver_send: epoll_wait error: " << strerror(errno);
-                                        Logger::putLogWarn(LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__);
-                                        up_thread_next_call_function = up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT];
-                                }
-                                return;
-                        }
-                
-                        for (int i = 0; i < ret_fds; ++i) {
-                                if (up_realserver_events[i].data.fd == event.data.fd) {
-                                        if (up_realserver_events[i].events & EPOLLOUT) {
-                                                break;
-                                        } else if (up_realserver_events[i].events & EPOLLHUP) {
-                                                up_thread_next_call_function = up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT];
-                                                return;
-                                        }
-                                }
-                        }
-                        func_tag = UP_FUNC_REALSERVER_SEND;
-                } else {
-                        func_tag = UP_FUNC_REALSERVER_DISCONNECT;
-                }
+        if (!error_code) {
+			send_data_size += send_size;
+			up_thread_data_dest_side.set_send_size(send_data_size);
+			parent_service.update_up_send_size(send_size);
+			if (data_size > send_data_size) {
+				func_tag = UP_FUNC_REALSERVER_SEND;
+			}
+			else {
+				protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_send(up_thread_id);
+			#ifdef	DEBUG
+			{	boost::format	fmt( "Thread ID[%d] protocol_module->handle_realserver_send() return: %s" );
+				fmt % boost::this_thread::get_id()
+					% func_tag_to_string( module_event );
+				Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+			}
+			#endif
+
+				func_tag = up_thread_module_event_map[module_event];
+			}
+        }
+		else {
+			if (error_code == boost::asio::error::try_again) {
+				upthread_status = UPTHREAD_LOCK;
+               	func_tag = UP_FUNC_REALSERVER_SEND;
+				basic_tcp_socket<boost::asio::ip::tcp>::async_rw_handler_t	handler = 
+					boost::bind(	&tcp_session::up_thread_realserver_async_write_some_handler,
+																	this,
+																	boost::asio::placeholders::error,
+																	boost::asio::placeholders::bytes_transferred );
+				if( realserver_socket )
+					realserver_socket->async_write_some(
+							boost::asio::const_buffers_1(
+							data_buff.data() + send_data_size,
+							data_size - send_data_size
+							),
+						handler
+						);
+				else
+					func_tag = UP_FUNC_REALSERVER_DISCONNECT_EVENT;
+			}
+			else{
+				func_tag = UP_FUNC_REALSERVER_DISCONNECT;
+				boost::format	fmt( "Thread ID[%d] realserver send error: %s" );
+				fmt % boost::this_thread::get_id() % error_code.message();
+				Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+			}
         }
 
         up_thread_next_call_function = up_thread_function_array[func_tag];
@@ -1707,216 +1582,299 @@ void tcp_session::up_thread_realserver_send(const TCP_PROCESS_TYPE_TAG process_t
 //! @param[in]        process_type is process type
 void tcp_session::up_thread_realserver_get_destination_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN up_thread_realserver_get_destination_event");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN up_thread_realserver_get_destination_event");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        endpoint server_endpoint;
+	protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_select(up_thread_id, connecting_endpoint );
+	#ifdef	DEBUG
+	{
+		boost::format	fmt( "Thread ID[%d] protocol_module->handle_realserver_select() return: %s" );
+		fmt % boost::this_thread::get_id()
+			% func_tag_to_string( module_event );
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+	}
+	#endif
+	if( unlikely( module_event == protocol_module_base::SORRYSERVER_SELECT) ){ //sorry_server mode change when realserver select fail.
+		tcp_thread_message*	down_msg = new tcp_thread_message();
+		down_msg->message = down_que_function_map[DOWN_FUNC_SORRY_ENABLE_EVENT];
+		#ifdef	DEBUG
+		down_msg->func_tag_name = func_tag_to_string( DOWN_FUNC_SORRY_ENABLE_EVENT );
+		{
+			boost::format   fmt( "Thread ID[%d] down_queue.push : %s" );
+			fmt % boost::this_thread::get_id() % func_tag_to_string( DOWN_FUNC_SORRY_ENABLE_EVENT );
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+		#endif
+		while( !down_thread_message_que.push( down_msg ) ){}
+		downthread_status_cond.notify_one();
+	}
 
-        protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_select(up_thread_id, server_endpoint);
-        up_thread_data_dest_side.set_endpoint(server_endpoint);
+	up_thread_next_call_function = up_thread_function_array[up_thread_module_event_map[module_event]];
 
-        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
-        up_thread_function_pair func = up_thread_function_array[func_type->second];
-        up_thread_next_call_function = func;
-
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT up_thread_realserver_get_destination_event");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT up_thread_realserver_get_destination_event");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 }
+void tcp_session::up_thread_realserver_connect_handler(
+                const boost::system::error_code &error)
+{
+	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
+		boost::format	fmt( "Thread ID[%d] FUNC IN up_thread_realserver_connect_handler");
+		fmt % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__);
+	}
+
+	
+	tcp_thread_message* msg = new tcp_thread_message();
+	if( !error ){
+		up_thread_function_pair func = up_thread_function_array[UP_FUNC_REALSERVER_CONNECT_EVENT];
+		msg->message = func.second;
+		#ifdef	DEBUG
+		msg->func_tag_name = func_tag_to_string( UP_FUNC_REALSERVER_CONNECT_EVENT );
+		{
+			boost::format   fmt( "Thread ID[%d] up_queue.push : %s" );
+			fmt % boost::this_thread::get_id() % func_tag_to_string( UP_FUNC_REALSERVER_CONNECT_EVENT );
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+		#endif
+	}
+	else{
+		up_thread_function_pair func = up_thread_function_array[UP_FUNC_REALSERVER_CONNECT_FAIL_EVENT];
+		msg->message = func.second;
+		#ifdef	DEBUG
+		msg->func_tag_name = func_tag_to_string( UP_FUNC_REALSERVER_CONNECT_FAIL_EVENT );
+		{
+			boost::format   fmt( "Thread ID[%d] up_queue.push : %s" );
+			fmt % boost::this_thread::get_id() % func_tag_to_string( UP_FUNC_REALSERVER_CONNECT_FAIL_EVENT );
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+		#endif
+		boost::format	fmt( "Thread ID[%d] connection error : %s" );
+		fmt % boost::this_thread::get_id() % error.message();
+		Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+	while( !up_thread_message_que.push(msg) ){}
+	upthread_status_cond.notify_one();
+
+	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION ))){
+		boost::format	fmt( "Thread ID[%d] FUNC OUT up_thread_realserver_connect_handler");
+		fmt % boost::this_thread::get_id() ;
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__);
+	}
+}
+
 //! up thread connect realserver
 //! @param[in]        process_type is process type
 void tcp_session::up_thread_realserver_connect(const TCP_PROCESS_TYPE_TAG process_type)
 {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN up_thread_realserver_connect");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN up_thread_realserver_connect");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        endpoint server_endpoint = up_thread_data_dest_side.get_endpoint();
-        std::map<endpoint, tcp_socket_ptr>::iterator get_socket = up_thread_send_realserver_socket_map.find(server_endpoint);
-        std::map<endpoint, tcp_socket_ptr>::iterator map_end = up_thread_send_realserver_socket_map.end();
-        UP_THREAD_FUNC_TYPE_TAG func_tag;
-        if (get_socket != map_end) {
-                func_tag = UP_FUNC_REALSERVER_CONNECT_EVENT;
-        } else {
-                tcp_socket_ptr new_socket(new tcp_socket(io, socket_opt_info));
-                boost::system::error_code ec;
-#ifdef IP_TRANSPARENT
-                realserver_element::REALSERVER_FWDMODE_TAG fwdmode = realserver_element::FWD_NONE;
-                std::vector<realserver_element> real_vec = parent_service.get_element().realserver_vector;
-                for (std::vector<realserver_element>::iterator rs_itr = real_vec.begin();
-                        rs_itr != real_vec.end(); ++rs_itr) {
-                        if (rs_itr->tcp_endpoint == server_endpoint) {
-                                fwdmode = rs_itr->fwdmode;
-                                break;
-                        }
-                }
-                if (fwdmode == realserver_element::FWD_TPROXY && (
-                        ( server_endpoint.address().is_v4() && client_endpoint.address().is_v4() ) ||
-                        ( server_endpoint.address().is_v6() && client_endpoint.address().is_v6() ) ) ) {
-                        int ip_socket_level;
-                        if (client_endpoint.address().is_v4()) {
-                                ip_socket_level = SOL_IP;
-                                new_socket->get_socket().open(boost::asio::ip::tcp::v4(), ec);
-                        } else {
-                                ip_socket_level = SOL_IPV6;
-                                new_socket->get_socket().open(boost::asio::ip::tcp::v6(), ec);
-                        }
-                        if (unlikely(ec)) {
-                                boost::format formatter("Thread ID[%d] realserver socket open error: %s");
-                                formatter % boost::this_thread::get_id() % ec.message();
-                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, formatter.str(), __FILE__, __LINE__);
-                                goto out_tproxy;
-                        }
-                        // set IP_TRANSPARENT
-                        int on = 1;
-                        int err = ::setsockopt(new_socket->get_socket().native(),
-                                ip_socket_level, IP_TRANSPARENT, &on, sizeof(on));
-                        if (unlikely(err)) {
-                                ec = boost::system::error_code(errno, boost::asio::error::get_system_category());
-                                boost::format formatter("Thread ID[%d] realserver socket option(IP_TRANSPARENT) set failed: %s");
-                                formatter % boost::this_thread::get_id() % ec.message();
-                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, formatter.str(), __FILE__, __LINE__);
-                                goto out_tproxy;
-                        }
-                        // bind client address
-                        new_socket->get_socket().bind(client_endpoint, ec);
-                        if (unlikely(ec)) {
-                                if (ec == boost::asio::error::address_in_use) {
-                                        boost::format formatter("Thread ID[%d] bind client address error(%s). retry by other port.");
-                                        formatter % boost::this_thread::get_id() % ec.message();
-                                        Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, /*XXX*/999, formatter.str(), __FILE__, __LINE__);
+	boost::system::error_code	error_code;
 
-                                        unsigned short client_port = client_endpoint.port();
-                                        client_endpoint.port(0);
-                                        new_socket->get_socket().bind(client_endpoint, ec);
-                                        client_endpoint.port(client_port);
-                                }
-                                if (unlikely(ec)) {
-                                        boost::format formatter("Thread ID[%d] bind client address to realserver socket failed: %s");
-                                        formatter % boost::this_thread::get_id() % ec.message();
-                                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, formatter.str(), __FILE__, __LINE__);
-                                }
-                        }
-                }
-out_tproxy:
-#endif
-                bool bres = new_socket->connect(server_endpoint, ec);
-                if (likely(bres)) {
-                        {
-                                rd_scoped_lock scoped_lock(access_log_flag_mutex);
-                                if (access_log_flag && access_logger != NULL) {
-                                        endpoint server_side_endpoint =
-                                                new_socket->get_socket().local_endpoint(ec);
-                                        if (!ec) {
-                                                std::string reserv_msg("");
-                                                access_logger->putLog(
-                                                        endpoint_to_string(virtualservice_endpoint),
-                                                        endpoint_to_string(client_endpoint),
-                                                        endpoint_to_string(server_side_endpoint),
-                                                        endpoint_to_string(server_endpoint),
-                                                        reserv_msg);
-                                        }
-                                }
-                        }
-                        parent_service.connection_active(server_endpoint);
-                        if (unlikely(!new_socket->set_non_blocking_mode(ec))) {
-                                // socket set non-blocking mode error
-                                std::stringstream buf;
-                                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                                buf << "set non blocking socket error: " << ec.message();
-                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, 34, buf.str(), __FILE__, __LINE__);
-                                up_thread_exit(process_type);
-                                return;
-                        }
+	if( realserver_socket && realserver_socket->is_open() ){
+		up_thread_data_dest_side.initialize();
+	        boost::array<char, MAX_BUFFER_SIZE>& data_buff = up_thread_data_dest_side.get_data();
+        	size_t data_size = 0;
+	        protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_connect(up_thread_id, data_buff, data_size);
+        	#ifdef  DEBUG
+        	{
+		        boost::format   fmt( "Thread ID[%d] protocol_module->handle_realserver_connect() return: %s" );
+		        fmt % boost::this_thread::get_id()
+		        % func_tag_to_string( module_event );
+		        Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+	        }
+        	#endif
+        	up_thread_data_dest_side.set_size(data_size);
+	        // next call function setup.
+        	up_thread_next_call_function = up_thread_function_array[ up_thread_module_event_map[module_event] ];
+	        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+	                boost::format formatter("Thread ID[%d] FUNC OUT up_thread_realserver_connect_event: NEXT_FUNC[%s]");
+        	        formatter % boost::this_thread::get_id() % func_tag_to_string( up_thread_module_event_map[module_event] );
+                	Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+		}
+		return ;
+	}
 
-                        //set realserver_socket options(receive buffer size)
-                        if (downstream_buffer_size > 0) {
-                                boost::asio::socket_base::receive_buffer_size opt1(downstream_buffer_size);
-                                new_socket->get_socket().set_option(opt1, ec);
-                                if (unlikely(ec)) {
-                                        // socket set non-blocking mode error
-                                        std::stringstream buf;
-                                        buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                                        buf << "realserver socket receive buffer size error: " << ec.message();
-                                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, 35, buf.str(), __FILE__, __LINE__);
-                                        up_thread_exit(process_type);
-                                        return;
-                                }
-                        }
-                        //set realserver_socket options(send buffer size)
-                        if (upstream_buffer_size > 0) {
-                                boost::asio::socket_base::send_buffer_size opt2(upstream_buffer_size);
-                                new_socket->get_socket().set_option(opt2, ec);
-                                if (unlikely(ec)) {
-                                        // socket set non-blocking mode error
-                                        std::stringstream buf;
-                                        buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                                        buf << "realserver socket send buffer size error: " << ec.message();
-                                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, 36, buf.str(), __FILE__, __LINE__);
-                                        up_thread_exit(process_type);
-                                        return;
-                                }
-                        }
+	connecting_socket.reset( new tcp_socket( parent_dispatcher, socket_opt_info ) );
 
-                        socket_element push_element;
-                        push_element.first = server_endpoint;
-                        push_element.second = new_socket;
-                        up_thread_send_realserver_socket_map.insert(push_element);
-                        down_thread_connect_socket_list.push_back(push_element);
-                        func_tag = UP_FUNC_REALSERVER_CONNECT_EVENT;
-                } else {
-                        func_tag = UP_FUNC_REALSERVER_CONNECT_FAIL_EVENT;
-                        //connect socket error
-                        std::stringstream buf;
-                        buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                        buf << "connect socket error: " << ec.message();
-                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, 37, buf.str(), __FILE__, __LINE__);
-                }
-        }
-        up_thread_function_pair func = up_thread_function_array[func_tag];
-        boost::mutex::scoped_lock lock(realserver_connect_mutex);
-        realserver_connect_status = true;
-        realserver_connect_cond.notify_one();
-        up_thread_next_call_function = func;
+	upthread_status = UPTHREAD_LOCK;
+	up_thread_next_call_function = up_thread_function_array[UP_FUNC_REALSERVER_CONNECT_EVENT];
 
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT up_thread_realserver_connect: NEXT_FUNC[%s]");
-                formatter % boost::this_thread::get_id() % func_tag_to_string(func_tag);
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	// down thread_pause on
+	tcp_thread_message* msg = new tcp_thread_message();
+	msg->message = down_que_function_map[DOWN_FUNC_PAUSE_ON_EVENT];
+
+	#ifdef	DEBUG
+	msg->func_tag_name = func_tag_to_string( DOWN_FUNC_PAUSE_ON_EVENT );
+	{
+		boost::format   fmt( "Thread ID[%d] down_queue.push : %s" );
+		fmt % boost::this_thread::get_id() % func_tag_to_string( DOWN_FUNC_PAUSE_ON_EVENT );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+	#endif
+	while( !down_thread_message_que.push( msg ) ){}
+	downthread_status_cond.notify_one();
+
+	connecting_socket->open( connecting_endpoint );
+	connecting_socket->setoption( error_code );
+
+	#ifdef IP_TRANSPARENT
+	if( parent_service.is_realserver_transparent( connecting_endpoint ) ){
+		if( ( connecting_endpoint.address().is_v4() && client_endpoint.address().is_v4() ) ||
+			( connecting_endpoint.address().is_v6() && client_endpoint.address().is_v6() ) ){
+			connecting_socket->set_transparent( client_endpoint, error_code );
+			if( error_code ){
+				boost::format	fmt( "Thread ID[%d] realserver[%s:%d] socket option(IP_TRANSPARENT) set failed:" );
+				fmt % boost::this_thread::get_id()
+					% connecting_endpoint.address().to_string()
+					% connecting_endpoint.port();
+				Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__);
+			}
+		}
+	}
+	#endif
+
+	connecting_socket->async_connect(
+		connecting_endpoint,
+		boost::bind(
+			&tcp_session::up_thread_realserver_connect_handler,
+			this,
+			boost::asio::placeholders::error
+		)
+	);
+
+	if(unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
+		boost::format formatter("Thread ID[%d] FUNC OUT up_thread_realserver_connect");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 }
 //! up thread raise module event of handle_realserver_connect
 //! @param[in]        process_type is process type
-void tcp_session::up_thread_realserver_connect_event(const TCP_PROCESS_TYPE_TAG process_type)
-{
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN up_thread_realserver_connect_event");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+void tcp_session::up_thread_realserver_connect_event(const TCP_PROCESS_TYPE_TAG process_type){
 
-        endpoint server_endpoint = up_thread_data_dest_side.get_endpoint();
-        up_thread_data_dest_side.initialize();
-        boost::array<char, MAX_BUFFER_SIZE>& data_buff = up_thread_data_dest_side.get_data();
-        size_t data_size = 0;
-        protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_connect(up_thread_id, data_buff, data_size);
-        up_thread_data_dest_side.set_endpoint(server_endpoint);
-        up_thread_data_dest_side.set_size(data_size);
-        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
-        up_thread_next_call_function = up_thread_function_array[func_type->second];
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN up_thread_realserver_connect_event");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT up_thread_realserver_connect_event: NEXT_FUNC[%s]");
-                formatter % boost::this_thread::get_id() % func_tag_to_string(func_type->second);
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	boost::system::error_code	error_code;
+
+	if( unlikely( error_code ) ){
+		boost::format	fmt( "Thread ID[%d] realserver socket option error %s" );
+		fmt % boost::this_thread::get_id() % error_code.message();
+		Logger::putLogError( LOG_CAT_L7VSD_SESSION, 99, fmt.str(), __FILE__, __LINE__ );
+	}
+
+	//set realserver socket receive buffer size
+	if( likely( downstream_buffer_size > 0 ) ){
+		boost::asio::socket_base::receive_buffer_size	buf_size( downstream_buffer_size );
+		connecting_socket->get_socket().set_option( buf_size, error_code );
+		if( unlikely( error_code ) ){
+			boost::format	formatter( "Thread ID[%d] realserver socket receive buffer size error: %s" );
+			formatter % boost::this_thread::get_id % error_code.message();
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 35, formatter.str(), __FILE__, __LINE__ );
+
+			up_thread_next_call_function = up_thread_function_array[UP_FUNC_EXIT];
+			upthread_status = UPTHREAD_ACTIVE;
+			return;
+		}
+	}
+
+	//set realserver socket send buffer size
+	if( likely( upstream_buffer_size > 0 ) ){
+		boost::asio::socket_base::send_buffer_size	buf_size( upstream_buffer_size );
+		connecting_socket->get_socket().set_option( buf_size, error_code );
+		if( unlikely( error_code ) ){
+			boost::format	formatter( "Thread ID[%d] realserver socket send buffer size error: %s" );
+			formatter % boost::this_thread::get_id() % error_code.message();
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 35, formatter.str(), __FILE__, __LINE__ );
+
+			up_thread_next_call_function = up_thread_function_array[UP_FUNC_EXIT];
+			upthread_status = UPTHREAD_ACTIVE;
+			return;
+		}
+	}
+
+	//realserver socket alive.
+	realserver_socket_mutex.lock();
+	realserver_socket.swap( connecting_socket );
+	realserver_socket_mutex.unlock();
+	realserver_endpoint = connecting_endpoint;
+
+	//set virtualservice connection active
+	parent_service.connection_active( realserver_endpoint );
+
+	// out put access log
+	rd_scoped_lock scoped_lock(access_log_flag_mutex);
+        if (access_log_flag && access_logger != NULL) {
+			endpoint server_side_endpoint =
+				realserver_socket->get_socket().local_endpoint(error_code);
+          		std::string reserv_msg("");
+                        access_logger->putLog(
+                        	endpoint_to_string(virtualservice_endpoint),
+                                endpoint_to_string(client_endpoint),
+                                endpoint_to_string(server_side_endpoint),
+                               	endpoint_to_string(realserver_endpoint),
+                                reserv_msg);
+    	}
+
+	// up thread pause off
+	upthread_status = UPTHREAD_ACTIVE;
+
+	// down thread pause off
+	tcp_thread_message*	msg = new tcp_thread_message();
+	msg->message = down_que_function_map[DOWN_FUNC_PAUSE_OFF_EVENT];
+
+	#ifdef	DEBUG
+	msg->func_tag_name = func_tag_to_string( DOWN_FUNC_PAUSE_OFF_EVENT );
+	{
+		boost::format   fmt( "Thread ID[%d] down_queue.push : %s" );
+		fmt % boost::this_thread::get_id() % func_tag_to_string( DOWN_FUNC_PAUSE_OFF_EVENT );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+	#endif
+	while( !down_thread_message_que.push( msg ) ){}
+	downthread_status_cond.notify_one();
+
+	// dist_side data initialize
+	up_thread_data_dest_side.initialize();
+	boost::array<char, MAX_BUFFER_SIZE>& data_buff = up_thread_data_dest_side.get_data();
+	size_t data_size = 0;
+	protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_connect(up_thread_id, data_buff, data_size);
+	#ifdef	DEBUG
+	{
+	boost::format	fmt( "Thread ID[%d] protocol_module->handle_realserver_connect() return: %s" );
+	fmt % boost::this_thread::get_id()
+	% func_tag_to_string( module_event );
+	Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+	}
+	#endif
+	up_thread_data_dest_side.set_endpoint( realserver_endpoint );
+	up_thread_data_dest_side.set_size(data_size);
+
+	// connecting values reset.
+	connecting_socket.reset();
+	connecting_endpoint = boost::asio::ip::tcp::endpoint();
+
+	// next call function setup.
+	up_thread_next_call_function = up_thread_function_array[ up_thread_module_event_map[module_event] ];
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT up_thread_realserver_connect_event: NEXT_FUNC[%s]");
+		formatter % boost::this_thread::get_id() % func_tag_to_string( up_thread_module_event_map[module_event] );
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 }
 //! up thread raise module event of handle_realserver_connection_fail
 //! @param[in]        process_type is process type
@@ -1928,137 +1886,192 @@ void tcp_session::up_thread_realserver_connection_fail_event(const TCP_PROCESS_T
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
         }
 
-        endpoint server_endpoint = up_thread_data_dest_side.get_endpoint();
-        protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_connection_fail(up_thread_id, server_endpoint);
-        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
-        up_thread_next_call_function = up_thread_function_array[func_type->second];
+		// connecting socket clear
+		connecting_socket.reset();
+		connecting_endpoint = boost::asio::ip::tcp::endpoint();
+
+		// module event call
+        protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_connection_fail(up_thread_id, connecting_endpoint);
+		#ifdef	DEBUG
+		{
+			boost::format	fmt( "Thread ID[%d] protocol_module->handle_realserver_connection_fail() return: %s" );
+			fmt % boost::this_thread::get_id()
+			% func_tag_to_string( module_event );
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+		}
+		#endif
+
+        up_thread_next_call_function = up_thread_function_array[ up_thread_module_event_map[module_event] ];
+
+
+		// session pause off
+		upthread_status = UPTHREAD_ACTIVE;
+
+		tcp_thread_message*	down_msg = new tcp_thread_message();
+		down_msg->message = down_que_function_map[DOWN_FUNC_PAUSE_OFF_EVENT];
+
+		#ifdef	DEBUG
+		down_msg->func_tag_name = func_tag_to_string( DOWN_FUNC_PAUSE_OFF_EVENT );
+		{
+			boost::format   fmt( "Thread ID[%d] down_queue.push : %s" );
+			fmt % boost::this_thread::get_id() % func_tag_to_string( DOWN_FUNC_PAUSE_OFF_EVENT );
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+		#endif
+		while( !down_thread_message_que.push( down_msg ) ){}
+		downthread_status_cond.notify_one();
+
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
                 boost::format formatter("Thread ID[%d] FUNC OUT up_thread_realserver_connection_fail_event: NEXT_FUNC[%s]");
-                formatter % boost::this_thread::get_id() % func_tag_to_string(func_type->second);
+                formatter % boost::this_thread::get_id() % func_tag_to_string( up_thread_module_event_map[module_event] );
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+		}
+
 }
 //! up thread close realserver socket and raise realserver disconnect event message for up and down thread
 //! @param[in]        process_type is process type
 void tcp_session::up_thread_realserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type)
 {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN up_thread_realserver_disconnect");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN up_thread_realserver_disconnect");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        endpoint server_endpoint = up_thread_data_dest_side.get_endpoint();
-        std::map<endpoint, tcp_socket_ptr>::iterator close_socket = up_thread_send_realserver_socket_map.find(server_endpoint);
-        boost::system::error_code ec;
-        bool bres = close_socket->second->close(ec);
-        if (bres) {
-                parent_service.connection_inactive(server_endpoint);
-                tcp_thread_message *up_msg = new tcp_thread_message;
-                tcp_thread_message *down_msg = new tcp_thread_message;
-                up_thread_function_pair up_func = up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT_EVENT];
-                up_msg->endpoint_info = server_endpoint;
-                up_msg->message = up_func.second;
-                std::map<DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func>::iterator down_func = up_thread_message_down_thread_function_map.find(DOWN_FUNC_REALSERVER_DISCONNECT_EVENT);
-                down_msg->endpoint_info = server_endpoint;
-                down_msg->message = down_func->second;
-                while (!up_thread_message_que.push(up_msg)) {}
-                while (!down_thread_message_que.push(down_msg)) {}
-        }
+	realserver_socket_mutex.lock();
+	if( realserver_socket ){
+		boost::system::error_code error_code;
+		if( realserver_socket->is_open() ){
+			realserver_socket->close(error_code);
+			parent_service.connection_inactive(realserver_endpoint);
+			if( unlikely( error_code ) ){
+				boost::format	fmt( "Thread ID[%d] realserver_socket close error: %s" );
+				fmt % boost::this_thread::get_id() % error_code.message();
+				Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+			}
+		}
+	}
+	realserver_socket_mutex.unlock();
 
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT up_thread_realserver_disconnect");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	tcp_thread_message *down_msg = new tcp_thread_message;
+
+	down_msg->endpoint_info = realserver_endpoint;
+	down_msg->message = down_que_function_map[DOWN_FUNC_REALSERVER_DISCONNECT_EVENT];
+	#ifdef	DEBUG
+	down_msg->func_tag_name = func_tag_to_string( DOWN_FUNC_REALSERVER_DISCONNECT_EVENT );
+	{
+		boost::format   fmt( "Thread ID[%d] down_queue.push : %s" );
+		fmt % boost::this_thread::get_id() % func_tag_to_string( DOWN_FUNC_REALSERVER_DISCONNECT_EVENT );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+	#endif
+	while (!down_thread_message_que.push(down_msg)) {}
+	downthread_status_cond.notify_one();
+
+	up_thread_next_call_function = up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT_EVENT];
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT up_thread_realserver_disconnect");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 }
 //! up thread raise module event of handle_client_disconnect
 //! @param[in]        process_type is process type
 void tcp_session::up_thread_realserver_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN up_thread_realserver_disconnect_event");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN up_thread_realserver_disconnect_event");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        protocol_module_base::EVENT_TAG module_event;
-        endpoint server_endpoint = up_thread_message_data.get_endpoint();
-        {
-                rw_scoped_lock scope_lock(module_function_realserver_disconnect_mutex);
-                module_event = protocol_module->handle_realserver_disconnect(up_thread_id, server_endpoint);
-        }
-        up_thread_send_realserver_socket_map.erase(server_endpoint);
+	protocol_module_base::EVENT_TAG module_event;
+	module_event = protocol_module->handle_realserver_disconnect(up_thread_id, realserver_endpoint);
+	#ifdef	DEBUG
+	boost::format	fmt( "Thread ID[%d] protocol_module->handle_realserver_disconnect() return: %s" );
+	fmt % boost::this_thread::get_id()
+		% func_tag_to_string( module_event );
+	Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+	#endif
 
-        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
-        up_thread_next_call_function = up_thread_function_array[func_type->second];
+	parent_service.connection_inactive(realserver_endpoint);
 
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT up_thread_realserver_disconnect_event: NEXT_FUNC[%s]");
-                formatter % boost::this_thread::get_id() % func_tag_to_string(func_type->second);
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	up_thread_next_call_function = up_thread_function_array[up_thread_module_event_map[module_event]];
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT up_thread_realserver_disconnect_event");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 }
-
-//! up thread close all realserver socket and raise module event of handle_realserver_disconnect
-//! @param[in]        process_type is process type
-void tcp_session::up_thread_all_realserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type)
+//! check and up thread close client socket and raise client disconnect event message for up thread
+void tcp_session::up_thread_realserver_check(const TCP_PROCESS_TYPE_TAG process_type)
 {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN up_thread_all_realserver_disconnect");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN up_thread_realserver_check");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        std::map<endpoint, tcp_socket_ptr>::iterator close_socket = up_thread_send_realserver_socket_map.begin();
-        std::map<endpoint, tcp_socket_ptr>::iterator list_end = up_thread_send_realserver_socket_map.end();
+	boost::asio::ip::tcp::endpoint	check_endpoint = up_thread_message_data.get_endpoint();
 
-        protocol_module_base::EVENT_TAG module_event;
-        bool realserver_found = false;
-        endpoint server_endpoint;
-        while (close_socket != list_end) {
-                realserver_found = true;
-                boost::system::error_code ec;
-                bool bres = close_socket->second->close(ec);
-                server_endpoint = close_socket->first;
-                if (bres) {
-                        parent_service.connection_inactive(server_endpoint);
-                }
-                {
-                        rw_scoped_lock scope_lock(module_function_realserver_disconnect_mutex);
-                        module_event = protocol_module->handle_realserver_disconnect(up_thread_id, server_endpoint);
-                }
-                close_socket++;
-        }
-        if (!realserver_found) {
-                // realserver not found
-                //----Debug log----------------------------------------------------------------------
-                if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                        std::stringstream buf;
-                        buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                        buf << "close realserver not fond";
-                        Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 38, buf.str(), __FILE__, __LINE__);
-                }
-                //----Debug log----------------------------------------------------------------------
-                rw_scoped_lock scope_lock(module_function_realserver_disconnect_mutex);
-                module_event = protocol_module->handle_realserver_disconnect(up_thread_id, endpoint());
-        }
-        up_thread_send_realserver_socket_map.clear();
-        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
-        up_thread_next_call_function = up_thread_function_array[func_type->second];
+	if( check_endpoint != realserver_endpoint && check_endpoint != connecting_endpoint ) return;
 
-        //allrealserver_disconnect.
-        boost::mutex::scoped_lock lock(realserver_connect_mutex);
-        realserver_connect_status = true;
-        realserver_connect_cond.notify_one();
+	realserver_socket_mutex.lock();
+	if( realserver_socket ){
+		boost::system::error_code	error_code;
+		if( realserver_socket->is_open() ){
+			realserver_socket->close( error_code );
+			parent_service.connection_inactive(realserver_endpoint);
+		}
+		if( unlikely( error_code ) ){
+			boost::format	fmt( "Thread ID[%d] realserver socket close fail: %s" );
+			fmt % boost::this_thread::get_id() % error_code.message();
+			Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+	}
+	realserver_socket_mutex.unlock();
 
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT up_thread_all_realserver_disconnect: NEXT_FUNC[%s]");
-                formatter % boost::this_thread::get_id() % func_tag_to_string(func_type->second);
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if( connecting_socket ){
+		boost::system::error_code	error_code;
+		if( connecting_socket->is_open() ) connecting_socket->close( error_code );
+		if( unlikely( error_code ) ){
+			boost::format	fmt( "Thread ID[%d] connecting socket close fail: %s" );
+			fmt % boost::this_thread::get_id() % error_code.message();
+			Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+	}
+	//
+
+	// up thread next call function set REALSERVER DISCONNECT
+	up_thread_next_call_function = up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT_EVENT];
+
+	// up thread pause off
+	upthread_status  = UPTHREAD_ACTIVE;
+
+	// down thread pause off
+	tcp_thread_message* down_msg = new tcp_thread_message;
+	down_msg->message = down_que_function_map[DOWN_FUNC_PAUSE_OFF_EVENT];
+	#ifdef	DEBUG
+	down_msg->func_tag_name = func_tag_to_string( DOWN_FUNC_PAUSE_OFF_EVENT );
+	{
+		boost::format   fmt( "Thread ID[%d] down_queue.push : %s" );
+		fmt % boost::this_thread::get_id() % func_tag_to_string( DOWN_FUNC_PAUSE_OFF_EVENT );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+	#endif
+	while( !down_thread_message_que.push( down_msg ) ){}
+
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT up_thread_realserver_check");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 }
+
 //! up thread send sorryserver and raise module event of handle_sorryserver_send
 //! @param[in]        process_type is process type
 void tcp_session::up_thread_sorryserver_send(const TCP_PROCESS_TYPE_TAG process_type)
@@ -2077,7 +2090,7 @@ void tcp_session::up_thread_sorryserver_send(const TCP_PROCESS_TYPE_TAG process_
         std::size_t send_size;
         UP_THREAD_FUNC_TYPE_TAG func_tag;
 
-        send_size = sorryserver_socket.second->write_some(boost::asio::buffer(data_buff.data() + send_data_size, data_size - send_data_size), ec);
+        send_size = sorryserver_socket->write_some(boost::asio::const_buffers_1(data_buff.data() + send_data_size, data_size - send_data_size), ec);
         if (!ec) {
                 send_data_size += send_size;
                 up_thread_data_dest_side.set_send_size(send_data_size);
@@ -2093,6 +2106,13 @@ void tcp_session::up_thread_sorryserver_send(const TCP_PROCESS_TYPE_TAG process_
                         func_tag = UP_FUNC_SORRYSERVER_SEND;
                 } else {
                         protocol_module_base::EVENT_TAG module_event = protocol_module->handle_sorryserver_send(up_thread_id);
+#ifdef	DEBUG
+{	boost::format	fmt( "Thread ID[%d] protocol_module->handle_sorryserver_send() return: %s" );
+	fmt % boost::this_thread::get_id()
+		% func_tag_to_string( module_event );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+}
+#endif
                         std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
                         if (unlikely(func_type == up_thread_module_event_map.end())) {
                                 //Error unknown protocol_module_base::EVENT_TAG return
@@ -2107,51 +2127,18 @@ void tcp_session::up_thread_sorryserver_send(const TCP_PROCESS_TYPE_TAG process_
                 }
         } else {
                 if (ec == boost::asio::error::try_again) {
-                        // epoll
-                        struct epoll_event event;
-                        event.data.fd = sorryserver_socket.second->get_socket().native();
-                        // epoll add
-                        if (!up_sorryserver_epollfd_registered) {
-                                if (is_epoll_edge_trigger) {
-                                        event.events = EPOLLET | EPOLLOUT | EPOLLHUP;
-                                } else {
-                                        event.events = EPOLLOUT | EPOLLHUP;
-                                }
-                                if (epoll_ctl(up_sorryserver_epollfd, EPOLL_CTL_ADD, event.data.fd, &event) < 0) {
-                                        std::stringstream buf;
-                                        buf << "up_thread_sorryserver_send: epoll_ctl EPOLL_CTL_ADD error: ";
-                                        buf << strerror(errno);
-                                        Logger::putLogWarn(LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__);
-                                        return;
-                                }
-                                up_sorryserver_epollfd_registered = true;
-                        }
-                        // epoll wait
-                        int ret_fds = epoll_wait(up_sorryserver_epollfd, up_sorryserver_events, EVENT_NUM, epoll_timeout);
-                        if (ret_fds <= 0) {
-                                if (ret_fds < 0) {
-                                        std::stringstream buf;
-                                        buf << "up_thread_sorryserver_send: epoll_wait error: ";
-                                        buf << strerror(errno);
-                                        Logger::putLogWarn(LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__);
-                                        up_thread_next_call_function = up_thread_function_array[UP_FUNC_SORRYSERVER_DISCONNECT];
-                                }
-                                return;
-                        }
-                
-                        for (int i = 0; i < ret_fds; ++i) {
-                                if (up_sorryserver_events[i].data.fd == event.data.fd) {
-                                        if (up_sorryserver_events[i].events & EPOLLOUT) {
-                                                break;
-                                        } else if (up_sorryserver_events[i].events & EPOLLHUP) {
-                                                up_thread_next_call_function = up_thread_function_array[UP_FUNC_SORRYSERVER_DISCONNECT];
-                                                return;
-                                        }
-                                }
-                        }
-                        func_tag = UP_FUNC_SORRYSERVER_SEND;
-                } else {
-                        func_tag = UP_FUNC_SORRYSERVER_DISCONNECT;
+					upthread_status = UPTHREAD_LOCK;
+					func_tag = UP_FUNC_SORRYSERVER_SEND;
+					basic_tcp_socket<boost::asio::ip::tcp>::async_rw_handler_t	handler = 
+						boost::bind(&tcp_session::up_thread_sorryserver_async_write_some_handler,
+									this,
+									boost::asio::placeholders::error,
+									boost::asio::placeholders::bytes_transferred );
+					sorryserver_socket->async_write_some(
+					boost::asio::const_buffers_1(data_buff.data() + send_data_size, data_size - send_data_size),handler );
+                }
+				else {
+					func_tag = UP_FUNC_SORRYSERVER_DISCONNECT;
                 }
         }
 
@@ -2167,264 +2154,376 @@ void tcp_session::up_thread_sorryserver_send(const TCP_PROCESS_TYPE_TAG process_
 //! @param[in]        process_type is process type
 void tcp_session::up_thread_sorryserver_get_destination_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN up_thread_sorryserver_get_destination_event");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN up_thread_sorryserver_get_destination_event");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        endpoint server_endpoint;
-        virtualservice_element &vs_element = parent_service.get_element();
-        server_endpoint = vs_element.sorry_endpoint;
-        protocol_module_base::EVENT_TAG module_event = protocol_module->handle_sorryserver_select(up_thread_id, server_endpoint);
-        up_thread_data_dest_side.set_endpoint(server_endpoint);
+	virtualservice_element &vs_element = parent_service.get_element();
+	sorryserver_endpoint = vs_element.sorry_endpoint;
+	protocol_module_base::EVENT_TAG module_event = protocol_module->handle_sorryserver_select(up_thread_id, sorryserver_endpoint );
+	#ifdef	DEBUG
+	{
+		boost::format	fmt( "Thread ID[%d] protocol_module->handle_sorryserver_select() return: %s" );
+		fmt % boost::this_thread::get_id()
+			% func_tag_to_string( module_event );
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+	}
+	#endif
+	up_thread_next_call_function = up_thread_function_array[up_thread_module_event_map[module_event]];
 
-        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
-        up_thread_next_call_function = up_thread_function_array[func_type->second];
-
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT up_thread_sorryserver_get_destination_event: NEXT_FUNC[%s]");
-                formatter % boost::this_thread::get_id() % func_tag_to_string(func_type->second);
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT up_thread_sorryserver_get_destination_event");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 }
 //! up thread connect sorryserver
 //! @param[in]        process_type is process type
 void tcp_session::up_thread_sorryserver_connect(const TCP_PROCESS_TYPE_TAG process_type)
 {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN up_thread_sorryserver_connect");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN up_thread_sorryserver_connect");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        endpoint sorry_endpoint = up_thread_data_dest_side.get_endpoint();
-        UP_THREAD_FUNC_TYPE_TAG func_tag;
-        boost::system::error_code ec;
-        if (sorryserver_socket.second->get_socket().lowest_layer().is_open()) {
-                func_tag = UP_FUNC_SORRYSERVER_CONNECT_EVENT;
-        } else {
-#ifdef IP_TRANSPARENT
-                if (parent_service.get_element().sorry_fwdmode == virtualservice_element::FWD_TPROXY && (
-                        ( sorry_endpoint.address().is_v4() && client_endpoint.address().is_v4() ) ||
-                        ( sorry_endpoint.address().is_v6() && client_endpoint.address().is_v6() ) ) ) {
-                        int ip_socket_level;
-                        if (client_endpoint.address().is_v4()) {
-                                ip_socket_level = SOL_IP;
-                                sorryserver_socket.second->get_socket().open(boost::asio::ip::tcp::v4(), ec);
-                        } else {
-                                ip_socket_level = SOL_IPV6;
-                                sorryserver_socket.second->get_socket().open(boost::asio::ip::tcp::v6(), ec);
-                        }
-                        if (unlikely(ec)) {
-                                boost::format formatter("Thread ID[%d] sorryserver socket open error: %s");
-                                formatter % boost::this_thread::get_id() % ec.message();
-                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, formatter.str(), __FILE__, __LINE__);
-                                goto out_tproxy;
-                        }
-                        // set IP_TRANSPARENT
-                        int on = 1;
-                        int err = ::setsockopt(sorryserver_socket.second->get_socket().native(),
-                                ip_socket_level, IP_TRANSPARENT, &on, sizeof(on));
-                        if (unlikely(err)) {
-                                ec = boost::system::error_code(errno, boost::asio::error::get_system_category());
-                                boost::format formatter("Thread ID[%d] sorryserver socket option(IP_TRANSPARENT) set failed: %s");
-                                formatter % boost::this_thread::get_id() % ec.message();
-                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, formatter.str(), __FILE__, __LINE__);
-                                goto out_tproxy;
-                        }
-                        // bind client address
-                        sorryserver_socket.second->get_socket().bind(client_endpoint, ec);
-                        if (unlikely(ec)) {
-                                if (ec == boost::asio::error::address_in_use) {
-                                        boost::format formatter("Thread ID[%d] bind client address error(%s). retry by other port.");
-                                        formatter % boost::this_thread::get_id() % ec.message();
-                                        Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, /*XXX*/999, formatter.str(), __FILE__, __LINE__);
+	sorryserver_socket.reset( new tcp_socket( parent_dispatcher, socket_opt_info ) );
+	boost::system::error_code	error_code;
 
-                                        unsigned short client_port = client_endpoint.port();
-                                        client_endpoint.port(0);
-                                        sorryserver_socket.second->get_socket().bind(client_endpoint, ec);
-                                        client_endpoint.port(client_port);
-                                }
-                                if (unlikely(ec)) {
-                                        boost::format formatter("Thread ID[%d] bind client address to sorryserver socket failed: %s");
-                                        formatter % boost::this_thread::get_id() % ec.message();
-                                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, /*XXX*/999, formatter.str(), __FILE__, __LINE__);
-                                }
+	// up thread pause on
+	upthread_status = UPTHREAD_LOCK;
+	up_thread_next_call_function = up_thread_function_array[UP_FUNC_SORRYSERVER_CONNECT_EVENT];
+
+	// down thread pause on
+	tcp_thread_message* msg = new tcp_thread_message();
+	msg->message = down_que_function_map[DOWN_FUNC_PAUSE_ON_EVENT];
+	#ifdef	DEBUG
+	msg->func_tag_name = func_tag_to_string( DOWN_FUNC_PAUSE_ON_EVENT );
+	{
+		boost::format   fmt( "Thread ID[%d] down_queue.push : %s" );
+		fmt % boost::this_thread::get_id() % func_tag_to_string( DOWN_FUNC_PAUSE_ON_EVENT );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+	#endif
+	while( !down_thread_message_que.push( msg  ) ){}
+	downthread_status_cond.notify_one();
+
+	sorryserver_socket->open( sorryserver_endpoint );
+	sorryserver_socket->setoption( error_code );
+
+
+        #ifdef IP_TRANSPARENT
+        if( parent_service.get_element().sorry_fwdmode == virtualservice_element::FWD_TPROXY ){
+                if( ( sorryserver_endpoint.address().is_v4() && client_endpoint.address().is_v4() ) ||
+                        ( sorryserver_endpoint.address().is_v6() && client_endpoint.address().is_v6() ) ){
+                        sorryserver_socket->set_transparent( client_endpoint, error_code );
+                        if( error_code ){
+                                boost::format   fmt( "Thread ID[%d] realserver[%s:%d] socket option(IP_TRANSPARENT) set failed:" );
+                                fmt % boost::this_thread::get_id()
+                                        % connecting_endpoint.address().to_string()
+                                        % connecting_endpoint.port();
+                                Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__);
                         }
                 }
-out_tproxy:
-#endif
-                bool bres = sorryserver_socket.second->connect(sorry_endpoint, ec);
-                if (likely(bres)) {
-                        if (unlikely(!sorryserver_socket.second->set_non_blocking_mode(ec))) {
-                                // socket set non-blocking mode error
-                                std::stringstream buf;
-                                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                                buf << "set non blocking socket error: " << ec.message();
-                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, 53, buf.str(), __FILE__, __LINE__);
-                                up_thread_exit(process_type);
-                        }
-                        sorryserver_socket.first = sorry_endpoint;
-                        func_tag = UP_FUNC_SORRYSERVER_CONNECT_EVENT;
-                } else {
-                        func_tag = UP_FUNC_SORRYSERVER_CONNECT_FAIL_EVENT;
-                        //connect socket error
-                        std::stringstream buf;
-                        buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                        buf << "connect socket error: " << ec.message();
-                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, 54, buf.str(), __FILE__, __LINE__);
-                }
         }
-        up_thread_next_call_function = up_thread_function_array[func_tag];
+        #endif
 
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT up_thread_sorryserver_connect: NEXT_FUNC[%s]");
-                formatter % boost::this_thread::get_id() % func_tag_to_string(func_tag);
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+
+	sorryserver_socket->async_connect(
+		sorryserver_endpoint,
+		boost::bind(
+			&tcp_session::up_thread_sorryserver_connect_handler,
+			this,
+			boost::asio::placeholders::error
+		)
+	);
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT up_thread_sorryserver_connect: next call function: %s");
+		formatter % boost::this_thread::get_id() % func_tag_to_string( up_thread_next_call_function.first );
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 }
+//! up thread sorryserver connect handle
+//! @param[in] error_code is system error code
+void tcp_session::up_thread_sorryserver_connect_handler( const boost::system::error_code& error_code ){
+	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
+		boost::format	fmt( "Thread ID[%d] FUNC IN up_thread_sorryserver_connect_handler" );
+		fmt % boost::this_thread::get_id();
+		Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+
+	tcp_thread_message* msg = new tcp_thread_message();
+	if( !error_code ){
+		up_thread_function_pair func = up_thread_function_array[UP_FUNC_SORRYSERVER_CONNECT_EVENT];
+		msg->message = func.second;
+		#ifdef DEBUG
+		msg->func_tag_name = func_tag_to_string( UP_FUNC_SORRYSERVER_CONNECT_EVENT );
+		{
+			boost::format   fmt( "Thread ID[%d] up_queue.push : %s" );
+			fmt % boost::this_thread::get_id() % func_tag_to_string( UP_FUNC_SORRYSERVER_CONNECT_EVENT );
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+		#endif
+	}
+	else{
+		up_thread_function_pair func = up_thread_function_array[UP_FUNC_SORRYSERVER_CONNECT_FAIL_EVENT];
+		msg->message = func.second;
+		#ifdef DEBUG
+		msg->func_tag_name = func_tag_to_string( UP_FUNC_SORRYSERVER_CONNECT_FAIL_EVENT );
+		{
+			boost::format   fmt( "Thread ID[%d] up_queue.push : %s" );
+			fmt % boost::this_thread::get_id() % func_tag_to_string( UP_FUNC_SORRYSERVER_CONNECT_FAIL_EVENT );
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+		#endif
+		boost::format	fmt( "Thread ID[%d] connection error: %s" );
+		fmt % boost::this_thread::get_id() % error_code.message();
+		Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+	while( !up_thread_message_que.push( msg ) ){}
+	upthread_status_cond.notify_one();
+
+	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
+		boost::format	fmt( "Thread ID[%d] FUNC OUT up_thread_sorryserver_connect_handler" );
+		fmt % boost::this_thread::get_id();
+		Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+}
+
+
 //! up thread raise module event of handle_sorryserver_connect
 //! @param[in]        process_type is process type
 void tcp_session::up_thread_sorryserver_connect_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN up_thread_sorryserver_connect_event");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN up_thread_sorryserver_connect_event");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        endpoint sorry_endpoint = up_thread_data_dest_side.get_endpoint();
-        up_thread_data_dest_side.initialize();
-        boost::array<char, MAX_BUFFER_SIZE>& data_buff = up_thread_data_dest_side.get_data();
-        size_t data_size = 0;
-        protocol_module_base::EVENT_TAG module_event = protocol_module->handle_sorryserver_connect(up_thread_id, data_buff, data_size);
-        up_thread_data_dest_side.set_endpoint(sorry_endpoint);
-        up_thread_data_dest_side.set_size(data_size);
-        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
-        up_thread_next_call_function = up_thread_function_array[func_type->second];
+	boost::system::error_code	error_code;
 
-        // protocol module sorry mode change
-        tcp_thread_message *down_msg = new tcp_thread_message;
-        std::map<DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func>::iterator
-        down_func = up_thread_message_down_thread_function_map.find(DOWN_FUNC_SORRY_ENABLE_EVENT);
-        down_msg->message = down_func->second;
-        while (!down_thread_message_que.push(down_msg)) {}
+	// set sorryserver socket receive buffer size
+	if( likely( downstream_buffer_size > 0 ) ){
+		boost::asio::socket_base::receive_buffer_size   buf_size( downstream_buffer_size );
+		sorryserver_socket->get_socket().set_option( buf_size, error_code );
+		if( unlikely( error_code ) ){
+			boost::format	fmt( "Thread ID[%d] realserver socket receive buffer size error: %s" );
+			fmt % boost::this_thread::get_id % error_code.message();
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+			up_thread_next_call_function = up_thread_function_array[UP_FUNC_EXIT];
+			upthread_status = UPTHREAD_ACTIVE;
+			return;
+		}
+	}
 
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT up_thread_sorryserver_connect_event: NEXT_FUNC[%s]");
-                formatter % boost::this_thread::get_id() % func_tag_to_string(func_type->second);
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	// set sorryserver socet send buffer size
+	if( likely( upstream_buffer_size > 0 ) ){
+		boost::asio::socket_base::send_buffer_size  buf_size( upstream_buffer_size );
+		connecting_socket->get_socket().set_option( buf_size, error_code );
+		if( unlikely( error_code ) ){
+			boost::format	fmt( "Thread ID[%d] realserver socket send buffer size error: %s" );
+			fmt % boost::this_thread::get_id() % error_code.message();
+			Logger::putLogError( LOG_CAT_L7VSD_SESSION, 35, fmt.str(), __FILE__, __LINE__ );
+			up_thread_next_call_function = up_thread_function_array[UP_FUNC_EXIT];
+			upthread_status = UPTHREAD_ACTIVE;
+			return;
+		}
+	}
+
+	// up thread pause off
+	upthread_status = UPTHREAD_ACTIVE;
+
+	// down thread pause off
+	tcp_thread_message* msg = new tcp_thread_message();
+	msg->message = down_que_function_map[DOWN_FUNC_PAUSE_OFF_EVENT];
+
+	#ifdef	DEBUG
+	msg->func_tag_name = func_tag_to_string( DOWN_FUNC_PAUSE_OFF_EVENT );
+	{
+		boost::format   fmt( "Thread ID[%d] down_queue.push : %s" );
+		fmt % boost::this_thread::get_id() % func_tag_to_string( DOWN_FUNC_PAUSE_OFF_EVENT );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+	#endif
+
+	while( !down_thread_message_que.push( msg ) ){}
+	downthread_status_cond.notify_one();
+
+	// dist side data initialize
+	up_thread_data_dest_side.initialize();
+	boost::array<char, MAX_BUFFER_SIZE>& data_buff = up_thread_data_dest_side.get_data();
+	size_t data_size = 0;
+	protocol_module_base::EVENT_TAG module_event = protocol_module->handle_sorryserver_connect( up_thread_id, data_buff, data_size );
+	#ifdef	DEBUG
+	{
+		boost::format	fmt( "Thread ID[%d] protocol_module->handle_sorryserver_connect() return: %s" );
+		fmt % boost::this_thread::get_id() % func_tag_to_string( module_event );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+	}	
+	#endif
+
+	up_thread_data_dest_side.set_endpoint( sorryserver_endpoint );
+	up_thread_data_dest_side.set_size( data_size );
+
+	// next call function setup
+	up_thread_next_call_function = up_thread_function_array[ up_thread_module_event_map[module_event] ];
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT up_thread_sorryserver_connect_event");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 }
 //! up thread raise module event of handle_sorryserver_connection_fail
 //! @param[in]        process_type is process type
 void tcp_session::up_thread_sorryserver_connection_fail_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN up_thread_sorryserver_connection_fail_event");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN up_thread_sorryserver_connection_fail_event");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        endpoint server_endpoint = up_thread_data_dest_side.get_endpoint();
-        protocol_module_base::EVENT_TAG module_event = protocol_module->handle_sorryserver_connection_fail(up_thread_id, server_endpoint);
-        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
-        up_thread_next_call_function = up_thread_function_array[func_type->second];
+	protocol_module_base::EVENT_TAG module_event = protocol_module->handle_sorryserver_connection_fail(up_thread_id, sorryserver_endpoint);
+	#ifdef	DEBUG
+	{	boost::format	fmt( "Thread ID[%d] protocol_module->handle_sorryserver_connection_fail() return: %s" );
+		fmt % boost::this_thread::get_id()
+			% func_tag_to_string( module_event );
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+	}
+	#endif
+	up_thread_next_call_function = up_thread_function_array[up_thread_module_event_map[module_event]];
 
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT up_thread_sorryserver_connection_fail_event: NEXT_FUNC[%s]");
-                formatter % boost::this_thread::get_id() % func_tag_to_string(func_type->second);
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT up_thread_sorryserver_connection_fail_event");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 }
 //! up thread close sorryserver socket and raise sorryserver disconnect event message for up and down thread
 //! @param[in]        process_type is process type
 void tcp_session::up_thread_sorryserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type)
 {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN up_thread_sorryserver_disconnect");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN up_thread_sorryserver_disconnect");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        boost::system::error_code ec;
-        bool bres = sorryserver_socket.second->close(ec);
-        if (bres) {
-                tcp_thread_message *up_msg = new tcp_thread_message;
-                tcp_thread_message *down_msg = new tcp_thread_message;
-                up_thread_function_pair up_func = up_thread_function_array[UP_FUNC_SORRYSERVER_DISCONNECT_EVENT];
-                up_msg->message = up_func.second;
-                up_msg->endpoint_info = sorryserver_socket.first;
-                std::map< DOWN_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator down_func = up_thread_message_down_thread_function_map.find(DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT);
-                down_msg->message = down_func->second;
-                down_msg->endpoint_info = sorryserver_socket.first;
-                while (!up_thread_message_que.push(up_msg)) {}
-                while (!down_thread_message_que.push(down_msg)) {}
-        }
+	// sorryserver socket clear
+	sorryserver_socket.reset();
+	sorryserver_endpoint = boost::asio::ip::tcp::endpoint();
 
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT up_thread_sorryserver_disconnect");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	// module event call
+	protocol_module_base::EVENT_TAG module_event = protocol_module->handle_sorryserver_connection_fail( up_thread_id, realserver_endpoint );
+	#ifdef	DEBUG
+	{
+		boost::format	fmt( "Thread ID[%d] protocol_module->handle_sorryserver_connection_fail() return: %s" );
+		fmt % boost::this_thread::get_id() % func_tag_to_string( module_event );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+	}
+	#endif
+
+	up_thread_next_call_function = up_thread_function_array[ up_thread_module_event_map[module_event] ];
+
+	// up thread pause off
+	upthread_status = UPTHREAD_ACTIVE;
+
+	// down thread pause off
+	tcp_thread_message* down_msg = new tcp_thread_message();
+	down_msg->message = down_que_function_map[DOWN_FUNC_PAUSE_OFF_EVENT];
+	#ifdef	DEBUG
+	down_msg->func_tag_name = func_tag_to_string( DOWN_FUNC_PAUSE_OFF_EVENT );
+	{
+		boost::format   fmt( "Thread ID[%d] down_queue.push : %s" );
+		fmt % boost::this_thread::get_id() % func_tag_to_string( DOWN_FUNC_PAUSE_OFF_EVENT );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+	#endif
+
+	while( !down_thread_message_que.push( down_msg ) ){}
+	downthread_status_cond.notify_one();
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT up_thread_sorryserver_disconnect");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 }
 //! up thread close sorryserver socket and raise module sorryserver disconnect event
 //! @param[in]        process_type is process type
 void tcp_session::up_thread_sorryserver_mod_disconnect(const TCP_PROCESS_TYPE_TAG process_type)
 {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN up_thread_sorryserver_mod_disconnect");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN up_thread_sorryserver_mod_disconnect");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        protocol_module_base::EVENT_TAG module_event;
+	if( sorryserver_socket ){
+		boost::system::error_code	error_code;
+		if( sorryserver_socket->is_open() ){
+			sorryserver_socket->close( error_code );
+			if( unlikely( error_code ) ){
+				boost::format   fmt( "Thread ID[%d] cannot close sorryserver socket" );
+				fmt % boost::this_thread::get_id();
+				Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+			}
+		}
+	}
 
-        boost::system::error_code ec;
-        endpoint sorry_endpoint = sorryserver_socket.first;
-        bool bres = sorryserver_socket.second->close(ec);
-        if (!bres) {
-                sorryserver_socket.first = endpoint();
-        }
-        {
-                rw_scoped_lock scope_lock(module_function_sorryserver_disconnect_mutex);
-                module_event = protocol_module->handle_sorryserver_disconnect(up_thread_id, sorry_endpoint);
-        }
-        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
-        up_thread_next_call_function = up_thread_function_array[func_type->second];
 
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT up_thread_sorryserver_mod_disconnect: NEXT_FUNC[%s]");
-                formatter % boost::this_thread::get_id() % func_tag_to_string(func_type->second);
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	protocol_module_base::EVENT_TAG module_event = protocol_module->handle_sorryserver_disconnect( up_thread_id, sorryserver_endpoint );
+	#ifdef	DEBUG
+	{
+		boost::format	fmt( "Thread ID[%d] protocol_module->handle_sorryserver_disconnect() return: %s" );
+		fmt % boost::this_thread::get_id()
+			% func_tag_to_string( module_event );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+	}
+	#endif
+
+	up_thread_next_call_function = up_thread_function_array[up_thread_module_event_map[module_event]];
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT up_thread_sorryserver_mod_disconnect");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 }
 
 //! up thread raise module event of handle_sorryserver_disconnect
 //! @param[in]        process_type is process type
 void tcp_session::up_thread_sorryserver_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN up_thread_sorryserver_disconnect_event");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN up_thread_sorryserver_disconnect_event");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        protocol_module_base::EVENT_TAG module_event;
-        endpoint sorry_endpoint = up_thread_message_data.get_endpoint();
-        {
-                rw_scoped_lock scope_lock(module_function_sorryserver_disconnect_mutex);
-                module_event = protocol_module->handle_sorryserver_disconnect(up_thread_id, sorry_endpoint);
-        }
-        std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
-        up_thread_next_call_function = up_thread_function_array[func_type->second];
+	protocol_module_base::EVENT_TAG module_event;
+	module_event = protocol_module->handle_sorryserver_disconnect(up_thread_id, sorryserver_endpoint);
+	#ifdef	DEBUG
+	{
+		boost::format	fmt( "Thread ID[%d] protocol_module->handle_sorryserver_disconnect() return: %s" );
+		fmt % boost::this_thread::get_id()
+			% func_tag_to_string( module_event );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+	}
+	#endif
 
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT up_thread_sorryserver_disconnect_event NEXT_FUNC[%s]");
-                formatter % boost::this_thread::get_id() % func_tag_to_string(func_type->second);
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	up_thread_next_call_function = up_thread_function_array[up_thread_module_event_map[module_event]];
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT up_thread_sorryserver_disconnect_event NEXT_FUNC[%s]");
+		formatter % boost::this_thread::get_id() % func_tag_to_string(up_thread_next_call_function.first);
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 }
 //! up thread raise module event of handle_sorry_enable
 //! @param[in]        process_type is process type
@@ -2448,6 +2547,13 @@ void tcp_session::up_thread_sorry_enable_event(const TCP_PROCESS_TYPE_TAG proces
                 }
                 //----Debug log----------------------------------------------------------------------
                 module_event = protocol_module->handle_sorry_enable(up_thread_id);
+#ifdef	DEBUG
+{	boost::format	fmt( "Thread ID[%d] protocol_module->handle_sorry_enable() return: %s" );
+	fmt % boost::this_thread::get_id()
+		% func_tag_to_string( module_event );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+}
+#endif
         }
         std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
         up_thread_next_call_function = up_thread_function_array[func_type->second];
@@ -2480,6 +2586,13 @@ void tcp_session::up_thread_sorry_disable_event(const TCP_PROCESS_TYPE_TAG proce
                 }
                 //----Debug log----------------------------------------------------------------------
                 module_event = protocol_module->handle_sorry_disable(up_thread_id);
+#ifdef	DEBUG
+{	boost::format	fmt( "Thread ID[%d] protocol_module->handle_sorry_disable() return: %s" );
+	fmt % boost::this_thread::get_id()
+		% func_tag_to_string( module_event );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+}
+#endif
         }
         std::map<protocol_module_base::EVENT_TAG, UP_THREAD_FUNC_TYPE_TAG>::iterator func_type = up_thread_module_event_map.find(module_event);
         up_thread_next_call_function = up_thread_function_array[func_type->second];
@@ -2500,339 +2613,319 @@ void tcp_session::up_thread_exit(const TCP_PROCESS_TYPE_TAG process_type)
                 formatter % boost::this_thread::get_id();
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
         }
-        boost::mutex::scoped_lock down_thread_cond_lock(upthread_status_mutex);
-        boost::mutex::scoped_lock realserver_status_lock(realserver_connect_mutex);
-        upthread_status_cond.notify_one();
-        realserver_connect_cond.notify_one();
-        realserver_connect_status = true;
+		upthread_status = UPTHREAD_ACTIVE;
         __sync_bool_compare_and_swap(&exit_flag, 0, 1);
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT func up_thread_client_disconnect");
+                boost::format formatter("Thread ID[%d] FUNC OUT func up_thread_exit");
                 formatter % boost::this_thread::get_id();
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
         }
 }
 //! up thread close all socket
-void tcp_session::up_thread_all_socket_close(void)
-{
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN up_thread_all_socket_close");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+void tcp_session::up_thread_all_socket_close(){
 
-        std::map<endpoint, tcp_socket_ptr>::iterator close_socket = up_thread_send_realserver_socket_map.begin();
-        std::map<endpoint, tcp_socket_ptr>::iterator list_end = up_thread_send_realserver_socket_map.end();
-        boost::system::error_code ec;
-        while (close_socket != list_end) {
-                bool bres = close_socket->second->close(ec);
-                if (bres)
-                        parent_service.connection_inactive(close_socket->first);
-                close_socket++;
-        }
-        up_thread_send_realserver_socket_map.clear();
-        down_thread_connect_socket_list.clear();
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN up_thread_all_socket_close");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        if (!ssl_flag)
-                client_socket.close(ec);
-        else
-                client_ssl_socket.close(ec);
+	boost::system::error_code	error_code;
 
-        sorryserver_socket.second->close(ec);
+	realserver_socket_mutex.lock();
+	if( realserver_socket ){
+		if( realserver_socket->is_open() ){
+			realserver_socket->close( error_code );
+			parent_service.connection_inactive(realserver_endpoint);
+			if( error_code ){
+				boost::format	fmt( "Thread ID[%d] realserver socket close fail : %s" );
+				fmt % boost::this_thread::get_id() % error_code.message();
+				Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__, __LINE__ );
+			}
+		}
+	}
+	realserver_socket_mutex.unlock();
 
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT up_thread_all_socket_close");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if( connecting_socket ){
+		if( connecting_socket->is_open() ){
+			connecting_socket->close( error_code );
+			if( error_code ){
+				boost::format	fmt( "Thread ID{%d] connecting socket clise fail : %s" );
+				fmt % boost::this_thread::get_id() % error_code.message();
+				Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__, __LINE__ );
+			}
+			connecting_socket.reset();
+			connecting_endpoint = boost::asio::ip::tcp::endpoint();
+		}
+	}
+
+	if( sorryserver_socket ){
+		if( sorryserver_socket->is_open() ){
+			sorryserver_socket->close( error_code );
+			if( error_code ){
+				boost::format	fmt( "Thread ID[%d] sorryserver socket close fail : %s" );
+				fmt % boost::this_thread::get_id() % error_code.message();
+				Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__, __LINE__ );
+			}
+		}
+	}
+
+	!ssl_flag ? client_socket.close( error_code ) : client_ssl_socket.close( error_code );
+
+	if(unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT up_thread_all_socket_close");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 }
+
+//! up_thread_session_pause_on event
+
+void tcp_session::up_thread_session_pause_on_event( const tcp_session::TCP_PROCESS_TYPE_TAG type ){
+
+	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+		boost::format	fmt( "Thread ID[%d] FUNC IN up_thread_session_pause_on_event" );
+		fmt % boost::this_thread::get_id();
+		Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+
+	upthread_status = UPTHREAD_LOCK;
+
+	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+		boost::format	fmt( "Thread ID[%d] FUNC OUT up_thread_session_pause_on_event" );
+		fmt % boost::this_thread::get_id();
+		Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+
+	}
+
+}
+
+//! up_thread_session_pause off event
+void tcp_session::up_thread_session_pause_off_event( const tcp_session::TCP_PROCESS_TYPE_TAG type ){
+	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION ) ) ){
+		boost::format	fmt( "Thread ID[%d] FUNC IN up_thread_session_pause_off_event" );
+		fmt % boost::this_thread::get_id();
+		Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+
+	upthread_status = UPTHREAD_ACTIVE;
+
+	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION) ) ){
+		boost::format	fmt( "Thread ID[%d] FUNC OUT up_thread_session_pause_off_event" );
+		fmt % boost::this_thread::get_id();
+		Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+
+	}
+}
+
 
 //! down thread receive from realserver and raise module event of handle_realserver_recv
 //! @param[in]        process_type is process type
-void tcp_session::down_thread_realserver_receive(const TCP_PROCESS_TYPE_TAG process_type)
-{
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN down_thread_realserver_receive");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+void tcp_session::down_thread_realserver_receive(const TCP_PROCESS_TYPE_TAG process_type){
 
-        if (down_thread_receive_realserver_socket_list.empty()) {
-                if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                        boost::format formatter("Thread ID[%d] FUNC OUT down_thread_realserver_receive");
-                        formatter % boost::this_thread::get_id();
-                        Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-                }
-                boost::mutex::scoped_lock lock(realserver_connect_mutex);
-                if (!realserver_connect_status) {
-                        to_time(LOCKTIMEOUT, xt);
-                        realserver_connect_cond.timed_wait(lock, xt);
-                }
-                down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_REALSERVER_RECEIVE];
-                return;
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN down_thread_realserver_receive");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        if (unlikely(0 < parent_service.get_wait_downstream())) {
-                //----Debug log----------------------------------------------------------------------
-                if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                        std::stringstream buf;
-                        buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                        buf << "down_thread_realserver_receive qos wait active";
-                        Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 42, buf.str(), __FILE__, __LINE__);
-                }
-                //----Debug log----------------------------------------------------------------------
-                return;
-        }
-        down_thread_data_dest_side.initialize();
-        boost::array<char, MAX_BUFFER_SIZE>& data_buff = down_thread_data_dest_side.get_data();
-        boost::system::error_code ec;
-        size_t recv_size;
-        DOWN_THREAD_FUNC_TYPE_TAG func_tag;
+	if (unlikely(0 < parent_service.get_wait_downstream())) {
+		//----Debug log----------------------------------------------------------------------
+		if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+			std::stringstream buf;
+			buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
+			buf << "down_thread_realserver_receive qos wait active";
+			Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 42, buf.str(), __FILE__, __LINE__);
+		}
+		//----Debug log----------------------------------------------------------------------
+		return;
+	}
+	if( unlikely( !realserver_socket ) ) return;
 
-        endpoint server_endpoint = down_thread_current_receive_realserver_socket->first;
-        down_thread_data_dest_side.set_endpoint(server_endpoint);
+	DOWN_THREAD_FUNC_TYPE_TAG func_tag;
 
-        recv_size = down_thread_current_receive_realserver_socket->second->read_some(boost::asio::buffer(data_buff, MAX_BUFFER_SIZE), ec);
-        if (!ec) {
-                if (recv_size > 0) {
-                        //----Debug log----------------------------------------------------------------------
-                        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                                std::stringstream buf;
-                                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                                buf << "down_thread_realserver_receive receive data size[" << recv_size << "] from [" << server_endpoint << "]";
-                                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 43, buf.str(), __FILE__, __LINE__);
-                        }
-                        //----Debug log----------------------------------------------------------------------
-                        down_thread_data_dest_side.set_size(recv_size);
-                        parent_service.update_down_recv_size(recv_size);
+	down_thread_data_dest_side.initialize();
+	boost::array<char, MAX_BUFFER_SIZE>& data_buff = down_thread_data_dest_side.get_data();
+	boost::system::error_code error_code;
+	size_t recv_size = 0;
 
-                        protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_recv(down_thread_id, server_endpoint, data_buff, recv_size);
+	down_thread_data_dest_side.set_endpoint(realserver_endpoint);
 
-                        std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type = down_thread_module_event_map.find(module_event);
-                        func_tag = func_type->second;
-                } else {
-                        func_tag = DOWN_FUNC_REALSERVER_DISCONNECT;
-                }
-        } else {
-                if (ec == boost::asio::error::try_again) {
-                        // epoll
-                        struct epoll_event event;
-                        event.data.fd = down_thread_current_receive_realserver_socket->second->get_socket().native();
-                        // epoll add
-                        if (!down_realserver_epollfd_registered) {
-                                if (is_epoll_edge_trigger) {
-                                        event.events = EPOLLIN | EPOLLHUP | EPOLLET;
-                                } else {
-                                        event.events = EPOLLIN | EPOLLHUP;
-                                }
-                                if (epoll_ctl(down_realserver_epollfd, EPOLL_CTL_ADD, event.data.fd, &event) < 0) {
-                                        std::stringstream buf;
-                                        buf << "down_thread_realserver_receive: epoll_ctl EPOLL_CTL_ADD error: " << strerror(errno);
-                                        Logger::putLogWarn(LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__);
-                                        return;
-                                }
-                                down_realserver_epollfd_registered = true;
-                        }
-                        // epoll wait
-                        int ret_fds = epoll_wait(down_realserver_epollfd, down_realserver_events, EVENT_NUM, epoll_timeout);
-                        if (ret_fds <= 0) {
-                                if (ret_fds < 0) {
-                                        boost::format formatter("down_thread_realserver_receive: epoll_wait error: %d");
-                                        formatter % strerror(errno);
-                                        Logger::putLogWarn(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-                                        down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_REALSERVER_DISCONNECT];
-                                }
-                                return;
-                        }
-                
-                        for (int i = 0; i < ret_fds; ++i) {
-                                if (down_realserver_events[i].data.fd == event.data.fd) {
-                                        if (down_realserver_events[i].events & EPOLLIN) {
-                                                break;
-                                        } else if (down_realserver_events[i].events & EPOLLHUP) {
-                                                down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_REALSERVER_DISCONNECT];
-                                                return;
-                                        }
-                                }
-                        }
-                        func_tag = DOWN_FUNC_REALSERVER_RECEIVE;
-                } else {
-                        func_tag = DOWN_FUNC_REALSERVER_DISCONNECT;
-                }
-        }
+	realserver_socket_mutex.lock();
+	if( realserver_socket )
+		recv_size = realserver_socket->read_some(boost::asio::buffer(data_buff, MAX_BUFFER_SIZE), error_code);
+	else{
+		error_code = boost::system::error_code( EBADF, boost::asio::error::get_system_category() ); 
+	}
+	realserver_socket_mutex.unlock();
 
-        down_thread_function_pair func = down_thread_function_array[func_tag];
-        down_thread_current_receive_realserver_socket++;
-        std::list<socket_element>::iterator list_end = down_thread_receive_realserver_socket_list.end();
-        if (down_thread_current_receive_realserver_socket == list_end) {
-                down_thread_current_receive_realserver_socket = down_thread_receive_realserver_socket_list.begin();
-        }
-        down_thread_next_call_function = func;
+	if( !error_code ){
+		if( recv_size > 0 ) {
+			down_thread_data_dest_side.set_size( recv_size );
+			parent_service.update_down_recv_size( recv_size );
+			protocol_module_base::EVENT_TAG module_event = protocol_module->handle_realserver_recv(
+																				down_thread_id,
+																				realserver_endpoint,
+																				data_buff,
+																				recv_size );
+			#ifdef	DEBUG
+			boost::format	fmt( "Thread ID[%d] protocol_module->handle_realserver_recv() return: %s" );
+			fmt % boost::this_thread::get_id()
+				% func_tag_to_string( module_event );
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+			#endif
+			func_tag = down_thread_module_event_map[module_event];
+		}
+		else{
+			func_tag = DOWN_FUNC_REALSERVER_DISCONNECT;
+		}
+	}
+	else{
+		if( error_code == boost::asio::error::try_again ){
+			downthread_status = DOWNTHREAD_LOCK;
+			func_tag = DOWN_FUNC_REALSERVER_HANDLE_ARECEIVE;
+			basic_tcp_socket<boost::asio::ip::tcp>::async_rw_handler_t	handler =
+				boost::bind(&tcp_session::down_thread_realserver_async_read_some_handler,
+							this,
+							boost::asio::placeholders::error,
+							boost::asio::placeholders::bytes_transferred );
+			realserver_socket_mutex.lock();
+			if( realserver_socket )
+				realserver_socket->async_read_some( boost::asio::buffer( data_buff ), handler );
+			else
+				func_tag = DOWN_FUNC_REALSERVER_DISCONNECT;
+			realserver_socket_mutex.unlock();
+		}
+		else {
+			func_tag = DOWN_FUNC_REALSERVER_DISCONNECT;
+		}
+	}
 
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT down_thread_realserver_receive: NEXT_FUNC[%s]");
-                formatter % boost::this_thread::get_id() % func_tag_to_string(func_tag);
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	down_thread_next_call_function = down_thread_function_array[func_tag];
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT down_thread_realserver_receive: NEXT_FUNC[%s]");
+		formatter % boost::this_thread::get_id() % func_tag_to_string(func_tag);
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 }
 //! down thread close realserver socket and raise realserver disconnect event message for up and down thread
 //! @param[in]        process_type is process type
 void tcp_session::down_thread_realserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type)
 {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN down_thread_realserver_disconnect");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN down_thread_realserver_disconnect");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        endpoint server_endpoint = down_thread_data_dest_side.get_endpoint();
-        std::list<socket_element>::iterator list_end = down_thread_receive_realserver_socket_list.end();
-        std::list<socket_element>::iterator close_socket = down_thread_receive_realserver_socket_list.begin();
-        while (list_end != close_socket) {
-                endpoint close_endpoint = close_socket->first;
-                if (close_endpoint == server_endpoint) {
-                        boost::system::error_code ec;
-                        bool bres = close_socket->second->close(ec);
-                        if (bres) {
-                                parent_service.connection_inactive(server_endpoint);
-                                tcp_thread_message *up_msg = new tcp_thread_message;
-                                tcp_thread_message *down_msg = new tcp_thread_message;
-                                down_thread_function_pair down_func = down_thread_function_array[DOWN_FUNC_REALSERVER_DISCONNECT_EVENT];
-                                down_msg->endpoint_info = server_endpoint;
-                                down_msg->message = down_func.second;
-                                std::map<UP_THREAD_FUNC_TYPE_TAG, tcp_session_func>::iterator up_func = down_thread_message_up_thread_function_map.find(UP_FUNC_REALSERVER_DISCONNECT_EVENT);
-                                up_msg->endpoint_info = server_endpoint;
-                                up_msg->message = up_func->second;
-                                while (!up_thread_message_que.push(up_msg)) {}
-                                while (!down_thread_message_que.push(down_msg)) {}
-                        }
-                        break;
-                }
-                close_socket++;
-        }
 
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT down_thread_realserver_disconnect");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	tcp_thread_message* up_msg = new tcp_thread_message();
+	up_msg->message = up_que_function_map[UP_FUNC_REALSERVER_DISCONNECT];
+	#ifdef	DEBUG
+	up_msg->func_tag_name = func_tag_to_string( UP_FUNC_REALSERVER_DISCONNECT );
+	{
+		boost::format   fmt( "Thread ID[%d] up_queue.push : %s" );
+		fmt % boost::this_thread::get_id() % func_tag_to_string( UP_FUNC_REALSERVER_DISCONNECT );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+	#endif
+	while(!up_thread_message_que.push( up_msg ) ){}
+
+	downthread_status = DOWNTHREAD_ACTIVE;
+
+	down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_REALSERVER_DISCONNECT_EVENT];
+
+	if(unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT down_thread_realserver_disconnect");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
+}
+
+
+// ! down thread realserver check event.
+//! @param[in]	process_type is process type
+void tcp_session::down_thread_realserver_check( const TCP_PROCESS_TYPE_TAG process_type ){
+	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ))){
+		boost::format	fmt( "Thread ID[%d] FUNC IN down_thread_realserver_check" );
+		fmt % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__,__LINE__ );
+	}
+
+	downthread_status = DOWNTHREAD_ACTIVE;
+	down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_CLIENT_SEND];
+
+
+	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ))){
+		boost::format	fmt( "Thread ID[%d] FUNC OUT down_thread_realserver_check next_call_function : %s" );
+		fmt % boost::this_thread::get_id() % func_tag_to_string( down_thread_next_call_function.first );
+		Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
 }
 
 //! down thread raise module event of handle_realserver_disconnect
 //! @param[in]        process_type is process type
 void tcp_session::down_thread_realserver_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN down_thread_realserver_disconnect_event");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN down_thread_realserver_disconnect_event");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        protocol_module_base::EVENT_TAG module_event;
-        endpoint server_endpoint = down_thread_message_data.get_endpoint();
-        {
-                rw_scoped_lock scope_lock(module_function_realserver_disconnect_mutex);
-                module_event = protocol_module->handle_realserver_disconnect(down_thread_id, server_endpoint);
-        }
-
-        std::list<socket_element>::iterator list_end = down_thread_receive_realserver_socket_list.end();
-        std::list<socket_element>::iterator erase_socket = down_thread_receive_realserver_socket_list.begin();
-        while (likely(erase_socket != list_end)) {
-                if (erase_socket->first == server_endpoint) {
-                        down_thread_receive_realserver_socket_list.erase(erase_socket);
-                        down_thread_current_receive_realserver_socket = down_thread_receive_realserver_socket_list.begin();
-                        break;
-                }
-                erase_socket++;
-        }
-
-        std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type = down_thread_module_event_map.find(module_event);
-        down_thread_next_call_function = down_thread_function_array[func_type->second];
-
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT down_thread_realserver_disconnect_event: NEXT_FUNC[%s]");
-                formatter % boost::this_thread::get_id() % func_tag_to_string(func_type->second);
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	protocol_module_base::EVENT_TAG module_event;
+	{
+		rw_scoped_lock scope_lock(module_function_realserver_disconnect_mutex);
+		module_event = protocol_module->handle_realserver_disconnect(down_thread_id, realserver_endpoint);
+#ifdef	DEBUG
+{	boost::format	fmt( "Thread ID[%d] protocol_module->handle_realserver_disconnect() return: %s" );
+	fmt % boost::this_thread::get_id()
+		% func_tag_to_string( module_event );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
 }
-//! down thread close realserver socket and raise realserver disconnect event message for up and down thread
-//! @param[in]        process_type is process type
-void tcp_session::down_thread_all_realserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type)
-{
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN down_thread_all_realserver_disconnect");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+#endif
+	}
 
-        std::list<socket_element>::iterator close_socket = down_thread_receive_realserver_socket_list.begin();
-        std::list<socket_element>::iterator list_end = down_thread_receive_realserver_socket_list.end();
+	down_thread_next_call_function = down_thread_function_array[down_thread_module_event_map[module_event]];
 
-        protocol_module_base::EVENT_TAG module_event;
-        endpoint server_endpoint;
-        bool realserver_fond = false;
-        while (close_socket != list_end) {
-                realserver_fond = true;
-                boost::system::error_code ec;
-                bool bres = close_socket->second->close(ec);
-                server_endpoint = close_socket->first;
-                if (bres) {
-                        parent_service.connection_inactive(server_endpoint);
-                }
-                {
-                        rw_scoped_lock scope_lock(module_function_realserver_disconnect_mutex);
-                        module_event = protocol_module->handle_realserver_disconnect(down_thread_id, server_endpoint);
-                }
-
-                close_socket++;
-        }
-        if (!realserver_fond) {
-                //not fond realserver
-                //----Debug log----------------------------------------------------------------------
-                if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                        std::stringstream buf;
-                        buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                        buf << "close realserver not fond";
-                        Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 44, buf.str(), __FILE__, __LINE__);
-                }
-                //----Debug log----------------------------------------------------------------------
-                rw_scoped_lock scope_lock(module_function_realserver_disconnect_mutex);
-                module_event = protocol_module->handle_realserver_disconnect(down_thread_id, endpoint());
-        }
-        down_thread_receive_realserver_socket_list.clear();
-        std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type = down_thread_module_event_map.find(module_event);
-        down_thread_next_call_function = down_thread_function_array[func_type->second];
-
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT down_thread_all_realserver_disconnect: NEXT_FUNC[%s]");
-                formatter % boost::this_thread::get_id() % func_type->second;
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT down_thread_realserver_disconnect_event");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 }
 //! down thread raise module event of handle_client_connection_check
 //! @param[in]        process_type is process type
 void tcp_session::down_thread_client_connection_chk_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN down_thread_client_connection_chk_event");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN down_thread_client_connection_chk_event");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        down_thread_data_client_side.initialize();
-        boost::array<char, MAX_BUFFER_SIZE>& data_buff = down_thread_data_client_side.get_data();
-        std::size_t data_size;
-        protocol_module_base::EVENT_TAG module_event = protocol_module->handle_client_connection_check(down_thread_id, data_buff, data_size);
-        down_thread_data_client_side.set_size(data_size);
-        std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type = down_thread_module_event_map.find(module_event);
-        down_thread_next_call_function = down_thread_function_array[func_type->second];
+	down_thread_data_client_side.initialize();
+	boost::array<char, MAX_BUFFER_SIZE>& data_buff = down_thread_data_client_side.get_data();
+	std::size_t data_size;
+	protocol_module_base::EVENT_TAG module_event = protocol_module->handle_client_connection_check(down_thread_id, data_buff, data_size);
+#ifdef	DEBUG
+{	boost::format	fmt( "Thread ID[%d] protocol_module->handle_client_connection_check() return: %s" );
+	fmt % boost::this_thread::get_id()
+		% func_tag_to_string( module_event );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+}
+#endif
+	down_thread_data_client_side.set_size(data_size);
 
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT down_thread_client_connection_chk_event: NEXT_FUNC[%s]");
-                formatter % boost::this_thread::get_id() % func_tag_to_string(func_type->second);
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	down_thread_next_call_function = down_thread_function_array[down_thread_module_event_map[module_event]];
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT down_thread_client_connection_chk_event:");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 }
 
 //! down thread raise module event of handle_response_send_inform
@@ -2849,416 +2942,417 @@ void tcp_session::down_thread_client_respond_event(const TCP_PROCESS_TYPE_TAG pr
         {
                 rw_scoped_lock scope_lock(module_function_response_send_inform_mutex);
                 module_event = protocol_module->handle_response_send_inform(down_thread_id);
+#ifdef	DEBUG
+{	boost::format	fmt( "Thread ID[%d] protocol_module->handle_response_send_inform() return: %s" );
+	fmt % boost::this_thread::get_id()
+		% func_tag_to_string( module_event );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+}
+#endif
         }
-        std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type = down_thread_module_event_map.find(module_event);
-        down_thread_next_call_function = down_thread_function_array[func_type->second];
+        down_thread_next_call_function = down_thread_function_array[down_thread_module_event_map[module_event]];
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT down_thread_client_respond_event: NEXT_FUNC[%s]");
-                formatter % boost::this_thread::get_id() % func_tag_to_string(func_type->second);
+                boost::format formatter("Thread ID[%d] FUNC OUT down_thread_client_respond_event");
+                formatter % boost::this_thread::get_id();
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
         }
-}
-bool tcp_session::down_thread_client_send_epoll_wait(DOWN_THREAD_FUNC_TYPE_TAG& func_tag)
-{
-        struct epoll_event event;
-        event.data.fd = !ssl_flag ? client_socket.get_socket().native()
-                        : client_ssl_socket.get_socket().lowest_layer().native();
-        // epoll add
-        if (!down_client_epollfd_registered) {
-                if (!ssl_flag && is_epoll_edge_trigger) {
-                        event.events = EPOLLOUT | EPOLLHUP | EPOLLET;
-                } else {
-                        event.events = EPOLLOUT | EPOLLHUP;
-                }
-                if (epoll_ctl(down_client_epollfd, EPOLL_CTL_ADD, event.data.fd, &event) < 0) {
-                        std::stringstream buf;
-                        buf << "down_thread_client_send_epoll_wait: epoll_ctl EPOLL_CTL_ADD error: ";
-                        buf << strerror(errno);
-                        Logger::putLogWarn(LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__);
-                        func_tag = DOWN_FUNC_CLIENT_SEND;
-                        return false;
-                }
-                down_client_epollfd_registered = true;
-        }
-        // epoll wait
-        int ret_fds = epoll_wait(down_client_epollfd, down_client_events, EVENT_NUM, epoll_timeout);
-        if (ret_fds <= 0) {
-                if (ret_fds < 0) {
-                        std::stringstream buf;
-                        buf << "down_thread_client_send_epoll_wait: epoll_wait error: ";
-                        buf << strerror(errno);
-                        Logger::putLogWarn(LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__);
-                        func_tag = DOWN_FUNC_CLIENT_DISCONNECT;
-                } else {
-                        func_tag = DOWN_FUNC_CLIENT_SEND;
-                }
-                return false;
-        }
-        for (int i = 0; i < ret_fds; ++i) {
-                if (down_client_events[i].data.fd == event.data.fd) {
-                        if (down_client_events[i].events & EPOLLOUT) {
-                                return true;
-                        }
-                }
-        }
-        func_tag = DOWN_FUNC_CLIENT_DISCONNECT;
-        return false;
 }
 //! down thread send for client and raise module event of handle_client_send
 //! @param[in]        process_type is process type
 void tcp_session::down_thread_client_send(const TCP_PROCESS_TYPE_TAG process_type)
 {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN down_thread_client_send");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN down_thread_client_send");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        boost::system::error_code ec;
-        boost::array<char, MAX_BUFFER_SIZE>& data_buff = down_thread_data_client_side.get_data();
-        std::size_t data_size = down_thread_data_client_side.get_size();
-        std::size_t send_data_size = down_thread_data_client_side.get_send_size();
-        std::size_t send_size;
-        DOWN_THREAD_FUNC_TYPE_TAG func_tag;
+	boost::system::error_code error_code;
+	boost::array<char, MAX_BUFFER_SIZE>& data_buff = down_thread_data_client_side.get_data();
+	std::size_t data_size = down_thread_data_client_side.get_size();
+	std::size_t send_data_size = down_thread_data_client_side.get_send_size();
+	std::size_t send_size;
+	DOWN_THREAD_FUNC_TYPE_TAG func_tag;
 
-        if (ssl_flag) {
-                if (!down_thread_client_send_epoll_wait(func_tag)) {
-                        goto down_thread_client_send_out;
-                }
-        }
-        send_size = !ssl_flag ? client_socket.write_some(
-                            boost::asio::buffer(
-                                    data_buff.data() + send_data_size,
-                                    data_size - send_data_size),
-                            ec)
-                    : client_ssl_socket.write_some(
-                            boost::asio::buffer(
-                                    data_buff.data() + send_data_size,
-                                    data_size - send_data_size),
-                            ec);
-        if (!ec) {
-                send_data_size += send_size;
-                down_thread_data_client_side.set_send_size(send_data_size);
-                parent_service.update_down_send_size(send_size);
-                //----Debug log----------------------------------------------------------------------
-                if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                        client_endpoint = !ssl_flag ? client_socket.get_socket().lowest_layer().remote_endpoint(ec)
-                                : client_ssl_socket.get_socket().lowest_layer().remote_endpoint(ec);
-                        boost::format formatter("Thread ID[%d] down_thread_client_send send data size[%d] for [%d]");
-                        formatter % boost::this_thread::get_id() % send_size % client_endpoint;
-                        Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 45, formatter.str(), __FILE__, __LINE__);
-                }
-                //----Debug log----------------------------------------------------------------------
-                if (data_size > send_data_size) {
-                        func_tag = DOWN_FUNC_CLIENT_SEND;
-                } else {
-                        protocol_module_base::EVENT_TAG module_event = protocol_module->handle_client_send(down_thread_id);
-                        std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type = down_thread_module_event_map.find(module_event);
-                        func_tag = func_type->second;
-                }
-        } else {
-                if (ec == boost::asio::error::try_again) {
-                        func_tag = DOWN_FUNC_CLIENT_SEND;
-                        if (!ssl_flag) {
-                                down_thread_client_send_epoll_wait(func_tag);
-                        }
-                } else {
-                        func_tag = DOWN_FUNC_CLIENT_DISCONNECT;
-                }
-        }
+	send_size = !ssl_flag ? client_socket.write_some(
+								boost::asio::const_buffers_1(
+									data_buff.data() + send_data_size,
+									data_size - send_data_size
+								),
+								error_code
+							)
+							: client_ssl_socket.write_some(
+								boost::asio::const_buffers_1(
+									data_buff.data() + send_data_size,
+									data_size - send_data_size),
+								error_code
+								);
 
-down_thread_client_send_out:
-        down_thread_next_call_function = down_thread_function_array[func_tag];
-
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT down_thread_client_send: NEXT_FUNC[%s]");
-                formatter % boost::this_thread::get_id() % func_tag_to_string(func_tag);
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if(!error_code){
+		send_data_size += send_size;
+		down_thread_data_client_side.set_send_size(send_data_size);
+		parent_service.update_down_send_size(send_size);
+		if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+			client_endpoint = !ssl_flag ? client_socket.get_socket().lowest_layer().remote_endpoint(error_code)
+										: client_ssl_socket.get_socket().lowest_layer().remote_endpoint(error_code);
+			boost::format formatter("Thread ID[%d] down_thread_client_send send data size[%d] for [%d]");
+			formatter % boost::this_thread::get_id() % send_size % client_endpoint;
+			Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 45, formatter.str(), __FILE__, __LINE__);
+		}
+		if (data_size > send_data_size) {
+			func_tag = DOWN_FUNC_CLIENT_SEND;
+		}
+		else {
+			protocol_module_base::EVENT_TAG module_event = protocol_module->handle_client_send(down_thread_id);
+#ifdef	DEBUG
+{	boost::format	fmt( "Thread ID[%d] protocol_module->handle_client_send() return: %s" );
+	fmt % boost::this_thread::get_id()
+		% func_tag_to_string( module_event );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
 }
+#endif
+			func_tag = down_thread_module_event_map[module_event];
+		}
+	}
+	else{
+		if( error_code == boost::asio::error::try_again){
+
+			downthread_status = DOWNTHREAD_LOCK;
+			func_tag = DOWN_FUNC_CLIENT_HANDLE_ASEND;
+			basic_tcp_socket<boost::asio::ip::tcp>::async_rw_handler_t	handler =
+				boost::bind(&tcp_session::down_thread_client_async_write_some_handler,
+							this,
+							boost::asio::placeholders::error,
+							boost::asio::placeholders::bytes_transferred );
+			!ssl_flag ? client_socket.async_write_some(
+							boost::asio::const_buffers_1(
+								data_buff.data() + send_data_size,
+								data_size - send_data_size
+							),
+							handler
+						)
+					  : client_ssl_socket.async_write_some(
+							boost::asio::const_buffers_1(
+								data_buff.data() + send_data_size,
+								data_size - send_data_size
+							),
+							handler
+						);
+
+		}
+		else{
+			func_tag = DOWN_FUNC_CLIENT_DISCONNECT;
+		}
+	}
+
+	down_thread_next_call_function = down_thread_function_array[func_tag];
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT down_thread_client_send: NEXT_FUNC[%s]");
+		formatter % boost::this_thread::get_id() % func_tag_to_string(func_tag);
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
+}
+
 //! down thread close client socket and raise client disconnect event message for up and down thread
 //! @param[in]        process_type is process type
 void tcp_session::down_thread_client_disconnect(const TCP_PROCESS_TYPE_TAG process_type)
 {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN down_thread_client_disconnect");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
-        boost::system::error_code ec;
-        bool bres = !ssl_flag ? client_socket.close(ec)
-                    : client_ssl_socket.close(ec);
-        if (bres) {
-                tcp_thread_message *up_msg = new tcp_thread_message;
-                tcp_thread_message *down_msg = new tcp_thread_message;
-                down_thread_function_pair down_func = down_thread_function_array[DOWN_FUNC_CLIENT_DISCONNECT_EVENT];
-                down_msg->message = down_func.second;
-                std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator up_func = down_thread_message_up_thread_function_map.find(UP_FUNC_CLIENT_DISCONNECT_EVENT);
-                up_msg->message = up_func->second;
-                while (!down_thread_message_que.push(down_msg)) {}
-                while (!up_thread_message_que.push(up_msg)) {}
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN down_thread_client_disconnect");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT down_thread_client_disconnect");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	tcp_thread_message*	mes = new tcp_thread_message();
+	mes->message = up_que_function_map[UP_FUNC_CLIENT_DISCONNECT];
+	#ifdef	DEBUG
+		mes->func_tag_name = func_tag_to_string( UP_FUNC_CLIENT_DISCONNECT );
+		boost::format	fmt( "Thread ID[%d] up_queue.push : %s " );
+		fmt % boost::this_thread::get_id() % func_tag_to_string( UP_FUNC_CLIENT_DISCONNECT );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	#endif
+	while( !up_thread_message_que.push( mes ) );
+	upthread_status_cond.notify_one();
+
+	downthread_status = DOWNTHREAD_LOCK;
+	down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_CLIENT_DISCONNECT_EVENT];
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT down_thread_client_disconnect");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 }
 
 //! down thread raise module event of handle_client_disconnect
 //! @param[in]        process_type is process type
 void tcp_session::down_thread_client_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN down_thread_disconnect_event");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN down_thread_disconnect_event");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        protocol_module_base::EVENT_TAG module_event;
-        {
-                rw_scoped_lock scope_lock(module_function_client_disconnect_mutex);
-                module_event = protocol_module->handle_client_disconnect(down_thread_id);
-        }
-        std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type =
-                down_thread_module_event_map.find(module_event);
-        down_thread_function_pair func = down_thread_function_array[func_type->second];
-        down_thread_next_call_function = func;
+	protocol_module_base::EVENT_TAG module_event;
+	{
+		rw_scoped_lock scope_lock(module_function_client_disconnect_mutex);
+		module_event = protocol_module->handle_client_disconnect(down_thread_id);
+		#ifdef	DEBUG
+		{
+			boost::format	fmt( "Thread ID[%d] protocol_module->handle_client_disconnect() return: %s" );
+		fmt % boost::this_thread::get_id()
+			% func_tag_to_string( module_event );
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+		}
+		#endif
+	}
+	down_thread_next_call_function = down_thread_function_array[down_thread_module_event_map[module_event]];
 
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT down_thread_exit: NEXT_FUNC[%s]");
-                formatter % boost::this_thread::get_id() % func_tag_to_string(func_type->second);
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+
+	tcp_thread_message*	mes = new tcp_thread_message();
+	mes->message = up_que_function_map[UP_FUNC_PAUSE_OFF_EVENT];
+	#ifdef	DEBUG
+	mes->func_tag_name = func_tag_to_string( UP_FUNC_PAUSE_OFF_EVENT );
+	{
+		boost::format   fmt( "Thread ID[%d] up_queue.push : %s" );
+		fmt % boost::this_thread::get_id() % func_tag_to_string( UP_FUNC_PAUSE_OFF_EVENT );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+	#endif
+	while(!up_thread_message_que.push( mes ) ){}
+
+	downthread_status = DOWNTHREAD_ACTIVE;
+
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT down_thread_exit");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 }
 //! down thread receive from sorryserver and raise module event of handle_sorryserver_recv
 //! @param[in]        process_type is process type
 void tcp_session::down_thread_sorryserver_receive(const TCP_PROCESS_TYPE_TAG process_type)
 {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN down_thread_sorryserver_receive");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN down_thread_sorryserver_receive");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        if (unlikely(!sorryserver_socket.second->get_socket().lowest_layer().is_open())) {
-                if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                        boost::format formatter("Thread ID[%d] FUNC OUT down_thread_sorryserver_receive");
-                        formatter % boost::this_thread::get_id();
-                        Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-                }
-                down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_SORRYSERVER_RECEIVE];
-                return;
-        }
+	if( unlikely( !sorryserver_socket ) ){
+		down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_SORRYSERVER_RECEIVE];
+		return;
+	}
 
-        down_thread_data_dest_side.initialize();
-        boost::array<char, MAX_BUFFER_SIZE>& data_buff = down_thread_data_dest_side.get_data();
-        boost::system::error_code ec;
-        DOWN_THREAD_FUNC_TYPE_TAG func_tag;
+	if( unlikely( !sorryserver_socket->get_socket().lowest_layer().is_open() )){
+		down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_SORRYSERVER_RECEIVE];
+		return;
+	}
 
-        endpoint sorry_endpoint = sorryserver_socket.first;
-        down_thread_data_dest_side.set_endpoint(sorry_endpoint);
+	down_thread_data_dest_side.initialize();
+	boost::array<char, MAX_BUFFER_SIZE>& data_buff = down_thread_data_dest_side.get_data();
+	boost::system::error_code error_code;
+	DOWN_THREAD_FUNC_TYPE_TAG func_tag;
 
-        size_t recv_size = sorryserver_socket.second->read_some(boost::asio::buffer(data_buff, MAX_BUFFER_SIZE), ec);
-        if (!ec) {
-                if (recv_size > 0) {
-                        //----Debug log----------------------------------------------------------------------
-                        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                                std::stringstream buf;
-                                buf << "Thread ID[" << boost::this_thread::get_id() << "] ";
-                                buf << "down_thread_sorryserver_receive receive data size[" << recv_size << "] from [" << sorry_endpoint << "]";
-                                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 46, buf.str(), __FILE__, __LINE__);
-                        }
-                        //----Debug log----------------------------------------------------------------------
-                        down_thread_data_dest_side.set_size(recv_size);
-                        protocol_module_base::EVENT_TAG module_event = protocol_module->handle_sorryserver_recv(down_thread_id, sorry_endpoint, data_buff, recv_size);
-                        std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type = down_thread_module_event_map.find(module_event);
-                        func_tag = func_type->second;
-                } else {
-                        func_tag = DOWN_FUNC_SORRYSERVER_DISCONNECT;
-                }
-        } else {
-                if (ec == boost::asio::error::try_again) {
-                        // epoll
-                        struct epoll_event event;
-                        event.data.fd = sorryserver_socket.second->get_socket().native();
-                        // epoll add
-                        if (!down_sorryserver_epollfd_registered) {
-                                if (is_epoll_edge_trigger) {
-                                        event.events = EPOLLIN | EPOLLHUP | EPOLLET;
-                                } else {
-                                        event.events = EPOLLIN | EPOLLHUP;
-                                }
-                                if (epoll_ctl(down_sorryserver_epollfd, EPOLL_CTL_ADD, event.data.fd, &event) < 0) {
-                                        std::stringstream buf;
-                                        buf << "down_thread_sorryserver_receive: epoll_ctl EPOLL_CTL_ADD error: ";
-                                        buf << strerror(errno);
-                                        Logger::putLogWarn(LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__);
-                                        return;
-                                }
-                                down_sorryserver_epollfd_registered = true;
-                        }
-                        // epoll wait
-                        int ret_fds = epoll_wait(down_sorryserver_epollfd, down_sorryserver_events, EVENT_NUM, epoll_timeout);
-                        if (ret_fds <= 0) {
-                                if (ret_fds < 0) {
-                                        std::stringstream buf;
-                                        buf << "down_thread_sorryserver_receive: epoll_wait error: " << strerror(errno);
-                                        Logger::putLogWarn(LOG_CAT_L7VSD_SESSION, 999, buf.str(), __FILE__, __LINE__);
-                                        func_tag = DOWN_FUNC_SORRYSERVER_DISCONNECT;
-                                }
-                                return;
-                        }
-                
-                        for (int i = 0; i < ret_fds; ++i) {
-                                if (down_sorryserver_events[i].data.fd == event.data.fd) {
-                                        if (down_sorryserver_events[i].events & EPOLLIN) {
-                                                break;
-                                        } else if (down_sorryserver_events[i].events & EPOLLHUP) {
-                                                down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_SORRYSERVER_DISCONNECT];
-                                                return;
-                                        }
-                                }
-                        }
-                        func_tag = DOWN_FUNC_SORRYSERVER_RECEIVE;
-                } else {
-                        func_tag = DOWN_FUNC_SORRYSERVER_DISCONNECT;
-                }
-        }
+	down_thread_data_dest_side.set_endpoint(sorryserver_endpoint);
 
-        down_thread_next_call_function = down_thread_function_array[func_tag];
+	size_t recv_size = sorryserver_socket->read_some(boost::asio::buffer(data_buff, MAX_BUFFER_SIZE), error_code);
+	#ifdef DEBUG
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format	fmt( "Thread ID[%d] down_thread_sorryserver_receive receive data size[%d] from [%s];");
+		fmt % boost::this_thread::get_id() % recv_size % sorryserver_endpoint.address().to_string();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 46, fmt.str(), __FILE__, __LINE__);
+	}
+	#endif
+	if(!error_code ){
+		if (recv_size > 0) {
+			down_thread_data_dest_side.set_size(recv_size);
+			protocol_module_base::EVENT_TAG module_event = protocol_module->handle_sorryserver_recv(
+																				down_thread_id,
+																				sorryserver_endpoint,
+																				data_buff,
+																				recv_size);
+			#ifdef	DEBUG
+			{
+				boost::format	fmt( "Thread ID[%d] protocol_module->handle_sorryserver_recv() return: %s" );
+				fmt % boost::this_thread::get_id() % func_tag_to_string( module_event );
+				Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+			}
+			#endif
+			func_tag = down_thread_module_event_map[module_event];
+		}
+		else{
+			#ifdef	DEBUG
+			boost::format	fmt( "Thread ID[%d] recv size == 0" );
+			fmt % boost::this_thread::get_id();
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+			#endif
+			func_tag = DOWN_FUNC_SORRYSERVER_DISCONNECT;
+		}
+	}
+	else{
+		if( error_code == boost::asio::error::try_again ){
+			downthread_status = DOWNTHREAD_LOCK;
+			func_tag = DOWN_FUNC_SORRYSERVER_HANDLE_ARECEIVE;
+			basic_tcp_socket<boost::asio::ip::tcp>::async_rw_handler_t	handler = 
+				boost::bind(&tcp_session::down_thread_sorryserver_async_read_some_handler,
+							this,
+							boost::asio::placeholders::error,
+							boost::asio::placeholders::bytes_transferred );
+			sorryserver_socket->async_read_some( boost::asio::buffer( data_buff ), handler );
+			#ifdef	DEBUG
+			boost::format	fmt( "Thraed ID[%d] try_agein async read some: %s" );
+			fmt % boost::this_thread::get_id() % error_code.message();
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+			#endif
+		}
+		else{
+			#ifdef	DEBUG
+			boost::format	fmt( "Thread ID[%d] recv error : %s" );
+			fmt % boost::this_thread::get_id() % error_code.message();
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+			#endif
+			func_tag = DOWN_FUNC_SORRYSERVER_DISCONNECT;
+		}
+	}
 
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT down_thread_sorryserver_receive: NEXT_FUNC[%s]");
-                formatter % boost::this_thread::get_id() % func_tag_to_string(func_tag);
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	down_thread_next_call_function = down_thread_function_array[func_tag];
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT down_thread_sorryserver_receive: NEXT_FUNC[%s]");
+		formatter % boost::this_thread::get_id() % func_tag_to_string(func_tag);
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 }
 //! down thread raise module event of handle_sorryserver_disconnect
 //! @param[in]        process_type is process type
 void tcp_session::down_thread_sorryserver_disconnect(const TCP_PROCESS_TYPE_TAG process_type)
 {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN down_thread_sorryserver_disconnect");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN down_thread_sorryserver_disconnect");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        boost::system::error_code ec;
-        bool bres = sorryserver_socket.second->close(ec);
-        if (bres) {
-                tcp_thread_message *up_msg = new tcp_thread_message;
-                tcp_thread_message *down_msg = new tcp_thread_message;
-                down_thread_function_pair down_func = down_thread_function_array[DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT];
-                down_msg->message = down_func.second;
-                down_msg->endpoint_info = sorryserver_socket.first;
-                std::map< UP_THREAD_FUNC_TYPE_TAG, tcp_session_func >::iterator up_func = down_thread_message_up_thread_function_map.find(UP_FUNC_SORRYSERVER_DISCONNECT_EVENT);
-                up_msg->message = up_func->second;
-                up_msg->endpoint_info = sorryserver_socket.first;
-                while (!up_thread_message_que.push(up_msg)) {}
-                while (!down_thread_message_que.push(down_msg)) {}
-        }
+	tcp_thread_message*	up_msg = new tcp_thread_message();
+	up_msg->message = up_que_function_map[UP_FUNC_SORRYSERVER_DISCONNECT_EVENT];
+	#ifdef	DEBUG
+	up_msg->func_tag_name = func_tag_to_string( UP_FUNC_SORRYSERVER_DISCONNECT_EVENT );
+	{
+		boost::format   fmt( "Thread ID[%d] up_queue.push : %s" );
+		fmt % boost::this_thread::get_id() % func_tag_to_string( UP_FUNC_SORRYSERVER_DISCONNECT_EVENT );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+	#endif
+	while (!up_thread_message_que.push(up_msg)) {}
+	upthread_status_cond.notify_one();
 
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT down_thread_sorryserver_disconnect");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	down_thread_next_call_function = down_thread_function_array[DOWN_FUNC_SORRYSERVER_DISCONNECT_EVENT];
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT down_thread_sorryserver_disconnect");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 }
 //! down thread close sorryserver socket and raise module sorryserver disconnect event
 //! @param[in]        process_type is process type
 void tcp_session::down_thread_sorryserver_mod_disconnect(const TCP_PROCESS_TYPE_TAG process_type)
 {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN down_thread_sorryserver_mod_disconnect");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN down_thread_sorryserver_mod_disconnect");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        protocol_module_base::EVENT_TAG module_event;
+	boost::system::error_code	error_code;
+	protocol_module_base::EVENT_TAG module_event;
+	if( !sorryserver_socket ){
+		if( !sorryserver_socket->is_open() ){
+			sorryserver_socket->close( error_code );
+		}
+	}
+	{
+		rw_scoped_lock scope_lock(module_function_sorryserver_disconnect_mutex);
+		module_event = protocol_module->handle_sorryserver_disconnect(down_thread_id, sorryserver_endpoint);
+#ifdef	DEBUG
+{	boost::format	fmt( "Thread ID[%d] protocol_module->handle_sorryserver_disconnect() return: %s" );
+	fmt % boost::this_thread::get_id()
+		% func_tag_to_string( module_event );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+}
+#endif
+	}
 
-        boost::system::error_code ec;
-        endpoint sorry_endpoint = sorryserver_socket.first;
-        bool bres = sorryserver_socket.second->close(ec);
-        if (!bres) {
-                sorryserver_socket.first = endpoint();
-        }
-        {
-                rw_scoped_lock scope_lock(module_function_sorryserver_disconnect_mutex);
-                module_event = protocol_module->handle_sorryserver_disconnect(down_thread_id, sorry_endpoint);
-        }
+down_thread_next_call_function = down_thread_function_array[down_thread_module_event_map[module_event]];
 
-        std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type = down_thread_module_event_map.find(module_event);
-        down_thread_function_pair func = down_thread_function_array[func_type->second];
-        down_thread_next_call_function = func;
-
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT down_thread_sorryserver_mod_disconnect: NEXT_FUNC[%s]");
-                formatter % boost::this_thread::get_id() % func_tag_to_string(func_type->second);
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT down_thread_sorryserver_mod_disconnect");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 }
 //! down thread raise module event of handle_sorryserver_disconnect
 //! @param[in]        process_type is process type
 void tcp_session::down_thread_sorryserver_disconnect_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN down_thread_sorryserver_disconnect_event");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN down_thread_sorryserver_disconnect_event");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        protocol_module_base::EVENT_TAG module_event;
-        endpoint sorry_endpoint = down_thread_message_data.get_endpoint();
-        {
-                rw_scoped_lock scope_lock(module_function_sorryserver_disconnect_mutex);
-                module_event = protocol_module->handle_sorryserver_disconnect(down_thread_id, sorry_endpoint);
-        }
-        std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type = down_thread_module_event_map.find(module_event);
-        down_thread_function_pair func = down_thread_function_array[func_type->second];
-        down_thread_next_call_function = func;
+	protocol_module_base::EVENT_TAG module_event;
+	{
+		rw_scoped_lock scope_lock(module_function_sorryserver_disconnect_mutex);
+		module_event = protocol_module->handle_sorryserver_disconnect(down_thread_id, sorryserver_endpoint);
+#ifdef	DEBUG
+{	boost::format	fmt( "Thread ID[%d] protocol_module->handle_sorryserver_disconnect() return: %s" );
+	fmt % boost::this_thread::get_id() % func_tag_to_string( module_event );
+	Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+}
+#endif
+	}
+	down_thread_next_call_function = down_thread_function_array[down_thread_module_event_map[module_event]];
 
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT down_thread_sorryserver_disconnect_event: NEXT_FUNC[%s]");
-                formatter % boost::this_thread::get_id() % func_tag_to_string(func_type->second);
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT down_thread_sorryserver_disconnect_event");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 }
 //! down thread raise module event of handle_sorry_enable
 //! @param[in]        process_type is process type
 void tcp_session::down_thread_sorry_enable_event(const TCP_PROCESS_TYPE_TAG process_type)
 {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN down_thread_sorry_enable_event");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN down_thread_sorry_enable_event");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
+	
 
-        protocol_module_base::EVENT_TAG module_event;
-        {
-                rw_scoped_lock scope_lock(module_function_sorry_enable_mutex);
-                //----Debug log----------------------------------------------------------------------
-                if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                        std::stringstream buf;
-                        buf << "Thread ID[";
-                        buf << boost::this_thread::get_id();
-                        buf << "] handle_sorry_enable call";
-                        Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 47, buf.str(), __FILE__, __LINE__);
-                }
-                //----Debug log----------------------------------------------------------------------
-                module_event = protocol_module->handle_sorry_enable(down_thread_id);
-        }
-        std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type = down_thread_module_event_map.find(module_event);
-        down_thread_function_pair func = down_thread_function_array[func_type->second];
-        down_thread_next_call_function = func;
+	protocol_module_base::EVENT_TAG	module_event;
+	module_event = protocol_module->handle_sorry_enable(down_thread_id);
+	#ifdef	DEBUG
+	{
+		boost::format	fmt( "Thread ID[%d] protocol_module->handle_sorry_enable() return: %s" );
+		fmt % boost::this_thread::get_id()
+		% func_tag_to_string( module_event );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+	}
+	#endif
+	down_thread_next_call_function = down_thread_function_array[down_thread_module_event_map[module_event]];
 
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT down_thread_sorry_enable_event: NEXT_FUNC[%s]");
-                formatter % boost::this_thread::get_id() % func_tag_to_string(func_type->second);
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT down_thread_sorry_enable_event: NEXT_FUNC[%s]");
+		formatter % boost::this_thread::get_id() % func_tag_to_string(down_thread_next_call_function.first);
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 }
 //! down thread raise module event of handle_sorry_disable
 //! @param[in]        process_type is process type
@@ -3282,6 +3376,13 @@ void tcp_session::down_thread_sorry_disable_event(const TCP_PROCESS_TYPE_TAG pro
                 }
                 //----Debug log----------------------------------------------------------------------
                 module_event = protocol_module->handle_sorry_disable(down_thread_id);
+#ifdef	DEBUG
+{	boost::format	fmt( "Thread ID[%d] protocol_module-> return:handle_sorry_disable() %s" );
+	fmt % boost::this_thread::get_id()
+		% func_tag_to_string( module_event );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+}
+#endif
         }
         std::map<protocol_module_base::EVENT_TAG, DOWN_THREAD_FUNC_TYPE_TAG>::iterator func_type = down_thread_module_event_map.find(module_event);
         down_thread_function_pair func = down_thread_function_array[func_type->second];
@@ -3302,8 +3403,8 @@ void tcp_session::down_thread_exit(const TCP_PROCESS_TYPE_TAG process_type)
                 formatter % boost::this_thread::get_id();
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
         }
-        boost::mutex::scoped_lock status_scoped_lock(downthread_status_mutex);
-        downthread_status_cond.notify_one();
+
+		downthread_status = DOWNTHREAD_ACTIVE;
         __sync_bool_compare_and_swap(&exit_flag, 0, 1);
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -3315,34 +3416,648 @@ void tcp_session::down_thread_exit(const TCP_PROCESS_TYPE_TAG process_type)
 //! down thread close all socket
 void tcp_session::down_thread_all_socket_close(void)
 {
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC IN down_thread_all_socket_close");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN down_thread_all_socket_close");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 
-        std::list<socket_element>::iterator close_socket = down_thread_receive_realserver_socket_list.begin();
-        std::list<socket_element>::iterator list_end = down_thread_receive_realserver_socket_list.end();
-        boost::system::error_code ec;
-        while (close_socket != list_end) {
-                bool bres = close_socket->second->close(ec);
-                if (bres)
-                        parent_service.connection_inactive(close_socket->first);
-                close_socket++;
-        }
-        down_thread_receive_realserver_socket_list.clear();
-        if (!ssl_flag)
-                client_socket.close(ec);
-        else
-                client_ssl_socket.close(ec);
-        sorryserver_socket.second->close(ec);
+	boost::system::error_code	error_code;
 
-        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
-                boost::format formatter("Thread ID[%d] FUNC OUT down_thread_all_socket_close");
-                formatter % boost::this_thread::get_id();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
-        }
+	realserver_socket_mutex.lock();
+	if( realserver_socket ){
+		if( realserver_socket->is_open() ){
+			realserver_socket->close( error_code );
+			parent_service.connection_inactive(realserver_endpoint);
+			if( error_code ){
+				boost::format	fmt( "Thread ID[%d] realserver socket close fail : %s" );
+				fmt % boost::this_thread::get_id() % error_code.message();
+				Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__, __LINE__ );
+			}
+		}
+	}
+	realserver_socket_mutex.unlock();
+
+
+	if( connecting_socket ){
+		if( connecting_socket->is_open() ){
+			connecting_socket->close( error_code );
+			if( error_code ){
+				boost::format	fmt( "Thread ID{%d] connecting socket clise fail : %s" );
+				fmt % boost::this_thread::get_id() % error_code.message();
+				Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__, __LINE__ );
+			}
+			connecting_socket.reset();
+			connecting_endpoint = boost::asio::ip::tcp::endpoint();
+		}
+	}
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC OUT down_thread_all_socket_close");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
 }
+
+//! down_thread_session_pause_on_event
+//!
+//!
+void tcp_session::down_thread_session_pause_on_event( tcp_session::TCP_PROCESS_TYPE_TAG type ){
+	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
+		boost::format	fmt( "Thread ID[%d] FUNC IN down_thread_session_pause_on_event" );
+		fmt % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+	downthread_status = DOWNTHREAD_LOCK;
+	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
+		boost::format	fmt( "Thread ID[%d] FUNC OUT down_thread_session_pause_on_event" );
+		fmt % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+}
+
+//! down_thread_session_pause_off_event
+//!
+//!
+void tcp_session::down_thread_session_pause_off_event( tcp_session::TCP_PROCESS_TYPE_TAG type ){
+	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
+		boost::format   fmt( "Thread ID[%d] FUNC IN down_thread_session_pause_off_event" );
+		fmt % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+	downthread_status = DOWNTHREAD_ACTIVE;
+	if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))){
+		boost::format   fmt( "Thread ID[%d] FUNC OUT down_thread_session_pause_off_event" );
+		fmt % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+}
+
+
+//! up_thrad_client_async_raed_some_hander
+//! this function call from other thread(io_service thread).
+//!
+void tcp_session::up_thread_client_async_read_some_handler( const boost::system::error_code& error_code , std::size_t len ){
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN up_thread_client_async_read_some_handler");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
+
+	if( ssl_flag ){
+		client_ssl_socket.decrement_read_con();
+	}
+		
+	up_thread_data_client_side.set_error_code( error_code );
+	up_thread_data_client_side.set_async_len( len );
+
+	if( error_code == boost::asio::error::operation_aborted ){
+		if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
+			boost::format   fmt( "Thread ID[%d] up_thread_client_async_read_some_handler canceled: %s" );
+			fmt % boost::this_thread::get_id() % error_code.message();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+	}
+	tcp_thread_message*	mes = new tcp_thread_message();
+	mes->message = up_que_function_map[UP_FUNC_PAUSE_OFF_EVENT];
+	#ifdef	DEBUG
+	mes->func_tag_name = func_tag_to_string( UP_FUNC_PAUSE_OFF_EVENT );
+	{
+		boost::format   fmt( "Thread ID[%d] up_queue.push : %s" );
+		fmt % boost::this_thread::get_id() % func_tag_to_string( UP_FUNC_PAUSE_OFF_EVENT );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+	#endif
+	while( !up_thread_message_que.push( mes ) ){}
+
+	upthread_status_cond.notify_one();
+}
+
+//! up_thread_client_handle_async_read_some
+//! this function call form up_thread_run : next_call_function.
+void tcp_session::up_thread_client_handle_async_read_some( const tcp_session::TCP_PROCESS_TYPE_TAG proc ){
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN up_thread_client_handle_async_read_some : error=%s : recv byte= %d");
+		formatter % boost::this_thread::get_id()
+				  % up_thread_data_client_side.get_error_code().message()
+				  % up_thread_data_client_side.get_async_len();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
+
+	UP_THREAD_FUNC_TYPE_TAG	func_tag;
+	boost::system::error_code error_code = up_thread_data_client_side.get_error_code();
+	std::size_t	recv_size = up_thread_data_client_side.get_async_len();
+
+	if( !error_code ){ // no error
+		if( recv_size > 0 ){
+			parent_service.update_up_recv_size( up_thread_data_client_side.get_size() );
+			protocol_module_base::EVENT_TAG module_event = protocol_module->handle_client_recv(
+				up_thread_id,
+				up_thread_data_client_side.get_data(),
+				up_thread_data_client_side.get_async_len() );
+			#ifdef	DEBUG
+			boost::format	fmt( "Thread ID[%d] protocol_module->handle_client_recv( upthread_id = %d, downthread_id = %d ) return %s");
+			fmt % up_thread_id % down_thread_id % func_tag_to_string( module_event );
+			#endif
+
+			func_tag = up_thread_module_event_map[module_event];
+		}
+		else{	// recv zero byte
+			upthread_status = UPTHREAD_LOCK;
+			func_tag = UP_FUNC_CLIENT_HANDLE_ARECIEVE;
+			basic_tcp_socket<boost::asio::ip::tcp>::async_rw_handler_t handler =
+				boost::bind(&tcp_session::up_thread_client_async_read_some_handler,
+							this,
+							boost::asio::placeholders::error,
+							boost::asio::placeholders::bytes_transferred );
+			!ssl_flag ? client_socket.async_read_some(	boost::asio::buffer( up_thread_data_client_side.get_data() ), handler )
+					  : client_ssl_socket.async_read_some(  boost::asio::buffer( up_thread_data_client_side.get_data()), handler );
+		}
+	}
+	else { // error handling
+		if( up_thread_data_client_side.get_error_code() == boost::asio::error::try_again ){ // don't recv try again
+			upthread_status = UPTHREAD_LOCK;
+			func_tag = UP_FUNC_CLIENT_HANDLE_ARECIEVE;
+			basic_tcp_socket<boost::asio::ip::tcp>::async_rw_handler_t	handler =
+				boost::bind(&tcp_session::up_thread_client_async_read_some_handler,
+							this,
+							boost::asio::placeholders::error,
+							boost::asio::placeholders::bytes_transferred );
+			!ssl_flag ? client_socket.async_read_some(	boost::asio::buffer( up_thread_data_client_side.get_data() ), handler )
+					  : client_ssl_socket.async_read_some(	boost::asio::buffer( up_thread_data_client_side.get_data()), handler );
+		}
+		else if( up_thread_data_client_side.get_error_code() == boost::asio::error::eof ){ // hung up
+			func_tag = UP_FUNC_CLIENT_DISCONNECT;
+		}
+		else{ // other error.
+			func_tag = UP_FUNC_CLIENT_DISCONNECT;
+			boost::format	fmt("Thread ID[%d] client read error: %s");
+			fmt % boost::this_thread::get_id() % up_thread_data_client_side.get_error_code().message();
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__);
+		}
+	}
+
+	up_thread_next_call_function = up_thread_function_array[func_tag];
+
+}
+
+//! up_thread_realserver_async_write_some_handler
+//! this function called from other thread( io_service thread ).
+//!
+void tcp_session::up_thread_realserver_async_write_some_handler( const boost::system::error_code& error_code, std::size_t len ){
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN up_thread_realserver_async_write_some_handler");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
+
+	up_thread_data_dest_side.set_error_code( error_code );
+	up_thread_data_dest_side.set_async_len( len );
+
+	if( error_code == boost::asio::error::operation_aborted ){
+		if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
+			boost::format   fmt( "Thread ID[%d] up_thread_reaslserver_async_write_some_handler canceled : %s" );
+			fmt % boost::this_thread::get_id() % error_code.message();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+	}
+	tcp_thread_message* mes = new tcp_thread_message();
+	mes->message = up_que_function_map[UP_FUNC_PAUSE_OFF_EVENT];
+	#ifdef	DEBUG
+	mes->func_tag_name = func_tag_to_string( UP_FUNC_PAUSE_OFF_EVENT );
+	{
+		boost::format   fmt( "Thread ID[%d] up_queue.push : %s" );
+		fmt % boost::this_thread::get_id() % func_tag_to_string( UP_FUNC_PAUSE_OFF_EVENT );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+	#endif
+	while( !up_thread_message_que.push( mes ) ){}
+	upthread_status_cond.notify_one();
+}
+
+
+void tcp_session::up_thread_realserver_handle_async_write_some( const tcp_session::TCP_PROCESS_TYPE_TAG proc ){
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN up_thread_realserver_handle_async_write_some");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
+
+	UP_THREAD_FUNC_TYPE_TAG	func_tag;
+
+	std::size_t	data_size		= up_thread_data_dest_side.get_size();
+	std::size_t	send_data_size	= up_thread_data_dest_side.get_send_size();
+
+	if( !up_thread_data_dest_side.get_error_code() ){	// no error
+		send_data_size = up_thread_data_dest_side.get_async_len();
+		up_thread_data_dest_side.set_send_size( send_data_size );
+		parent_service.update_up_send_size( up_thread_data_dest_side.get_async_len() );
+		if( data_size > send_data_size )
+			func_tag = UP_FUNC_REALSERVER_SEND;
+		else
+			func_tag = up_thread_module_event_map[protocol_module->handle_realserver_send(up_thread_id)];
+	}
+	else{	// error
+		if( up_thread_data_dest_side.get_error_code() == boost::asio::error::try_again ){
+			func_tag = UP_FUNC_REALSERVER_ASEND_HANDLE_EVENT;
+			upthread_status = UPTHREAD_LOCK;
+			boost::array<char, MAX_BUFFER_SIZE>& send_buff = up_thread_data_dest_side.get_data();
+			tcp_socket::async_rw_handler_t	handler = boost::bind(	&tcp_session::up_thread_realserver_async_write_some_handler,
+																this,
+																boost::asio::placeholders::error,
+																boost::asio::placeholders::bytes_transferred );
+			if( realserver_socket )
+				realserver_socket->async_write_some(
+					boost::asio::const_buffers_1(
+					send_buff.data() + send_data_size,
+					data_size - send_data_size
+					),
+					handler );
+		}
+		else{
+			func_tag = UP_FUNC_REALSERVER_DISCONNECT;
+			boost::format fmt( "Thread ID[%d] realserver send error: %s" );
+			fmt % boost::this_thread::get_id() % up_thread_data_dest_side.get_error_code().message();
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__,__LINE__ );
+		}
+	}
+	up_thread_next_call_function = up_thread_function_array[func_tag];
+
+}
+
+void tcp_session::up_thread_sorryserver_async_write_some_handler( const boost::system::error_code& error_code, std::size_t len ){
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN up_thread_sorryserver_async_write_some_handler");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
+
+	
+	if( ssl_flag ){
+		client_ssl_socket.decrement_write_con();
+	}
+	up_thread_data_dest_side.set_error_code( error_code );
+	up_thread_data_dest_side.set_async_len( len );
+
+	if( error_code == boost::asio::error::operation_aborted ){
+		if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
+			boost::format   fmt( "Thread ID[%d] up_thread_reaslserver_async_write_some_handler canceled : %s" );
+			fmt % boost::this_thread::get_id() % error_code.message();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+	}
+	tcp_thread_message* mes = new tcp_thread_message();
+	mes->message = up_que_function_map[UP_FUNC_PAUSE_OFF_EVENT];
+	#ifdef  DEBUG
+	mes->func_tag_name = func_tag_to_string( UP_FUNC_PAUSE_OFF_EVENT );
+	{
+		boost::format   fmt( "Thread ID[%d] up_queue.push : %s" );
+		fmt % boost::this_thread::get_id() % func_tag_to_string( UP_FUNC_PAUSE_OFF_EVENT );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+	#endif
+	while( !up_thread_message_que.push( mes ) ){}
+	upthread_status_cond.notify_one();
+}
+
+void tcp_session::up_thread_sorryserver_handle_async_write_some( const TCP_PROCESS_TYPE_TAG proc ){
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN up_thread_sorryserver_handle_async_write_some");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
+
+	UP_THREAD_FUNC_TYPE_TAG func_tag;
+
+	std::size_t	data_size		= up_thread_data_dest_side.get_size();
+	std::size_t	send_data_size	= up_thread_data_dest_side.get_send_size();
+
+	if( !up_thread_data_dest_side.get_error_code() ){	//no error
+		send_data_size = up_thread_data_dest_side.get_async_len();
+		up_thread_data_dest_side.set_send_size( send_data_size );
+		parent_service.update_up_send_size( up_thread_data_dest_side.get_async_len() );
+		if( data_size > send_data_size )
+			func_tag = UP_FUNC_SORRYSERVER_SEND;
+		else
+			func_tag = up_thread_module_event_map[protocol_module->handle_realserver_send(up_thread_id)];
+	}
+	else{
+		if( up_thread_data_dest_side.get_error_code() == boost::asio::error::try_again ){
+			func_tag = UP_FUNC_SORRYSERVER_HANDLE_ASEND;
+			upthread_status = UPTHREAD_LOCK;
+
+			boost::array<char, MAX_BUFFER_SIZE>& send_buff = up_thread_data_dest_side.get_data();
+			tcp_socket::async_rw_handler_t	handler = boost::bind(	&tcp_session::up_thread_sorryserver_async_write_some_handler,
+																this,
+																boost::asio::placeholders::error,
+																boost::asio::placeholders::bytes_transferred );
+			sorryserver_socket->async_write_some(
+				boost::asio::const_buffers_1( send_buff.data() + send_data_size, data_size - send_data_size ),
+				handler );
+		}
+		else{
+			func_tag = UP_FUNC_SORRYSERVER_DISCONNECT;
+			boost::format	fmt( "Thread ID[%d] sorryserver send error: %s" );
+			fmt % boost::this_thread::get_id() % up_thread_data_dest_side.get_error_code().message();
+			Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+	}
+	up_thread_next_call_function = up_thread_function_array[func_tag];
+}
+
+
+void tcp_session::down_thread_realserver_async_read_some_handler( const boost::system::error_code& error_code, std::size_t len ){
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN down_thread_realserver_async_read_some_handler");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
+
+	down_thread_data_dest_side.set_error_code( error_code );
+	down_thread_data_dest_side.set_async_len( len );	
+
+	if( error_code == boost::asio::error::operation_aborted ){ //error
+		if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
+			boost::format   fmt( "Thread ID[%d] down_thread_realserver_async_read_some_handler candeld : %s" );
+			fmt % boost::this_thread::get_id() % error_code.message();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+	}
+
+
+	tcp_thread_message* mes = new tcp_thread_message();
+	mes->message = down_que_function_map[DOWN_FUNC_PAUSE_OFF_EVENT];
+	#ifdef	DEBUG
+	mes->func_tag_name = func_tag_to_string( DOWN_FUNC_PAUSE_OFF_EVENT ); 
+	{
+		boost::format   fmt( "Thread ID[%d] down_queue.push : %s" );
+		fmt % boost::this_thread::get_id() % func_tag_to_string( DOWN_FUNC_PAUSE_OFF_EVENT );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+	#endif
+	while( !down_thread_message_que.push( mes ) ){}
+	downthread_status_cond.notify_one();
+}
+
+void tcp_session::down_thread_realserver_handle_async_read_some( const tcp_session::TCP_PROCESS_TYPE_TAG proc ){
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN down_thread_realserver_handle_async_raed_some : error = %s : recv_byte = %d");
+		formatter % boost::this_thread::get_id()
+				  % down_thread_data_dest_side.get_error_code().message()
+				  % down_thread_data_dest_side.get_async_len();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
+
+	DOWN_THREAD_FUNC_TYPE_TAG	func_tag;
+	boost::system::error_code	error_code = down_thread_data_dest_side.get_error_code();
+	std::size_t	recv_size = down_thread_data_dest_side.get_async_len();
+
+	if( !error_code ){	//no error
+		if( down_thread_data_dest_side.get_async_len() > 0 ){ //recv success
+			down_thread_data_dest_side.set_size( recv_size );
+			parent_service.update_down_recv_size( recv_size );
+			protocol_module_base::EVENT_TAG module_event = 
+				protocol_module->handle_realserver_recv(	down_thread_id,
+															realserver_endpoint,
+															down_thread_data_dest_side.get_data(),
+															recv_size );
+			func_tag = down_thread_module_event_map[module_event];
+		}
+		else{	// zero byte recv = try again.
+			downthread_status = DOWNTHREAD_LOCK;
+			func_tag = DOWN_FUNC_REALSERVER_HANDLE_ARECEIVE;
+			tcp_socket::async_rw_handler_t handler = boost::bind(	&tcp_session::down_thread_realserver_async_read_some_handler,
+																this,
+																boost::asio::placeholders::error,
+																boost::asio::placeholders::bytes_transferred );
+			realserver_socket_mutex.lock();
+			if( realserver_socket )
+				realserver_socket->async_read_some( boost::asio::buffer( down_thread_data_dest_side.get_data() ), handler );
+			else
+				func_tag = DOWN_FUNC_REALSERVER_DISCONNECT;
+			realserver_socket_mutex.unlock();
+		}
+	}
+	else{		// error
+		if( error_code == boost::asio::error::try_again ){
+			downthread_status = DOWNTHREAD_LOCK;
+			func_tag = DOWN_FUNC_REALSERVER_HANDLE_ARECEIVE;
+			tcp_socket::async_rw_handler_t handler = boost::bind(	&tcp_session::down_thread_realserver_async_read_some_handler,
+																this,
+																boost::asio::placeholders::error,
+																boost::asio::placeholders::bytes_transferred );
+			realserver_socket_mutex.lock();
+			if( realserver_socket )
+				realserver_socket->async_read_some( boost::asio::buffer( down_thread_data_dest_side.get_data() ), handler );
+			else
+				func_tag = DOWN_FUNC_REALSERVER_DISCONNECT;
+			realserver_socket_mutex.lock();
+		}
+		else{	//recv error
+			func_tag = DOWN_FUNC_REALSERVER_DISCONNECT;
+			boost::format	fmt( "Thread ID[%d] down_thread_realserver_handle_async_read_some recv error:%s" );
+			fmt % boost::this_thread::get_id() % error_code.message();
+			Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+	}
+
+	down_thread_next_call_function = down_thread_function_array[func_tag];
+
+}
+	
+void tcp_session::down_thread_client_async_write_some_handler( const boost::system::error_code& error_code, std::size_t len ){
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN down_thread_client_async_write_some_handler");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
+
+	if( ssl_flag ){
+		client_ssl_socket.decrement_write_con();
+	}
+
+	down_thread_data_client_side.set_error_code( error_code );
+	down_thread_data_client_side.set_async_len( len );
+
+	if( error_code == boost::asio::error::operation_aborted ){
+		if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
+			boost::format	fmt( "Thread ID[%d] down_thread_client_async_write_some_handle candeld : %s" );
+			fmt % boost::this_thread::get_id() % error_code.message();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+	}
+
+	tcp_thread_message* mes = new tcp_thread_message();
+	mes->message = down_que_function_map[DOWN_FUNC_PAUSE_OFF_EVENT];
+	#ifdef	DEBUG
+	mes->func_tag_name = func_tag_to_string( DOWN_FUNC_PAUSE_OFF_EVENT );
+	{
+		boost::format   fmt( "Thread ID[%d] down_queue.push : %s" );
+		fmt % boost::this_thread::get_id() % func_tag_to_string( DOWN_FUNC_PAUSE_OFF_EVENT );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+	#endif
+	while( !down_thread_message_que.push( mes ) ){}
+	downthread_status_cond.notify_one();
+
+}
+
+void tcp_session::down_thread_client_handle_async_write_some( tcp_session::TCP_PROCESS_TYPE_TAG proc ){
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN down_thread_client_handle_async_write_some");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
+
+	DOWN_THREAD_FUNC_TYPE_TAG	func_tag;
+	boost::system::error_code	error_code = down_thread_data_client_side.get_error_code();
+	boost::array<char, MAX_BUFFER_SIZE>& data_buff = down_thread_data_client_side.get_data();
+	std::size_t					data_size  = down_thread_data_client_side.get_size();
+	std::size_t					send_data_size = down_thread_data_client_side.get_send_size();
+	std::size_t					send_size  = down_thread_data_client_side.get_async_len();
+
+	if( !error_code ) {	//no error
+		send_data_size += send_size;
+		down_thread_data_client_side.set_send_size( send_size );
+		if( data_size > send_data_size ){
+			func_tag = DOWN_FUNC_CLIENT_SEND;
+		}
+		else {
+			protocol_module_base::EVENT_TAG module_event =
+				protocol_module->handle_client_send( down_thread_id );
+			#ifdef	DEBUG
+			boost::format	fmt( "Thread ID[%d] protocol_module->handle_client_send() return: %s" );
+			fmt % boost::this_thread::get_id() % func_tag_to_string( module_event );
+			Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__,__LINE__ );
+			#endif
+			func_tag = down_thread_module_event_map[module_event];
+		}
+	}
+	else{	//error
+		if( error_code == boost::asio::error::try_again ){
+			func_tag = DOWN_FUNC_CLIENT_HANDLE_ASEND;
+			downthread_status = DOWNTHREAD_LOCK;
+			tcp_socket::async_rw_handler_t	handler = boost::bind(
+													&tcp_session::down_thread_client_async_write_some_handler,
+													this,
+													boost::asio::placeholders::error,
+													boost::asio::placeholders::bytes_transferred );
+			!ssl_flag ? client_socket.async_write_some(
+										boost::asio::const_buffers_1( data_buff.data() + send_data_size, data_size - send_data_size ),
+										handler )
+					  : client_ssl_socket.async_write_some(
+										boost::asio::const_buffers_1( data_buff.data() + send_data_size, data_size - send_data_size ),
+										handler );
+		}
+		else{
+			func_tag = DOWN_FUNC_CLIENT_DISCONNECT;
+		}
+	}
+	down_thread_next_call_function = down_thread_function_array[func_tag];
+}
+
+void tcp_session::down_thread_sorryserver_async_read_some_handler( const boost::system::error_code& error_code, std::size_t	len ){
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN down_thread_sorryserver_async_read_some_handler");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
+
+	if( ssl_flag ){
+		client_ssl_socket.decrement_read_con();
+	}
+
+	down_thread_data_dest_side.set_error_code( error_code );
+	down_thread_data_dest_side.set_async_len( len );
+
+	if( error_code == boost::asio::error::operation_aborted ){
+			if( unlikely( LOG_LV_DEBUG == Logger::getLogLevel( LOG_CAT_L7VSD_SESSION ) ) ){
+			boost::format   fmt( "Thread ID[%d] down_thread_realserver_async_read_some_handler candeld : %s" );
+			fmt % boost::this_thread::get_id() % error_code.message();
+			Logger::putLogDebug( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+	}
+	tcp_thread_message* mes = new tcp_thread_message();
+	mes->message = down_que_function_map[DOWN_FUNC_PAUSE_OFF_EVENT];
+	#ifdef  DEBUG
+	mes->func_tag_name = func_tag_to_string( DOWN_FUNC_PAUSE_OFF_EVENT );
+	{
+		boost::format   fmt( "Thread ID[%d] down_queue.push : %s" );
+		fmt % boost::this_thread::get_id() % func_tag_to_string( DOWN_FUNC_PAUSE_OFF_EVENT );
+		Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+	}
+	#endif
+	while( !down_thread_message_que.push( mes ) ){}
+	downthread_status_cond.notify_one();
+}
+
+void tcp_session::down_thread_sorryserver_handle_async_read_some( tcp_session::TCP_PROCESS_TYPE_TAG ){
+
+	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+		boost::format formatter("Thread ID[%d] FUNC IN down_thread_sorryserver_handle_async_read_some");
+		formatter % boost::this_thread::get_id();
+		Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+	}
+
+	DOWN_THREAD_FUNC_TYPE_TAG	func_tag;
+	boost::system::error_code	error_code = down_thread_data_dest_side.get_error_code();
+	std::size_t	recv_size = down_thread_data_dest_side.get_async_len();
+
+	if( !error_code ){ // no error
+		if( recv_size > 0 ){ //recv success
+			down_thread_data_dest_side.set_size( recv_size );
+			parent_service.update_down_recv_size( recv_size );
+			protocol_module_base::EVENT_TAG	module_event =
+				protocol_module->handle_sorryserver_recv(	down_thread_id,
+															sorryserver_endpoint,
+															down_thread_data_dest_side.get_data(),
+															recv_size );
+			func_tag = down_thread_module_event_map[module_event];
+		}
+		else{ // zero byte recv try_again
+			downthread_status = DOWNTHREAD_LOCK;
+			func_tag = DOWN_FUNC_SORRYSERVER_HANDLE_ARECEIVE;
+			tcp_socket::async_rw_handler_t handler = 
+				boost::bind(    &tcp_session::down_thread_sorryserver_async_read_some_handler,
+				this,
+				boost::asio::placeholders::error,
+				boost::asio::placeholders::bytes_transferred );
+			sorryserver_socket->async_read_some( boost::asio::buffer( down_thread_data_dest_side.get_data() ), handler );
+		}
+	}
+	else{
+		if( error_code == boost::asio::error::try_again ){
+			downthread_status = DOWNTHREAD_LOCK;
+			func_tag = DOWN_FUNC_SORRYSERVER_HANDLE_ARECEIVE;
+			tcp_socket::async_rw_handler_t	handler = 
+				boost::bind(	&tcp_session::down_thread_sorryserver_async_read_some_handler,
+								this,
+								boost::asio::placeholders::error,
+								boost::asio::placeholders::bytes_transferred );
+
+			sorryserver_socket->async_read_some( boost::asio::buffer( down_thread_data_dest_side.get_data() ), handler );
+		}
+		else{	//recv error
+			func_tag = DOWN_FUNC_SORRYSERVER_DISCONNECT;
+			boost::format	fmt( "Thread ID[%d] down_thread_sorryserver_handle_async_read_some recv error : %s" );
+			fmt % boost::this_thread::get_id() % error_code.message();
+			Logger::putLogInfo( LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__ );
+		}
+	}
+	down_thread_next_call_function = down_thread_function_array[func_tag];
+}
+
 
 //! milliseconds to boost::xtime converter
 void tcp_session::to_time(int in, boost::xtime &xt)
@@ -3354,6 +4069,34 @@ void tcp_session::to_time(int in, boost::xtime &xt)
                 xt.sec++;
                 xt.nsec -= 1000000000;
         }
+}
+
+//! endpoint data to string information
+////! @param[in]        endpoint is target endpoint object
+std::string tcp_session::endpoint_to_string(
+        const endpoint &target_endpoint)
+{
+        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+                boost::format formatter("Thread ID[%d] FUNC IN endpoint_to_string");
+                formatter % boost::this_thread::get_id();
+                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+        }
+
+        std::stringstream ret;
+        if (target_endpoint.address().is_v6()) {
+                ret << "[" << target_endpoint.address().to_string() << "]:" << target_endpoint.port()
+;
+        } else {
+                ret << target_endpoint.address().to_string() << ":" << target_endpoint.port();
+        }
+
+        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+                boost::format formatter("Thread ID[%d] FUNC OUT endpoint_to_string");
+                formatter % boost::this_thread::get_id();
+                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+        }
+
+        return ret.str();
 }
 
 }// namespace l7vs
