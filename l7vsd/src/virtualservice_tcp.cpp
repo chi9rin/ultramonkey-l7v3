@@ -1488,7 +1488,7 @@ void l7vs::virtualservice_tcp::del_realserver(const l7vs::virtualservice_element
         }
 
         //pause active sessions
-        //active_sessions.do_all(boost::bind(&session_thread_control::session_pause_on, _1));
+        active_sessions.do_all(boost::bind(&session_thread_control::session_pause_on, _1));
 
         //del realserver
         for (std::vector<realserver_element>::iterator itr = in_element.realserver_vector.begin();
@@ -1505,7 +1505,7 @@ void l7vs::virtualservice_tcp::del_realserver(const l7vs::virtualservice_element
         }
 
         //run active sessions
-        //active_sessions.do_all(boost::bind(&session_thread_control::session_pause_off, _1));
+        active_sessions.do_all(boost::bind(&session_thread_control::session_pause_off, _1));
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                 boost::format formatter("out_function: void virtualservice_tcp::del_realserver( "

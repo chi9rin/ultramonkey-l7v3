@@ -190,7 +190,7 @@ public:
         //! Default session pool alert off threshold
         const static int  SESSIONPOOL_ALERT_OFF_SIZE_DEFAULT= 8;
 
-        static const int IO_SERVICE_THREADS_NUM = 6;
+        static const int IO_SERVICE_THREADS_NUM = 1;
 protected:
 
         struct    parameter_data {
