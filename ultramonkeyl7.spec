@@ -7,7 +7,7 @@ Summary: The Layer-7 Virtual Server
 Name: ultramonkeyl7
 Version: 3.0.2
 Release: 1%{?dist}
-License: LGPLv2
+License: LGPLv2.1
 Group: System Environment/Daemons
 URL: http://sourceforge.jp/projects/ultramonkey-l7/
 Source0: %{name}-%{version}.tar.gz
