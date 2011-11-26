@@ -32,11 +32,12 @@
  * @return  void
  */
 l7vs::Logger::Logger() :
-    scopedLogCategory(LOG_CAT_L7VSD_LOGGER),
-    scopedLogId(0),
-    scopedLogMessage("Logger Constructor"),
-    scopedLogFile(__FILE__),
-    scopedLogLine(__LINE__){
+        scopedLogCategory(LOG_CAT_L7VSD_LOGGER),
+        scopedLogId(0),
+        scopedLogMessage("Logger Constructor"),
+        scopedLogFile(__FILE__),
+        scopedLogLine(__LINE__)
+{
 }
 
 //! log output constractor
@@ -46,12 +47,13 @@ l7vs::Logger::Logger() :
 //! @param[in]    log message
 //!    @param[in]    filename    (=__FILE__)
 //! @param[in]    lineno        (=__LINE__)
-l7vs::Logger::Logger( LOG_CATEGORY_TAG cat, const unsigned int id, const std::string& msg, const char* file, int line) :
-    scopedLogCategory(cat),
-    scopedLogId(id),
-    scopedLogMessage(msg),
-    scopedLogFile(file),
-    scopedLogLine(line){
+l7vs::Logger::Logger(LOG_CATEGORY_TAG cat, const unsigned int id, const std::string &msg, const char *file, int line) :
+        scopedLogCategory(cat),
+        scopedLogId(id),
+        scopedLogMessage(msg),
+        scopedLogFile(file),
+        scopedLogLine(line)
+{
 
 //    std::stringstream buf;
 //    buf << msg << "  " << file << "  " << line;
@@ -63,7 +65,8 @@ l7vs::Logger::Logger( LOG_CATEGORY_TAG cat, const unsigned int id, const std::st
  * @param   void
  * @return  void
  */
-l7vs::Logger::~Logger(){
+l7vs::Logger::~Logger()
+{
 }
 
 /*!
@@ -72,8 +75,9 @@ l7vs::Logger::~Logger(){
  * @param   category that want to know
  * @return  log level
  */
-l7vs::LOG_LEVEL_TAG l7vs::Logger::getLogLevel(LOG_CATEGORY_TAG cat){
-    return LOG_LV_NONE;
+l7vs::LOG_LEVEL_TAG l7vs::Logger::getLogLevel(LOG_CATEGORY_TAG cat)
+{
+        return LOG_LV_NONE;
 }
 
 /*!
@@ -84,86 +88,92 @@ l7vs::LOG_LEVEL_TAG l7vs::Logger::getLogLevel(LOG_CATEGORY_TAG cat){
  * @retval  true  succeed
  * @retval  false failed
  */
-bool l7vs::Logger::setLogLevel(LOG_CATEGORY_TAG cat, LOG_LEVEL_TAG level){
-    return true;
+bool l7vs::Logger::setLogLevel(LOG_CATEGORY_TAG cat, LOG_LEVEL_TAG level)
+{
+        return true;
 }
 
 /*!
  * output fatal log.
  * this is only wrapper to implement method.
  * @param   category that logging matter occured
- * @param   log message id 
- * @param   log message 
- * @param   current file 
+ * @param   log message id
+ * @param   log message
+ * @param   current file
  * @param   current line
  * @retrun  void
  */
-void l7vs::Logger::putLogFatal(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line){
+void l7vs::Logger::putLogFatal(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string &message, const char *file, int line)
+{
 
-    std::stringstream buf;
-    buf << message << "  " << file << "  " << line;
-    BOOST_MESSAGE ( buf.str() ) ;
+        std::stringstream buf;
+        buf << message << "  " << file << "  " << line;
+        BOOST_MESSAGE(buf.str()) ;
 }
 
 /*!
  * output errorl log.
  * this is only wrapper to implement method.
  * @param   category that logging matter occured
- * @param   log message id 
- * @param   log message 
- * @param   current file 
+ * @param   log message id
+ * @param   log message
+ * @param   current file
  * @param   current line
  * @retrun  void
  */
-void l7vs::Logger::putLogError(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line){
-    std::stringstream buf;
-    buf << message << "  " << file << "  " << line;
-    BOOST_MESSAGE ( buf.str() ) ;
+void l7vs::Logger::putLogError(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string &message, const char *file, int line)
+{
+        std::stringstream buf;
+        buf << message << "  " << file << "  " << line;
+        BOOST_MESSAGE(buf.str()) ;
 }
 
 /*!
  * output warn log.
  * this is only wrapper to implement method.
  * @param   category that logging matter occured
- * @param   log message id 
- * @param   log message 
- * @param   current file 
+ * @param   log message id
+ * @param   log message
+ * @param   current file
  * @param   current line
  * @retrun  void
  */
-void l7vs::Logger::putLogWarn(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line){
-    std::stringstream buf;
-    buf << message << "  " << file << "  " << line;
-    BOOST_MESSAGE ( buf.str() ) ;
+void l7vs::Logger::putLogWarn(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string &message, const char *file, int line)
+{
+        std::stringstream buf;
+        buf << message << "  " << file << "  " << line;
+        BOOST_MESSAGE(buf.str()) ;
 }
 
 /*!
  * output info log.
  * this is only wrapper to implement method.
  * @param   category that logging matter occured
- * @param   log message id 
- * @param   log message 
- * @param   current file 
+ * @param   log message id
+ * @param   log message
+ * @param   current file
  * @param   current line
  * @retrun  void
  */
-void l7vs::Logger::putLogInfo(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line){
-    std::stringstream buf;
-    buf << message << "  " << file << "  " << line;
-    BOOST_MESSAGE ( buf.str() ) ;
+void l7vs::Logger::putLogInfo(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string &message, const char *file, int line)
+{
+        std::stringstream buf;
+        buf << message << "  " << file << "  " << line;
+        BOOST_MESSAGE(buf.str()) ;
 }
 
 /*!
  * output debug log.
  * this is only wrapper to implement method.
  * @param   category that logging matter occured
- * @param   log message id 
- * @param   log message 
- * @param   current file 
+ * @param   log message id
+ * @param   log message
+ * @param   current file
  * @param   current line
  * @retrun  void
  */
-void l7vs::Logger::putLogDebug(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line){
+void l7vs::Logger::putLogDebug(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string &message, const char *file, int line)
+{
 }
 
 /*!
@@ -172,5 +182,6 @@ void l7vs::Logger::putLogDebug(LOG_CATEGORY_TAG cat, const unsigned int message_
  * @param   void
  * @return  void
  */
-void l7vs::Logger::loadConf(){
+void l7vs::Logger::loadConf()
+{
 }

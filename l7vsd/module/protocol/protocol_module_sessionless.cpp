@@ -34,60 +34,62 @@
 
 namespace l7vs
 {
-#ifdef	DEBUG
-std::string	eventtag_to_string( protocol_module_base::EVENT_TAG in ){
-	return
-	  in == protocol_module_base::INITIALIZE				?	"INITIALIZE"
-	: in == protocol_module_base::ACCEPT					?	"ACCEPT"
-	: in == protocol_module_base::CLIENT_RECV				?	"CLIENT_RECV"
-	: in == protocol_module_base::REALSERVER_SELECT			?	"REALSERVER_SELECT"
-	: in == protocol_module_base::REALSERVER_CONNECT		?	"REALSERVER_CONNECT"
-	: in == protocol_module_base::REALSERVER_SEND			?	"REALSERVER_SEND"
-	: in == protocol_module_base::SORRYSERVER_SELECT		?	"SORRYSERVER_SELECT"
-	: in == protocol_module_base::SORRYSERVER_CONNECT		?	"SORRYSERVER_CONNECT"
-	: in == protocol_module_base::SORRYSERVER_SEND			?	"SORRYSERVER_SEND"
-	: in == protocol_module_base::REALSERVER_RECV			?	"REALSERVER_RECV"
-	: in == protocol_module_base::SORRYSERVER_RECV			?	"SORRYSERVER_RECV"
-	: in == protocol_module_base::CLIENT_SELECT				?	"CLIENT_SELECT"
-	: in == protocol_module_base::CLIENT_CONNECTION_CHECK	?	"CLIENT_CONNECTION_CHECK"
-	: in == protocol_module_base::CLIENT_SEND				?	"CLIENT_SEND"
-	: in == protocol_module_base::CLIENT_RESPONSE_SEND		?	"CLIENT_RESPONSE_SEND"
-	: in == protocol_module_base::REALSERVER_DISCONNECT		?	"REALSERVER_DISCONNECT"
-	: in == protocol_module_base::SORRYSERVER_DISCONNECT	?	"SORRYSERVER_DISCONNECT"
-	: in == protocol_module_base::CLIENT_DISCONNECT			?	"CLIENT_DISCONNECT"
-	: in == protocol_module_base::REALSERVER_CLOSE			?	"REALSERVER_CLOSE"
-	: in == protocol_module_base::FINALIZE					?	"FINALIZE"
-	: in == protocol_module_base::STOP						?	"STOP"
-	: 															"NOT_FOUND"
-	;
+#ifdef  DEBUG
+std::string     eventtag_to_string(protocol_module_base::EVENT_TAG in)
+{
+        return
+                in == protocol_module_base::INITIALIZE                                ?       "INITIALIZE"
+                : in == protocol_module_base::ACCEPT                                    ?       "ACCEPT"
+                : in == protocol_module_base::CLIENT_RECV                               ?       "CLIENT_RECV"
+                : in == protocol_module_base::REALSERVER_SELECT                 ?       "REALSERVER_SELECT"
+                : in == protocol_module_base::REALSERVER_CONNECT                ?       "REALSERVER_CONNECT"
+                : in == protocol_module_base::REALSERVER_SEND                   ?       "REALSERVER_SEND"
+                : in == protocol_module_base::SORRYSERVER_SELECT                ?       "SORRYSERVER_SELECT"
+                : in == protocol_module_base::SORRYSERVER_CONNECT               ?       "SORRYSERVER_CONNECT"
+                : in == protocol_module_base::SORRYSERVER_SEND                  ?       "SORRYSERVER_SEND"
+                : in == protocol_module_base::REALSERVER_RECV                   ?       "REALSERVER_RECV"
+                : in == protocol_module_base::SORRYSERVER_RECV                  ?       "SORRYSERVER_RECV"
+                : in == protocol_module_base::CLIENT_SELECT                             ?       "CLIENT_SELECT"
+                : in == protocol_module_base::CLIENT_CONNECTION_CHECK   ?       "CLIENT_CONNECTION_CHECK"
+                : in == protocol_module_base::CLIENT_SEND                               ?       "CLIENT_SEND"
+                : in == protocol_module_base::CLIENT_RESPONSE_SEND              ?       "CLIENT_RESPONSE_SEND"
+                : in == protocol_module_base::REALSERVER_DISCONNECT             ?       "REALSERVER_DISCONNECT"
+                : in == protocol_module_base::SORRYSERVER_DISCONNECT    ?       "SORRYSERVER_DISCONNECT"
+                : in == protocol_module_base::CLIENT_DISCONNECT                 ?       "CLIENT_DISCONNECT"
+                : in == protocol_module_base::REALSERVER_CLOSE                  ?       "REALSERVER_CLOSE"
+                : in == protocol_module_base::FINALIZE                                  ?       "FINALIZE"
+                : in == protocol_module_base::STOP                                              ?       "STOP"
+                :                                                                                                                       "NOT_FOUND"
+                ;
 }
 
-std::string	session_thread_data_to_string( const boost::shared_ptr< protocol_module_sessionless::session_thread_data_sessionless > in_ptr ){
-	boost::format	fmt(	"DATA : Thread ID[%d]\n"
-							"		Thread_division[%d]\n"
-							"		Pair Thread ID[%d]\n"
-							"		end_flag[%d]\n"
-							"		accept_end_flag[%d]\n"
-							"		sorry_flag[%d]\n"
-							"		sorryserver_switch_flag[%d]\n"
-							"		realserver_switch_flag[%d]\n"
-							"		target_endpoint[%s:%d]\n"
-							"		client_endpoint[%s:%d]\n"
-							"		last_status[%d]\n"
-						);
-	fmt % in_ptr->thread_id
-		% in_ptr->thread_division
-		% in_ptr->pair_thread_id
-		% in_ptr->end_flag
-		% in_ptr->accept_end_flag
-		% in_ptr->sorry_flag
-		% in_ptr->sorryserver_switch_flag
-		% in_ptr->realserver_switch_flag
-		% in_ptr->target_endpoint.address().to_string() % in_ptr->target_endpoint.port()
-		% in_ptr->client_endpoint_tcp.address().to_string() % in_ptr->client_endpoint_tcp.port()
-		% eventtag_to_string( in_ptr->last_status );
+std::string     session_thread_data_to_string(const boost::shared_ptr< protocol_module_sessionless::session_thread_data_sessionless > in_ptr)
+{
+        boost::format   fmt("DATA : Thread ID[%d]\n"
+                            "		Thread_division[%d]\n"
+                            "		Pair Thread ID[%d]\n"
+                            "		end_flag[%d]\n"
+                            "		accept_end_flag[%d]\n"
+                            "		sorry_flag[%d]\n"
+                            "		sorryserver_switch_flag[%d]\n"
+                            "		realserver_switch_flag[%d]\n"
+                            "		target_endpoint[%s:%d]\n"
+                            "		client_endpoint[%s:%d]\n"
+                            "		last_status[%d]\n"
+                           );
+        fmt % in_ptr->thread_id
+        % in_ptr->thread_division
+        % in_ptr->pair_thread_id
+        % in_ptr->end_flag
+        % in_ptr->accept_end_flag
+        % in_ptr->sorry_flag
+        % in_ptr->sorryserver_switch_flag
+        % in_ptr->realserver_switch_flag
+        % in_ptr->target_endpoint.address().to_string() % in_ptr->target_endpoint.port()
+        % in_ptr->client_endpoint_tcp.address().to_string() % in_ptr->client_endpoint_tcp.port()
+        % eventtag_to_string(in_ptr->last_status);
 
-	return fmt.str();
+        return fmt.str();
 }
 
 
@@ -362,39 +364,39 @@ protocol_module_base::check_message_result protocol_module_sessionless::check_pa
         sregex    sorry_uri_regex
         =    +('/' >>
                *(
-                 alpha | digit |
-                 (set = '-', '_', '.', '!', '~', '*', '\'', '(', ')') |
-                 '%' >> repeat<2>(xdigit) |
-                 (set = ':', '@', '&', '=', '+', '$', ',')
+                       alpha | digit |
+                       (set = '-', '_', '.', '!', '~', '*', '\'', '(', ')') |
+                       '%' >> repeat<2>(xdigit) |
+                       (set = ':', '@', '&', '=', '+', '$', ',')
                )
                >>
                *(';' >>
                  *(
-                   alpha | digit |
-                   (set = '-', '_', '.', '!', '~', '*', '\'', '(', ')') | // mark
-                   '%' >> repeat<2>(xdigit) | // escaped
-                   (set = ':', '@', '&', '=', '+', '$', ',')
+                         alpha | digit |
+                         (set = '-', '_', '.', '!', '~', '*', '\'', '(', ')') | // mark
+                         '%' >> repeat<2>(xdigit) | // escaped
+                         (set = ':', '@', '&', '=', '+', '$', ',')
                  ) // pchar
-               ) // param
-             ) // segment
+                ) // param
+              ) // segment
              >>
              !('?' >>
                *(
-                 (set = ';', '/', '?', ':', '@', '&', '=', '+', '$', ',') | //reserved
-                 alpha | digit |
-                 (set = '-', '_', '.', '!', '~', '*', '\'', '(', ')') | // mark
-                 '%' >> repeat<2>(xdigit) // escaped
+                       (set = ';', '/', '?', ':', '@', '&', '=', '+', '$', ',') | //reserved
+                       alpha | digit |
+                       (set = '-', '_', '.', '!', '~', '*', '\'', '(', ')') | // mark
+                       '%' >> repeat<2>(xdigit) // escaped
                ) // uric
-             ) // query
+              ) // query
              >>
              !('#' >>
                *(
-                 (set = ';', '/', '?', ':', '@', '&', '=', '+', '$', ',') | //reserved
-                 alpha | digit |
-                 (set = '-', '_', '.', '!', '~', '*', '\'', '(', ')') | // mark
-                 '%' >> repeat<2>(xdigit) // escaped
+                       (set = ';', '/', '?', ':', '@', '&', '=', '+', '$', ',') | //reserved
+                       alpha | digit |
+                       (set = '-', '_', '.', '!', '~', '*', '\'', '(', ')') | // mark
+                       '%' >> repeat<2>(xdigit) // escaped
                ) // uric
-             ); // fragment
+              ); // fragment
 
         typedef std::vector<std::string>::const_iterator vec_str_it;
 
@@ -489,13 +491,13 @@ protocol_module_base::check_message_result protocol_module_sessionless::check_pa
                                 //statistic flag is OFF
                                 if (!stats_checked) {
                                         //next item exist
-                                        if(++it != it_end) {
-                                            //collect statistic flag must be 0 or 1
-                                            if(*it == "0" || *it == "1"){
+                                        if (++it != it_end) {
+                                                //collect statistic flag must be 0 or 1
+                                                if (*it == "0" || *it == "1") {
                                                         //check OK
                                                         //set statistic flag ON
-                                                        stats_checked = true;                                            }
-                                            else {
+                                                        stats_checked = true;
+                                                } else {
                                                         std::ostringstream ostr;
                                                         ostr << "'-c/--statistic' option value '" << *it << "' is not a valid value.";
 
@@ -605,39 +607,39 @@ protocol_module_base::check_message_result protocol_module_sessionless::set_para
         sregex    sorry_uri_regex
         =    +('/' >>
                *(
-                 alpha | digit |
-                 (set = '-', '_', '.', '!', '~', '*', '\'', '(', ')') |
-                 '%' >> repeat<2>(xdigit) |
-                 (set = ':', '@', '&', '=', '+', '$', ',')
+                       alpha | digit |
+                       (set = '-', '_', '.', '!', '~', '*', '\'', '(', ')') |
+                       '%' >> repeat<2>(xdigit) |
+                       (set = ':', '@', '&', '=', '+', '$', ',')
                )
                >>
                *(';' >>
                  *(
-                   alpha | digit |
-                   (set = '-', '_', '.', '!', '~', '*', '\'', '(', ')') | // mark
-                   '%' >> repeat<2>(xdigit) | // escaped
-                   (set = ':', '@', '&', '=', '+', '$', ',')
+                         alpha | digit |
+                         (set = '-', '_', '.', '!', '~', '*', '\'', '(', ')') | // mark
+                         '%' >> repeat<2>(xdigit) | // escaped
+                         (set = ':', '@', '&', '=', '+', '$', ',')
                  ) // pchar
-               ) // param
-             ) // segment
+                ) // param
+              ) // segment
              >>
              !('?' >>
                *(
-                 (set = ';', '/', '?', ':', '@', '&', '=', '+', '$', ',') | //reserved
-                 alpha | digit |
-                 (set = '-', '_', '.', '!', '~', '*', '\'', '(', ')') | // mark
-                 '%' >> repeat<2>(xdigit) // escaped
+                       (set = ';', '/', '?', ':', '@', '&', '=', '+', '$', ',') | //reserved
+                       alpha | digit |
+                       (set = '-', '_', '.', '!', '~', '*', '\'', '(', ')') | // mark
+                       '%' >> repeat<2>(xdigit) // escaped
                ) // uric
-             ) // query
+              ) // query
              >>
              !('#' >>
                *(
-                 (set = ';', '/', '?', ':', '@', '&', '=', '+', '$', ',') | //reserved
-                 alpha | digit |
-                 (set = '-', '_', '.', '!', '~', '*', '\'', '(', ')') | // mark
-                 '%' >> repeat<2>(xdigit) // escaped
+                       (set = ';', '/', '?', ':', '@', '&', '=', '+', '$', ',') | //reserved
+                       alpha | digit |
+                       (set = '-', '_', '.', '!', '~', '*', '\'', '(', ')') | // mark
+                       '%' >> repeat<2>(xdigit) // escaped
                ) // uric
-             ); // fragment
+              ); // fragment
 
         typedef std::vector<std::string>::const_iterator vec_str_it;
 
@@ -736,16 +738,16 @@ protocol_module_base::check_message_result protocol_module_sessionless::set_para
                                 //statistic flag is OFF
                                 if (!stats_checked) {
                                         //next item exist
-                                        if(++it != it_end) {
-                                            //collect statistic flag must be 0 or 1
-                                            if(*it == "0" || *it == "1"){
+                                        if (++it != it_end) {
+                                                //collect statistic flag must be 0 or 1
+                                                if (*it == "0" || *it == "1") {
                                                         //check OK
                                                         //set statistic flag ON
                                                         stats_checked = true;
 
                                                         //set collect statistic flag
-                                                        statistic = boost::lexical_cast<int>(*it);                                          }
-                                            else {
+                                                        statistic = boost::lexical_cast<int>(*it);
+                                                } else {
                                                         std::ostringstream ostr;
                                                         ostr << "'-c/--statistic' option value '" << *it << "' is not a valid value.";
 
@@ -899,7 +901,7 @@ void protocol_module_sessionless::get_option_info(std::string &option)
 
         boost::format option_formatter("%s--sorry-uri '%s' --statistic %d");
         option_formatter % (forwarded_for ? "--forwarded-for " : "") % sorry_uri.c_array()
-                         % statistic;
+        % statistic;
         option.assign(option_formatter.str());
 
         /*-------- DEBUG LOG --------*/
@@ -1106,7 +1108,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_session_fina
         try {
                 boost::mutex::scoped_lock slock(session_thread_data_map_mutex);
 
-                session_thread_data_map_it	session_thread_data_it = session_thread_data_map.find(up_thread_id);
+                session_thread_data_map_it      session_thread_data_it = session_thread_data_map.find(up_thread_id);
                 if (session_thread_data_it != session_thread_data_map.end()) {
                         thread_data_ptr p_up = session_thread_data_it->second;
                         /*-------- DEBUG LOG --------*/
@@ -1121,7 +1123,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_session_fina
 
                 session_thread_data_it = session_thread_data_map.find(down_thread_id);
                 if (session_thread_data_it != session_thread_data_map.end()) {
-						thread_data_ptr p_down = session_thread_data_it->second;
+                        thread_data_ptr p_down = session_thread_data_it->second;
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel())) {
                                 boost::format formatter("delete : address = &(%d).");
@@ -1205,16 +1207,16 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_accept(const
                         putLogDebug(100035, formatter.str(), __FILE__, __LINE__);
                 }
                 /*------DEBUG LOG END------*/
-		//sorry flag on 
-                if (session_data->sorry_flag == SORRY_FLAG_ON) { 
-                        //set return status 
-                        status = SORRYSERVER_SELECT; 
-                } 
-                //sorry flag off 
-                else { 
-                        //set return status 
-                        status = REALSERVER_SELECT; 
-                } 
+                //sorry flag on
+                if (session_data->sorry_flag == SORRY_FLAG_ON) {
+                        //set return status
+                        status = SORRYSERVER_SELECT;
+                }
+                //sorry flag off
+                else {
+                        //set return status
+                        status = REALSERVER_SELECT;
+                }
 
         } catch (int e) {
                 /*-------- DEBUG LOG --------*/
@@ -2451,49 +2453,49 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_c
         thread_data_ptr session_data;
 
         try {
-			session_thread_data_map_mutex.lock();
+                session_thread_data_map_mutex.lock();
 
-			//thread id check
-			session_thread_data_map_it	session_thread_it = session_thread_data_map.find(thread_id);
-			if (unlikely(session_thread_it == session_thread_data_map.end() || session_thread_it->second == NULL)) {
-				boost::format formatter("Invalid thread id. thread id : %d.");
-				formatter % boost::this_thread::get_id();
-				putLogError(100042, formatter.str(), __FILE__, __LINE__);
-				session_thread_data_map_mutex.unlock();
-				throw - 1;
-			}
+                //thread id check
+                session_thread_data_map_it      session_thread_it = session_thread_data_map.find(thread_id);
+                if (unlikely(session_thread_it == session_thread_data_map.end() || session_thread_it->second == NULL)) {
+                        boost::format formatter("Invalid thread id. thread id : %d.");
+                        formatter % boost::this_thread::get_id();
+                        putLogError(100042, formatter.str(), __FILE__, __LINE__);
+                        session_thread_data_map_mutex.unlock();
+                        throw - 1;
+                }
 
-			session_data = session_thread_it->second;
+                session_data = session_thread_it->second;
 
-			//endpoint check
-			receive_data_map_it	receive_data_it = session_data->receive_data_map.find(session_data->client_endpoint_tcp);
-			if (unlikely(receive_data_it == session_data->receive_data_map.end())) {
-				boost::format formatter("Invalid endpoint. thread id : %d.");
-				formatter % boost::this_thread::get_id();
-				putLogError(100043, formatter.str(), __FILE__, __LINE__);
-				session_thread_data_map_mutex.unlock();
-				throw - 1;
-			}
-	
-			//receive_buffer pointer check
-			 receive_data &recv_data = receive_data_it->second;
-			if (unlikely(recv_data.receive_buffer == NULL)) {
-				session_thread_data_map_mutex.unlock();
-				return CLIENT_RECV;
-			}
+                //endpoint check
+                receive_data_map_it     receive_data_it = session_data->receive_data_map.find(session_data->client_endpoint_tcp);
+                if (unlikely(receive_data_it == session_data->receive_data_map.end())) {
+                        boost::format formatter("Invalid endpoint. thread id : %d.");
+                        formatter % boost::this_thread::get_id();
+                        putLogError(100043, formatter.str(), __FILE__, __LINE__);
+                        session_thread_data_map_mutex.unlock();
+                        throw - 1;
+                }
 
-			//send list check
-			send_status_it it = recv_data.send_status_list.begin();
-			send_status_it it_end = recv_data.send_status_list.end();
-			it = find_if(it, it_end, data_send_possible());
-			if (unlikely(it == it_end)) {
-				boost::format formatter("Sending possible data is not existed. thread id : %d.");
-				formatter % boost::this_thread::get_id();
-				putLogError(100045, formatter.str(), __FILE__, __LINE__);
-				session_thread_data_map_mutex.unlock();
-				throw - 1;
-			}
-			session_thread_data_map_mutex.unlock();
+                //receive_buffer pointer check
+                receive_data &recv_data = receive_data_it->second;
+                if (unlikely(recv_data.receive_buffer == NULL)) {
+                        session_thread_data_map_mutex.unlock();
+                        return CLIENT_RECV;
+                }
+
+                //send list check
+                send_status_it it = recv_data.send_status_list.begin();
+                send_status_it it_end = recv_data.send_status_list.end();
+                it = find_if(it, it_end, data_send_possible());
+                if (unlikely(it == it_end)) {
+                        boost::format formatter("Sending possible data is not existed. thread id : %d.");
+                        formatter % boost::this_thread::get_id();
+                        putLogError(100045, formatter.str(), __FILE__, __LINE__);
+                        session_thread_data_map_mutex.unlock();
+                        throw - 1;
+                }
+                session_thread_data_map_mutex.unlock();
 
                 //send buffer rest size initialization
                 send_buffer_remian_size = send_buffer_end_size;
@@ -3326,12 +3328,12 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                 if (unlikely(recv_data.receive_buffer == NULL)) {
                         status = CLIENT_RECV;
                         goto handle_sorryserver_connect_out;
-/*
-                        boost::format formatter("Invalid pointer. thread id : %d.");
-                        formatter % boost::this_thread::get_id();
-                        putLogError(100065, formatter.str(), __FILE__, __LINE__);
-                        throw - 1;
-*/
+                        /*
+                                                boost::format formatter("Invalid pointer. thread id : %d.");
+                                                formatter % boost::this_thread::get_id();
+                                                putLogError(100065, formatter.str(), __FILE__, __LINE__);
+                                                throw - 1;
+                        */
                 }
 
                 //send list check
@@ -4158,14 +4160,14 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                         session_thread_it = session_thread_data_map.find(thread_id);
                         if (unlikely(session_thread_it == session_thread_data_map.end()
                                      || session_thread_it->second == NULL)) {
-#ifdef	DEBUG
-								// debug code insert 
-								std::stringstream	buff;
-								buff << "Invalid Thread ID. Thread ID[" << boost::this_thread::get_id() << "] map has thread datas = \n";
-								for( session_thread_data_map_it itr = session_thread_data_map.begin(); itr != session_thread_data_map.end(); itr++ ){
-									buff << session_thread_data_to_string( itr->second ) << "\n";
-								}
-								putLogError(100080, buff.str(), __FILE__, __LINE__ );
+#ifdef  DEBUG
+                                // debug code insert
+                                std::stringstream       buff;
+                                buff << "Invalid Thread ID. Thread ID[" << boost::this_thread::get_id() << "] map has thread datas = \n";
+                                for (session_thread_data_map_it itr = session_thread_data_map.begin(); itr != session_thread_data_map.end(); itr++) {
+                                        buff << session_thread_data_to_string(itr->second) << "\n";
+                                }
+                                putLogError(100080, buff.str(), __FILE__, __LINE__);
 #else
                                 boost::format formatter("Invalid thread id. thread id : %d.");
                                 formatter % boost::this_thread::get_id();

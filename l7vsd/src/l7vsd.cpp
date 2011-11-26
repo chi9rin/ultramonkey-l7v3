@@ -45,7 +45,7 @@ namespace l7vs
 //! constructor
 l7vsd::l7vsd()
         :    help(false),
-			 debug(false),
+             debug(false),
              exit_requested(0),
              received_sig(0)
 {
@@ -53,8 +53,8 @@ l7vsd::l7vsd()
 
         option_dic["-h"]        = boost::bind(&l7vsd::parse_help, this, _1, _2, _3);
         option_dic["--help"]    = boost::bind(&l7vsd::parse_help, this, _1, _2, _3);
-		option_dic["-d"]		= boost::bind(&l7vsd::parse_debug, this, _1, _2, _3);
-		option_dic["--debug"]	= boost::bind(&l7vsd::parse_debug, this, _1, _2, _3);
+        option_dic["-d"]                = boost::bind(&l7vsd::parse_debug, this, _1, _2, _3);
+        option_dic["--debug"]   = boost::bind(&l7vsd::parse_debug, this, _1, _2, _3);
 
         starttime = boost::posix_time::second_clock::local_time();
 }
@@ -153,8 +153,8 @@ void    l7vsd::list_virtual_service_verbose(l7vsd_response *response, error_code
         // get all category log level
         Logger::getLogLevelAll(response->log_status_list);
 
-    //get snmp info
-    response->snmpinfo = snmpagent::get_snmp_info();
+        //get snmp info
+        response->snmpinfo = snmpagent::get_snmp_info();
 
         // calc total bps
         unsigned long long    total_bytes =
@@ -285,8 +285,7 @@ void    l7vsd::add_virtual_service(const virtualservice_element *in_vselement, e
                         } else {
                                 oss << in_vselement->udp_recv_endpoint.address().to_string() << ":" << in_vselement->udp_recv_endpoint.port();
                         }
-                }
-                else {
+                } else {
                         if (in_vselement->tcp_accept_endpoint.address().is_v6()) {
                                 oss << "[" << in_vselement->tcp_accept_endpoint.address().to_string() << "]:" << in_vselement->tcp_accept_endpoint.port();
                         } else {
@@ -296,7 +295,7 @@ void    l7vsd::add_virtual_service(const virtualservice_element *in_vselement, e
 
                 trap_msg.message = oss.str();
 
-		error_code err_code;
+                error_code err_code;
 
                 //push the trap message
                 snmpagent::push_trapmessage(trap_msg, err_code);
@@ -364,8 +363,7 @@ void    l7vsd::del_virtual_service(const virtualservice_element *in_vselement, e
                         } else {
                                 oss << in_vselement->udp_recv_endpoint.address().to_string() << ":" << in_vselement->udp_recv_endpoint.port();
                         }
-                }
-                else {
+                } else {
                         if (in_vselement->tcp_accept_endpoint.address().is_v6()) {
                                 oss << "[" << in_vselement->tcp_accept_endpoint.address().to_string() << "]:" << in_vselement->tcp_accept_endpoint.port();
                         } else {
@@ -375,7 +373,7 @@ void    l7vsd::del_virtual_service(const virtualservice_element *in_vselement, e
 
                 trap_msg.message = oss.str();
 
-		error_code err_code;
+                error_code err_code;
 
                 //push the trap message
                 snmpagent::push_trapmessage(trap_msg, err_code);
@@ -441,8 +439,7 @@ void    l7vsd::edit_virtual_service(const virtualservice_element *in_vselement, 
                         } else {
                                 oss << in_vselement->udp_recv_endpoint.address().to_string() << ":" << in_vselement->udp_recv_endpoint.port();
                         }
-                }
-                else {
+                } else {
                         if (in_vselement->tcp_accept_endpoint.address().is_v6()) {
                                 oss << "[" << in_vselement->tcp_accept_endpoint.address().to_string() << "]:" << in_vselement->tcp_accept_endpoint.port();
                         } else {
@@ -452,15 +449,15 @@ void    l7vsd::edit_virtual_service(const virtualservice_element *in_vselement, 
 
                 trap_msg.message = oss.str();
 
-		error_code err_code;
+                error_code err_code;
 
                 //push the trap message
-		snmpagent::push_trapmessage(trap_msg, err_code);
+                snmpagent::push_trapmessage(trap_msg, err_code);
 
                 if (err_code) {
                         std::string msg("Push trap message failed.");
                         Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 126, msg, __FILE__, __LINE__);
-                }                
+                }
 
         } else {
                 std::string msg("virtual service not found.");
@@ -516,8 +513,7 @@ void    l7vsd::add_real_server(const virtualservice_element *in_vselement, error
                         } else {
                                 oss << in_vselement->udp_recv_endpoint.address().to_string() << ":" << in_vselement->udp_recv_endpoint.port();
                         }
-                }
-                else {
+                } else {
                         if (in_vselement->tcp_accept_endpoint.address().is_v6()) {
                                 oss << "[" << in_vselement->tcp_accept_endpoint.address().to_string() << "]:" << in_vselement->tcp_accept_endpoint.port();
                         } else {
@@ -533,8 +529,7 @@ void    l7vsd::add_real_server(const virtualservice_element *in_vselement, error
                                 } else {
                                         oss << ",rs:"  << elem.udp_endpoint.address().to_string() << ":" << elem.udp_endpoint.port();
                                 }
-                        }
-                        else {
+                        } else {
                                 if (elem.tcp_endpoint.address().is_v6()) {
                                         oss << ",rs:[" << elem.tcp_endpoint.address().to_string() << "]:" << elem.tcp_endpoint.port();
                                 } else {
@@ -545,15 +540,15 @@ void    l7vsd::add_real_server(const virtualservice_element *in_vselement, error
 
                 trap_msg.message = oss.str();
 
-		error_code err_code;
+                error_code err_code;
 
                 //push the trap message
-		snmpagent::push_trapmessage(trap_msg, err_code);
+                snmpagent::push_trapmessage(trap_msg, err_code);
 
                 if (err_code) {
                         std::string msg("Push trap message failed.");
                         Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 127, msg, __FILE__, __LINE__);
-                }                
+                }
 
 
         } else {
@@ -610,8 +605,7 @@ void    l7vsd::del_real_server(const virtualservice_element *in_vselement, error
                         } else {
                                 oss << in_vselement->udp_recv_endpoint.address().to_string() << ":" << in_vselement->udp_recv_endpoint.port();
                         }
-                }
-                else {
+                } else {
                         if (in_vselement->tcp_accept_endpoint.address().is_v6()) {
                                 oss << "[" << in_vselement->tcp_accept_endpoint.address().to_string() << "]:" << in_vselement->tcp_accept_endpoint.port();
                         } else {
@@ -627,8 +621,7 @@ void    l7vsd::del_real_server(const virtualservice_element *in_vselement, error
                                 } else {
                                         oss << ",rs:"  << elem.udp_endpoint.address().to_string() << ":" << elem.udp_endpoint.port();
                                 }
-                        }
-                        else {
+                        } else {
                                 if (elem.tcp_endpoint.address().is_v6()) {
                                         oss << ",rs:[" << elem.tcp_endpoint.address().to_string() << "]:" << elem.tcp_endpoint.port();
                                 } else {
@@ -639,7 +632,7 @@ void    l7vsd::del_real_server(const virtualservice_element *in_vselement, error
 
                 trap_msg.message = oss.str();
 
-		error_code err_code;
+                error_code err_code;
 
                 //push the trap message
                 snmpagent::push_trapmessage(trap_msg, err_code);
@@ -702,8 +695,7 @@ void    l7vsd::edit_real_server(const virtualservice_element *in_vselement, erro
                         } else {
                                 oss << in_vselement->udp_recv_endpoint.address().to_string() << ":" << in_vselement->udp_recv_endpoint.port();
                         }
-                }
-                else {
+                } else {
                         if (in_vselement->tcp_accept_endpoint.address().is_v6()) {
                                 oss << "[" << in_vselement->tcp_accept_endpoint.address().to_string() << "]:" << in_vselement->tcp_accept_endpoint.port();
                         } else {
@@ -719,8 +711,7 @@ void    l7vsd::edit_real_server(const virtualservice_element *in_vselement, erro
                                 } else {
                                         oss << ",rs:"  << elem.udp_endpoint.address().to_string() << ":" << elem.udp_endpoint.port();
                                 }
-                        }
-                        else {
+                        } else {
                                 if (elem.tcp_endpoint.address().is_v6()) {
                                         oss << ",rs:[" << elem.tcp_endpoint.address().to_string() << "]:" << elem.tcp_endpoint.port();
                                 } else {
@@ -731,7 +722,7 @@ void    l7vsd::edit_real_server(const virtualservice_element *in_vselement, erro
 
                 trap_msg.message = oss.str();
 
-		error_code err_code;
+                error_code err_code;
 
                 //push the trap message
                 snmpagent::push_trapmessage(trap_msg, err_code);
@@ -768,7 +759,7 @@ void    l7vsd::flush_virtual_service(error_code &err)
                 } else {
                         //create trap message
                         trapmessage trap_msg;
-			trap_msg.type = trapmessage::VIRTUALSERVICE_REMOVE;
+                        trap_msg.type = trapmessage::VIRTUALSERVICE_REMOVE;
 
                         std::ostringstream oss;
                         oss << "TRAP00020003,A virtual service was eliminated.vs:";
@@ -778,8 +769,7 @@ void    l7vsd::flush_virtual_service(error_code &err)
                                 } else {
                                         oss << (*itr)->get_element().udp_recv_endpoint.address().to_string() << ":" << (*itr)->get_element().udp_recv_endpoint.port();
                                 }
-                        }
-                        else {
+                        } else {
                                 if ((*itr)->get_element().tcp_accept_endpoint.address().is_v6()) {
                                         oss << "[" << (*itr)->get_element().tcp_accept_endpoint.address().to_string() << "]:" << (*itr)->get_element().tcp_accept_endpoint.port();
                                 } else {
@@ -789,7 +779,7 @@ void    l7vsd::flush_virtual_service(error_code &err)
 
                         trap_msg.message = oss.str();
 
-			error_code err_code;
+                        error_code err_code;
 
                         //push the trap message
                         snmpagent::push_trapmessage(trap_msg, err_code);
@@ -1011,7 +1001,7 @@ void    l7vsd::reload_parameter(const PARAMETER_COMPONENT_TAG *comp, error_code 
 
 
 }
-void    l7vsd::set_snmp_info(const snmp_info* info, error_code &err)
+void    l7vsd::set_snmp_info(const snmp_info *info, error_code &err)
 {
         Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 42, "l7vsd::set_snmp_info", __FILE__, __LINE__);
 
@@ -1032,62 +1022,53 @@ void    l7vsd::set_snmp_info(const snmp_info* info, error_code &err)
         }
         /*------ DEBUG LOG END ------*/
 
-    if (info->option_set_flag & snmp_info::SNMP_ENABLE_OPTION_FLAG)
-    {
-        if(info->enabled) {
-            snmpagent::enable();
-        }
-        else {
-            snmpagent::disable();
-        }
-    }
-
-    if (info->option_set_flag & snmp_info::SNMP_LOGTRAP_OPTION_FLAG)
-    {
-        if(info->logtrap_enabled) {
-            snmpagent::logtrap_enable();
-        }
-        else {
-            snmpagent::logtrap_disable();
-        }
-    }
-
-    if (info->option_set_flag & snmp_info::SNMP_LOGTRAP_LEVEL_OPTION_FLAG)
-    {
-        snmpagent::set_logtrap_level(info->logtrap_level);
-    }
-
-    if (info->option_set_flag & snmp_info::SNMP_INTERVAL_OPTION_FLAG)
-    {
-        snmpagent::set_interval(info->interval);
-    }
-
-    if (info->option_set_flag & snmp_info::SNMP_REFRESH_OPTION_FLAG)
-    {
-        {
-            boost::mutex::scoped_lock vslist_lock(vslist_mutex);
-            virtualservice_element element;
-            element.udpmode = false;
-            element.tcp_accept_endpoint = info->vs_endpoint;
-            element.protocol_module_name = info->protocol;
-            vslist_type::iterator it = search_vslist(element, true);
-            if (it == vslist.end())
-            {
-                std::string msg("virtual service not found.");
-                Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 29, msg, __FILE__, __LINE__);
-
-                err.setter(true, msg);
-                return;
-            }
+        if (info->option_set_flag & snmp_info::SNMP_ENABLE_OPTION_FLAG) {
+                if (info->enabled) {
+                        snmpagent::enable();
+                } else {
+                        snmpagent::disable();
+                }
         }
 
-        snmpagent::refresh_statistics(info->vs_endpoint, info->protocol);
-    }
+        if (info->option_set_flag & snmp_info::SNMP_LOGTRAP_OPTION_FLAG) {
+                if (info->logtrap_enabled) {
+                        snmpagent::logtrap_enable();
+                } else {
+                        snmpagent::logtrap_disable();
+                }
+        }
 
-    if (info->option_set_flag & snmp_info::SNMP_REFRESH_ALL_OPTION_FLAG)
-    {
-        snmpagent::refresh_all_statistics();
-    }
+        if (info->option_set_flag & snmp_info::SNMP_LOGTRAP_LEVEL_OPTION_FLAG) {
+                snmpagent::set_logtrap_level(info->logtrap_level);
+        }
+
+        if (info->option_set_flag & snmp_info::SNMP_INTERVAL_OPTION_FLAG) {
+                snmpagent::set_interval(info->interval);
+        }
+
+        if (info->option_set_flag & snmp_info::SNMP_REFRESH_OPTION_FLAG) {
+                {
+                        boost::mutex::scoped_lock vslist_lock(vslist_mutex);
+                        virtualservice_element element;
+                        element.udpmode = false;
+                        element.tcp_accept_endpoint = info->vs_endpoint;
+                        element.protocol_module_name = info->protocol;
+                        vslist_type::iterator it = search_vslist(element, true);
+                        if (it == vslist.end()) {
+                                std::string msg("virtual service not found.");
+                                Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 29, msg, __FILE__, __LINE__);
+
+                                err.setter(true, msg);
+                                return;
+                        }
+                }
+
+                snmpagent::refresh_statistics(info->vs_endpoint, info->protocol);
+        }
+
+        if (info->option_set_flag & snmp_info::SNMP_REFRESH_ALL_OPTION_FLAG) {
+                snmpagent::refresh_all_statistics();
+        }
 
 }
 
@@ -1182,7 +1163,7 @@ boost::mutex    &l7vsd::get_virtualservice_list_mutex()
 //! @return    replication_ptr
 replication::REPLICATION_MODE_TAG l7vsd::get_replication_state() const
 {
-    return rep->get_status();
+        return rep->get_status();
 }
 
 
@@ -1218,15 +1199,15 @@ int    l7vsd::run(int argc, char *argv[])
                         return 0;
                 }
 
-				if( !debug ){
-	                if (0 > daemon(0, 0)) {
-                        std::stringstream buf;
-                        buf << "daemon() failed: " << strerror(errno);
-                        logger.putLogError(LOG_CAT_L7VSD_MAINTHREAD, 3, buf.str(), __FILE__, __LINE__);
-                        munlockall();
-                        return -1;
-	                }
-				}
+                if (!debug) {
+                        if (0 > daemon(0, 0)) {
+                                std::stringstream buf;
+                                buf << "daemon() failed: " << strerror(errno);
+                                logger.putLogError(LOG_CAT_L7VSD_MAINTHREAD, 3, buf.str(), __FILE__, __LINE__);
+                                munlockall();
+                                return -1;
+                        }
+                }
 
                 //set max file open num
                 Parameter    param;
@@ -1328,7 +1309,7 @@ int    l7vsd::run(int argc, char *argv[])
                 snmpagent agent(this);
 
                 // snmp trap function set
-                Logger::set_snmp_send_trap_func( boost::bind( &snmpagent::push_trapmessage, _1, _2 ) );
+                Logger::set_snmp_send_trap_func(boost::bind(&snmpagent::push_trapmessage, _1, _2));
 
                 error_code err_code;
 
@@ -1370,8 +1351,8 @@ int    l7vsd::run(int argc, char *argv[])
                         boost::this_thread::yield();
                 }
 
-		// snmp trap function unset
-		Logger::set_snmp_send_trap_func(NULL);
+                // snmp trap function unset
+                Logger::set_snmp_send_trap_func(NULL);
 
                 // check snmp function enabled
                 if (snmpagent::get_snmp_info().enabled) {
@@ -1467,10 +1448,11 @@ bool    l7vsd::parse_help(int &pos, int argc, char *argv[])
 }
 
 //! command debug parse
-bool	l7vsd::parse_debug( int& pos, int argc, char* argv[] ){
-		Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 38, "l7vsd::parse_help", __FILE__, __LINE__);
-		debug = true;
-		return true;
+bool    l7vsd::parse_debug(int &pos, int argc, char *argv[])
+{
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 38, "l7vsd::parse_help", __FILE__, __LINE__);
+        debug = true;
+        return true;
 }
 
 //! create usage string

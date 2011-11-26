@@ -47,8 +47,8 @@ public:
         //! @enum    STATS_MODE_TAG
         //! @brief    statistic mode type.
         enum STATS_MODE_TAG {
-          MODE_BASE = 0,
-          MODE_HTTP
+                MODE_BASE = 0,
+                MODE_HTTP
         };
 
         //!    constructor
@@ -83,7 +83,7 @@ public:
         };
 
         //! destructor
-        ~http_stats(){};
+        ~http_stats() {};
 
         //! http request counts
         atomic<unsigned long long> http_requests;
@@ -496,8 +496,7 @@ public:
 
         //! get base statistic object.
         //! @return        base statistic object.
-        virtual stats_base& get_stats()
-        {
+        virtual stats_base &get_stats() {
                 return stats;
         }
 };

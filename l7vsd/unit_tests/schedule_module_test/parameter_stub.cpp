@@ -18,13 +18,15 @@ l7vs::LOG_CATEGORY_TAG param_cat = l7vs::LOG_CAT_L7VSD_PARAMETER;
 /*!
  * Constructor of Parameter class
  */
-l7vs::Parameter::Parameter(){
+l7vs::Parameter::Parameter()
+{
 }
 
 /*!
  * Destructor of Parameter class
  */
-l7vs::Parameter::~Parameter(){
+l7vs::Parameter::~Parameter()
+{
 }
 
 /*!
@@ -43,11 +45,12 @@ l7vs::Parameter::~Parameter(){
  * @param[in]    key    key string
  * @return        value
  */
-int l7vs::Parameter::get_int(   const l7vs::PARAMETER_COMPONENT_TAG comp,
-                                const std::string& key,
-                                l7vs::error_code& err,
-                                const std::string& file) {
-    return 0;
+int l7vs::Parameter::get_int(const l7vs::PARAMETER_COMPONENT_TAG comp,
+                             const std::string &key,
+                             l7vs::error_code &err,
+                             const std::string &file)
+{
+        return 0;
 }
 
 /*!
@@ -56,9 +59,10 @@ int l7vs::Parameter::get_int(   const l7vs::PARAMETER_COMPONENT_TAG comp,
  * @param[in]    key    key string
  * @return    value
  */
-std::string l7vs::Parameter::get_string( const l7vs::PARAMETER_COMPONENT_TAG comp,
-                                         const std::string& key,
-                                         l7vs::error_code& err,
-                                         const std::string& file) {
-    return key;
+std::string l7vs::Parameter::get_string(const l7vs::PARAMETER_COMPONENT_TAG comp,
+                                        const std::string &key,
+                                        l7vs::error_code &err,
+                                        const std::string &file)
+{
+        return key;
 }

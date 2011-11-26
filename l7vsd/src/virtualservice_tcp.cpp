@@ -47,15 +47,16 @@ l7vs::virtualservice_tcp::virtualservice_tcp(const l7vsd &invsd,
                 const replication &inrep,
                 const virtualservice_element &inelement)
         :
-        virtualservice_base(invsd, inrep, inelement){
-		access_log_file_name = "";
-		dispatcher.reset( new boost::asio::io_service( 10 ) );
-		calc_bps_timer.reset(new boost::asio::deadline_timer(*dispatcher));
-		replication_timer.reset(new boost::asio::deadline_timer(*dispatcher));
-		protomod_rep_timer.reset(new boost::asio::deadline_timer(*dispatcher));
-		schedmod_rep_timer.reset(new boost::asio::deadline_timer(*dispatcher));
-		acceptor_.reset( new boost::asio::ip::tcp::acceptor( *dispatcher ) );
-		sslcontext.reset( new boost::asio::ssl::context( *dispatcher, DEFAULT_SSL_METHOD ) );
+        virtualservice_base(invsd, inrep, inelement)
+{
+        access_log_file_name = "";
+        dispatcher.reset(new boost::asio::io_service(10));
+        calc_bps_timer.reset(new boost::asio::deadline_timer(*dispatcher));
+        replication_timer.reset(new boost::asio::deadline_timer(*dispatcher));
+        protomod_rep_timer.reset(new boost::asio::deadline_timer(*dispatcher));
+        schedmod_rep_timer.reset(new boost::asio::deadline_timer(*dispatcher));
+        acceptor_.reset(new boost::asio::ip::tcp::acceptor(*dispatcher));
+        sslcontext.reset(new boost::asio::ssl::context(*dispatcher, DEFAULT_SSL_METHOD));
         active_count = 0;
         ca_dir = "";
         ca_file = "";
@@ -95,7 +96,7 @@ void l7vs::virtualservice_tcp::handle_replication_interrupt(const boost::system:
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                 boost::format fmt("in_function: void virtualservice_tcp::handle_replication_interrupt( "
-                        "const boost::system::error_code& err ): err = %s, err.message = %s");
+                                  "const boost::system::error_code& err ): err = %s, err.message = %s");
                 fmt % (err ? "true" : "false") % err.message();
                 Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 20, fmt.str(), __FILE__, __LINE__);
         }
@@ -113,7 +114,7 @@ void l7vs::virtualservice_tcp::handle_replication_interrupt(const boost::system:
 
         if (replication::REPLICATION_SINGLE == rep_noconst.get_status()) {
                 Logger::putLogInfo(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, "replication mode is single.",
-                        __FILE__, __LINE__);
+                                   __FILE__, __LINE__);
                 interrupt_running_flag--;
                 return;
         }
@@ -128,10 +129,10 @@ void l7vs::virtualservice_tcp::handle_replication_interrupt(const boost::system:
         //get replication area
         unsigned int rep_size = 0;
         replication_header *rep_header_ptr = reinterpret_cast<replication_header *>(
-                rep_noconst.pay_memory(REP_AREA_NAME, rep_size));
+                        rep_noconst.pay_memory(REP_AREA_NAME, rep_size));
         if ((rep_header_ptr == NULL) || (0 == rep_size)) {
                 Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 1, REP_BLOCK_SIZE_ERR_MSG,
-                        __FILE__, __LINE__);
+                                   __FILE__, __LINE__);
                 interrupt_running_flag--;
                 return;
         }
@@ -140,7 +141,7 @@ void l7vs::virtualservice_tcp::handle_replication_interrupt(const boost::system:
         if ((rep_size * DATA_SIZE) <
             ((sizeof(replication_data) * MAX_REPLICATION_DATA_NUM) + sizeof(replication_header))) {
                 Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 2, REP_AREA_SIZE_ERR_MSG,
-                        __FILE__, __LINE__);
+                                   __FILE__, __LINE__);
                 interrupt_running_flag--;
                 return;
         }
@@ -173,7 +174,7 @@ void l7vs::virtualservice_tcp::handle_replication_interrupt(const boost::system:
         //if it is new data, increment data num.
         if (newdata) {
                 rep_header_ptr = reinterpret_cast<replication_header *>(
-                        rep_noconst.pay_memory(REP_AREA_NAME, rep_size));
+                                         rep_noconst.pay_memory(REP_AREA_NAME, rep_size));
                 ++(rep_header_ptr->data_num);
         }
         //write replication data
@@ -195,15 +196,15 @@ void l7vs::virtualservice_tcp::handle_replication_interrupt(const boost::system:
                 replication_timer->expires_from_now(
                         boost::posix_time::milliseconds(param_data.rep_interval));
                 replication_timer->async_wait(boost::bind(
-                        &virtualservice_tcp::handle_replication_interrupt,
-                        this, boost::asio::placeholders::error));
+                                                      &virtualservice_tcp::handle_replication_interrupt,
+                                                      this, boost::asio::placeholders::error));
         }
         interrupt_running_flag--;
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                 Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 21,
-                        "out_function: void virtualservice_tcp::handle_replication_interrupt( "
-                        "const boost::system::error_code& err )", __FILE__, __LINE__);
+                                    "out_function: void virtualservice_tcp::handle_replication_interrupt( "
+                                    "const boost::system::error_code& err )", __FILE__, __LINE__);
         }
 }
 
@@ -217,25 +218,25 @@ void l7vs::virtualservice_tcp::handle_replication_interrupt(const boost::system:
 void l7vs::virtualservice_tcp::read_replicationdata()
 {
         Logger funclog(LOG_CAT_L7VSD_VIRTUALSERVICE, 22, "function: "
-                "void virtualservice_tcp::read_replicationdata()", __FILE__, __LINE__);
+                       "void virtualservice_tcp::read_replicationdata()", __FILE__, __LINE__);
 
         replication &rep_noconst = const_cast<replication &>(rep);
 
         if (replication::REPLICATION_SINGLE == rep_noconst.get_status()) {
                 Logger::putLogInfo(LOG_CAT_L7VSD_VIRTUALSERVICE, 2, "replication mode is single.",
-                        __FILE__, __LINE__);
+                                   __FILE__, __LINE__);
                 return;
         }
 
         unsigned int rep_size = 0;
         replication_header *rep_header_ptr = reinterpret_cast<replication_header *>(
-                rep_noconst.pay_memory(REP_AREA_NAME, rep_size));
+                        rep_noconst.pay_memory(REP_AREA_NAME, rep_size));
         if ((rep_header_ptr == NULL) || (0 == rep_size)) {
                 Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 3, REP_BLOCK_SIZE_ERR_MSG,
-                        __FILE__, __LINE__);
+                                   __FILE__, __LINE__);
                 if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 23, "out_function: "
-                                "void virtualservice_tcp::read_replicationdata()", __FILE__, __LINE__);
+                                            "void virtualservice_tcp::read_replicationdata()", __FILE__, __LINE__);
                 }
                 return;
         }
@@ -244,10 +245,10 @@ void l7vs::virtualservice_tcp::read_replicationdata()
         if ((rep_size * DATA_SIZE) <
             ((sizeof(replication_data) * MAX_REPLICATION_DATA_NUM) + sizeof(replication_header))) {
                 Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 4, REP_AREA_SIZE_ERR_MSG,
-                        __FILE__, __LINE__);
+                                   __FILE__, __LINE__);
                 if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 24, "out_function: "
-                                "void virtualservice_tcp::read_replicationdata()", __FILE__, __LINE__);
+                                            "void virtualservice_tcp::read_replicationdata()", __FILE__, __LINE__);
                 }
                 return;
         }
@@ -259,10 +260,10 @@ void l7vs::virtualservice_tcp::read_replicationdata()
         //if data_num over MAX_REPLICATION_DATA_NUM, set data_num = 0
         if (static_cast<unsigned int>(MAX_REPLICATION_DATA_NUM) < loop_cnt) {
                 Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 5, REP_BLOCK_SIZE_ERR_MSG,
-                        __FILE__, __LINE__);
+                                   __FILE__, __LINE__);
                 if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 25, "out_function: "
-                                "void virtualservice_tcp::read_replicationdata()", __FILE__, __LINE__);
+                                            "void virtualservice_tcp::read_replicationdata()", __FILE__, __LINE__);
                 }
                 rep_header_ptr->data_num = 0;
                 rep_noconst.unlock(REP_AREA_NAME);
@@ -293,12 +294,12 @@ void l7vs::virtualservice_tcp::read_replicationdata()
                 //check equal udpmode and tcp_accept_endpoint
                 if ((rep_data_ptr->udpmode == element.udpmode) &&
                     (tcp_endpoint_type(boost::asio::ip::address::from_string(ipaddr), portno)
-                        == element.tcp_accept_endpoint)) {
+                     == element.tcp_accept_endpoint)) {
                         element.sorry_maxconnection = rep_data_ptr->sorry_maxconnection;
                         tmpstr = rep_data_ptr->sorry_endpoint;
                         try {
                                 portno = boost::lexical_cast<unsigned short>(
-                                        tmpstr.substr((tmpstr.rfind(":") + 1)));
+                                                 tmpstr.substr((tmpstr.rfind(":") + 1)));
                         } catch (const boost::bad_lexical_cast &err) {
                                 portno = 0;
                         }
@@ -326,7 +327,7 @@ void l7vs::virtualservice_tcp::read_replicationdata()
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                 Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 26, "out_function: "
-                        "void virtualservice_tcp::read_replicationdata()", __FILE__, __LINE__);
+                                    "void virtualservice_tcp::read_replicationdata()", __FILE__, __LINE__);
         }
 }
 
@@ -339,49 +340,48 @@ void l7vs::virtualservice_tcp::read_replicationdata()
  */
 void l7vs::virtualservice_tcp::handle_accept(const l7vs::session_thread_control *stc_ptr, const boost::system::error_code &err)
 {
-	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
-		boost::format fmt(	"in_function: void virtualservice_tcp::handle_accept( "
-							"const boost::shared_ptr<session_thread_control> , "
-							"const boost::system::error_code& err ): err = %s, err.message = %s");
-		fmt % (err ? "true" : "false") % err.message();
-		Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 27, fmt.str(), __FILE__, __LINE__);
-	}
+        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+                boost::format fmt("in_function: void virtualservice_tcp::handle_accept( "
+                                  "const boost::shared_ptr<session_thread_control> , "
+                                  "const boost::system::error_code& err ): err = %s, err.message = %s");
+                fmt % (err ? "true" : "false") % err.message();
+                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 27, fmt.str(), __FILE__, __LINE__);
+        }
 
-	if(unlikely(virtualservice_stop_flag.get())){
-		return;
-	}
+        if (unlikely(virtualservice_stop_flag.get())) {
+                return;
+        }
 
-	session_thread_control *stc_ptr_noconst = const_cast<session_thread_control *>(stc_ptr);
+        session_thread_control *stc_ptr_noconst = const_cast<session_thread_control *>(stc_ptr);
 
-	if( unlikely( err == boost::asio::error::operation_aborted ) ){ // nomal exit case
-		boost::format	fmt( "Thread ID[%d] handle accept cancel : %s" );
-		fmt % boost::this_thread::get_id() % err.message();
-		Logger::putLogInfo( LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__ );
-		return;
-	}
-	else if (unlikely(err)) { // register next accept handle when error mode.
-		if(!ssl_virtualservice_mode_flag ){
-			waiting_session->get_client_socket().get_socket().close();
-			acceptor_->async_accept(	waiting_session->get_client_socket().get_socket(),
-									 	boost::bind(	&virtualservice_tcp::handle_accept,
-														this,
-														stc_ptr,
-														boost::asio::placeholders::error ) );
-		}else{
-			waiting_session->get_client_ssl_socket().lowest_layer().close();
-			acceptor_->async_accept(	waiting_session->get_client_ssl_socket().lowest_layer(),
-										boost::bind(	&virtualservice_tcp::handle_accept,
-														this,
-														stc_ptr,
-														boost::asio::placeholders::error ) );
-		}
-           	Logger::putLogInfo(LOG_CAT_L7VSD_VIRTUALSERVICE, 2, err.message(), __FILE__, __LINE__);
-		return;
-	}
+        if (unlikely(err == boost::asio::error::operation_aborted)) {   // nomal exit case
+                boost::format   fmt("Thread ID[%d] handle accept cancel : %s");
+                fmt % boost::this_thread::get_id() % err.message();
+                Logger::putLogInfo(LOG_CAT_L7VSD_VIRTUALSERVICE, 0, fmt.str(), __FILE__, __LINE__);
+                return;
+        } else if (unlikely(err)) { // register next accept handle when error mode.
+                if (!ssl_virtualservice_mode_flag) {
+                        waiting_session->get_client_socket().get_socket().close();
+                        acceptor_->async_accept(waiting_session->get_client_socket().get_socket(),
+                                                boost::bind(&virtualservice_tcp::handle_accept,
+                                                            this,
+                                                            stc_ptr,
+                                                            boost::asio::placeholders::error));
+                } else {
+                        waiting_session->get_client_ssl_socket().lowest_layer().close();
+                        acceptor_->async_accept(waiting_session->get_client_ssl_socket().lowest_layer(),
+                                                boost::bind(&virtualservice_tcp::handle_accept,
+                                                            this,
+                                                            stc_ptr,
+                                                            boost::asio::placeholders::error));
+                }
+                Logger::putLogInfo(LOG_CAT_L7VSD_VIRTUALSERVICE, 2, err.message(), __FILE__, __LINE__);
+                return;
+        }
 
-	tcp_session *tmp_session = stc_ptr_noconst->get_session().get();
+        tcp_session *tmp_session = stc_ptr_noconst->get_session().get();
 
-	if (ssl_file_name != "") {
+        if (ssl_file_name != "") {
 
                 //*-------- DEBUG LOG --------*/
                 if (unlikely(LOG_LV_DEBUG ==
@@ -392,7 +392,7 @@ void l7vs::virtualservice_tcp::handle_accept(const l7vs::session_thread_control 
                         get_ssl_session_cache_info(buf);
                         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 28,
                                             buf.str(),
-                                           __FILE__, __LINE__);
+                                            __FILE__, __LINE__);
                 }
                 //*------ DEBUG LOG END ------*/
 
@@ -415,125 +415,124 @@ void l7vs::virtualservice_tcp::handle_accept(const l7vs::session_thread_control 
                                             buf.str(),
                                             __FILE__, __LINE__);
                 }
-		//*------ DEBUG LOG END ------*/
-	}
+                //*------ DEBUG LOG END ------*/
+        }
 
-	// initialize session
-	stc_ptr_noconst->get_session()->initialize();
+        // initialize session
+        stc_ptr_noconst->get_session()->initialize();
 
-	// send access log output ON or OFF message to tcp_session
-	stc_ptr_noconst->session_access_log_output_mode_change(access_log_flag);
+        // send access log output ON or OFF message to tcp_session
+        stc_ptr_noconst->session_access_log_output_mode_change(access_log_flag);
 
-	active_sessions.insert(tmp_session, stc_ptr_noconst);
+        active_sessions.insert(tmp_session, stc_ptr_noconst);
 
-	//check sorry flag and status
-	if (unlikely(
-		(0 != element.sorry_flag) ||
-		((0 < element.sorry_maxconnection) && ((active_count.get() >= static_cast<size_t>(element.sorry_maxconnection)))
-		)
-	)) {
-		if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
-			boost::format fmt("Connection switch Sorry mode. "
-			"active_session.size = %d, active_count.get = %d");
-			fmt % active_sessions.size() % active_count.get();
-			Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 30, fmt.str(), __FILE__, __LINE__);
-		}
+        //check sorry flag and status
+        if (unlikely(
+                    (0 != element.sorry_flag) ||
+                    ((0 < element.sorry_maxconnection) && ((active_count.get() >= static_cast<size_t>(element.sorry_maxconnection)))
+                    )
+            )) {
+                if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+                        boost::format fmt("Connection switch Sorry mode. "
+                                          "active_session.size = %d, active_count.get = %d");
+                        fmt % active_sessions.size() % active_count.get();
+                        Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 30, fmt.str(), __FILE__, __LINE__);
+                }
 
-		stc_ptr_noconst->get_session()->set_virtual_service_message(tcp_session::SORRY_STATE_ENABLE, boost::asio::ip::tcp::endpoint() );
-	}
+                stc_ptr_noconst->get_session()->set_virtual_service_message(tcp_session::SORRY_STATE_ENABLE, boost::asio::ip::tcp::endpoint());
+        }
 
-	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
-		boost::format fmt1("active session thread id = %d");
-		fmt1 % stc_ptr_noconst->get_upthread_id();
-		Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 31, fmt1.str(), __FILE__, __LINE__);
-		boost::format fmt2("pool_session.size = %d");
-		fmt2 % pool_sessions.size();
-		Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 32, fmt2.str(), __FILE__, __LINE__);
-		boost::format fmt3("active_session.size = %d");
-		fmt3 % active_sessions.size();
-		Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 33, fmt3.str(), __FILE__, __LINE__);
-		boost::format fmt4("active_count = %d");
-		fmt4 % active_count.get();
-		Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 34, fmt4.str(), __FILE__, __LINE__);
-	}
+        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+                boost::format fmt1("active session thread id = %d");
+                fmt1 % stc_ptr_noconst->get_upthread_id();
+                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 31, fmt1.str(), __FILE__, __LINE__);
+                boost::format fmt2("pool_session.size = %d");
+                fmt2 % pool_sessions.size();
+                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 32, fmt2.str(), __FILE__, __LINE__);
+                boost::format fmt3("active_session.size = %d");
+                fmt3 % active_sessions.size();
+                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 33, fmt3.str(), __FILE__, __LINE__);
+                boost::format fmt4("active_count = %d");
+                fmt4 % active_count.get();
+                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 34, fmt4.str(), __FILE__, __LINE__);
+        }
 
-	stc_ptr_noconst->startupstream();
-	stc_ptr_noconst->startdownstream();
+        stc_ptr_noconst->startupstream();
+        stc_ptr_noconst->startdownstream();
 
-	//left session is less than the threshold
-	if ((sessionpool_alert_flag == false) &&
-		((pool_sessions.size() + 1) < param_data.session_pool_alert_on)) {
-		//create trap message
-		trapmessage trap_msg;
-		trap_msg.type = trapmessage::SESSIONPOOL_ALERT_ON;
-		trap_msg.message = "TRAP00020011,Warning: The left-session has fell below the threshold of left-session warning.";
-		error_code err_code;
-		//push the trap message
-		snmpagent::push_trapmessage(trap_msg, err_code);
-		if (err_code) {
-			std::string	str("Push trap message failed :");
-			Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 38, str , __FILE__, __LINE__);
-		}
-		//set sessionpool alert flag true
-		sessionpool_alert_flag = true;
-	}
+        //left session is less than the threshold
+        if ((sessionpool_alert_flag == false) &&
+            ((pool_sessions.size() + 1) < param_data.session_pool_alert_on)) {
+                //create trap message
+                trapmessage trap_msg;
+                trap_msg.type = trapmessage::SESSIONPOOL_ALERT_ON;
+                trap_msg.message = "TRAP00020011,Warning: The left-session has fell below the threshold of left-session warning.";
+                error_code err_code;
+                //push the trap message
+                snmpagent::push_trapmessage(trap_msg, err_code);
+                if (err_code) {
+                        std::string     str("Push trap message failed :");
+                        Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 38, str , __FILE__, __LINE__);
+                }
+                //set sessionpool alert flag true
+                sessionpool_alert_flag = true;
+        }
 
-	//waiting, pool_sessions.size become over 1
-	//pick up session from pool
-	session_thread_control*		stc_ptr_register_accept;
+        //waiting, pool_sessions.size become over 1
+        //pick up session from pool
+        session_thread_control         *stc_ptr_register_accept;
 
-	for(;;){
-		stc_ptr_register_accept = pool_sessions.pop();
-		if( stc_ptr_register_accept ) break;
-		else if( pool_sessions.empty() ) dispatcher->poll();
-		timespec	ts = { 0, 50 };
-		nanosleep( &ts, NULL );
-	}
+        for (;;) {
+                stc_ptr_register_accept = pool_sessions.pop();
+                if (stc_ptr_register_accept) break;
+                else if (pool_sessions.empty()) dispatcher->poll();
+                timespec        ts = { 0, 50 };
+                nanosleep(&ts, NULL);
+        }
 
-	//session add wait_sessions
-	boost::mutex::scoped_lock up_wait_lk(stc_ptr_register_accept->get_upthread_mutex());
-	boost::mutex::scoped_lock down_wait_lk(stc_ptr_register_accept->get_downthread_mutex());
+        //session add wait_sessions
+        boost::mutex::scoped_lock up_wait_lk(stc_ptr_register_accept->get_upthread_mutex());
+        boost::mutex::scoped_lock down_wait_lk(stc_ptr_register_accept->get_downthread_mutex());
 
-	waiting_session = stc_ptr_register_accept->get_session().get();
+        waiting_session = stc_ptr_register_accept->get_session().get();
 
-	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
-		boost::format fmt1("active session thread id = %d");
-		fmt1 % stc_ptr_register_accept->get_upthread_id();
-		Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 35, fmt1.str(), __FILE__, __LINE__);
-		boost::format fmt2("pool_session.size = %d");
-		fmt2 % pool_sessions.size();
-		Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 36, fmt2.str(), __FILE__, __LINE__);
-		boost::format fmt3("active_session.size = %d");
-		fmt3 % active_sessions.size();
-		Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 37, fmt3.str(), __FILE__, __LINE__);
-		boost::format fmt4("active_count = %d");
-		fmt4 % active_count.get();
-		Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 38, fmt4.str(), __FILE__, __LINE__);
-	}
+        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+                boost::format fmt1("active session thread id = %d");
+                fmt1 % stc_ptr_register_accept->get_upthread_id();
+                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 35, fmt1.str(), __FILE__, __LINE__);
+                boost::format fmt2("pool_session.size = %d");
+                fmt2 % pool_sessions.size();
+                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 36, fmt2.str(), __FILE__, __LINE__);
+                boost::format fmt3("active_session.size = %d");
+                fmt3 % active_sessions.size();
+                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 37, fmt3.str(), __FILE__, __LINE__);
+                boost::format fmt4("active_count = %d");
+                fmt4 % active_count.get();
+                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 38, fmt4.str(), __FILE__, __LINE__);
+        }
 
-	//register accept event handler
-	if (!ssl_virtualservice_mode_flag) {
-		acceptor_->async_accept(waiting_session->get_client_socket().get_socket(),
-								boost::bind(&virtualservice_tcp::handle_accept,
-											this,
-											stc_ptr_register_accept,
-											boost::asio::placeholders::error));
-	}
-	else {
-		acceptor_->async_accept(waiting_session->get_client_ssl_socket().lowest_layer(),
-								boost::bind(&virtualservice_tcp::handle_accept,
-											this,
-											stc_ptr_register_accept,
-											boost::asio::placeholders::error));
-	}
+        //register accept event handler
+        if (!ssl_virtualservice_mode_flag) {
+                acceptor_->async_accept(waiting_session->get_client_socket().get_socket(),
+                                        boost::bind(&virtualservice_tcp::handle_accept,
+                                                    this,
+                                                    stc_ptr_register_accept,
+                                                    boost::asio::placeholders::error));
+        } else {
+                acceptor_->async_accept(waiting_session->get_client_ssl_socket().lowest_layer(),
+                                        boost::bind(&virtualservice_tcp::handle_accept,
+                                                    this,
+                                                    stc_ptr_register_accept,
+                                                    boost::asio::placeholders::error));
+        }
 
-	if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
-		Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 39,
-			"out_function: "
-			"void virtualservice_tcp::handle_accept( "
-			"const boost::shared_ptr<session_thread_control> , "
-			"const boost::system::error_code& err )", __FILE__, __LINE__);
-	}
+        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
+                Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 39,
+                                    "out_function: "
+                                    "void virtualservice_tcp::handle_accept( "
+                                    "const boost::shared_ptr<session_thread_control> , "
+                                    "const boost::system::error_code& err )", __FILE__, __LINE__);
+        }
 }
 
 /*!
@@ -556,7 +555,7 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
                                                 "l7vs::error_code& err ): err = %s, err.message = %s");
                         formatter % (err ? "true" : "false") % err.get_message();
                         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 41, formatter.str(),
-                                __FILE__, __LINE__);
+                                            __FILE__, __LINE__);
                 }
                 return;
         }
@@ -569,7 +568,7 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
                                                 "l7vs::error_code& err ): err = %s, err.message = %s");
                         formatter % (err ? "true" : "false") % err.get_message();
                         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 42, formatter.str(),
-                                __FILE__, __LINE__);
+                                            __FILE__, __LINE__);
                 }
                 return;
         }
@@ -592,10 +591,10 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
                           err);
                 if (access_log_instance == NULL) {
                         boost::format formatter("access logger Instance acquisition err = %s, "
-                                "err.message = %s ");
+                                                "err.message = %s ");
                         formatter % (err ? "true" : "false") % err.get_message();
                         Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 4, formatter.str(),
-                                __FILE__, __LINE__);
+                                            __FILE__, __LINE__);
                         err.setter(true, "access log class instance create failed");
                         return;
                 }
@@ -613,14 +612,14 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
         acceptor_->open(element.tcp_accept_endpoint.protocol(), acceptor_err);
         if (acceptor_err) {
                 Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 5, acceptor_err.message(),
-                        __FILE__, __LINE__);
+                                    __FILE__, __LINE__);
                 err.setter(true, acceptor_err.message());
                 return;
         }
         acceptor_->set_option(boost::asio::ip::tcp::acceptor::reuse_address(true), acceptor_err);
         if (acceptor_err) {
                 Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 6, acceptor_err.message(),
-                        __FILE__, __LINE__);
+                                    __FILE__, __LINE__);
                 err.setter(true, acceptor_err.message());
                 return;
         }
@@ -629,7 +628,7 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
                 acceptor_->set_option(option, acceptor_err);
                 if (acceptor_err) {
                         Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 7, acceptor_err.message(),
-                                __FILE__, __LINE__);
+                                            __FILE__, __LINE__);
                         err.setter(true, acceptor_err.message());
                         return;
                 }
@@ -637,7 +636,7 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
         acceptor_->bind(element.tcp_accept_endpoint, acceptor_err);
         if (acceptor_err) {
                 Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 8, acceptor_err.message(),
-                        __FILE__, __LINE__);
+                                    __FILE__, __LINE__);
                 err.setter(true, acceptor_err.message());
                 return;
         }
@@ -650,14 +649,14 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
         if (NULL == protomod) {
                 //ERROR case
                 Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 9, PROTOMOD_LOAD_ERROR_MSG,
-                        __FILE__, __LINE__);
+                                    __FILE__, __LINE__);
                 err.setter(true, PROTOMOD_LOAD_ERROR_MSG);
                 if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                         boost::format formatter("out_function: void virtualservice_tcp::initialize( "
                                                 "l7vs::error_code& err ): err = %s, err.message = %s");
                         formatter % (err ? "true" : "false") % err.get_message();
                         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 43, formatter.str(),
-                                __FILE__, __LINE__);
+                                            __FILE__, __LINE__);
                 }
                 return;
         }
@@ -682,7 +681,7 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
                 element.tcp_accept_endpoint,
                 element.udp_recv_endpoint);
         tcp_schedule_func_type sched_rs_func = boost::bind(
-                &virtualservice_tcp::schedule_rs, this, _1, _2, _3, _4, _5);
+                        &virtualservice_tcp::schedule_rs, this, _1, _2, _3, _4, _5);
         protomod->register_schedule(sched_rs_func);
 
         protocol_module_base::check_message_result pm_result;
@@ -695,7 +694,7 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
                                                 "l7vs::error_code& err ): err = %s, err.message = %s");
                         formatter % (err ? "true" : "false") % err.get_message();
                         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 44, formatter.str(),
-                                __FILE__, __LINE__);
+                                            __FILE__, __LINE__);
                 }
                 return;
         }
@@ -707,7 +706,7 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
                                                 "l7vs::error_code& err ): err = %s, err.message = %s");
                         formatter % (err ? "true" : "false") % err.get_message();
                         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 45, formatter.str(),
-                                __FILE__, __LINE__);
+                                            __FILE__, __LINE__);
                 }
                 return;
         }
@@ -720,14 +719,14 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
         if (NULL == schedmod) {
                 //ERROR case
                 Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 10, SCHEDMOD_LOAD_ERROR_MSG,
-                        __FILE__, __LINE__);
+                                    __FILE__, __LINE__);
                 err.setter(true, SCHEDMOD_LOAD_ERROR_MSG);
                 if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                         boost::format formatter("out_function: void virtualservice_tcp::initialize( "
                                                 "l7vs::error_code& err ) : err = %s, err.message = %s");
                         formatter % (err ? "true" : "false") % err.get_message();
                         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 46, formatter.str(),
-                                __FILE__, __LINE__);
+                                            __FILE__, __LINE__);
                 }
                 return;
         }
@@ -772,7 +771,7 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
                 if (unlikely(!get_ssl_parameter())) {
                         //Error
                         Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 11, "get ssl parameter failed",
-                                __FILE__, __LINE__);
+                                            __FILE__, __LINE__);
                         err.setter(true, "get ssl parameter failed");
                         return;
                 }
@@ -780,7 +779,7 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
                 if (unlikely(!set_ssl_config())) {
                         //Error
                         Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 12, "set ssl config failed",
-                                __FILE__, __LINE__);
+                                            __FILE__, __LINE__);
                         err.setter(true, "set ssl config failed");
                         return;
                 }
@@ -795,25 +794,25 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
                 for (int i = 0; i < param_data.session_pool_size; ++i) {
                         try {
                                 tcp_session *sess = new tcp_session(*this,
-										*dispatcher,
-                                        set_sock_opt,
-                                        element.tcp_accept_endpoint,
-                                        ssl_virtualservice_mode_flag,
-                                        *sslcontext,
-                                        is_session_cache_use,
-                                        handshake_timeout,
-                                        access_log_instance);
+                                                                    *dispatcher,
+                                                                    set_sock_opt,
+                                                                    element.tcp_accept_endpoint,
+                                                                    ssl_virtualservice_mode_flag,
+                                                                    *sslcontext,
+                                                                    is_session_cache_use,
+                                                                    handshake_timeout,
+                                                                    access_log_instance);
                                 session_result_message result = sess->initialize();
                                 if (result.flag == true) {
                                         err.setter(result.flag, result.message);
                                         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                                                 boost::format formatter("out_function: "
-                                                        "void virtualservice_tcp::initialize( "
-                                                        "l7vs::error_code& err ): err = %s, "
-                                                        "err.message = %s");
+                                                                        "void virtualservice_tcp::initialize( "
+                                                                        "l7vs::error_code& err ): err = %s, "
+                                                                        "err.message = %s");
                                                 formatter % (err ? "true" : "false") % err.get_message();
                                                 Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 47,
-                                                        formatter.str(), __FILE__, __LINE__);
+                                                                    formatter.str(), __FILE__, __LINE__);
                                         }
                                         return;
                                 }
@@ -825,7 +824,7 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
                         } catch (...) {
                                 Logger::putLogFatal(
                                         LOG_CAT_L7VSD_VIRTUALSERVICE, 1, "error, create session.",
-                                                __FILE__, __LINE__);
+                                        __FILE__, __LINE__);
 
                                 err.setter(true, "error, create session.");
 
@@ -836,11 +835,11 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
 
                                 if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                                         boost::format formatter("out_function: "
-                                                "void virtualservice_tcp::initialize( "
-                                                "l7vs::error_code& err ): err = %s, err.message = %s");
+                                                                "void virtualservice_tcp::initialize( "
+                                                                "l7vs::error_code& err ): err = %s, err.message = %s");
                                         formatter % (err ? "true" : "false") % err.get_message();
                                         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 48, formatter.str(),
-                                                __FILE__, __LINE__);
+                                                            __FILE__, __LINE__);
                                 }
                                 return;
                         }
@@ -849,11 +848,11 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
                         boost::format fmt1("pool_session.size = %d");
                         fmt1 % pool_sessions.size();
                         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 49, fmt1.str(),
-                                __FILE__, __LINE__);
+                                            __FILE__, __LINE__);
                         boost::format fmt2("active_session.size = %d");
                         fmt2 % active_sessions.size();
                         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 50, fmt2.str(),
-                                __FILE__, __LINE__);
+                                            __FILE__, __LINE__);
                 }
         }
 
@@ -864,7 +863,7 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
                                         "l7vs::error_code& err ): err = %s, err.message = %s");
                 formatter % (err ? "true" : "false") % err.get_message();
                 Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 51, formatter.str(),
-                        __FILE__, __LINE__);
+                                    __FILE__, __LINE__);
         }
 }
 
@@ -880,15 +879,15 @@ void l7vs::virtualservice_tcp::finalize(l7vs::error_code &err)
                 boost::format formatter("in_function: void virtualservice_tcp::finalize( "
                                         "l7vs::error_code& err )");
                 Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 52, formatter.str(),
-                        __FILE__, __LINE__);
+                                    __FILE__, __LINE__);
                 boost::format fmt1("pool_session.size = %d");
                 fmt1 % pool_sessions.size();
                 Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 53, fmt1.str(),
-                        __FILE__, __LINE__);
+                                    __FILE__, __LINE__);
                 boost::format fmt2("active_session.size = %d");
                 fmt2 % active_sessions.size();
                 Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 54, fmt2.str(),
-                        __FILE__, __LINE__);
+                                    __FILE__, __LINE__);
         }
 
         //release sessions[i]->join();
@@ -905,12 +904,12 @@ void l7vs::virtualservice_tcp::finalize(l7vs::error_code &err)
                         boost::format fmt("join pool session: pool_sessions.size = %d");
                         fmt % pool_sessions.size();
                         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 55, fmt.str(),
-                                __FILE__, __LINE__);
+                                            __FILE__, __LINE__);
                 }
         }
-		//waiting session delete
-		delete waiting_session;
-		waiting_session = NULL;
+        //waiting session delete
+        delete waiting_session;
+        waiting_session = NULL;
 
         //unload ProtocolModule
         if (protomod) {
@@ -943,11 +942,11 @@ void l7vs::virtualservice_tcp::finalize(l7vs::error_code &err)
         if (replication::REPLICATION_SINGLE != rep_noconst.get_status()) {
                 unsigned int rep_size = 0;
                 replication_header *rep_header_ptr = reinterpret_cast<replication_header *>(
-                        rep_noconst.pay_memory(REP_AREA_NAME, rep_size));
+                                rep_noconst.pay_memory(REP_AREA_NAME, rep_size));
                 if ((rep_header_ptr == NULL) || (0 == rep_size)) {
                         err.setter(true, REP_BLOCK_SIZE_ERR_MSG);
                         Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 6, REP_BLOCK_SIZE_ERR_MSG,
-                                __FILE__, __LINE__);
+                                           __FILE__, __LINE__);
                         replication_status = false;
                 }
 
@@ -956,7 +955,7 @@ void l7vs::virtualservice_tcp::finalize(l7vs::error_code &err)
                     ((sizeof(replication_data) * MAX_REPLICATION_DATA_NUM) + sizeof(replication_header))) {
                         err.setter(true, REP_AREA_SIZE_ERR_MSG);
                         Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 7, REP_AREA_SIZE_ERR_MSG,
-                                __FILE__, __LINE__);
+                                           __FILE__, __LINE__);
                         replication_status = false;
                 }
                 if ((NULL != rep_header_ptr) && (replication_status)) {
@@ -1053,8 +1052,8 @@ void l7vs::virtualservice_tcp::edit_virtualservice(const l7vs::virtualservice_el
 {
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                 boost::format formatter("in_function: void virtualservice_tcp::edit_virtualservice( "
-                        "const l7vs::virtualservice_element& in,"
-                        "l7vs::error_code& err ): dump in ");
+                                        "const l7vs::virtualservice_element& in,"
+                                        "l7vs::error_code& err ): dump in ");
                 Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 61, formatter.str(), __FILE__, __LINE__);
         }
 
@@ -1065,11 +1064,11 @@ void l7vs::virtualservice_tcp::edit_virtualservice(const l7vs::virtualservice_el
                 err.setter(true, "Virtual Service does not exist.");
                 if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                         boost::format formatter("out_function: void virtualservice_tcp::edit_virtualservice( "
-                                "const l7vs::virtualservice_element& in,"
-                                "l7vs::error_code& err ): err = %s, err.message = %s");
+                                                "const l7vs::virtualservice_element& in,"
+                                                "l7vs::error_code& err ): err = %s, err.message = %s");
                         formatter % (err ? "true" : "false") % err.get_message();
                         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 62, formatter.str(),
-                                __FILE__, __LINE__);
+                                            __FILE__, __LINE__);
                 }
                 return;
         }
@@ -1081,16 +1080,16 @@ void l7vs::virtualservice_tcp::edit_virtualservice(const l7vs::virtualservice_el
                 if (NULL == schedmod) {
                         //ERROR case
                         Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 13, SCHEDMOD_LOAD_ERROR_MSG,
-                                __FILE__, __LINE__);
+                                            __FILE__, __LINE__);
                         err.setter(true, SCHEDMOD_LOAD_ERROR_MSG);
                         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                                 boost::format formatter("out_function: "
-                                        "void virtualservice_tcp::edit_virtualservice( "
-                                        "const l7vs::virtualservice_element& in,"
-                                        "l7vs::error_code& err ): err = %s, err.message = %s");
+                                                        "void virtualservice_tcp::edit_virtualservice( "
+                                                        "const l7vs::virtualservice_element& in,"
+                                                        "l7vs::error_code& err ): err = %s, err.message = %s");
                                 formatter % (err ? "true" : "false") % err.get_message();
                                 Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 63, formatter.str(),
-                                        __FILE__, __LINE__);
+                                                    __FILE__, __LINE__);
                         }
                         return;
                 }
@@ -1168,17 +1167,17 @@ void l7vs::virtualservice_tcp::edit_virtualservice(const l7vs::virtualservice_el
         if (elem.sorry_endpoint ==
             boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string("255.255.255.255"), (0))) {
                 element.sorry_endpoint = boost::asio::ip::tcp::endpoint(
-                        boost::asio::ip::address::from_string("0.0.0.0"), (0));
+                                                 boost::asio::ip::address::from_string("0.0.0.0"), (0));
                 element.sorry_maxconnection = 0LL;
                 element.sorry_flag = false;
                 active_sessions.do_all(boost::bind(&session_thread_control::session_sorry_disable, _1));
         } else {
                 if (elem.sorry_endpoint != boost::asio::ip::tcp::endpoint(
-                        boost::asio::ip::address::from_string("0.0.0.0"), (0))) {
+                            boost::asio::ip::address::from_string("0.0.0.0"), (0))) {
                         element.sorry_endpoint = elem.sorry_endpoint;
                 }
                 active_sessions.do_all(boost::bind(
-                        &session_thread_control::session_sorry_mode_change, _1, elem.sorry_flag));
+                                               &session_thread_control::session_sorry_mode_change, _1, elem.sorry_flag));
         }
 
         if (elem.access_log_flag != -1) {
@@ -1186,7 +1185,7 @@ void l7vs::virtualservice_tcp::edit_virtualservice(const l7vs::virtualservice_el
                 if (elem.access_log_flag == 1 && element.access_log_file_name == "") {
                         //ERROR case
                         Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 15, SCHEDMOD_LOAD_ERROR_MSG,
-                                __FILE__, __LINE__);
+                                            __FILE__, __LINE__);
                         err.setter(true, "access log flag change err.");
                         return;
                 }
@@ -1195,11 +1194,11 @@ void l7vs::virtualservice_tcp::edit_virtualservice(const l7vs::virtualservice_el
                 element.access_log_flag = elem.access_log_flag;
                 if (elem.access_log_flag == 1 && access_log_flag == false) {
                         active_sessions.do_all(boost::bind(
-                                &session_thread_control::session_accesslog_output_mode_on, _1));
+                                                       &session_thread_control::session_accesslog_output_mode_on, _1));
                         access_log_flag = true;
                 } else if (elem.access_log_flag == 0 && access_log_flag == true) {
                         active_sessions.do_all(boost::bind(
-                                &session_thread_control::session_accesslog_output_mode_off, _1));
+                                                       &session_thread_control::session_accesslog_output_mode_off, _1));
                         access_log_flag = false;
                 }
         }
@@ -1242,7 +1241,7 @@ void l7vs::virtualservice_tcp::add_realserver(const l7vs::virtualservice_element
                                                 "l7vs::error_code& err ): err = %s, err.message = %s");
                         formatter % (err ? "true" : "false") % err.get_message();
                         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 68, formatter.str(),
-                                __FILE__, __LINE__);
+                                            __FILE__, __LINE__);
                 }
                 return;
         }
@@ -1255,7 +1254,7 @@ void l7vs::virtualservice_tcp::add_realserver(const l7vs::virtualservice_element
                                                 "l7vs::error_code& err ): err = %s, err.message = %s");
                         formatter % (err ? "true" : "false") % err.get_message();
                         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 69, formatter.str(),
-                                __FILE__, __LINE__);
+                                            __FILE__, __LINE__);
                 }
                 return;
         }
@@ -1279,12 +1278,12 @@ void l7vs::virtualservice_tcp::add_realserver(const l7vs::virtualservice_element
                                 err.setter(true, "Real Server already exist.");
                                 if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                                         boost::format formatter("out_function: "
-                                                "void virtualservice_tcp::add_realserver( "
-                                                "const l7vs::virtualservice_element& in,"
-                                                "l7vs::error_code& err ): err = %s, err.message = %s");
+                                                                "void virtualservice_tcp::add_realserver( "
+                                                                "const l7vs::virtualservice_element& in,"
+                                                                "l7vs::error_code& err ): err = %s, err.message = %s");
                                         formatter % (err ? "true" : "false") % err.get_message();
                                         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 70,
-                                                formatter.str(), __FILE__, __LINE__);
+                                                            formatter.str(), __FILE__, __LINE__);
                                 }
                                 return;
                         }
@@ -1342,7 +1341,7 @@ void l7vs::virtualservice_tcp::edit_realserver(const l7vs::virtualservice_elemen
                                                 "l7vs::error_code& err ): err = %s, err.message = %s");
                         formatter % (err ? "true" : "false") % err.get_message();
                         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 73, formatter.str(),
-                                __FILE__, __LINE__);
+                                            __FILE__, __LINE__);
                 }
                 return;
         }
@@ -1374,12 +1373,12 @@ void l7vs::virtualservice_tcp::edit_realserver(const l7vs::virtualservice_elemen
                         err.setter(true, "Real Server does not exist.");
                         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                                 boost::format formatter("out_function: "
-                                        "void virtualservice_tcp::edit_realserver( "
-                                        "const l7vs::virtualservice_element& in,"
-                                        "l7vs::error_code& err ): err = %s, err.message = %s");
+                                                        "void virtualservice_tcp::edit_realserver( "
+                                                        "const l7vs::virtualservice_element& in,"
+                                                        "l7vs::error_code& err ): err = %s, err.message = %s");
                                 formatter % (err ? "true" : "false") % err.get_message();
                                 Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 74, formatter.str(),
-                                        __FILE__, __LINE__);
+                                                    __FILE__, __LINE__);
                         }
                         return;
                 }
@@ -1445,7 +1444,7 @@ void l7vs::virtualservice_tcp::del_realserver(const l7vs::virtualservice_element
                                                 "l7vs::error_code& err ): err = %s, err.message = %s");
                         formatter % (err ? "true" : "false") % err.get_message();
                         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 77, formatter.str(),
-                                __FILE__, __LINE__);
+                                            __FILE__, __LINE__);
                 }
                 return;
         }
@@ -1481,7 +1480,7 @@ void l7vs::virtualservice_tcp::del_realserver(const l7vs::virtualservice_element
                                                         "l7vs::error_code& err ): err = %s, err.message = %s");
                                 formatter % (err ? "true" : "false") % err.get_message();
                                 Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 78, formatter.str(),
-                                        __FILE__, __LINE__);
+                                                    __FILE__, __LINE__);
                         }
                         return;
                 }
@@ -1498,7 +1497,7 @@ void l7vs::virtualservice_tcp::del_realserver(const l7vs::virtualservice_element
                      rs_itr != rs_list.end(); ++rs_itr) {
                         if (itr->tcp_endpoint == rs_itr->tcp_endpoint) {
                                 rs_list.erase(rs_itr);
-				active_sessions.do_all( boost::bind( &session_thread_control::session_realserver_remove, _1, rs_itr->tcp_endpoint ) );
+                                active_sessions.do_all(boost::bind(&session_thread_control::session_realserver_remove, _1, rs_itr->tcp_endpoint));
                                 break;
                         }
                 }
@@ -1525,11 +1524,11 @@ void l7vs::virtualservice_tcp::del_realserver(const l7vs::virtualservice_element
 void l7vs::virtualservice_tcp::run()
 {
         Logger funcLog(LOG_CAT_L7VSD_VIRTUALSERVICE, 80, "function: void virtualservice_tcp::run()",
-                __FILE__, __LINE__);
+                       __FILE__, __LINE__);
 
         if (pool_sessions.size() == 0) {
                 Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 16, "VirtualService not initialized.",
-                        __FILE__, __LINE__);
+                                    __FILE__, __LINE__);
                 return;
         }
         boost::asio::socket_base::receive_buffer_size option(8192 * 192);
@@ -1541,7 +1540,7 @@ void l7vs::virtualservice_tcp::run()
                 if (unlikely(err)) {
                         //ERROR
                         Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 17,
-                                "socket option(TCP_DEFER_ACCEPT) set failed" , __FILE__, __LINE__);
+                                            "socket option(TCP_DEFER_ACCEPT) set failed" , __FILE__, __LINE__);
                 }
         }
         //start listen
@@ -1568,21 +1567,20 @@ void l7vs::virtualservice_tcp::run()
 
         //switch active a session
         session_thread_control *stc_ptr;
-		do{
-			stc_ptr = pool_sessions.pop();
-		}
-		while( !stc_ptr );
+        do {
+                stc_ptr = pool_sessions.pop();
+        } while (!stc_ptr);
 
-		waiting_session  = stc_ptr->get_session().get();
+        waiting_session  = stc_ptr->get_session().get();
 
         if (!ssl_virtualservice_mode_flag) {
-                acceptor_->async_accept( waiting_session->get_client_socket().get_socket(),
-                        boost::bind(&virtualservice_tcp::handle_accept, this, stc_ptr,
-                                boost::asio::placeholders::error));
+                acceptor_->async_accept(waiting_session->get_client_socket().get_socket(),
+                                        boost::bind(&virtualservice_tcp::handle_accept, this, stc_ptr,
+                                                    boost::asio::placeholders::error));
         } else {
-                acceptor_->async_accept( waiting_session->get_client_ssl_socket().lowest_layer(),
-                        boost::bind(&virtualservice_tcp::handle_accept, this, stc_ptr,
-                                boost::asio::placeholders::error));
+                acceptor_->async_accept(waiting_session->get_client_ssl_socket().lowest_layer(),
+                                        boost::bind(&virtualservice_tcp::handle_accept, this, stc_ptr,
+                                                    boost::asio::placeholders::error));
         }
         //register timer event handler
         calc_bps_timer->expires_from_now(boost::posix_time::milliseconds(param_data.bps_interval));
@@ -1604,14 +1602,14 @@ void l7vs::virtualservice_tcp::run()
 
         //run dispatcher(start io_service loop)
         work.reset(new boost::asio::io_service::work(*dispatcher));
-	boost::thread_group dispatcher_thread_group;
+        boost::thread_group dispatcher_thread_group;
 
-	for(int i = 0; i < IO_SERVICE_THREADS_NUM; i++){
-		dispatcher_thread_group.create_thread(boost::bind(&boost::asio::io_service::run, dispatcher));
-	}
+        for (int i = 0; i < IO_SERVICE_THREADS_NUM; i++) {
+                dispatcher_thread_group.create_thread(boost::bind(&boost::asio::io_service::run, dispatcher));
+        }
 
-	//join dispatcher_thread_group when virtualservice_tcp::stop() executed.
-	dispatcher_thread_group.join_all();
+        //join dispatcher_thread_group when virtualservice_tcp::stop() executed.
+        dispatcher_thread_group.join_all();
 
         //stop all active sessions
         {
@@ -1628,7 +1626,7 @@ void l7vs::virtualservice_tcp::run()
 void l7vs::virtualservice_tcp::stop()
 {
         Logger funcLog(LOG_CAT_L7VSD_VIRTUALSERVICE, 81, "function: void virtualservice_tcp::stop()",
-                __FILE__, __LINE__);
+                       __FILE__, __LINE__);
 
         boost::system::error_code err;
         virtualservice_stop_flag++;
@@ -1643,8 +1641,8 @@ void l7vs::virtualservice_tcp::stop()
 
         //stop main loop
         //stop()
-	active_sessions.do_all( boost::bind( &session_thread_control::session_pause_off, _1 ) );
-	active_sessions.do_all( boost::bind( &session_thread_control::session_stop, _1 ) );
+        active_sessions.do_all(boost::bind(&session_thread_control::session_pause_off, _1));
+        active_sessions.do_all(boost::bind(&session_thread_control::session_stop, _1));
         while (active_sessions.size()) {
                 boost::this_thread::yield();
         }
@@ -1655,9 +1653,9 @@ void l7vs::virtualservice_tcp::stop()
         protomod_rep_timer->cancel();
         schedmod_rep_timer->cancel();
 
-	work.reset();
+        work.reset();
         dispatcher->reset();
-	dispatcher->poll();
+        dispatcher->poll();
         dispatcher->stop();
 }
 
@@ -1689,7 +1687,7 @@ void l7vs::virtualservice_tcp::connection_active(const boost::asio::ip::tcp::end
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                 Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 83, "out_function: "
-                        "void virtualservice_tcp::connection_active()", __FILE__, __LINE__);
+                                    "void virtualservice_tcp::connection_active()", __FILE__, __LINE__);
         }
 }
 
@@ -1722,7 +1720,7 @@ void l7vs::virtualservice_tcp::connection_inactive(const boost::asio::ip::tcp::e
 
         //left session is more than the release threshold
         if ((sessionpool_alert_flag == true) &&
-                 ((pool_sessions.size() + 1 ) > param_data.session_pool_alert_off)) {
+            ((pool_sessions.size() + 1) > param_data.session_pool_alert_off)) {
                 //create trap message
                 trapmessage trap_msg;
                 trap_msg.type = trapmessage::SESSIONPOOL_ALERT_OFF;
@@ -1741,7 +1739,7 @@ void l7vs::virtualservice_tcp::connection_inactive(const boost::asio::ip::tcp::e
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                 Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 85, "out_function: "
-                        "void virtualservice_tcp::connection_inactive()", __FILE__, __LINE__);
+                                    "void virtualservice_tcp::connection_inactive()", __FILE__, __LINE__);
         }
 }
 
@@ -1763,13 +1761,13 @@ void l7vs::virtualservice_tcp::release_session(const tcp_session *session_ptr)
         session_thread_control *stc_ptr = active_sessions.find(session_ptr);
         if (unlikely(NULL == stc_ptr)) {
                 boost::format fmt("session release fail: "
-                        "active_sessions.find( const tcp_session* session_ptr = %d )");
+                                  "active_sessions.find( const tcp_session* session_ptr = %d )");
                 fmt % session_ptr;
                 Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, /*XXX*/999, fmt.str(), __FILE__, __LINE__);
                 if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 88, "out_function: "
-                                "void virtualservice_tcp::release_session( "
-                                "const boost::thread::id thread_id )", __FILE__, __LINE__);
+                                            "void virtualservice_tcp::release_session( "
+                                            "const boost::thread::id thread_id )", __FILE__, __LINE__);
                 }
                 return;
         }
@@ -1787,7 +1785,7 @@ void l7vs::virtualservice_tcp::release_session(const tcp_session *session_ptr)
         }
         active_sessions.erase(session_ptr);
 
-		while( !pool_sessions.push( stc_ptr ) ){}
+        while (!pool_sessions.push(stc_ptr)) {}
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                 boost::format fmt1("pool_session.size = %d");
@@ -1868,23 +1866,23 @@ void l7vs::virtualservice_tcp::set_socket_option()
         //----Debug log----------------------------------------------------------------------
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                 boost::format formatter("set_socket_option"
-                        " defer_accept_opt[%s]"
-                        " defer_accept_val[%d]"
-                        " nodelay_opt[%s]"
-                        " nodelay_val[%s]"
-                        " cork_opt[%s]"
-                        " cork_val[%s]"
-                        " quickack_opt[%s]"
-                        " quickack_val[%s]");
+                                        " defer_accept_opt[%s]"
+                                        " defer_accept_val[%d]"
+                                        " nodelay_opt[%s]"
+                                        " nodelay_val[%s]"
+                                        " cork_opt[%s]"
+                                        " cork_val[%s]"
+                                        " quickack_opt[%s]"
+                                        " quickack_val[%s]");
                 formatter
-                        % (defer_accept_opt ? "true" : "false")
-                        % defer_accept_val
-                        % (set_sock_opt.nodelay_opt ? "true" : "false")
-                        % (set_sock_opt.nodelay_val ? "true" : "false")
-                        % (set_sock_opt.cork_opt ? "true" : "false")
-                        % (set_sock_opt.cork_val ? "true" : "false")
-                        % (set_sock_opt.quickack_opt ? "true" : "false")
-                        % (set_sock_opt.quickack_val ? "true" : "false");
+                % (defer_accept_opt ? "true" : "false")
+                % defer_accept_val
+                % (set_sock_opt.nodelay_opt ? "true" : "false")
+                % (set_sock_opt.nodelay_val ? "true" : "false")
+                % (set_sock_opt.cork_opt ? "true" : "false")
+                % (set_sock_opt.cork_val ? "true" : "false")
+                % (set_sock_opt.quickack_opt ? "true" : "false")
+                % (set_sock_opt.quickack_val ? "true" : "false");
                 Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 97, formatter.str(), __FILE__, __LINE__);
         }
         //----Debug log----------------------------------------------------------------------
@@ -2415,7 +2413,7 @@ bool l7vs::virtualservice_tcp::get_ssl_parameter()
                         is_session_cache_use = false;
                 } else {
                         Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 34,
-                                "Invalid session_cache parameter value.", __FILE__, __LINE__);
+                                            "Invalid session_cache parameter value.", __FILE__, __LINE__);
                         throw - 1;
                 }
 
@@ -2428,13 +2426,13 @@ bool l7vs::virtualservice_tcp::get_ssl_parameter()
                                                            ssl_file_name);
                         if (unlikely(err)) {
                                 Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 20,
-                                        "session_cache_size parameter not found. Use default value.",
-                                        __FILE__, __LINE__);
+                                                   "session_cache_size parameter not found. Use default value.",
+                                                   __FILE__, __LINE__);
                                 session_cache_size = DEFAULT_SSL_SESSION_CACHE_SIZE;
                         } else if (session_cache_size < 0 ||
                                    session_cache_size > INT_MAX) {
                                 Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 35,
-                                        "Invalid session_cache_size parameter value.", __FILE__, __LINE__);
+                                                    "Invalid session_cache_size parameter value.", __FILE__, __LINE__);
                                 throw - 1;
                         }
                         // Get parameter "session_cache_timeout".
@@ -2444,14 +2442,14 @@ bool l7vs::virtualservice_tcp::get_ssl_parameter()
                                                               ssl_file_name);
                         if (unlikely(err)) {
                                 Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 21,
-                                        "session_cache_timeout parameter not found. Use default value.",
-                                        __FILE__, __LINE__);
+                                                   "session_cache_timeout parameter not found. Use default value.",
+                                                   __FILE__, __LINE__);
                                 session_cache_timeout = DEFAULT_SSL_SESSION_CACHE_TIMEOUT;
                         } else if (session_cache_timeout < 0 ||
                                    session_cache_timeout > INT_MAX) {
                                 Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 36,
-                                        "Invalid session_cache_timeout parameter value.",
-                                        __FILE__, __LINE__);
+                                                    "Invalid session_cache_timeout parameter value.",
+                                                    __FILE__, __LINE__);
                                 throw - 1;
                         }
                 } else {
@@ -2466,11 +2464,11 @@ bool l7vs::virtualservice_tcp::get_ssl_parameter()
                                                   ssl_file_name);
                 if (unlikely(err)) {
                         Logger::putLogWarn(LOG_CAT_L7VSD_VIRTUALSERVICE, 22,
-                                "timeout_sec parameter not found. Use default value.", __FILE__, __LINE__);
+                                           "timeout_sec parameter not found. Use default value.", __FILE__, __LINE__);
                         handshake_timeout = DEFAULT_SSL_HANDSHAKE_TIMEOUT;
                 } else if (handshake_timeout <= 0 || handshake_timeout > INT_MAX) {
                         Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 37,
-                                "Invalid timeout_sec parameter value.", __FILE__, __LINE__);
+                                            "Invalid timeout_sec parameter value.", __FILE__, __LINE__);
                         throw - 1;
                 }
 

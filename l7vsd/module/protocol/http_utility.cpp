@@ -707,8 +707,7 @@ bool    l7vs::http_utility::is_get_request(const char *buffer)
         bool    check_result            = false;
 
         if (likely(buffer != NULL)) {
-                if ( strncmp("GET", buffer, 3) == 0 )
-                {
+                if (strncmp("GET", buffer, 3) == 0) {
                         return true;
                 }
         }
@@ -724,8 +723,7 @@ bool    l7vs::http_utility::is_post_request(const char *buffer)
         bool    check_result            = false;
 
         if (likely(buffer != NULL)) {
-                if ( strncmp("POST", buffer, 4) == 0 )
-                {
+                if (strncmp("POST", buffer, 4) == 0) {
                         return true;
                 }
         }

@@ -1,7 +1,8 @@
 #include "replication_stub.h"
 #include "l7vsd_stub.h"
 
-namespace    l7vs{
+namespace    l7vs
+{
 // l7vsd
 bool    l7vsd::list_vs_called(false);
 bool    l7vsd::list_vs_v_called(false);

@@ -17,36 +17,36 @@ using namespace log4cxx::helpers;
 using namespace log4cxx::pattern;
 
 extern int timeSizePolicyCtorCalled;
-extern void* timeSizePolicyCreated;
+extern void *timeSizePolicyCreated;
 
 IMPLEMENT_LOG4CXX_OBJECT(TimeAndSizeBasedRollingPolicy)
 
 TimeAndSizeBasedRollingPolicy::TimeAndSizeBasedRollingPolicy() :
-	maxFileSize(DEFAULT_MAX_FILE_SIZE)
+        maxFileSize(DEFAULT_MAX_FILE_SIZE)
 {
-	++timeSizePolicyCtorCalled;
-	timeSizePolicyCreated = this;
+        ++timeSizePolicyCtorCalled;
+        timeSizePolicyCreated = this;
 }
 
 size_t TimeAndSizeBasedRollingPolicy::getMaxFileSize()
 {
-	return maxFileSize;
-}
- 
-void TimeAndSizeBasedRollingPolicy::setMaxFileSize(size_t size)
-{
-	maxFileSize = size;
+        return maxFileSize;
 }
 
-void TimeAndSizeBasedRollingPolicy::setOption(const LogString& option, const LogString& value)
+void TimeAndSizeBasedRollingPolicy::setMaxFileSize(size_t size)
+{
+        maxFileSize = size;
+}
+
+void TimeAndSizeBasedRollingPolicy::setOption(const LogString &option, const LogString &value)
 {
 }
 
 bool TimeAndSizeBasedRollingPolicy::isTriggeringEvent(
-	Appender* appender,
-	const log4cxx::spi::LoggingEventPtr& event,
-	const LogString& filename,
-	size_t fileLength)  
+        Appender *appender,
+        const log4cxx::spi::LoggingEventPtr &event,
+        const LogString &filename,
+        size_t fileLength)
 {
-	return true;
+        return true;
 }

@@ -135,10 +135,10 @@ public:
         //! set log trap enable.
         //! @retrun  void
         static void logtrap_enable();
-	
-	//! set log trap disable.
+
+        //! set log trap disable.
         //! @retrun  void
-	static void logtrap_disable();
+        static void logtrap_disable();
 
         //! set log trap level
         //! @param   log trap level

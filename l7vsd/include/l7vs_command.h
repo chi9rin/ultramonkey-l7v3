@@ -108,7 +108,7 @@ public:
                    % request.log_category
                    % request.log_level
                    % request.reload_param
-           % request.snmpinfo;
+                   % request.snmpinfo;
                 return os;
         }
 
@@ -227,9 +227,9 @@ public:
                                 ++i;
                         }
                 }
-        os << "snmpinfo=" << response.snmpinfo;
+                os << "snmpinfo=" << response.snmpinfo;
 
-        os << boost::format("total_bps=%d: "
+                os << boost::format("total_bps=%d: "
                                     "total_client_recv_byte=%d: "
                                     "total_client_send_byte=%d: "
                                     "total_realserver_recv_byte=%d: "

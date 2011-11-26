@@ -154,8 +154,7 @@ public:
 
         //! get base statistic object.
         //! @return                        base statistic object.
-        stats_base& get_stats()
-        {
+        stats_base &get_stats() {
                 return http_stats_info;
         }
 };

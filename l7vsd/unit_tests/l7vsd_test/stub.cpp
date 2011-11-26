@@ -13,7 +13,8 @@
 
 #include "l7vsd.h"
 
-namespace    l7vs{
+namespace    l7vs
+{
 
 // virtualservice
 bool    virtual_service::initialize_fail(false);
@@ -28,11 +29,11 @@ bool    virtual_service::finalize_called(false);
 bool    virtual_service::finalize_fail(false);
 bool    virtual_service::stop_called(false);
 
-void    virtual_service::finalize( error_code& err )
+void    virtual_service::finalize(error_code &err)
 {
-    finalize_called = true;
-    vsd.release_virtual_service( element );
-    if( finalize_fail )    err.setter( true, "finalize_fail!" );
+        finalize_called = true;
+        vsd.release_virtual_service(element);
+        if (finalize_fail)    err.setter(true, "finalize_fail!");
 }
 
 // replication

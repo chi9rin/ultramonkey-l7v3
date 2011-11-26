@@ -82,7 +82,7 @@ int        handle_get_rstable(netsnmp_mib_handler *handler,
  * @param[in]      error_code& is trap error code
  * @retrun         void
  */
-void    init_snmp_handles(error_code& err);
+void    init_snmp_handles(error_code &err);
 
 /*!
  * unregister snmp handler.
@@ -96,7 +96,7 @@ void    unregister_handler();
  * @param[in]      error_code& is trap error code
  * @retrun         void
  */
-void    initialize_virtual_service_table(error_code& err);
+void    initialize_virtual_service_table(error_code &err);
 
 /*!
  * initialize real server table data set.
@@ -104,7 +104,7 @@ void    initialize_virtual_service_table(error_code& err);
  * @param[in]      error_code& is trap error code
  * @retrun         void
  */
-void    initialize_real_server_table(error_code& err);
+void    initialize_real_server_table(error_code &err);
 
 /*!
  * send service start trap.
@@ -112,7 +112,7 @@ void    initialize_real_server_table(error_code& err);
  * @param[in]      const std::string& is trap message
  * @retrun         int  success:SNMP_ERR_NOERROR  failed:SNMP_ERR_GENERR
  */
-int     trap_service_start(const std::string&);
+int     trap_service_start(const std::string &);
 
 /*!
  * send service stop trap.
@@ -120,7 +120,7 @@ int     trap_service_start(const std::string&);
  * @param[in]      const std::string& is trap message
  * @retrun         int  success:SNMP_ERR_NOERROR  failed:SNMP_ERR_GENERR
  */
-int     trap_service_stop(const std::string&);
+int     trap_service_stop(const std::string &);
 
 /*!
  * send virtual service add trap.
@@ -128,7 +128,7 @@ int     trap_service_stop(const std::string&);
  * @param[in]      const std::string& is trap message
  * @retrun         int  success:SNMP_ERR_NOERROR  failed:SNMP_ERR_GENERR
  */
-int     trap_vs_add(const std::string&);
+int     trap_vs_add(const std::string &);
 
 /*!
  * send virtual service change trap.
@@ -136,7 +136,7 @@ int     trap_vs_add(const std::string&);
  * @param[in]      std::string is trap message
  * @retrun         int  success:SNMP_ERR_NOERROR  failed:SNMP_ERR_GENERR
  */
-int     trap_vs_change(const std::string&);
+int     trap_vs_change(const std::string &);
 
 /*!
  * send virtual service remove trap.
@@ -144,7 +144,7 @@ int     trap_vs_change(const std::string&);
  * @param[in]      std::string is trap message
  * @retrun         int  success:SNMP_ERR_NOERROR  failed:SNMP_ERR_GENERR
  */
-int     trap_vs_remove(const std::string&);
+int     trap_vs_remove(const std::string &);
 
 /*!
  * send real server add trap.
@@ -152,7 +152,7 @@ int     trap_vs_remove(const std::string&);
  * @param[in]      const std::string& is trap message
  * @retrun         int  success:SNMP_ERR_NOERROR  failed:SNMP_ERR_GENERR
  */
-int     trap_rs_add(const std::string&);
+int     trap_rs_add(const std::string &);
 
 /*!
  * send real server change trap.
@@ -160,7 +160,7 @@ int     trap_rs_add(const std::string&);
  * @param[in]      const std::string& is trap message
  * @retrun         int  success:SNMP_ERR_NOERROR  failed:SNMP_ERR_GENERR
  */
-int     trap_rs_change(const std::string&);
+int     trap_rs_change(const std::string &);
 
 /*!
  * send real server remove trap.
@@ -168,7 +168,7 @@ int     trap_rs_change(const std::string&);
  * @param[in]      const std::string& is trap message
  * @retrun         int  success:SNMP_ERR_NOERROR  failed:SNMP_ERR_GENERR
  */
-int     trap_rs_remove(const std::string&);
+int     trap_rs_remove(const std::string &);
 
 /*!
  * send upstream QoS alert on trap.
@@ -176,7 +176,7 @@ int     trap_rs_remove(const std::string&);
  * @param[in]      const std::string& is trap message
  * @retrun         int  success:SNMP_ERR_NOERROR  failed:SNMP_ERR_GENERR
  */
-int     trap_up_qos_alert_on(const std::string&);
+int     trap_up_qos_alert_on(const std::string &);
 
 /*!
  * send upstream QoS alert off trap.
@@ -184,7 +184,7 @@ int     trap_up_qos_alert_on(const std::string&);
  * @param[in]      const std::string& is trap message
  * @retrun         int  success:SNMP_ERR_NOERROR  failed:SNMP_ERR_GENERR
  */
-int     trap_up_qos_alert_off(const std::string&);
+int     trap_up_qos_alert_off(const std::string &);
 
 /*!
  * send downstream QoS alert on trap.
@@ -192,7 +192,7 @@ int     trap_up_qos_alert_off(const std::string&);
  * @param[in]      const std::string& is trap message
  * @retrun         int  success:SNMP_ERR_NOERROR  failed:SNMP_ERR_GENERR
  */
-int     trap_down_qos_alert_on(const std::string&);
+int     trap_down_qos_alert_on(const std::string &);
 
 /*!
  * send downstream QoS alert off trap.
@@ -200,7 +200,7 @@ int     trap_down_qos_alert_on(const std::string&);
  * @param[in]      const std::string& is trap message
  * @retrun         int  success:SNMP_ERR_NOERROR  failed:SNMP_ERR_GENERR
  */
-int     trap_down_qos_alert_off(const std::string&);
+int     trap_down_qos_alert_off(const std::string &);
 
 /*!
  * send session pool alert on trap.
@@ -208,7 +208,7 @@ int     trap_down_qos_alert_off(const std::string&);
  * @param[in]      const std::string& is trap message
  * @retrun         int  success:SNMP_ERR_NOERROR  failed:SNMP_ERR_GENERR
  */
-int     trap_sessionpool_alert_on(const std::string&);
+int     trap_sessionpool_alert_on(const std::string &);
 
 /*!
  * send session pool alert off trap.
@@ -216,7 +216,7 @@ int     trap_sessionpool_alert_on(const std::string&);
  * @param[in]      const std::string& is trap message
  * @retrun         int  success:SNMP_ERR_NOERROR  failed:SNMP_ERR_GENERR
  */
-int     trap_sessionpool_alert_off(const std::string&);
+int     trap_sessionpool_alert_off(const std::string &);
 
 /*!
  * send fatal log trap.
@@ -224,7 +224,7 @@ int     trap_sessionpool_alert_off(const std::string&);
  * @param[in]      const std::string& is trap message
  * @retrun         int  success:SNMP_ERR_NOERROR  failed:SNMP_ERR_GENERR
  */
-int     trap_fatal(const std::string&);
+int     trap_fatal(const std::string &);
 
 /*!
  * send error log trap.
@@ -232,7 +232,7 @@ int     trap_fatal(const std::string&);
  * @param[in]      const std::string& is trap message
  * @retrun         int  success:SNMP_ERR_NOERROR  failed:SNMP_ERR_GENERR
  */
-int     trap_error(const std::string&);
+int     trap_error(const std::string &);
 
 /*!
  * send warn log trap.
@@ -240,7 +240,7 @@ int     trap_error(const std::string&);
  * @param[in]      const std::string& is trap message
  * @retrun         int  success:SNMP_ERR_NOERROR  failed:SNMP_ERR_GENERR
  */
-int     trap_warn(const std::string&);
+int     trap_warn(const std::string &);
 
 /*!
  * send info log trap.
@@ -248,7 +248,7 @@ int     trap_warn(const std::string&);
  * @param[in]      const std::string& is trap message
  * @retrun         int  success:SNMP_ERR_NOERROR  failed:SNMP_ERR_GENERR
  */
-int     trap_info(const std::string&);
+int     trap_info(const std::string &);
 
 /*!
  * send debug log trap.
@@ -256,7 +256,7 @@ int     trap_info(const std::string&);
  * @param[in]      const std::string& is trap message
  * @retrun         int  success:SNMP_ERR_NOERROR  failed:SNMP_ERR_GENERR
  */
-int     trap_debug(const std::string&);
+int     trap_debug(const std::string &);
 
 /*
  * column number definitions for table l7vsVsTable

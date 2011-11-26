@@ -178,7 +178,7 @@ public:
         const static int  SCHEDULER_PRIORITY       = 20;
 
         //! Default upstream QoS alert on threshold
-	const static int  UPQOS_ALERT_ON_SIZE_DEFAULT       = 85;
+        const static int  UPQOS_ALERT_ON_SIZE_DEFAULT       = 85;
         //! Default upstream QoS alert off threshold
         const static int  UPQOS_ALERT_OFF_SIZE_DEFAULT      = 50;
         //! Default downstream QoS alert on threshold
@@ -188,7 +188,7 @@ public:
         //! Default session pool alert on threshold
         const static int  SESSIONPOOL_ALERT_ON_SIZE_DEFAULT = 5;
         //! Default session pool alert off threshold
-        const static int  SESSIONPOOL_ALERT_OFF_SIZE_DEFAULT= 8;
+        const static int  SESSIONPOOL_ALERT_OFF_SIZE_DEFAULT = 8;
 
         static const int IO_SERVICE_THREADS_NUM = 1;
 protected:
@@ -205,15 +205,15 @@ protected:
                 unsigned long long session_pool_alert_on;
                 unsigned long long session_pool_alert_off;
                 parameter_data() :  nic_realserver_side(RS_SIDE_NIC_NAME_DEFAULT),
-                                session_pool_size(SESSION_POOL_NUM_DEFAULT),
-                                bps_interval(BPS_INTERVAL_DEFAULT),
-                                rep_interval(REP_INTERVAL_DEFAULT),
-				qos_up_alert_on(UPQOS_ALERT_ON_SIZE_DEFAULT),
-                                qos_up_alert_off(UPQOS_ALERT_OFF_SIZE_DEFAULT),
-                                qos_down_alert_on(DOWNQOS_ALERT_ON_SIZE_DEFAULT),
-                                qos_down_alert_off(DOWNQOS_ALERT_OFF_SIZE_DEFAULT),
-                                session_pool_alert_on(SESSIONPOOL_ALERT_ON_SIZE_DEFAULT),
-                                session_pool_alert_off(SESSIONPOOL_ALERT_OFF_SIZE_DEFAULT) {}
+                        session_pool_size(SESSION_POOL_NUM_DEFAULT),
+                        bps_interval(BPS_INTERVAL_DEFAULT),
+                        rep_interval(REP_INTERVAL_DEFAULT),
+                        qos_up_alert_on(UPQOS_ALERT_ON_SIZE_DEFAULT),
+                        qos_up_alert_off(UPQOS_ALERT_OFF_SIZE_DEFAULT),
+                        qos_down_alert_on(DOWNQOS_ALERT_ON_SIZE_DEFAULT),
+                        qos_down_alert_off(DOWNQOS_ALERT_OFF_SIZE_DEFAULT),
+                        session_pool_alert_on(SESSIONPOOL_ALERT_ON_SIZE_DEFAULT),
+                        session_pool_alert_off(SESSIONPOOL_ALERT_OFF_SIZE_DEFAULT) {}
         };
 
         boost::thread::id       this_id;
@@ -222,9 +222,9 @@ protected:
         const replication      &rep;                  //! replication reference
 
         Logger                  log;
-		boost::shared_ptr< boost::asio::io_service >
-        						dispatcher;           //! dispatcher service
-	boost::shared_ptr< boost::asio::io_service::work >      work;
+        boost::shared_ptr< boost::asio::io_service >
+        dispatcher;           //! dispatcher service
+        boost::shared_ptr< boost::asio::io_service::work >      work;
         deadline_timer_ptr_type calc_bps_timer;       //! timer object
         deadline_timer_ptr_type replication_timer;    //! timer object
         deadline_timer_ptr_type protomod_rep_timer;   //! timer object
@@ -264,7 +264,7 @@ protected:
         // protocol module option string
         std::string             protocol_module_for_indication_options;
 
-	bool upqos_alert_flag;          //! upstream QoS alert flag
+        bool upqos_alert_flag;          //! upstream QoS alert flag
         bool downqos_alert_flag;        //! downstream QoS alert flag
         bool sessionpool_alert_flag;    //! sessionpool alert flag
 
@@ -332,7 +332,7 @@ public:
         virtual bool operator==(const virtualservice_base &) = 0;
         virtual bool operator!=(const virtualservice_base &) = 0;
 
-        void rs_list_lock() {	// rs_list_ref_cont is atomic numeric. this numeric not use lock.
+        void rs_list_lock() {   // rs_list_ref_cont is atomic numeric. this numeric not use lock.
                 rs_list_ref_count++;
         }
         void rs_list_unlock() {
@@ -424,7 +424,7 @@ public:
 
         virtual void clear_inact();
 
-		virtual bool is_realserver_transparent( const boost::asio::ip::tcp::endpoint& );
+        virtual bool is_realserver_transparent(const boost::asio::ip::tcp::endpoint &);
 };
 
 //!
@@ -440,10 +440,10 @@ public:
         typedef std::map< std::string, std::string >
         accesslog_argument_map_type;
 protected:
-        boost::shared_ptr<	boost::asio::ip::tcp::acceptor > acceptor_;
+        boost::shared_ptr<      boost::asio::ip::tcp::acceptor > acceptor_;
 
         session_queue_type          pool_sessions;
-		tcp_session*				waiting_session;
+        tcp_session                            *waiting_session;
         session_map_type            active_sessions;
         l7vs::atomic<unsigned long long>
         active_count;
@@ -460,7 +460,7 @@ protected:
         std::string                 ssl_file_name;
         // SSL context
         boost::shared_ptr<boost::asio::ssl::context>
-									sslcontext;
+        sslcontext;
         // SSL context parameter
         std::string                 ca_dir;
         std::string                 ca_file;
@@ -648,9 +648,9 @@ public:
                 return vs->clear_inact();
         }
 
-	bool is_realserver_transparent( const boost::asio::ip::tcp::endpoint& endpoint ){
-		return vs->is_realserver_transparent( endpoint );
-	}
+        bool is_realserver_transparent(const boost::asio::ip::tcp::endpoint &endpoint) {
+                return vs->is_realserver_transparent(endpoint);
+        }
 };
 
 } //namespace l7vs

@@ -46,7 +46,7 @@ netsnmp_handler_registration *replication_handler = NULL;
  * @retrun         void
  */
 void
-init_snmp_handles(error_code& err)
+init_snmp_handles(error_code &err)
 {
         Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 76, "snmpfunc::init_snmp_handles", __FILE__, __LINE__);
 
@@ -65,7 +65,7 @@ init_snmp_handles(error_code& err)
 
         int ret = netsnmp_register_scalar(vs_table_size_handler);
 
-        if ( ret ) {
+        if (ret) {
                 std::string msg("netsnmp_register_scalar failed.");
                 Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 68, msg, __FILE__, __LINE__);
                 //set error code
@@ -567,7 +567,7 @@ trap_service_start(const std::string &in_trapmessage)
                                              snmptrap_oid,
                                              OID_LENGTH(snmptrap_oid),
                                              ASN_OBJECT_ID,
-                                             (u_char*)l7vsServiceStart_oid,
+                                             (u_char *)l7vsServiceStart_oid,
                                              sizeof(l7vsServiceStart_oid));
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -579,7 +579,7 @@ trap_service_start(const std::string &in_trapmessage)
                                              l7vsServiceStart_oid,
                                              OID_LENGTH(l7vsServiceStart_oid),
                                              ASN_OCTET_STR,
-                                             (u_char*)in_trapmessage.c_str(),
+                                             (u_char *)in_trapmessage.c_str(),
                                              in_trapmessage.length());
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -627,7 +627,7 @@ trap_service_stop(const std::string &in_trapmessage)
                                              snmptrap_oid,
                                              OID_LENGTH(snmptrap_oid),
                                              ASN_OBJECT_ID,
-                                             (u_char*)l7vsServiceStop_oid,
+                                             (u_char *)l7vsServiceStop_oid,
                                              sizeof(l7vsServiceStop_oid));
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -639,7 +639,7 @@ trap_service_stop(const std::string &in_trapmessage)
                                              l7vsServiceStop_oid,
                                              OID_LENGTH(l7vsServiceStop_oid),
                                              ASN_OCTET_STR,
-                                             (u_char*)in_trapmessage.c_str(),
+                                             (u_char *)in_trapmessage.c_str(),
                                              in_trapmessage.length());
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -687,7 +687,7 @@ trap_vs_add(const std::string &in_trapmessage)
         ret_list = snmp_varlist_add_variable(&var_list,
                                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
                                              ASN_OBJECT_ID,
-                                             (u_char*)l7vsBalancingVsAdd_oid,
+                                             (u_char *)l7vsBalancingVsAdd_oid,
                                              sizeof(l7vsBalancingVsAdd_oid));
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -699,7 +699,7 @@ trap_vs_add(const std::string &in_trapmessage)
                                              l7vsBalancingVsAdd_oid,
                                              OID_LENGTH(l7vsBalancingVsAdd_oid),
                                              ASN_OCTET_STR,
-                                             (u_char*)in_trapmessage.c_str(),
+                                             (u_char *)in_trapmessage.c_str(),
                                              in_trapmessage.length());
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -750,7 +750,7 @@ trap_vs_change(const std::string &in_trapmessage)
         ret_list = snmp_varlist_add_variable(&var_list,
                                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
                                              ASN_OBJECT_ID,
-                                             (u_char*)l7vsBalancingVsChange_oid,
+                                             (u_char *)l7vsBalancingVsChange_oid,
                                              sizeof(l7vsBalancingVsChange_oid));
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -762,7 +762,7 @@ trap_vs_change(const std::string &in_trapmessage)
                                              l7vsBalancingVsChange_oid,
                                              OID_LENGTH(l7vsBalancingVsChange_oid),
                                              ASN_OCTET_STR,
-                                             (u_char*)in_trapmessage.c_str(),
+                                             (u_char *)in_trapmessage.c_str(),
                                              in_trapmessage.length());
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -813,7 +813,7 @@ trap_vs_remove(const std::string &in_trapmessage)
         ret_list = snmp_varlist_add_variable(&var_list,
                                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
                                              ASN_OBJECT_ID,
-                                             (u_char*)l7vsBalancingVsRemove_oid,
+                                             (u_char *)l7vsBalancingVsRemove_oid,
                                              sizeof(l7vsBalancingVsRemove_oid));
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -825,7 +825,7 @@ trap_vs_remove(const std::string &in_trapmessage)
                                              l7vsBalancingVsRemove_oid,
                                              OID_LENGTH(l7vsBalancingVsRemove_oid),
                                              ASN_OCTET_STR,
-                                             (u_char*)in_trapmessage.c_str(),
+                                             (u_char *)in_trapmessage.c_str(),
                                              in_trapmessage.length());
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -876,7 +876,7 @@ trap_rs_add(const std::string &in_trapmessage)
         ret_list = snmp_varlist_add_variable(&var_list,
                                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
                                              ASN_OBJECT_ID,
-                                             (u_char*)l7vsBalancingRsAdd_oid,
+                                             (u_char *)l7vsBalancingRsAdd_oid,
                                              sizeof(l7vsBalancingRsAdd_oid));
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -888,7 +888,7 @@ trap_rs_add(const std::string &in_trapmessage)
                                              l7vsBalancingRsAdd_oid,
                                              OID_LENGTH(l7vsBalancingRsAdd_oid),
                                              ASN_OCTET_STR,
-                                             (u_char*)in_trapmessage.c_str(),
+                                             (u_char *)in_trapmessage.c_str(),
                                              in_trapmessage.length());
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -939,7 +939,7 @@ trap_rs_change(const std::string &in_trapmessage)
         ret_list = snmp_varlist_add_variable(&var_list,
                                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
                                              ASN_OBJECT_ID,
-                                             (u_char*)l7vsBalancingRsChange_oid,
+                                             (u_char *)l7vsBalancingRsChange_oid,
                                              sizeof(l7vsBalancingRsChange_oid));
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -951,7 +951,7 @@ trap_rs_change(const std::string &in_trapmessage)
                                              l7vsBalancingRsChange_oid,
                                              OID_LENGTH(l7vsBalancingRsChange_oid),
                                              ASN_OCTET_STR,
-                                             (u_char*)in_trapmessage.c_str(),
+                                             (u_char *)in_trapmessage.c_str(),
                                              in_trapmessage.length());
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -1001,7 +1001,7 @@ trap_rs_remove(const std::string &in_trapmessage)
         ret_list = snmp_varlist_add_variable(&var_list,
                                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
                                              ASN_OBJECT_ID,
-                                             (u_char*)l7vsBalancingRsRemove_oid,
+                                             (u_char *)l7vsBalancingRsRemove_oid,
                                              sizeof(l7vsBalancingRsRemove_oid));
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -1013,7 +1013,7 @@ trap_rs_remove(const std::string &in_trapmessage)
                                              l7vsBalancingRsRemove_oid,
                                              OID_LENGTH(l7vsBalancingRsRemove_oid),
                                              ASN_OCTET_STR,
-                                             (u_char*)in_trapmessage.c_str(),
+                                             (u_char *)in_trapmessage.c_str(),
                                              in_trapmessage.length());
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -1064,7 +1064,7 @@ trap_up_qos_alert_on(const std::string &in_trapmessage)
         ret_list = snmp_varlist_add_variable(&var_list,
                                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
                                              ASN_OBJECT_ID,
-                                             (u_char*)l7vsBalancingUpQoSAlertOn_oid,
+                                             (u_char *)l7vsBalancingUpQoSAlertOn_oid,
                                              sizeof(l7vsBalancingUpQoSAlertOn_oid));
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -1076,7 +1076,7 @@ trap_up_qos_alert_on(const std::string &in_trapmessage)
                                              l7vsBalancingUpQoSAlertOn_oid,
                                              OID_LENGTH(l7vsBalancingUpQoSAlertOn_oid),
                                              ASN_OCTET_STR,
-                                             (u_char*)in_trapmessage.c_str(),
+                                             (u_char *)in_trapmessage.c_str(),
                                              in_trapmessage.length());
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -1127,7 +1127,7 @@ trap_up_qos_alert_off(const std::string &in_trapmessage)
         ret_list = snmp_varlist_add_variable(&var_list,
                                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
                                              ASN_OBJECT_ID,
-                                             (u_char*)l7vsBalancingUpQoSAlertOff_oid,
+                                             (u_char *)l7vsBalancingUpQoSAlertOff_oid,
                                              sizeof(l7vsBalancingUpQoSAlertOff_oid));
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -1139,7 +1139,7 @@ trap_up_qos_alert_off(const std::string &in_trapmessage)
                                              l7vsBalancingUpQoSAlertOff_oid,
                                              OID_LENGTH(l7vsBalancingUpQoSAlertOff_oid),
                                              ASN_OCTET_STR,
-                                             (u_char*)in_trapmessage.c_str(),
+                                             (u_char *)in_trapmessage.c_str(),
                                              in_trapmessage.length());
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -1190,7 +1190,7 @@ trap_down_qos_alert_on(const std::string &in_trapmessage)
         ret_list = snmp_varlist_add_variable(&var_list,
                                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
                                              ASN_OBJECT_ID,
-                                             (u_char*)l7vsBalancingDownQoSAlertOn_oid,
+                                             (u_char *)l7vsBalancingDownQoSAlertOn_oid,
                                              sizeof(l7vsBalancingDownQoSAlertOn_oid));
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -1202,7 +1202,7 @@ trap_down_qos_alert_on(const std::string &in_trapmessage)
                                              l7vsBalancingDownQoSAlertOn_oid,
                                              OID_LENGTH(l7vsBalancingDownQoSAlertOn_oid),
                                              ASN_OCTET_STR,
-                                             (u_char*)in_trapmessage.c_str(),
+                                             (u_char *)in_trapmessage.c_str(),
                                              in_trapmessage.length());
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -1253,7 +1253,7 @@ trap_down_qos_alert_off(const std::string &in_trapmessage)
         ret_list = snmp_varlist_add_variable(&var_list,
                                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
                                              ASN_OBJECT_ID,
-                                             (u_char*)l7vsBalancingDownQoSAlertOff_oid,
+                                             (u_char *)l7vsBalancingDownQoSAlertOff_oid,
                                              sizeof(l7vsBalancingDownQoSAlertOff_oid));
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -1265,7 +1265,7 @@ trap_down_qos_alert_off(const std::string &in_trapmessage)
                                              l7vsBalancingDownQoSAlertOff_oid,
                                              OID_LENGTH(l7vsBalancingDownQoSAlertOff_oid),
                                              ASN_OCTET_STR,
-                                             (u_char*)in_trapmessage.c_str(),
+                                             (u_char *)in_trapmessage.c_str(),
                                              in_trapmessage.length());
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -1316,7 +1316,7 @@ trap_sessionpool_alert_on(const std::string &in_trapmessage)
         ret_list = snmp_varlist_add_variable(&var_list,
                                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
                                              ASN_OBJECT_ID,
-                                             (u_char*)l7vsBalancingSessionPoolAlertOn_oid,
+                                             (u_char *)l7vsBalancingSessionPoolAlertOn_oid,
                                              sizeof(l7vsBalancingSessionPoolAlertOn_oid));
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -1328,7 +1328,7 @@ trap_sessionpool_alert_on(const std::string &in_trapmessage)
                                              l7vsBalancingSessionPoolAlertOn_oid,
                                              OID_LENGTH(l7vsBalancingSessionPoolAlertOn_oid),
                                              ASN_OCTET_STR,
-                                             (u_char*)in_trapmessage.c_str(),
+                                             (u_char *)in_trapmessage.c_str(),
                                              in_trapmessage.length());
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -1379,7 +1379,7 @@ trap_sessionpool_alert_off(const std::string &in_trapmessage)
         ret_list = snmp_varlist_add_variable(&var_list,
                                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
                                              ASN_OBJECT_ID,
-                                             (u_char*)l7vsBalancingSessionPoolAlertOff_oid,
+                                             (u_char *)l7vsBalancingSessionPoolAlertOff_oid,
                                              sizeof
                                              (l7vsBalancingSessionPoolAlertOff_oid));
         if (!ret_list) {
@@ -1392,7 +1392,7 @@ trap_sessionpool_alert_off(const std::string &in_trapmessage)
                                              l7vsBalancingSessionPoolAlertOff_oid,
                                              OID_LENGTH(l7vsBalancingSessionPoolAlertOff_oid),
                                              ASN_OCTET_STR,
-                                             (u_char*)in_trapmessage.c_str(),
+                                             (u_char *)in_trapmessage.c_str(),
                                              in_trapmessage.length());
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -1442,7 +1442,7 @@ trap_fatal(const std::string &in_trapmessage)
         ret_list = snmp_varlist_add_variable(&var_list,
                                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
                                              ASN_OBJECT_ID,
-                                             (u_char*)l7vsLogFatal_oid, sizeof(l7vsLogFatal_oid));
+                                             (u_char *)l7vsLogFatal_oid, sizeof(l7vsLogFatal_oid));
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
                 Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 57, msg, __FILE__, __LINE__);
@@ -1453,7 +1453,7 @@ trap_fatal(const std::string &in_trapmessage)
                                              l7vsLogFatal_oid,
                                              OID_LENGTH(l7vsLogFatal_oid),
                                              ASN_OCTET_STR,
-                                             (u_char*)in_trapmessage.c_str(),
+                                             (u_char *)in_trapmessage.c_str(),
                                              in_trapmessage.length());
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -1504,7 +1504,7 @@ trap_error(const std::string &in_trapmessage)
         ret_list = snmp_varlist_add_variable(&var_list,
                                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
                                              ASN_OBJECT_ID,
-                                             (u_char*)l7vsLogError_oid, sizeof(l7vsLogError_oid));
+                                             (u_char *)l7vsLogError_oid, sizeof(l7vsLogError_oid));
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
                 Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 59, msg, __FILE__, __LINE__);
@@ -1515,7 +1515,7 @@ trap_error(const std::string &in_trapmessage)
                                              l7vsLogError_oid,
                                              OID_LENGTH(l7vsLogError_oid),
                                              ASN_OCTET_STR,
-                                             (u_char*)in_trapmessage.c_str(),
+                                             (u_char *)in_trapmessage.c_str(),
                                              in_trapmessage.length());
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -1566,7 +1566,7 @@ trap_warn(const std::string &in_trapmessage)
         ret_list = snmp_varlist_add_variable(&var_list,
                                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
                                              ASN_OBJECT_ID,
-                                             (u_char*)l7vsLogWarn_oid, sizeof(l7vsLogWarn_oid));
+                                             (u_char *)l7vsLogWarn_oid, sizeof(l7vsLogWarn_oid));
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
                 Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 61, msg, __FILE__, __LINE__);
@@ -1577,7 +1577,7 @@ trap_warn(const std::string &in_trapmessage)
                                              l7vsLogWarn_oid,
                                              OID_LENGTH(l7vsLogWarn_oid),
                                              ASN_OCTET_STR,
-                                             (u_char*)in_trapmessage.c_str(),
+                                             (u_char *)in_trapmessage.c_str(),
                                              in_trapmessage.length());
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -1628,7 +1628,7 @@ trap_info(const std::string &in_trapmessage)
         ret_list = snmp_varlist_add_variable(&var_list,
                                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
                                              ASN_OBJECT_ID,
-                                             (u_char*)l7vsLogInfo_oid, sizeof(l7vsLogInfo_oid));
+                                             (u_char *)l7vsLogInfo_oid, sizeof(l7vsLogInfo_oid));
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
                 Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 63, msg, __FILE__, __LINE__);
@@ -1639,7 +1639,7 @@ trap_info(const std::string &in_trapmessage)
                                              l7vsLogInfo_oid,
                                              OID_LENGTH(l7vsLogInfo_oid),
                                              ASN_OCTET_STR,
-                                             (u_char*)in_trapmessage.c_str(),
+                                             (u_char *)in_trapmessage.c_str(),
                                              in_trapmessage.length());
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
@@ -1690,7 +1690,7 @@ trap_debug(const std::string &in_trapmessage)
         ret_list = snmp_varlist_add_variable(&var_list,
                                              snmptrap_oid, OID_LENGTH(snmptrap_oid),
                                              ASN_OBJECT_ID,
-                                             (u_char*)l7vsLogDebug_oid, sizeof(l7vsLogDebug_oid));
+                                             (u_char *)l7vsLogDebug_oid, sizeof(l7vsLogDebug_oid));
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");
                 Logger::putLogError(LOG_CAT_L7VSD_SNMPAGENT, 65, msg, __FILE__, __LINE__);
@@ -1701,7 +1701,7 @@ trap_debug(const std::string &in_trapmessage)
                                              l7vsLogDebug_oid,
                                              OID_LENGTH(l7vsLogDebug_oid),
                                              ASN_OCTET_STR,
-                                             (u_char*)in_trapmessage.c_str(),
+                                             (u_char *)in_trapmessage.c_str(),
                                              in_trapmessage.length());
         if (!ret_list) {
                 std::string msg("snmp_varlist_add_variable failed.");

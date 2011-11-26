@@ -85,58 +85,57 @@ public:
         int socket_option_tcp_quickack;
         std::string socket_option_string;
 
-	unsigned long long    http_total_count;
+        unsigned long long    http_total_count;
         unsigned long long    http_get_count;
         unsigned long long    http_post_count;
 
         // constructor
         virtualservice_element()
-		:  udpmode(false),
-                sorry_maxconnection(0LL),
-                sorry_flag(0),
-                sorry_fwdmode(FWD_NONE),
-                qos_upstream(0ULL),
-                qos_downstream(0ULL),
-                throughput_upstream(0ULL),
-                throughput_downstream(0ULL),
-                access_log_flag(0),
-                socket_option_tcp_defer_accept(0),
-                socket_option_tcp_nodelay(0),
-                socket_option_tcp_cork(0),
-                socket_option_tcp_quickack(0),
-		http_total_count(0ULL),
-                http_get_count(0ULL),
-                http_post_count(0ULL) {}
+                :  udpmode(false),
+                   sorry_maxconnection(0LL),
+                   sorry_flag(0),
+                   sorry_fwdmode(FWD_NONE),
+                   qos_upstream(0ULL),
+                   qos_downstream(0ULL),
+                   throughput_upstream(0ULL),
+                   throughput_downstream(0ULL),
+                   access_log_flag(0),
+                   socket_option_tcp_defer_accept(0),
+                   socket_option_tcp_nodelay(0),
+                   socket_option_tcp_cork(0),
+                   socket_option_tcp_quickack(0),
+                   http_total_count(0ULL),
+                   http_get_count(0ULL),
+                   http_post_count(0ULL) {}
 
         virtualservice_element(const virtualservice_element &in)
                 :  udpmode(in.udpmode),
-                tcp_accept_endpoint(in.tcp_accept_endpoint),
-                udp_recv_endpoint(in.udp_recv_endpoint),
-                protocol_module_name(in.protocol_module_name),
-                schedule_module_name(in.schedule_module_name),
-                sorry_maxconnection(in.sorry_maxconnection),
-                sorry_endpoint(in.sorry_endpoint),
-                sorry_flag(in.sorry_flag),
-                sorry_fwdmode(in.sorry_fwdmode),
-                qos_upstream(in.qos_upstream),
-                qos_downstream(in.qos_downstream),
-                throughput_upstream(in.throughput_upstream),
-                throughput_downstream(in.throughput_downstream),
-                ssl_file_name(in.ssl_file_name),
-                access_log_flag(in.access_log_flag),
-                access_log_file_name(in.access_log_file_name),
-                access_log_rotate_key_info(in.access_log_rotate_key_info),
-                access_log_rotate_verbose_info(in.access_log_rotate_verbose_info),
-                protocol_module_for_indication_options(in.protocol_module_for_indication_options),
-                socket_option_tcp_defer_accept(in.socket_option_tcp_defer_accept),
-                socket_option_tcp_nodelay(in.socket_option_tcp_nodelay),
-                socket_option_tcp_cork(in.socket_option_tcp_cork),
-                socket_option_tcp_quickack(in.socket_option_tcp_quickack),
-                socket_option_string(in.socket_option_string),
-		http_total_count(in.http_total_count),
-                http_get_count(in.http_get_count),
-                http_post_count(in.http_post_count)
-        {
+                   tcp_accept_endpoint(in.tcp_accept_endpoint),
+                   udp_recv_endpoint(in.udp_recv_endpoint),
+                   protocol_module_name(in.protocol_module_name),
+                   schedule_module_name(in.schedule_module_name),
+                   sorry_maxconnection(in.sorry_maxconnection),
+                   sorry_endpoint(in.sorry_endpoint),
+                   sorry_flag(in.sorry_flag),
+                   sorry_fwdmode(in.sorry_fwdmode),
+                   qos_upstream(in.qos_upstream),
+                   qos_downstream(in.qos_downstream),
+                   throughput_upstream(in.throughput_upstream),
+                   throughput_downstream(in.throughput_downstream),
+                   ssl_file_name(in.ssl_file_name),
+                   access_log_flag(in.access_log_flag),
+                   access_log_file_name(in.access_log_file_name),
+                   access_log_rotate_key_info(in.access_log_rotate_key_info),
+                   access_log_rotate_verbose_info(in.access_log_rotate_verbose_info),
+                   protocol_module_for_indication_options(in.protocol_module_for_indication_options),
+                   socket_option_tcp_defer_accept(in.socket_option_tcp_defer_accept),
+                   socket_option_tcp_nodelay(in.socket_option_tcp_nodelay),
+                   socket_option_tcp_cork(in.socket_option_tcp_cork),
+                   socket_option_tcp_quickack(in.socket_option_tcp_quickack),
+                   socket_option_string(in.socket_option_string),
+                   http_total_count(in.http_total_count),
+                   http_get_count(in.http_get_count),
+                   http_post_count(in.http_post_count) {
                 protocol_args.clear();
                 BOOST_FOREACH(std::string str, in.protocol_args) {
                         protocol_args.push_back(str);
@@ -151,8 +150,7 @@ public:
                 }
         }
 
-        virtualservice_element &operator=(const virtualservice_element &in)
-        {
+        virtualservice_element &operator=(const virtualservice_element &in) {
                 udpmode = in.udpmode;
                 tcp_accept_endpoint = in.tcp_accept_endpoint;
                 udp_recv_endpoint = in.udp_recv_endpoint;
@@ -177,7 +175,7 @@ public:
                 socket_option_tcp_cork = in.socket_option_tcp_cork;
                 socket_option_tcp_quickack = in.socket_option_tcp_quickack;
                 socket_option_string = in.socket_option_string;
-		http_total_count = in.http_total_count;
+                http_total_count = in.http_total_count;
                 http_get_count = in.http_get_count;
                 http_post_count = in.http_post_count;
                 protocol_args.clear();
@@ -195,8 +193,7 @@ public:
                 return *this;
         }
 
-        friend bool operator==(const virtualservice_element &elem1, const virtualservice_element &elem2)
-        {
+        friend bool operator==(const virtualservice_element &elem1, const virtualservice_element &elem2) {
                 if (elem1.udpmode == elem2.udpmode &&
                     elem1.tcp_accept_endpoint == elem2.tcp_accept_endpoint &&
                     elem1.udp_recv_endpoint == elem2.udp_recv_endpoint &&
@@ -219,7 +216,7 @@ public:
                     elem1.socket_option_tcp_cork == elem2.socket_option_tcp_cork &&
                     elem1.socket_option_tcp_quickack == elem2.socket_option_tcp_quickack &&
                     elem1.socket_option_string == elem2.socket_option_string &&
-		    elem1.http_total_count == elem2.http_total_count &&
+                    elem1.http_total_count == elem2.http_total_count &&
                     elem1.http_get_count == elem2.http_get_count &&
                     elem1.http_post_count == elem2.http_post_count) {
 
@@ -256,8 +253,7 @@ public:
                 return false;
         }
 
-        friend bool operator!=(const virtualservice_element &elem1, const virtualservice_element &elem2)
-        {
+        friend bool operator!=(const virtualservice_element &elem1, const virtualservice_element &elem2) {
                 if (elem1.udpmode == elem2.udpmode &&
                     elem1.tcp_accept_endpoint == elem2.tcp_accept_endpoint &&
                     elem1.udp_recv_endpoint == elem2.udp_recv_endpoint &&
@@ -280,9 +276,9 @@ public:
                     elem1.socket_option_tcp_cork == elem2.socket_option_tcp_cork &&
                     elem1.socket_option_tcp_quickack == elem2.socket_option_tcp_quickack &&
                     elem1.socket_option_string == elem2.socket_option_string &&
-		    elem1.http_total_count == elem2.http_total_count &&
+                    elem1.http_total_count == elem2.http_total_count &&
                     elem1.http_get_count == elem2.http_get_count &&
-                    elem1.http_post_count == elem2.http_post_count ) {
+                    elem1.http_post_count == elem2.http_post_count) {
 
                         if (elem1.realserver_vector.size() != elem2.realserver_vector.size()) {
                                 return true;
@@ -317,8 +313,7 @@ public:
                 return true;
         }
 
-        friend bool operator<(const virtualservice_element &elem1, const virtualservice_element &elem2)
-        {
+        friend bool operator<(const virtualservice_element &elem1, const virtualservice_element &elem2) {
                 if (!elem1.udpmode && !elem2.udpmode) {
                         return elem1.tcp_accept_endpoint < elem2.tcp_accept_endpoint;
                 } else if (elem1.udpmode && elem2.udpmode) {
@@ -328,8 +323,7 @@ public:
         }
 
         template <typename Elem, typename Traits>
-        friend std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& os, const virtualservice_element &elem)
-        {
+        friend std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& os, const virtualservice_element &elem) {
                 os << "virtualservice_element={";
                 os << boost::format("udpmode=%s, "
                                     "tcp_accept_endpoint=%s, "
@@ -386,7 +380,7 @@ public:
                                     "socket_option_tcp_cork=%d, "
                                     "socket_option_tcp_quickack=%d, "
                                     "socket_option_string=%s; "
-				    "http_total_count=%d; "
+                                    "http_total_count=%d; "
                                     "http_get_count=%d; "
                                     "http_post_count=%d; }")
                    % args
@@ -410,7 +404,7 @@ public:
                    % elem.socket_option_tcp_cork
                    % elem.socket_option_tcp_quickack
                    % elem.socket_option_string
-		   % elem.http_total_count
+                   % elem.http_total_count
                    % elem.http_get_count
                    % elem.http_post_count;
 
@@ -419,8 +413,8 @@ public:
 
         const std::string get_fwdmode_str() {
                 return sorry_fwdmode == FWD_MASQ   ? "Masq"
-                     : sorry_fwdmode == FWD_TPROXY ? "Tproxy"
-                     : "Unknown";
+                       : sorry_fwdmode == FWD_TPROXY ? "Tproxy"
+                       : "Unknown";
         }
 
 private:
@@ -430,8 +424,7 @@ private:
         //! @param[in] archive
         //! @param[in] version
         template <class Archive>
-        void serialize(Archive &ar, const unsigned int version)
-        {
+        void serialize(Archive &ar, const unsigned int version) {
                 ar &udpmode;
                 ar &tcp_accept_endpoint;
                 ar &udp_recv_endpoint;
@@ -459,7 +452,7 @@ private:
                 ar &socket_option_tcp_cork;
                 ar &socket_option_tcp_quickack;
                 ar &socket_option_string;
-		ar &http_total_count;
+                ar &http_total_count;
                 ar &http_get_count;
                 ar &http_post_count;
         }

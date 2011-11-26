@@ -155,43 +155,43 @@ public:
         boost::mutex    &get_downthread_mutex();
 
         void            session_stop() {
-                session->set_virtual_service_message(tcp_session::SESSION_END, boost::asio::ip::tcp::endpoint() );
+                session->set_virtual_service_message(tcp_session::SESSION_END, boost::asio::ip::tcp::endpoint());
         }
         void            session_sorry_mode_change(int sorry_flag) {
                 if (INT_MAX == sorry_flag)
-                        session->set_virtual_service_message(tcp_session::SORRY_STATE_DISABLE, boost::asio::ip::tcp::endpoint() );
+                        session->set_virtual_service_message(tcp_session::SORRY_STATE_DISABLE, boost::asio::ip::tcp::endpoint());
                 else if (0 != sorry_flag)
-                        session->set_virtual_service_message(tcp_session::SORRY_STATE_ENABLE, boost::asio::ip::tcp::endpoint() );
+                        session->set_virtual_service_message(tcp_session::SORRY_STATE_ENABLE, boost::asio::ip::tcp::endpoint());
         }
         void            session_sorry_enable() {
-                session->set_virtual_service_message(tcp_session::SORRY_STATE_ENABLE, boost::asio::ip::tcp::endpoint() );
+                session->set_virtual_service_message(tcp_session::SORRY_STATE_ENABLE, boost::asio::ip::tcp::endpoint());
         }
         void            session_sorry_disable() {
-                session->set_virtual_service_message(tcp_session::SORRY_STATE_DISABLE, boost::asio::ip::tcp::endpoint() );
+                session->set_virtual_service_message(tcp_session::SORRY_STATE_DISABLE, boost::asio::ip::tcp::endpoint());
         }
         void            session_pause_on() {
-                session->set_virtual_service_message(tcp_session::SESSION_PAUSE_ON, boost::asio::ip::tcp::endpoint() );
+                session->set_virtual_service_message(tcp_session::SESSION_PAUSE_ON, boost::asio::ip::tcp::endpoint());
         }
         void            session_pause_off() {
-                session->set_virtual_service_message(tcp_session::SESSION_PAUSE_OFF, boost::asio::ip::tcp::endpoint() );
+                session->set_virtual_service_message(tcp_session::SESSION_PAUSE_OFF, boost::asio::ip::tcp::endpoint());
         }
 
         void session_accesslog_output_mode_on() {
-                session->set_virtual_service_message(tcp_session::ACCESS_LOG_ON, boost::asio::ip::tcp::endpoint() );
+                session->set_virtual_service_message(tcp_session::ACCESS_LOG_ON, boost::asio::ip::tcp::endpoint());
         }
         void session_accesslog_output_mode_off() {
-                session->set_virtual_service_message(tcp_session::ACCESS_LOG_OFF, boost::asio::ip::tcp::endpoint() );
+                session->set_virtual_service_message(tcp_session::ACCESS_LOG_OFF, boost::asio::ip::tcp::endpoint());
         }
         void            session_access_log_output_mode_change(int accesslog_flag) {
                 if (accesslog_flag == true)
-                        session->set_virtual_service_message(tcp_session::ACCESS_LOG_ON, boost::asio::ip::tcp::endpoint() );
+                        session->set_virtual_service_message(tcp_session::ACCESS_LOG_ON, boost::asio::ip::tcp::endpoint());
                 else if (accesslog_flag == false)
-                        session->set_virtual_service_message(tcp_session::ACCESS_LOG_OFF, boost::asio::ip::tcp::endpoint() );
+                        session->set_virtual_service_message(tcp_session::ACCESS_LOG_OFF, boost::asio::ip::tcp::endpoint());
         }
 
-		void		session_realserver_remove( const boost::asio::ip::tcp::endpoint& in ){
-			session->set_virtual_service_message( tcp_session::REALSERVER_REMOVE, in );
-		}
+        void            session_realserver_remove(const boost::asio::ip::tcp::endpoint &in) {
+                session->set_virtual_service_message(tcp_session::REALSERVER_REMOVE, in);
+        }
 
 
 };

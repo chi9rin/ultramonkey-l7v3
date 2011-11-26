@@ -39,98 +39,98 @@ namespace l7vs
 
 //! @class    mibdata
 //! @brief    this class is mib data cache class.
-        class mibdata : private boost::noncopyable
-        {
-        protected:
-                netsnmp_table_data_set*  vs_table;
-                netsnmp_table_data_set*  rs_table;
-                int  vs_table_size;
-                int  rs_table_size;
-                int  replication_state;
+class mibdata : private boost::noncopyable
+{
+protected:
+        netsnmp_table_data_set  *vs_table;
+        netsnmp_table_data_set  *rs_table;
+        int  vs_table_size;
+        int  rs_table_size;
+        int  replication_state;
 
-                mibdata() {};
-                ~mibdata() {};
-                mibdata(const mibdata &);
-                mibdata& operator=(const mibdata &);
+        mibdata() {};
+        ~mibdata() {};
+        mibdata(const mibdata &);
+        mibdata &operator=(const mibdata &);
 
-                /*!
-                 * update virtual service table information.
-                 *
-                 * @param   l7vsd * l7vsd pointer
-                 * @param   error_code & error code
-                 * @retrun  void
-                 */
-                void  update_vs_table(l7vsd *, error_code &);
+        /*!
+         * update virtual service table information.
+         *
+         * @param   l7vsd * l7vsd pointer
+         * @param   error_code & error code
+         * @retrun  void
+         */
+        void  update_vs_table(l7vsd *, error_code &);
 
-                /*!
-                 * update real server table information.
-                 *
-                 * @param   const std::vector<rsdata> & temporary real server list
-                 * @param   error_code & error code
-                 * @retrun  void
-                 */
-                void  update_rs_table(const std::vector<rsdata> &, error_code &);
+        /*!
+         * update real server table information.
+         *
+         * @param   const std::vector<rsdata> & temporary real server list
+         * @param   error_code & error code
+         * @retrun  void
+         */
+        void  update_rs_table(const std::vector<rsdata> &, error_code &);
 
-                /*!
-                 * update replication state.
-                 *
-                 * @param   l7vsd * l7vsd pointer
-                 * @param   error_code & error code
-                 * @retrun  void
-                 */
-                void  update_replication_state(l7vsd *, error_code &);
+        /*!
+         * update replication state.
+         *
+         * @param   l7vsd * l7vsd pointer
+         * @param   error_code & error code
+         * @retrun  void
+         */
+        void  update_replication_state(l7vsd *, error_code &);
 
-        public:
-                /*!
-                 * get mibdata instance.
-                 *
-                 * @retrun  mibdata instance
-                 */
-                static mibdata&  get_instance();
+public:
+        /*!
+         * get mibdata instance.
+         *
+         * @retrun  mibdata instance
+         */
+        static mibdata  &get_instance();
 
-                /*!
-                 * collect mibdata in l7vsd.
-                 *
-                 * @param   l7vsd * l7vsd pointer
-                 * @param   error_code & error code
-                 * @retrun  void
-                 */
-                void  collect_mibdata(l7vsd *, error_code &);
+        /*!
+         * collect mibdata in l7vsd.
+         *
+         * @param   l7vsd * l7vsd pointer
+         * @param   error_code & error code
+         * @retrun  void
+         */
+        void  collect_mibdata(l7vsd *, error_code &);
 
-                /*!
-                 * set virtual service data set.
-                 *
-                 * @param   netsnmp_table_data_set * virtual service data set
-                 * @retrun  void
-                 */
-                void  set_vs_table(netsnmp_table_data_set *);
+        /*!
+         * set virtual service data set.
+         *
+         * @param   netsnmp_table_data_set * virtual service data set
+         * @retrun  void
+         */
+        void  set_vs_table(netsnmp_table_data_set *);
 
-                /*!
-                 * set real server data set.
-                 *
-                 * @param   netsnmp_table_data_set * real server data set
-                 * @retrun  void
-                 */
-                void  set_rs_table(netsnmp_table_data_set *);
+        /*!
+         * set real server data set.
+         *
+         * @param   netsnmp_table_data_set * real server data set
+         * @retrun  void
+         */
+        void  set_rs_table(netsnmp_table_data_set *);
 
-                /*!
-                 * get virtual service table size
-                 *
-                 * @retrun  int virtual service table size
-                 */
-                inline int   get_vs_table_size() {
-                        return vs_table_size;
-                }
+        /*!
+         * get virtual service table size
+         *
+         * @retrun  int virtual service table size
+         */
+        inline int   get_vs_table_size() {
+                return vs_table_size;
+        }
 
-                /*!
-                 * get replication state.
-                 *
-                 * @retrun  int replication state
-                 */
-                inline int   get_replication_state() {
-                        return replication_state;
-                }
-        };
+        /*!
+         * get replication state.
+         *
+         * @retrun  int replication state
+         */
+        inline int   get_replication_state() {
+                return replication_state;
+        }
+};
 }
 
 #endif //__MIBDATA_H__

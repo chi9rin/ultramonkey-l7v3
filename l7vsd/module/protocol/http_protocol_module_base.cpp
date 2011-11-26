@@ -1184,8 +1184,7 @@ bool    l7vs::http_protocol_module_base::is_get_request(const char *buffer)
         bool    check_result            = false;
 
         if (likely(buffer != NULL)) {
-                if ( strncmp("GET", buffer, 3) == 0 )
-                {
+                if (strncmp("GET", buffer, 3) == 0) {
                         check_result = true;
                 }
         }
@@ -1224,8 +1223,7 @@ bool    l7vs::http_protocol_module_base::is_post_request(const char *buffer)
         bool    check_result            = false;
 
         if (likely(buffer != NULL)) {
-                if ( strncmp("POST", buffer, 4) == 0 )
-                {
+                if (strncmp("POST", buffer, 4) == 0) {
                         check_result = true;
                 }
         }
@@ -1254,13 +1252,13 @@ void    l7vs::http_protocol_module_base::increment_stats(const char *buffer)
         //---------- DEBUG LOG START ------------------------------
         if (unlikely(LOG_LV_DEBUG == getloglevel())) {
                 boost::format    outform("function in : [increment_stats] : "
-                             "http_get_requests = [%d], "
-                             "http_post_requests = [%d], "
-                             "http_requests = [%d]");
+                                         "http_get_requests = [%d], "
+                                         "http_post_requests = [%d], "
+                                         "http_requests = [%d]");
 
                 outform % http_stats_info.http_get_requests.get() %
-                          http_stats_info.http_post_requests.get() %
-                          http_stats_info.http_requests.get();
+                http_stats_info.http_post_requests.get() %
+                http_stats_info.http_requests.get();
                 putLogDebug(28,
                             outform.str(),
                             __FILE__,
@@ -1269,14 +1267,13 @@ void    l7vs::http_protocol_module_base::increment_stats(const char *buffer)
         //---------- DEBUG LOG END ------------------------------
 
         if (buffer != NULL && statistic == true) {
-            if (is_get_request(buffer)) {
-                    http_stats_info.http_get_requests++;
-            }
-            else if (is_post_request(buffer)) {
-                    http_stats_info.http_post_requests++;
-            }
+                if (is_get_request(buffer)) {
+                        http_stats_info.http_get_requests++;
+                } else if (is_post_request(buffer)) {
+                        http_stats_info.http_post_requests++;
+                }
 
-            http_stats_info.http_requests++;
+                http_stats_info.http_requests++;
         }
 
         //---------- DEBUG LOG START ------------------------------
@@ -1287,8 +1284,8 @@ void    l7vs::http_protocol_module_base::increment_stats(const char *buffer)
                                          "http_requests = [%d]");
 
                 outform % http_stats_info.http_get_requests.get() %
-                          http_stats_info.http_post_requests.get() %
-                          http_stats_info.http_requests.get();
+                http_stats_info.http_post_requests.get() %
+                http_stats_info.http_requests.get();
 
                 putLogDebug(29,
                             outform.str(),

@@ -22,9 +22,9 @@
 
 namespace l7vs
 {
-	class ParameterImpl;
-	class Parameter
-	{
+    class ParameterImpl;
+    class Parameter
+    {
 public:
     Parameter();                            //!< default constractor
     ~Parameter();                           //!< default destractor
@@ -84,14 +84,14 @@ public:
                          const std::string& = PARAMETER_FILE );
 
 
-	void    setIntValue(const PARAMETER_COMPONENT_TAG comp, const std::string& key, const int value);
-	void    setStringValue(const PARAMETER_COMPONENT_TAG comp, const std::string& key, const std::string& value);
+    void    setIntValue(const PARAMETER_COMPONENT_TAG comp, const std::string& key, const int value);
+    void    setStringValue(const PARAMETER_COMPONENT_TAG comp, const std::string& key, const std::string& value);
 
         void    deleteIntValue(const PARAMETER_COMPONENT_TAG comp, const std::string& key);
         void    deleteStringValue(const PARAMETER_COMPONENT_TAG comp, const std::string& key);
 
 
-	};
+    };
 };
-	
-#endif	//PARAMETER_H__
+    
+#endif  //PARAMETER_H__

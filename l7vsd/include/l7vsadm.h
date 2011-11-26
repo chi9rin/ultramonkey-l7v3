@@ -197,8 +197,7 @@ protected:
                 file_lock(const std::string &path, error_code &err)
                         :
                         fd(-1),
-                        lock(-1)
-                {
+                        lock(-1) {
                         fd = open(path.c_str(), O_RDONLY);
                         if (fd == -1) {
                                 std::stringstream buf;
@@ -208,8 +207,7 @@ protected:
                 }
 
                 //! destructor
-                ~file_lock()
-                {
+                ~file_lock() {
                         if (lock != -1) {
                                 // fd unlock.
                                 flock(fd, LOCK_UN);
@@ -222,8 +220,7 @@ protected:
 
                 //! try lock function
                 //! @return    lock succeed(true) / lock failed(false)
-                bool try_lock()
-                {
+                bool try_lock() {
                         lock = flock(fd, LOCK_EX | LOCK_NB);
                         if (lock == 0) {
                                 // l7vsadm file lock OK.

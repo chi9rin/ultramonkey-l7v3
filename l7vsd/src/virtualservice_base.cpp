@@ -66,7 +66,7 @@ l7vs::virtualservice_base::virtualservice_base(const l7vs::l7vsd &invsd,
         wait_count_down    = 0;
         interrupt_running_flag = 0;
         virtualservice_stop_flag = 0;
-	upqos_alert_flag = false;
+        upqos_alert_flag = false;
         downqos_alert_flag = false;
         sessionpool_alert_flag = false;
 
@@ -132,39 +132,39 @@ void    l7vs::virtualservice_base::load_parameter(l7vs::error_code &err)
         if (!vs_err)
                 param_data.rep_interval = int_val;
 
-	//get upstream QoS alert on threshold
+        //get upstream QoS alert on threshold
         int_val    = param.get_int(l7vs::PARAM_COMP_SNMPAGENT, QOS_UP_ALERT_ON_SIZE, vs_err);
         if (!vs_err) {
-                if (int_val > 0 && int_val <= 100 ) {
+                if (int_val > 0 && int_val <= 100) {
                         param_data.qos_up_alert_on = int_val;
                 } else {
-			param_data.qos_up_alert_on = virtualservice_base::UPQOS_ALERT_ON_SIZE_DEFAULT;
+                        param_data.qos_up_alert_on = virtualservice_base::UPQOS_ALERT_ON_SIZE_DEFAULT;
                 }
         }
         //get upstream QoS alert off threshold
         int_val    = param.get_int(l7vs::PARAM_COMP_SNMPAGENT, QOS_UP_ALERT_OFF_SIZE, vs_err);
         if (!vs_err) {
-                if (int_val > 0 && int_val <= 100 ) {
+                if (int_val > 0 && int_val <= 100) {
                         param_data.qos_up_alert_off = int_val;
                 } else {
                         param_data.qos_up_alert_off = virtualservice_base::UPQOS_ALERT_OFF_SIZE_DEFAULT;
-		}
-	}
+                }
+        }
 
-	//get downstream QoS alert on threshold
+        //get downstream QoS alert on threshold
         int_val    = param.get_int(l7vs::PARAM_COMP_SNMPAGENT, QOS_DOWN_ALERT_ON_SIZE, vs_err);
         if (!vs_err) {
-                if (int_val > 0 && int_val <= 100 ) {
+                if (int_val > 0 && int_val <= 100) {
                         param_data.qos_down_alert_on = int_val;
                 } else {
                         param_data.qos_down_alert_on = virtualservice_base::DOWNQOS_ALERT_ON_SIZE_DEFAULT;
                 }
         }
 
-	//get downstream QoS alert off threshold
+        //get downstream QoS alert off threshold
         int_val    = param.get_int(l7vs::PARAM_COMP_SNMPAGENT, QOS_DOWN_ALERT_OFF_SIZE, vs_err);
         if (!vs_err) {
-                if (int_val > 0 && int_val <= 100 ) {
+                if (int_val > 0 && int_val <= 100) {
                         param_data.qos_down_alert_off = int_val;
                 } else {
                         param_data.qos_down_alert_off = virtualservice_base::DOWNQOS_ALERT_OFF_SIZE_DEFAULT;
@@ -172,7 +172,7 @@ void    l7vs::virtualservice_base::load_parameter(l7vs::error_code &err)
         }
 
         //get session pool alert on threshold
-	int_val    = param.get_int(l7vs::PARAM_COMP_SNMPAGENT, SESSION_POOL_ALERT_ON_SIZE, vs_err);
+        int_val    = param.get_int(l7vs::PARAM_COMP_SNMPAGENT, SESSION_POOL_ALERT_ON_SIZE, vs_err);
         if (!vs_err) {
                 if (int_val > 0) {
                         param_data.session_pool_alert_on = int_val;
@@ -194,7 +194,7 @@ void    l7vs::virtualservice_base::load_parameter(l7vs::error_code &err)
         if (unlikely(LOG_LV_DEBUG == l7vs::Logger::getLogLevel(l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD))) {
                 std::stringstream buf;
                 buf << "out_function : void virtualservice_base::load_parameter() : ";
-		buf << "param_data.nic_realserver_side = ["   << param_data.nic_realserver_side    << "], ";
+                buf << "param_data.nic_realserver_side = ["   << param_data.nic_realserver_side    << "], ";
                 buf << "param_data.session_pool_size = ["     << param_data.session_pool_size      << "], ";
                 buf << "param_data.bps_interval = ["          << param_data.bps_interval           << "], ";
                 buf << "param_data.rep_interval = ["          << param_data.rep_interval           << "], ";
@@ -203,7 +203,7 @@ void    l7vs::virtualservice_base::load_parameter(l7vs::error_code &err)
                 buf << "param_data.qos_down_alert_on = ["     << param_data.qos_down_alert_on      << "], ";
                 buf << "param_data.qos_down_alert_off = ["    << param_data.qos_down_alert_off     << "], ";
                 buf << "param_data.session_pool_alert_on = [" << param_data.session_pool_alert_on  << "], ";
-                buf << "param_data.session_pool_alert_off = ["<< param_data.session_pool_alert_off << "]";
+                buf << "param_data.session_pool_alert_off = [" << param_data.session_pool_alert_off << "]";
 
                 l7vs::Logger::putLogDebug(l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 2, buf.str(), __FILE__, __LINE__);
         }
@@ -380,7 +380,7 @@ void    l7vs::virtualservice_base::handle_throughput_update(const boost::system:
                         throughput_down = (unsigned long long)(byte_sec_down_val * 1000);
                         current_down_recvsize = 0ULL;
                 }
- 
+
                 //calc downstream alert on throughput
                 unsigned long long downqos_alert_on_throughput =  element.qos_downstream * param_data.qos_down_alert_on / 100;
                 //calc downstream alert off throughput
@@ -432,17 +432,15 @@ void    l7vs::virtualservice_base::handle_throughput_update(const boost::system:
                         formatter2 % throughput_down.get() % wait_count_down.get();
                         l7vs::Logger::putLogDebug(l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 9, formatter2.str(), __FILE__, __LINE__);
                 }
+        } else if (err == boost::asio::error::operation_aborted) { //nomal exit case
+                boost::format   fmt("Thread ID[%d] throughput update timer cancel : %s");
+                fmt % boost::this_thread::get_id() % err.message();
+                Logger::putLogInfo(LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, fmt.str(), __FILE__, __LINE__);
+        } else { // error case
+                boost::format   fmt("Thread ID[%d] throughput update timer error : %s");
+                fmt % boost::this_thread::get_id() % err.message();
+                Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 5, fmt.str(), __FILE__, __LINE__);
         }
-		else if( err == boost::asio::error::operation_aborted ){ //nomal exit case
-			boost::format	fmt( "Thread ID[%d] throughput update timer cancel : %s" );
-			fmt % boost::this_thread::get_id() % err.message();
-			Logger::putLogInfo( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 0, fmt.str(), __FILE__, __LINE__ );
-		}
-		else{	// error case
-			boost::format	fmt( "Thread ID[%d] throughput update timer error : %s" );
-			fmt % boost::this_thread::get_id() % err.message();
-			Logger::putLogError( LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD, 5, fmt.str(), __FILE__, __LINE__ );
-		}
 
 
         if (unlikely(LOG_LV_DEBUG == l7vs::Logger::getLogLevel(l7vs::LOG_CAT_L7VSD_VIRTUALSERVICE_THREAD))) {
@@ -596,10 +594,10 @@ l7vs::virtualservice_element        &l7vs::virtualservice_base::get_element()
         element.throughput_upstream        = throughput_up.get();
         element.throughput_downstream    = throughput_down.get();
 
-	if (protomod != NULL) {
-                stats_base& sbase = protomod->get_stats();
+        if (protomod != NULL) {
+                stats_base &sbase = protomod->get_stats();
                 if (sbase.get_mode() == stats_base::MODE_HTTP) {
-                        http_stats& hstats = static_cast<http_stats&>(sbase);
+                        http_stats &hstats = static_cast<http_stats &>(sbase);
                         element.http_total_count = hstats.http_requests.get();
                         element.http_get_count = hstats.http_get_requests.get();
                         element.http_post_count = hstats.http_post_requests.get();
@@ -643,7 +641,7 @@ void l7vs::virtualservice_base::clear_inact()
 
         rs_list_lock();
         for (std::list<realserver>::iterator itr = rs_list.begin();
-                        itr != rs_list.end(); ++itr) {
+             itr != rs_list.end(); ++itr) {
                 itr->clear_inact();
         }
         rs_list_unlock();
@@ -658,16 +656,17 @@ void l7vs::virtualservice_base::clear_inact()
 // @param[in] realserver_endpoint realserver endpoint
 // @return    mode check result
 //
-bool l7vs::virtualservice_base::is_realserver_transparent( const boost::asio::ip::tcp::endpoint& realserver_endpoint ){
+bool l7vs::virtualservice_base::is_realserver_transparent(const boost::asio::ip::tcp::endpoint &realserver_endpoint)
+{
 
-	rs_list_lock();
-	for( std::list<realserver>::iterator itr = rs_list.begin(); itr != rs_list.end(); ++itr ){
-		if( (itr->tcp_endpoint == realserver_endpoint) &&
-			(itr->fwdmode == realserver_element::FWD_TPROXY ) ){
-			 rs_list_unlock();
-			 return true;
-		}
-	}
-	rs_list_unlock();
-	return false;
+        rs_list_lock();
+        for (std::list<realserver>::iterator itr = rs_list.begin(); itr != rs_list.end(); ++itr) {
+                if ((itr->tcp_endpoint == realserver_endpoint) &&
+                    (itr->fwdmode == realserver_element::FWD_TPROXY)) {
+                        rs_list_unlock();
+                        return true;
+                }
+        }
+        rs_list_unlock();
+        return false;
 }

@@ -18,16 +18,16 @@ using namespace log4cxx::pattern;
 
 using namespace l7vs;
 extern int strictPolicyCtorCalled;
-extern void* strictPolicyCreated;
+extern void *strictPolicyCreated;
 
 
 IMPLEMENT_LOG4CXX_OBJECT(StrictTimeBasedRollingPolicy)
 
 StrictTimeBasedRollingPolicy::StrictTimeBasedRollingPolicy() :
-	nextCheck(0), rotationTiming(LOG_TIM_YEAR), rotationTimingValue("")
+        nextCheck(0), rotationTiming(LOG_TIM_YEAR), rotationTimingValue("")
 {
-	++strictPolicyCtorCalled;
-	strictPolicyCreated = this;
+        ++strictPolicyCtorCalled;
+        strictPolicyCreated = this;
 }
 
 void StrictTimeBasedRollingPolicy::addRef() const
@@ -38,63 +38,63 @@ void StrictTimeBasedRollingPolicy::releaseRef() const
 {
 }
 
-void StrictTimeBasedRollingPolicy::activateOptions(log4cxx::helpers::Pool& pool)
+void StrictTimeBasedRollingPolicy::activateOptions(log4cxx::helpers::Pool &pool)
 {
 }
 
 std::string StrictTimeBasedRollingPolicy::getRotationTimingValue()
 {
-	return rotationTimingValue;
+        return rotationTimingValue;
 }
- 
-void StrictTimeBasedRollingPolicy::setRotationTimingValue(const std::string& val)
+
+void StrictTimeBasedRollingPolicy::setRotationTimingValue(const std::string &val)
 {
-	rotationTimingValue = val;
+        rotationTimingValue = val;
 }
 
 LOG_ROTATION_TIMING_TAG StrictTimeBasedRollingPolicy::getRotationTiming()
 {
-	return rotationTiming;
-}
- 
-void StrictTimeBasedRollingPolicy::setRotationTiming(const LOG_ROTATION_TIMING_TAG val)
-{
-	rotationTiming = val;
+        return rotationTiming;
 }
 
-void StrictTimeBasedRollingPolicy::setOption(const LogString& option, const LogString& value)
+void StrictTimeBasedRollingPolicy::setRotationTiming(const LOG_ROTATION_TIMING_TAG val)
+{
+        rotationTiming = val;
+}
+
+void StrictTimeBasedRollingPolicy::setOption(const LogString &option, const LogString &value)
 {
 }
 
 RolloverDescriptionPtr StrictTimeBasedRollingPolicy::initialize(
-	const LogString& currentActiveFile,
-	const bool append,
-	Pool& pool) 
+        const LogString &currentActiveFile,
+        const bool append,
+        Pool &pool)
 {
-	RolloverDescriptionPtr desc;
-	return desc;
+        RolloverDescriptionPtr desc;
+        return desc;
 }
 
 time_t StrictTimeBasedRollingPolicy::getNextCheck(time_t timeNow)
 {
-	return 0;
+        return 0;
 }
 
 RolloverDescriptionPtr StrictTimeBasedRollingPolicy::rollover(
-	const LogString& currentActiveFile,
-	Pool& pool) 
+        const LogString &currentActiveFile,
+        Pool &pool)
 {
-	RolloverDescriptionPtr desc;
-	return desc;
+        RolloverDescriptionPtr desc;
+        return desc;
 }
 
 
 
 bool StrictTimeBasedRollingPolicy::isTriggeringEvent(
-	Appender* /* appender */,
-	const log4cxx::spi::LoggingEventPtr& /* event */,
-	const LogString& /* filename */,
-	size_t /* fileLength */)  
+        Appender* /* appender */,
+        const log4cxx::spi::LoggingEventPtr& /* event */,
+        const LogString& /* filename */,
+        size_t /* fileLength */)
 {
-	return true;
+        return true;
 }

@@ -18,13 +18,13 @@
 
 namespace l7vs
 {
-	struct	component{
-		std::string	section;
-		void		(*function)();
-		component(){ section = ""; function = NULL;}
-		component( std::string str, void (*p_func)() ){ section = str; function = p_func;}
-		component& operator=(const component& in_comp){ section = in_comp.section; function = in_comp.function;return *this;}
-	};
+    struct  component{
+        std::string section;
+        void        (*function)();
+        component(){ section = ""; function = NULL;}
+        component( std::string str, void (*p_func)() ){ section = str; function = p_func;}
+        component& operator=(const component& in_comp){ section = in_comp.section; function = in_comp.function;return *this;}
+    };
 class ParameterImpl : private boost::noncopyable {
 protected:
     typedef    std::map< std::string, int >               int_map_type;
@@ -107,14 +107,14 @@ public:
                           error_code&,
                           const std::string& );
 
-	void    setIntValue(const PARAMETER_COMPONENT_TAG comp, const std::string& key, const int value);
+    void    setIntValue(const PARAMETER_COMPONENT_TAG comp, const std::string& key, const int value);
 
-	void    setStringValue(const PARAMETER_COMPONENT_TAG comp, const std::string& key, const std::string& value);
+    void    setStringValue(const PARAMETER_COMPONENT_TAG comp, const std::string& key, const std::string& value);
 
         void    deleteIntValue(const PARAMETER_COMPONENT_TAG comp, const std::string& key);
         void    deleteStringValue(const PARAMETER_COMPONENT_TAG comp, const std::string& key);
 
 
-	};
+    };
 };
-#endif	//PARAMETER_IMPL_H__
+#endif  //PARAMETER_IMPL_H__

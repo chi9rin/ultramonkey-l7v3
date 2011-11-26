@@ -28,37 +28,37 @@
 
 namespace l7vs
 {
-        //! snmp trap message struct
-        struct trapmessage {
-                enum TRAP_TYPE_TAG {
-                        SERVICE_START = 0,
-                        SERVICE_STOP,
-                        VIRTUALSERVICE_ADD,
-                        VIRTUALSERVICE_CHANGE,
-                        VIRTUALSERVICE_REMOVE,
-                        REALSERVER_ADD,
-                        REALSERVER_CHANGE,
-                        REALSERVER_REMOVE,
-                        UPQOS_ALERT_ON,
-                        UPQOS_ALERT_OFF,
-                        DOWNQOS_ALERT_ON,
-                        DOWNQOS_ALERT_OFF,
-                        SESSIONPOOL_ALERT_ON,
-                        SESSIONPOOL_ALERT_OFF,
-                        DEBUG_LOG,
-                        INFO_LOG,
-                        WARN_LOG,
-                        ERROR_LOG,
-                        FATAL_LOG
-                };
-
-                std::string    message;
-                TRAP_TYPE_TAG  type;
+//! snmp trap message struct
+struct trapmessage {
+        enum TRAP_TYPE_TAG {
+                SERVICE_START = 0,
+                SERVICE_STOP,
+                VIRTUALSERVICE_ADD,
+                VIRTUALSERVICE_CHANGE,
+                VIRTUALSERVICE_REMOVE,
+                REALSERVER_ADD,
+                REALSERVER_CHANGE,
+                REALSERVER_REMOVE,
+                UPQOS_ALERT_ON,
+                UPQOS_ALERT_OFF,
+                DOWNQOS_ALERT_ON,
+                DOWNQOS_ALERT_OFF,
+                SESSIONPOOL_ALERT_ON,
+                SESSIONPOOL_ALERT_OFF,
+                DEBUG_LOG,
+                INFO_LOG,
+                WARN_LOG,
+                ERROR_LOG,
+                FATAL_LOG
         };
 
-        //! typedef snmp send trap func type
-        typedef boost::function<void(trapmessage&, error_code&)>
-        snmp_send_trap_func_type;
+        std::string    message;
+        TRAP_TYPE_TAG  type;
+};
+
+//! typedef snmp send trap func type
+typedef boost::function<void(trapmessage &, error_code &)>
+snmp_send_trap_func_type;
 }
 
 #endif //__TRAPMESSAGE_H__

@@ -70,8 +70,7 @@ public:
                 fwdmode(in.fwdmode)
         {}
 
-        realserver_element &operator=(const realserver_element &elem)
-        {
+        realserver_element &operator=(const realserver_element &elem) {
                 nactive = elem.nactive;
                 ninact = elem.ninact;
                 tcp_endpoint = elem.tcp_endpoint;
@@ -81,37 +80,30 @@ public:
                 return *this;
         }
 
-        friend bool operator==(const realserver_element &rselem1, const realserver_element &rselem2)
-        {
+        friend bool operator==(const realserver_element &rselem1, const realserver_element &rselem2) {
                 return rselem1.tcp_endpoint == rselem2.tcp_endpoint &&
                        rselem1.udp_endpoint == rselem2.udp_endpoint &&
                        rselem1.weight == rselem2.weight &&
                        rselem1.fwdmode == rselem2.fwdmode;
         }
 
-        friend bool operator!=(const realserver_element &rselem1, const realserver_element &rselem2)
-        {
+        friend bool operator!=(const realserver_element &rselem1, const realserver_element &rselem2) {
                 return rselem1.tcp_endpoint != rselem2.tcp_endpoint ||
                        rselem1.udp_endpoint != rselem2.udp_endpoint ||
                        rselem1.weight != rselem2.weight ||
                        rselem1.fwdmode != rselem2.fwdmode;
         }
 
-        friend bool operator<(const realserver_element &rselem1, const realserver_element &rselem2)
-        {
+        friend bool operator<(const realserver_element &rselem1, const realserver_element &rselem2) {
                 if (rselem1.tcp_endpoint < rselem2.tcp_endpoint) {
                         return true;
-                }
-                else if (rselem1.tcp_endpoint != rselem2.tcp_endpoint) {
+                } else if (rselem1.tcp_endpoint != rselem2.tcp_endpoint) {
                         return false;
-                }
-                else if (rselem1.weight < rselem2.weight) {
+                } else if (rselem1.weight < rselem2.weight) {
                         return true;
-                }
-                else if (rselem1.weight > rselem2.weight) {
+                } else if (rselem1.weight > rselem2.weight) {
                         return false;
-                }
-                else {
+                } else {
                         return rselem1.fwdmode < rselem2.fwdmode;
                 }
         }
@@ -134,13 +126,12 @@ public:
 
         const std::string get_fwdmode_str() {
                 return fwdmode == FWD_MASQ   ? "Masq"
-                     : fwdmode == FWD_TPROXY ? "Tproxy"
-                     : "Unknown";
+                       : fwdmode == FWD_TPROXY ? "Tproxy"
+                       : "Unknown";
         }
 
         template <typename Elem, typename Traits>
-        friend std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& os, const realserver_element &elem)
-        {
+        friend std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& os, const realserver_element &elem) {
                 os << "realserver_element={";
                 os << boost::format("nactive=%d, "
                                     "ninact=%d, "
@@ -164,8 +155,7 @@ private:
         //! @param[in] archive
         //! @param[in] version
         template <class Archive>
-        void serialize(Archive &ar, const unsigned int version)
-        {
+        void serialize(Archive &ar, const unsigned int version) {
                 ar &nactive;
                 ar &ninact;
                 ar &tcp_endpoint;

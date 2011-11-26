@@ -69,14 +69,14 @@ public:
         //! set endpoint
         //! @param[in]    copy endpoint
         void set_endpoint(const boost::asio::ip::basic_endpoint<InternetProtocol> set_endpoint);
-		//! set error code
-		void set_error_code( const boost::system::error_code& code );
-		//! get error code
-		boost::system::error_code&	get_error_code();
-		//! set async_len
-		void set_async_len( std::size_t	set_async_len );
-		//! get async_len
-		std::size_t get_async_len();
+        //! set error code
+        void set_error_code(const boost::system::error_code &code);
+        //! get error code
+        boost::system::error_code      &get_error_code();
+        //! set async_len
+        void set_async_len(std::size_t  set_async_len);
+        //! get async_len
+        std::size_t get_async_len();
 
 protected:
         //! tcp endpoint
@@ -87,10 +87,10 @@ protected:
         std::size_t data_size;
         //! send data size
         std::size_t send_size;
-		//! error code( async read/write modify)
-		boost::system::error_code	error_code;
-		std::size_t	async_len;
-		boost::mutex	mutex_;		//use error_code and data size only. other data is no thread safe.
+        //! error code( async read/write modify)
+        boost::system::error_code       error_code;
+        std::size_t     async_len;
+        boost::mutex    mutex_;         //use error_code and data size only. other data is no thread safe.
 };// class data_buff_base
 
 
@@ -114,10 +114,10 @@ void data_buff_base< InternetProtocol >::initialize()
 {
         data_size = 0;
         send_size = 0;
-		async_len = 0;
+        async_len = 0;
         data.assign('\0');
         endpoint_info = boost::asio::ip::basic_endpoint<InternetProtocol>();
-		error_code.clear();
+        error_code.clear();
 }
 
 //! set data
@@ -185,7 +185,7 @@ void data_buff_base< InternetProtocol >::set_send_size(const std::size_t set_siz
 template< typename InternetProtocol >
 std::size_t data_buff_base< InternetProtocol >::get_send_size()
 {
-		boost::mutex::scoped_lock	lock( mutex_ );
+        boost::mutex::scoped_lock       lock(mutex_);
         return send_size;
 }
 
@@ -206,29 +206,33 @@ void data_buff_base< InternetProtocol >::set_endpoint(const boost::asio::ip::bas
 }
 
 //! set error code
-//! @param[in]	error code
+//! @param[in]  error code
 template< typename InternetProtocol >
-void data_buff_base< InternetProtocol >::set_error_code( const boost::system::error_code& code ){
-	mutex_.lock();
-	error_code.assign( code.value(), code.category() );
-	mutex_.unlock();
+void data_buff_base< InternetProtocol >::set_error_code(const boost::system::error_code &code)
+{
+        mutex_.lock();
+        error_code.assign(code.value(), code.category());
+        mutex_.unlock();
 }
 
 //! get error code
 template< typename InternetProtocol >
-boost::system::error_code& data_buff_base< InternetProtocol >::get_error_code(){
-	boost::mutex::scoped_lock	lock( mutex_ );
-	return error_code;
+boost::system::error_code &data_buff_base< InternetProtocol >::get_error_code()
+{
+        boost::mutex::scoped_lock       lock(mutex_);
+        return error_code;
 }
 
 template< typename InternetProtocol >
-void data_buff_base< InternetProtocol >::set_async_len( std::size_t	set_async_len ){
-	async_len = set_async_len;
+void data_buff_base< InternetProtocol >::set_async_len(std::size_t      set_async_len)
+{
+        async_len = set_async_len;
 }
 
 template< typename InternetProtocol >
-std::size_t data_buff_base< InternetProtocol >::get_async_len(){
-	return async_len;
+std::size_t data_buff_base< InternetProtocol >::get_async_len()
+{
+        return async_len;
 }
 }// namespace l7vs
 

@@ -228,19 +228,19 @@ public:
                                         buf.str(),
                                         log4cxx::spi::LocationInfo(file, "", line));
                         // send_trap
-			if (logtrap_enabled.get() == 1) {
+                        if (logtrap_enabled.get() == 1) {
                                 LOG_LEVEL_TAG tmp_level;
                                 {
-					rd_scoped_lock lock(logtrap_level_mutex);
+                                        rd_scoped_lock lock(logtrap_level_mutex);
                                         tmp_level = logtrap_level;
                                 }
-                                if ( (tmp_level <= LOG_LV_FATAL) &&
-				      snmp_send_trap_func        &&
-                                      (LOG_CAT_L7VSD_SNMPAGENT != cat)) {
+                                if ((tmp_level <= LOG_LV_FATAL) &&
+                                    snmp_send_trap_func        &&
+                                    (LOG_CAT_L7VSD_SNMPAGENT != cat)) {
                                         trapmessage trap_msg;
-					trap_msg.type = trapmessage::FATAL_LOG;
+                                        trap_msg.type = trapmessage::FATAL_LOG;
                                         trap_msg.message = buf.str();
-					error_code err;
+                                        error_code err;
                                         //send trap message
                                         snmp_send_trap_func(trap_msg, err);
                                 }
@@ -313,13 +313,13 @@ public:
                                         rd_scoped_lock lock(logtrap_level_mutex);
                                         tmp_level = logtrap_level;
                                 }
-                                if ( (tmp_level <= LOG_LV_ERROR) &&
-                                      snmp_send_trap_func        &&
-                                      (LOG_CAT_L7VSD_SNMPAGENT != cat)) {
+                                if ((tmp_level <= LOG_LV_ERROR) &&
+                                    snmp_send_trap_func        &&
+                                    (LOG_CAT_L7VSD_SNMPAGENT != cat)) {
                                         trapmessage trap_msg;
                                         trap_msg.type = trapmessage::ERROR_LOG;
                                         trap_msg.message = buf.str();
-					error_code err;
+                                        error_code err;
                                         //send trap message
                                         snmp_send_trap_func(trap_msg, err);
                                 }
@@ -392,13 +392,13 @@ public:
                                         rd_scoped_lock lock(logtrap_level_mutex);
                                         tmp_level = logtrap_level;
                                 }
-                                if ( (tmp_level <= LOG_LV_WARN) &&
-                                      snmp_send_trap_func       &&
-                                      (LOG_CAT_L7VSD_SNMPAGENT != cat)) {
+                                if ((tmp_level <= LOG_LV_WARN) &&
+                                    snmp_send_trap_func       &&
+                                    (LOG_CAT_L7VSD_SNMPAGENT != cat)) {
                                         trapmessage trap_msg;
                                         trap_msg.type = trapmessage::WARN_LOG;
                                         trap_msg.message = buf.str();
-					error_code err;
+                                        error_code err;
                                         //send trap message
                                         snmp_send_trap_func(trap_msg, err);
                                 }
@@ -472,13 +472,13 @@ public:
                                         rd_scoped_lock lock(logtrap_level_mutex);
                                         tmp_level = logtrap_level;
                                 }
-                                if ( (tmp_level <= LOG_LV_INFO) &&
-                                      snmp_send_trap_func       &&
-                                      (LOG_CAT_L7VSD_SNMPAGENT != cat)) {
+                                if ((tmp_level <= LOG_LV_INFO) &&
+                                    snmp_send_trap_func       &&
+                                    (LOG_CAT_L7VSD_SNMPAGENT != cat)) {
                                         trapmessage trap_msg;
                                         trap_msg.type = trapmessage::INFO_LOG;
                                         trap_msg.message = buf.str();
-					error_code err;
+                                        error_code err;
                                         //send trap message
                                         snmp_send_trap_func(trap_msg, err);
                                 }
@@ -552,14 +552,14 @@ public:
                                         rd_scoped_lock lock(logtrap_level_mutex);
                                         tmp_level = logtrap_level;
                                 }
-                                if ( (tmp_level <= LOG_LV_DEBUG) &&
-                                      snmp_send_trap_func        &&
-                                      (LOG_CAT_L7VSD_SNMPAGENT != cat)) {
+                                if ((tmp_level <= LOG_LV_DEBUG) &&
+                                    snmp_send_trap_func        &&
+                                    (LOG_CAT_L7VSD_SNMPAGENT != cat)) {
                                         trapmessage trap_msg;
                                         trap_msg.type = trapmessage::DEBUG_LOG;
                                         trap_msg.message = buf.str();
 
-					error_code err;
+                                        error_code err;
                                         //send trap message
                                         snmp_send_trap_func(trap_msg, err);
                                 }
@@ -577,7 +577,7 @@ public:
          * @param   snmp send trap function object
          * @retrun  void
          */
-	 void    set_snmp_send_trap_func(const snmp_send_trap_func_type func) {
+        void    set_snmp_send_trap_func(const snmp_send_trap_func_type func) {
                 snmp_send_trap_func = func;
         }
 
@@ -590,10 +590,10 @@ public:
         }
 
         /*!
-	 * set log trap disable 	
+         * set log trap disable
          * @retrun  void
          */
-	void    logtrap_disable() {
+        void    logtrap_disable() {
                 logtrap_enabled = false;
         }
 

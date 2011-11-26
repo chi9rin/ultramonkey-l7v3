@@ -95,7 +95,7 @@ protected:
         boost::mutex                vslist_mutex;        //!< virtual service list mutex
 
         bool                        help;                //!< help mode
-		bool						debug;				//!< debug mode
+        bool                                            debug;                          //!< debug mode
 
         boost::posix_time::ptime    starttime;            //!< l7vsd startup time
 
@@ -124,7 +124,7 @@ public:
         void    del_real_server(const virtualservice_element *, error_code &);    //!< real_server del command
         void    edit_real_server(const virtualservice_element *, error_code &);    //!< real_server edit command
         void    set_loglevel(const LOG_CATEGORY_TAG *, const LOG_LEVEL_TAG *, error_code &);       //!< set loglevel command
-        void    set_snmp_info(const snmp_info*, error_code&);
+        void    set_snmp_info(const snmp_info *, error_code &);
         void    flush_virtual_service(error_code &);     //!< all virtual_service delete command
 
         void    replication_command(const l7vsadm_request::REPLICATION_COMMAND_TAG *, error_code &);    //!< replication command
@@ -142,9 +142,9 @@ public:
                 bool find_module_name = false) const; //!< vs_list search function
 
 protected:
-        bool    check_options(int, char*[]);			//!< check option func
-        bool    parse_help(int &, int, char*[]);		//!< parse help func
-		bool	parse_debug( int &, int, char*[] );		//!< pase debug func
+        bool    check_options(int, char*[]);                    //!< check option func
+        bool    parse_help(int &, int, char*[]);                //!< parse help func
+        bool    parse_debug(int &, int, char*[]);                //!< pase debug func
 
         std::string    usage();                            //!< make usage message
 
