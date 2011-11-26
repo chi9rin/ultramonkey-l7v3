@@ -113,7 +113,7 @@ bool l7vs::logger_implement_access::is_rotate_default_flag()
     return(rtn);
 }
 
-// ƒƒOƒtƒH[ƒ}ƒbƒg 2008/12/07 20:08:31 [INFO] [[AccessLog] (CL)192.168.2.1 --> 192.168.2.2 --UM-- 192.168.1.101:37259 --> (RS-DST)192.168.1.106:80 ]
+// ãƒ­ã‚°ãƒ•ã‚©ãƒ¼ãƒžãƒƒãƒˆ 2008/12/07 20:08:31 [INFO] [[AccessLog] (CL)192.168.2.1 --> 192.168.2.2 --UM-- 192.168.1.101:37259 --> (RS-DST)192.168.1.106:80 ]
 /*!
  * output access info log.
  *
@@ -148,7 +148,7 @@ void l7vs::logger_implement_access::putLog(
     catch (const std::exception& ex) {
         std::ostringstream oss;
         oss << "Logging Error (Access Log) : " << ex.what();
-        std::cout << oss.str() << "\n";
+        std::cout << oss.str() << "Â¥n";
     }
 
 }
