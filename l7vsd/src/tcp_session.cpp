@@ -1543,7 +1543,7 @@ void tcp_session::up_thread_realserver_send(const TCP_PROCESS_TYPE_TAG process_t
         } else {
                 if (error_code == boost::asio::error::try_again) {
                         upthread_status = UPTHREAD_LOCK;
-                        func_tag = UP_FUNC_REALSERVER_SEND;
+                        func_tag = UP_FUNC_REALSERVER_HANDLE_ASEND;
                         basic_tcp_socket<boost::asio::ip::tcp>::async_rw_handler_t      handler =
                                 boost::bind(&tcp_session::up_thread_realserver_async_write_some_handler,
                                             this,
@@ -1558,7 +1558,7 @@ void tcp_session::up_thread_realserver_send(const TCP_PROCESS_TYPE_TAG process_t
                                         handler
                                 );
                         else
-                                func_tag = UP_FUNC_REALSERVER_DISCONNECT_EVENT;
+                                func_tag = UP_FUNC_REALSERVER_DISCONNECT;
                 } else {
                         func_tag = UP_FUNC_REALSERVER_DISCONNECT;
                         boost::format   fmt("Thread ID[%d] realserver send error: %s");
@@ -2128,7 +2128,7 @@ void tcp_session::up_thread_sorryserver_send(const TCP_PROCESS_TYPE_TAG process_
         } else {
                 if (ec == boost::asio::error::try_again) {
                         upthread_status = UPTHREAD_LOCK;
-                        func_tag = UP_FUNC_SORRYSERVER_SEND;
+                        func_tag = UP_FUNC_SORRYSERVER_HANDLE_ASEND;
                         basic_tcp_socket<boost::asio::ip::tcp>::async_rw_handler_t      handler =
                                 boost::bind(&tcp_session::up_thread_sorryserver_async_write_some_handler,
                                             this,
@@ -3561,11 +3561,12 @@ void tcp_session::up_thread_client_handle_async_read_some(const tcp_session::TCP
 
         if (!error_code) { // no error
                 if (recv_size > 0) {
-                        parent_service.update_up_recv_size(up_thread_data_client_side.get_size());
+                        up_thread_data_client_side.set_size(recv_size);
+                        parent_service.update_up_recv_size(recv_size);
                         protocol_module_base::EVENT_TAG module_event = protocol_module->handle_client_recv(
                                                 up_thread_id,
                                                 up_thread_data_client_side.get_data(),
-                                                up_thread_data_client_side.get_async_len());
+                                                recv_size);
 #ifdef  DEBUG
                         boost::format   fmt("Thread ID[%d] protocol_module->handle_client_recv( upthread_id = %d, downthread_id = %d ) return %s");
                         fmt % up_thread_id % down_thread_id % func_tag_to_string(module_event);
@@ -3660,7 +3661,7 @@ void tcp_session::up_thread_realserver_handle_async_write_some(const tcp_session
         std::size_t     send_data_size  = up_thread_data_dest_side.get_send_size();
 
         if (!up_thread_data_dest_side.get_error_code()) {        // no error
-                send_data_size = up_thread_data_dest_side.get_async_len();
+                send_data_size += up_thread_data_dest_side.get_async_len();
                 up_thread_data_dest_side.set_send_size(send_data_size);
                 parent_service.update_up_send_size(up_thread_data_dest_side.get_async_len());
                 if (data_size > send_data_size)
@@ -3669,7 +3670,7 @@ void tcp_session::up_thread_realserver_handle_async_write_some(const tcp_session
                         func_tag = up_thread_module_event_map[protocol_module->handle_realserver_send(up_thread_id)];
         } else { // error
                 if (up_thread_data_dest_side.get_error_code() == boost::asio::error::try_again) {
-                        func_tag = UP_FUNC_REALSERVER_ASEND_HANDLE_EVENT;
+                        func_tag = UP_FUNC_REALSERVER_HANDLE_ASEND;
                         upthread_status = UPTHREAD_LOCK;
                         boost::array<char, MAX_BUFFER_SIZE>& send_buff = up_thread_data_dest_side.get_data();
                         tcp_socket::async_rw_handler_t  handler = boost::bind(&tcp_session::up_thread_realserver_async_write_some_handler,
@@ -3683,6 +3684,8 @@ void tcp_session::up_thread_realserver_handle_async_write_some(const tcp_session
                                                 data_size - send_data_size
                                         ),
                                         handler);
+			else
+				func_tag = UP_FUNC_REALSERVER_DISCONNECT;
                 } else {
                         func_tag = UP_FUNC_REALSERVER_DISCONNECT;
                         boost::format fmt("Thread ID[%d] realserver send error: %s");
@@ -3746,9 +3749,8 @@ void tcp_session::up_thread_sorryserver_handle_async_write_some(const TCP_PROCES
         std::size_t     send_data_size  = up_thread_data_dest_side.get_send_size();
 
         if (!up_thread_data_dest_side.get_error_code()) {        //no error
-                send_data_size = up_thread_data_dest_side.get_async_len();
+                send_data_size += up_thread_data_dest_side.get_async_len();
                 up_thread_data_dest_side.set_send_size(send_data_size);
-                parent_service.update_up_send_size(up_thread_data_dest_side.get_async_len());
                 if (data_size > send_data_size)
                         func_tag = UP_FUNC_SORRYSERVER_SEND;
                 else
@@ -3934,7 +3936,8 @@ void tcp_session::down_thread_client_handle_async_write_some(tcp_session::TCP_PR
 
         if (!error_code) {       //no error
                 send_data_size += send_size;
-                down_thread_data_client_side.set_send_size(send_size);
+                down_thread_data_client_side.set_send_size(send_data_size);
+                parent_service.update_down_send_size(send_size);
                 if (data_size > send_data_size) {
                         func_tag = DOWN_FUNC_CLIENT_SEND;
                 } else {
@@ -4022,7 +4025,6 @@ void tcp_session::down_thread_sorryserver_handle_async_read_some(tcp_session::TC
         if (!error_code) { // no error
                 if (recv_size > 0) { //recv success
                         down_thread_data_dest_side.set_size(recv_size);
-                        parent_service.update_down_recv_size(recv_size);
                         protocol_module_base::EVENT_TAG module_event =
                                 protocol_module->handle_sorryserver_recv(down_thread_id,
                                                 sorryserver_endpoint,
