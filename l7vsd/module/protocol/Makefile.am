@@ -11,6 +11,7 @@ AM_CPPFLAGS      = \
 lib_LTLIBRARIES = \
 	libprotomod_sslid.la \
 	libprotomod_sessionless.la \
+	libprotomod_url.la \
 	libprotomod_ip.la
 
 libprotomod_sslid_la_SOURCES = \
@@ -33,6 +34,14 @@ libprotomod_sessionless_la_SOURCES = \
 
 libprotomod_sessionless_la_LIBADD = -lrt -lboost_thread-mt
 
+libprotomod_url_la_SOURCES = \
+        protocol_module_base.h \
+        http_protocol_module_base.h \
+        http_protocol_module_base.cpp \
+        protocol_module_url.cpp
+
+libprotomod_url_la_LIBADD = -lrt -lboost_thread-mt
+
 libprotomod_ip_la_SOURCES = \
 	protocol_module_base.h \
 	ip_protocol_module_base.h \
@@ -50,8 +59,10 @@ install:
 	cp ./.libs/libprotomod_sslid.so ./.libs/protomod_sslid.so && \
 	cp ./.libs/libprotomod_sessionless.so ./.libs/protomod_sessionless.so && \
 	cp ./.libs/libprotomod_ip.so ./.libs/protomod_ip.so && \
+	cp ./.libs/libprotomod_url.so ./.libs/protomod_url.so
 	$(INSTALL) -m 755 -d $(L7VS_MODDIR)
 	$(INSTALL) -m 755 -D \
 		./.libs/protomod_sslid.so  \
 		./.libs/protomod_ip.so  \
-		./.libs/protomod_sessionless.so $(L7VS_MODDIR)
+		./.libs/protomod_sessionless.so \
+		./.libs/protomod_url.so $(L7VS_MODDIR)
