@@ -28,41 +28,43 @@
 //  typedef helpers::ObjectPtrT<RollingFileAppender> RollingFileAppenderPtr;
 //}
 
-namespace l7vs{
+namespace l7vs
+{
 
-class logger_implement_access {
+class logger_implement_access
+{
 public:
-    
+
 //    typedef std::map< std::string , std::string > accesslog_rotate_map_type;
 
-    logger_implement_access(const std::string &aclogFilename);
-    virtual ~logger_implement_access(){};
+        logger_implement_access(const std::string &aclogFilename);
+        virtual ~logger_implement_access() {};
 
-    //! initialze function
+        //! initialze function
 //  virtual bool init(appender_property& access_log_default_property,const std::map<std::string,std::string>& rotate);
 
-    /*!
-     * output info log.
-     *
-     * @param   category that logging matter occured
-     * @param   log message id
-     * @param   log message
-     * @param   current file
-     * @param   current line
-     * @retrun  void
-     */
-    virtual inline void putLog(
-                    const std::string& vsinfo,
-                    const std::string& cl_con_org,
-                    const std::string& rs_con_org,
-                    const std::string& rs_con_dest,
-                                        const std::string& msg){
-            putLog_vsinfo = vsinfo;
-            putLog_cl_con_org = cl_con_org;
-            putLog_rs_con_org = rs_con_org;
-            putLog_rs_con_dest =rs_con_dest;
-            putLog_msg = msg;
-    };
+        /*!
+         * output info log.
+         *
+         * @param   category that logging matter occured
+         * @param   log message id
+         * @param   log message
+         * @param   current file
+         * @param   current line
+         * @retrun  void
+         */
+        virtual inline void putLog(
+                const std::string &vsinfo,
+                const std::string &cl_con_org,
+                const std::string &rs_con_org,
+                const std::string &rs_con_dest,
+                const std::string &msg) {
+                putLog_vsinfo = vsinfo;
+                putLog_cl_con_org = cl_con_org;
+                putLog_rs_con_org = rs_con_org;
+                putLog_rs_con_dest = rs_con_dest;
+                putLog_msg = msg;
+        };
 
         std::string putLog_vsinfo;
         std::string putLog_cl_con_org;
@@ -79,26 +81,26 @@ public:
 //    std::string getAcLogFileName(){ return( this->acLogFileName ); }
 
 //    bool checkRotateParameterComp(accesslog_rotate_map_type &rotatedata);
-    
+
 //    bool is_rotate_default_flag();
-    
+
 protected:
 
-    
+
 //    int access_cnt;
 
 //    std::string acLogFileName;
 
-    //! initialized flag
+        //! initialized flag
 //  bool initialized;
-  
-    //! hostname
+
+        //! hostname
 //    appender_property access_log_property;
 
 //    accesslog_rotate_map_type aclog_args;
-    
+
 //    bool rotate_default_flag;
-    
+
 //    bool setAcLoggerConf(appender_property& access_log_default_property,const accesslog_rotate_map_type& rotate);
 
 };
