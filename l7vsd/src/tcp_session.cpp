@@ -161,9 +161,9 @@ tcp_session::tcp_session(
                 std::make_pair(
                         UP_FUNC_REALSERVER_SEND,
                         boost::bind(&tcp_session::up_thread_realserver_send, this, _1));
-        up_thread_function_array[UP_FUNC_REALSERVER_HANDLE_ASEND] =
+        up_thread_function_array[UP_FUNC_REALSERVER_HANDLE_ASYNC_SEND] =
                 std::make_pair(
-                        UP_FUNC_REALSERVER_HANDLE_ASEND,
+                        UP_FUNC_REALSERVER_HANDLE_ASYNC_SEND,
                         boost::bind(&tcp_session::up_thread_realserver_handle_async_write_some, this, _1));
         up_thread_function_array[UP_FUNC_REALSERVER_DISCONNECT] =
                 std::make_pair(
@@ -197,9 +197,9 @@ tcp_session::tcp_session(
                 std::make_pair(
                         UP_FUNC_SORRYSERVER_SEND,
                         boost::bind(&tcp_session::up_thread_sorryserver_send, this, _1));
-        up_thread_function_array[UP_FUNC_SORRYSERVER_HANDLE_ASEND] =
+        up_thread_function_array[UP_FUNC_SORRYSERVER_HANDLE_ASYNC_SEND] =
                 std::make_pair(
-                        UP_FUNC_SORRYSERVER_HANDLE_ASEND,
+                        UP_FUNC_SORRYSERVER_HANDLE_ASYNC_SEND,
                         boost::bind(&tcp_session::up_thread_sorryserver_handle_async_write_some, this, _1));
         up_thread_function_array[UP_FUNC_SORRYSERVER_DISCONNECT] =
                 std::make_pair(
@@ -262,17 +262,17 @@ tcp_session::tcp_session(
                 std::make_pair(
                         DOWN_FUNC_CLIENT_SEND,
                         boost::bind(&tcp_session::down_thread_client_send, this, _1));
-        down_thread_function_array[DOWN_FUNC_CLIENT_HANDLE_ASEND] =
+        down_thread_function_array[DOWN_FUNC_CLIENT_HANDLE_ASYNC_SEND] =
                 std::make_pair(
-                        DOWN_FUNC_CLIENT_HANDLE_ASEND,
+                        DOWN_FUNC_CLIENT_HANDLE_ASYNC_SEND,
                         boost::bind(&tcp_session::down_thread_client_handle_async_write_some, this, _1));
         down_thread_function_array[DOWN_FUNC_REALSERVER_RECEIVE] =
                 std::make_pair(
                         DOWN_FUNC_REALSERVER_RECEIVE,
                         boost::bind(&tcp_session::down_thread_realserver_receive, this, _1));
-        down_thread_function_array[DOWN_FUNC_REALSERVER_HANDLE_ARECEIVE] =
+        down_thread_function_array[DOWN_FUNC_REALSERVER_HANDLE_ASYNC_RECEIVE] =
                 std::make_pair(
-                        DOWN_FUNC_REALSERVER_HANDLE_ARECEIVE,
+                        DOWN_FUNC_REALSERVER_HANDLE_ASYNC_RECEIVE,
                         boost::bind(&tcp_session::down_thread_realserver_handle_async_read_some, this, _1));
         down_thread_function_array[DOWN_FUNC_REALSERVER_DISCONNECT] =
                 std::make_pair(
@@ -286,9 +286,9 @@ tcp_session::tcp_session(
                 std::make_pair(
                         DOWN_FUNC_SORRYSERVER_RECEIVE,
                         boost::bind(&tcp_session::down_thread_sorryserver_receive, this, _1));
-        down_thread_function_array[DOWN_FUNC_SORRYSERVER_HANDLE_ARECEIVE] =
+        down_thread_function_array[DOWN_FUNC_SORRYSERVER_HANDLE_ASYNC_RECEIVE] =
                 std::make_pair(
-                        DOWN_FUNC_SORRYSERVER_HANDLE_ARECEIVE,
+                        DOWN_FUNC_SORRYSERVER_HANDLE_ASYNC_RECEIVE,
                         boost::bind(&tcp_session::down_thread_sorryserver_handle_async_read_some, this, _1));
         down_thread_function_array[DOWN_FUNC_SORRYSERVER_DISCONNECT] =
                 std::make_pair(
@@ -1543,7 +1543,7 @@ void tcp_session::up_thread_realserver_send(const TCP_PROCESS_TYPE_TAG process_t
         } else {
                 if (error_code == boost::asio::error::try_again) {
                         upthread_status = UPTHREAD_LOCK;
-                        func_tag = UP_FUNC_REALSERVER_HANDLE_ASEND;
+                        func_tag = UP_FUNC_REALSERVER_HANDLE_ASYNC_SEND;
                         basic_tcp_socket<boost::asio::ip::tcp>::async_rw_handler_t      handler =
                                 boost::bind(&tcp_session::up_thread_realserver_async_write_some_handler,
                                             this,
@@ -2128,7 +2128,7 @@ void tcp_session::up_thread_sorryserver_send(const TCP_PROCESS_TYPE_TAG process_
         } else {
                 if (ec == boost::asio::error::try_again) {
                         upthread_status = UPTHREAD_LOCK;
-                        func_tag = UP_FUNC_SORRYSERVER_HANDLE_ASEND;
+                        func_tag = UP_FUNC_SORRYSERVER_HANDLE_ASYNC_SEND;
                         basic_tcp_socket<boost::asio::ip::tcp>::async_rw_handler_t      handler =
                                 boost::bind(&tcp_session::up_thread_sorryserver_async_write_some_handler,
                                             this,
@@ -2788,7 +2788,7 @@ void tcp_session::down_thread_realserver_receive(const TCP_PROCESS_TYPE_TAG proc
         } else {
                 if (error_code == boost::asio::error::try_again) {
                         downthread_status = DOWNTHREAD_LOCK;
-                        func_tag = DOWN_FUNC_REALSERVER_HANDLE_ARECEIVE;
+                        func_tag = DOWN_FUNC_REALSERVER_HANDLE_ASYNC_RECEIVE;
                         basic_tcp_socket<boost::asio::ip::tcp>::async_rw_handler_t      handler =
                                 boost::bind(&tcp_session::down_thread_realserver_async_read_some_handler,
                                             this,
@@ -3025,7 +3025,7 @@ void tcp_session::down_thread_client_send(const TCP_PROCESS_TYPE_TAG process_typ
                 if (error_code == boost::asio::error::try_again) {
 
                         downthread_status = DOWNTHREAD_LOCK;
-                        func_tag = DOWN_FUNC_CLIENT_HANDLE_ASEND;
+                        func_tag = DOWN_FUNC_CLIENT_HANDLE_ASYNC_SEND;
                         basic_tcp_socket<boost::asio::ip::tcp>::async_rw_handler_t      handler =
                                 boost::bind(&tcp_session::down_thread_client_async_write_some_handler,
                                             this,
@@ -3200,7 +3200,7 @@ void tcp_session::down_thread_sorryserver_receive(const TCP_PROCESS_TYPE_TAG pro
         } else {
                 if (error_code == boost::asio::error::try_again) {
                         downthread_status = DOWNTHREAD_LOCK;
-                        func_tag = DOWN_FUNC_SORRYSERVER_HANDLE_ARECEIVE;
+                        func_tag = DOWN_FUNC_SORRYSERVER_HANDLE_ASYNC_RECEIVE;
                         basic_tcp_socket<boost::asio::ip::tcp>::async_rw_handler_t      handler =
                                 boost::bind(&tcp_session::down_thread_sorryserver_async_read_some_handler,
                                             this,
@@ -3670,7 +3670,7 @@ void tcp_session::up_thread_realserver_handle_async_write_some(const tcp_session
                         func_tag = up_thread_module_event_map[protocol_module->handle_realserver_send(up_thread_id)];
         } else { // error
                 if (up_thread_data_dest_side.get_error_code() == boost::asio::error::try_again) {
-                        func_tag = UP_FUNC_REALSERVER_HANDLE_ASEND;
+                        func_tag = UP_FUNC_REALSERVER_HANDLE_ASYNC_SEND;
                         upthread_status = UPTHREAD_LOCK;
                         boost::array<char, MAX_BUFFER_SIZE>& send_buff = up_thread_data_dest_side.get_data();
                         tcp_socket::async_rw_handler_t  handler = boost::bind(&tcp_session::up_thread_realserver_async_write_some_handler,
@@ -3757,7 +3757,7 @@ void tcp_session::up_thread_sorryserver_handle_async_write_some(const TCP_PROCES
                         func_tag = up_thread_module_event_map[protocol_module->handle_realserver_send(up_thread_id)];
         } else {
                 if (up_thread_data_dest_side.get_error_code() == boost::asio::error::try_again) {
-                        func_tag = UP_FUNC_SORRYSERVER_HANDLE_ASEND;
+                        func_tag = UP_FUNC_SORRYSERVER_HANDLE_ASYNC_SEND;
                         upthread_status = UPTHREAD_LOCK;
 
                         boost::array<char, MAX_BUFFER_SIZE>& send_buff = up_thread_data_dest_side.get_data();
@@ -3841,7 +3841,7 @@ void tcp_session::down_thread_realserver_handle_async_read_some(const tcp_sessio
                         func_tag = down_thread_module_event_map[module_event];
                 } else { // zero byte recv = try again.
                         downthread_status = DOWNTHREAD_LOCK;
-                        func_tag = DOWN_FUNC_REALSERVER_HANDLE_ARECEIVE;
+                        func_tag = DOWN_FUNC_REALSERVER_HANDLE_ASYNC_RECEIVE;
                         tcp_socket::async_rw_handler_t handler = boost::bind(&tcp_session::down_thread_realserver_async_read_some_handler,
                                         this,
                                         boost::asio::placeholders::error,
@@ -3856,7 +3856,7 @@ void tcp_session::down_thread_realserver_handle_async_read_some(const tcp_sessio
         } else {        // error
                 if (error_code == boost::asio::error::try_again) {
                         downthread_status = DOWNTHREAD_LOCK;
-                        func_tag = DOWN_FUNC_REALSERVER_HANDLE_ARECEIVE;
+                        func_tag = DOWN_FUNC_REALSERVER_HANDLE_ASYNC_RECEIVE;
                         tcp_socket::async_rw_handler_t handler = boost::bind(&tcp_session::down_thread_realserver_async_read_some_handler,
                                         this,
                                         boost::asio::placeholders::error,
@@ -3952,7 +3952,7 @@ void tcp_session::down_thread_client_handle_async_write_some(tcp_session::TCP_PR
                 }
         } else { //error
                 if (error_code == boost::asio::error::try_again) {
-                        func_tag = DOWN_FUNC_CLIENT_HANDLE_ASEND;
+                        func_tag = DOWN_FUNC_CLIENT_HANDLE_ASYNC_SEND;
                         downthread_status = DOWNTHREAD_LOCK;
                         tcp_socket::async_rw_handler_t  handler = boost::bind(
                                                 &tcp_session::down_thread_client_async_write_some_handler,
@@ -4033,7 +4033,7 @@ void tcp_session::down_thread_sorryserver_handle_async_read_some(tcp_session::TC
                         func_tag = down_thread_module_event_map[module_event];
                 } else { // zero byte recv try_again
                         downthread_status = DOWNTHREAD_LOCK;
-                        func_tag = DOWN_FUNC_SORRYSERVER_HANDLE_ARECEIVE;
+                        func_tag = DOWN_FUNC_SORRYSERVER_HANDLE_ASYNC_RECEIVE;
                         tcp_socket::async_rw_handler_t handler =
                                 boost::bind(&tcp_session::down_thread_sorryserver_async_read_some_handler,
                                             this,
@@ -4044,7 +4044,7 @@ void tcp_session::down_thread_sorryserver_handle_async_read_some(tcp_session::TC
         } else {
                 if (error_code == boost::asio::error::try_again) {
                         downthread_status = DOWNTHREAD_LOCK;
-                        func_tag = DOWN_FUNC_SORRYSERVER_HANDLE_ARECEIVE;
+                        func_tag = DOWN_FUNC_SORRYSERVER_HANDLE_ASYNC_RECEIVE;
                         tcp_socket::async_rw_handler_t  handler =
                                 boost::bind(&tcp_session::down_thread_sorryserver_async_read_some_handler,
                                             this,
