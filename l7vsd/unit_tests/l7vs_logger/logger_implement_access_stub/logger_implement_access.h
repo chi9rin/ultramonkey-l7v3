@@ -14,7 +14,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- *      
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
@@ -49,82 +49,84 @@
 
 namespace log4cxx
 {
-    typedef helpers::ObjectPtrT<RollingFileAppender> RollingFileAppenderPtr;
+typedef helpers::ObjectPtrT<RollingFileAppender> RollingFileAppenderPtr;
 }
 
-namespace l7vs{
+namespace l7vs
+{
 
 //! @class logger_implement_access
 //! @brief access logger implement class.
 //! @brief this class manage logger for access setting and access logging by log4cxx.
-class logger_implement_access {
+class logger_implement_access
+{
 public:
-    
-    typedef std::map< std::string , std::string > accesslog_rotate_map_type;
 
-    typedef std::map< std::string , std::string >::iterator accesslog_rotate_map_type_iterator;
+        typedef std::map< std::string , std::string > accesslog_rotate_map_type;
 
-    logger_implement_access(const std::string &access_log_file_name);
-    virtual ~logger_implement_access(){};
+        typedef std::map< std::string , std::string >::iterator accesslog_rotate_map_type_iterator;
 
-    //! initialze function
-    virtual bool init(
-        const bool rotate_default_flag,
-        const appender_property& access_log_default_property,
-        accesslog_rotate_map_type& rotatedata);
+        logger_implement_access(const std::string &access_log_file_name);
+        virtual ~logger_implement_access() {};
 
-    /*!
-     * output info log.
-     *
-     * @param   category that logging matter occured
-     * @param   log message id
-     * @param   log message
-     * @param   current file
-     * @param   current line
-     * @retrun  void
-     */
-    virtual inline void putLog(
-                                const std::string& vsinfo,
-                                const std::string& cl_con_org,
-                                const std::string& rs_con_org,
-                                const std::string& rs_con_dest,
-                                const std::string& msg = "");
+        //! initialze function
+        virtual bool init(
+                const bool rotate_default_flag,
+                const appender_property &access_log_default_property,
+                accesslog_rotate_map_type &rotatedata);
 
-    virtual void    addRef();
+        /*!
+         * output info log.
+         *
+         * @param   category that logging matter occured
+         * @param   log message id
+         * @param   log message
+         * @param   current file
+         * @param   current line
+         * @retrun  void
+         */
+        virtual inline void putLog(
+                const std::string &vsinfo,
+                const std::string &cl_con_org,
+                const std::string &rs_con_org,
+                const std::string &rs_con_dest,
+                const std::string &msg = "");
 
-    virtual void    releaseRef();
+        virtual void    addRef();
 
-    virtual bool    operator<=(const int access_num );
+        virtual void    releaseRef();
 
-    virtual std::string getAcLogFileName();
+        virtual bool    operator<=(const int access_num);
 
-    virtual bool    checkRotateParameterComp(
-                        accesslog_rotate_map_type &rotatedata);
-    
-    virtual bool    is_rotate_default_flag();
-    
-    static bool rtn_init_flag;
-    
-    static bool rtn_checkRotateParameterComp_flag;
-    
-    bool rotate_default_flag;
-    
-    static bool rtn_setAcLoggerConf_flag;
-    
-    
-    int access_cnt;
+        virtual std::string getAcLogFileName();
 
-    std::string access_log_file_name_;
+        virtual bool    checkRotateParameterComp(
+                accesslog_rotate_map_type &rotatedata);
 
-    //! hostname
-    appender_property access_log_property;
+        virtual bool    is_rotate_default_flag();
 
-    accesslog_rotate_map_type aclog_args;
-    
-    
-    virtual bool setAcLoggerConf(
-                    const appender_property& access_log_default_property,
-                    accesslog_rotate_map_type& rotatedata);
+        static bool rtn_init_flag;
+
+        static bool rtn_checkRotateParameterComp_flag;
+
+        bool rotate_default_flag;
+
+        static bool rtn_setAcLoggerConf_flag;
+
+
+        int access_cnt;
+
+        std::string access_log_file_name_;
+
+        //! hostname
+        appender_property access_log_property;
+
+        accesslog_rotate_map_type aclog_args;
+
+
+        virtual bool setAcLoggerConf(
+                const appender_property &access_log_default_property,
+                accesslog_rotate_map_type &rotatedata);
 
 };
 

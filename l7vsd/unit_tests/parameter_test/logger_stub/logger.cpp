@@ -32,37 +32,39 @@
  * @return  void
  */
 l7vs::Logger::Logger() :
-	scopedLogCategory(LOG_CAT_L7VSD_LOGGER),
-	scopedLogId(0),
-	scopedLogMessage("Logger Constructor"),
-	scopedLogFile(__FILE__),
-	scopedLogLine(__LINE__){
-	if (unlikely(!LoggerImpl::getInstance().init())) {
-		exit(1);
-	}
+        scopedLogCategory(LOG_CAT_L7VSD_LOGGER),
+        scopedLogId(0),
+        scopedLogMessage("Logger Constructor"),
+        scopedLogFile(__FILE__),
+        scopedLogLine(__LINE__)
+{
+        if (unlikely(!LoggerImpl::getInstance().init())) {
+                exit(1);
+        }
 }
 
 //! log output constractor
 //! scoped log output( Logger destractor output log)
-//! @param[in]	Log output category tag
-//! @param[in]	log id
-//! @param[in]	log message
-//!	@param[in]	filename	(=__FILE__)
-//! @param[in]	lineno		(=__LINE__)
-l7vs::Logger::Logger( LOG_CATEGORY_TAG cat, const unsigned int id, const std::string& msg, const char* file, int line) :
-	scopedLogCategory(cat),
-	scopedLogId(id),
-	scopedLogMessage(msg),
-	scopedLogFile(file),
-	scopedLogLine(line){
-	if (unlikely(LOG_LV_DEBUG == LoggerImpl::getInstance().getLogLevel(scopedLogCategory))){
-		LoggerImpl::getInstance().putLogDebug(
-			scopedLogCategory,
-			scopedLogId,
-			"Function in : " + scopedLogMessage,
-			scopedLogFile,
-			scopedLogLine);
-	}
+//! @param[in]  Log output category tag
+//! @param[in]  log id
+//! @param[in]  log message
+//!     @param[in]      filename        (=__FILE__)
+//! @param[in]  lineno          (=__LINE__)
+l7vs::Logger::Logger(LOG_CATEGORY_TAG cat, const unsigned int id, const std::string &msg, const char *file, int line) :
+        scopedLogCategory(cat),
+        scopedLogId(id),
+        scopedLogMessage(msg),
+        scopedLogFile(file),
+        scopedLogLine(line)
+{
+        if (unlikely(LOG_LV_DEBUG == LoggerImpl::getInstance().getLogLevel(scopedLogCategory))) {
+                LoggerImpl::getInstance().putLogDebug(
+                        scopedLogCategory,
+                        scopedLogId,
+                        "Function in : " + scopedLogMessage,
+                        scopedLogFile,
+                        scopedLogLine);
+        }
 }
 
 /*!
@@ -70,15 +72,16 @@ l7vs::Logger::Logger( LOG_CATEGORY_TAG cat, const unsigned int id, const std::st
  * @param   void
  * @return  void
  */
-l7vs::Logger::~Logger(){
-	if (unlikely(LOG_LV_DEBUG == LoggerImpl::getInstance().getLogLevel(scopedLogCategory))){
-		LoggerImpl::getInstance().putLogDebug(
-			scopedLogCategory,
-			scopedLogId,
-			"Function out : " + scopedLogMessage,
-			scopedLogFile,
-			scopedLogLine);
-	}
+l7vs::Logger::~Logger()
+{
+        if (unlikely(LOG_LV_DEBUG == LoggerImpl::getInstance().getLogLevel(scopedLogCategory))) {
+                LoggerImpl::getInstance().putLogDebug(
+                        scopedLogCategory,
+                        scopedLogId,
+                        "Function out : " + scopedLogMessage,
+                        scopedLogFile,
+                        scopedLogLine);
+        }
 }
 
 /*!
@@ -89,7 +92,7 @@ l7vs::Logger::~Logger(){
  */
 l7vs::LOG_LEVEL_TAG l7vs::Logger::getLogLevel(LOG_CATEGORY_TAG cat)
 {
-	return LoggerImpl::getInstance().getLogLevel(cat);
+        return LoggerImpl::getInstance().getLogLevel(cat);
 }
 
 /*!
@@ -97,9 +100,9 @@ l7vs::LOG_LEVEL_TAG l7vs::Logger::getLogLevel(LOG_CATEGORY_TAG cat)
  * this is only wrapper to implement method.
  * @param[out]   category level list
  */
-void l7vs::Logger::getLogLevelAll( category_level_list_type& list )
+void l7vs::Logger::getLogLevelAll(category_level_list_type &list)
 {
-	return LoggerImpl::getInstance().getLogLevelAll( list );
+        return LoggerImpl::getInstance().getLogLevelAll(list);
 }
 
 /*!
@@ -112,7 +115,7 @@ void l7vs::Logger::getLogLevelAll( category_level_list_type& list )
  */
 bool l7vs::Logger::setLogLevel(LOG_CATEGORY_TAG cat, LOG_LEVEL_TAG level)
 {
-	return LoggerImpl::getInstance().setLogLevel(cat, level);
+        return LoggerImpl::getInstance().setLogLevel(cat, level);
 }
 
 /*!
@@ -123,88 +126,88 @@ bool l7vs::Logger::setLogLevel(LOG_CATEGORY_TAG cat, LOG_LEVEL_TAG level)
  * @retval  true  succeed
  * @retval  false failed
  */
-bool l7vs::Logger::setLogLevelAll( LOG_LEVEL_TAG level )
+bool l7vs::Logger::setLogLevelAll(LOG_LEVEL_TAG level)
 {
-	return LoggerImpl::getInstance().setLogLevelAll( level );
+        return LoggerImpl::getInstance().setLogLevelAll(level);
 }
 
 /*!
  * output fatal log.
  * this is only wrapper to implement method.
  * @param   category that logging matter occured
- * @param   log message id 
- * @param   log message 
- * @param   current file 
+ * @param   log message id
+ * @param   log message
+ * @param   current file
  * @param   current line
  * @retrun  void
  */
-void l7vs::Logger::putLogFatal(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line)
+void l7vs::Logger::putLogFatal(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string &message, const char *file, int line)
 {
-	if ( LOG_LV_FATAL >= getLogLevel( cat ) )
-		LoggerImpl::getInstance().putLogFatal(cat, message_id, message, file, line);
+        if (LOG_LV_FATAL >= getLogLevel(cat))
+                LoggerImpl::getInstance().putLogFatal(cat, message_id, message, file, line);
 }
 
 /*!
  * output errorl log.
  * this is only wrapper to implement method.
  * @param   category that logging matter occured
- * @param   log message id 
- * @param   log message 
- * @param   current file 
+ * @param   log message id
+ * @param   log message
+ * @param   current file
  * @param   current line
  * @retrun  void
  */
-void l7vs::Logger::putLogError(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line)
+void l7vs::Logger::putLogError(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string &message, const char *file, int line)
 {
-	if ( LOG_LV_ERROR >= getLogLevel( cat ) )
-		LoggerImpl::getInstance().putLogError(cat, message_id, message, file, line);
+        if (LOG_LV_ERROR >= getLogLevel(cat))
+                LoggerImpl::getInstance().putLogError(cat, message_id, message, file, line);
 }
 
 /*!
  * output warn log.
  * this is only wrapper to implement method.
  * @param   category that logging matter occured
- * @param   log message id 
- * @param   log message 
- * @param   current file 
+ * @param   log message id
+ * @param   log message
+ * @param   current file
  * @param   current line
  * @retrun  void
  */
-void l7vs::Logger::putLogWarn(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line)
+void l7vs::Logger::putLogWarn(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string &message, const char *file, int line)
 {
-	if ( LOG_LV_WARN >= getLogLevel( cat ) )
-		LoggerImpl::getInstance().putLogWarn(cat, message_id, message, file, line);
+        if (LOG_LV_WARN >= getLogLevel(cat))
+                LoggerImpl::getInstance().putLogWarn(cat, message_id, message, file, line);
 }
 
 /*!
  * output info log.
  * this is only wrapper to implement method.
  * @param   category that logging matter occured
- * @param   log message id 
- * @param   log message 
- * @param   current file 
+ * @param   log message id
+ * @param   log message
+ * @param   current file
  * @param   current line
  * @retrun  void
  */
-void l7vs::Logger::putLogInfo(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line)
+void l7vs::Logger::putLogInfo(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string &message, const char *file, int line)
 {
-	if ( LOG_LV_INFO >= getLogLevel( cat ) )
-		LoggerImpl::getInstance().putLogInfo(cat, message_id, message, file, line);
+        if (LOG_LV_INFO >= getLogLevel(cat))
+                LoggerImpl::getInstance().putLogInfo(cat, message_id, message, file, line);
 }
 
 /*!
  * output debug log.
  * this is only wrapper to implement method.
  * @param   category that logging matter occured
- * @param   log message id 
- * @param   log message 
- * @param   current file 
+ * @param   log message id
+ * @param   log message
+ * @param   current file
  * @param   current line
  * @retrun  void
  */
-void l7vs::Logger::putLogDebug(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string& message, const char *file, int line)
+void l7vs::Logger::putLogDebug(LOG_CATEGORY_TAG cat, const unsigned int message_id, const std::string &message, const char *file, int line)
 {
-	LoggerImpl::getInstance().putLogDebug(cat, message_id, message, file, line);
+        LoggerImpl::getInstance().putLogDebug(cat, message_id, message, file, line);
 }
 
 /*!
@@ -215,13 +218,14 @@ void l7vs::Logger::putLogDebug(LOG_CATEGORY_TAG cat, const unsigned int message_
  */
 void l7vs::Logger::loadConf()
 {
-	LoggerImpl::getInstance().loadConf();
+        LoggerImpl::getInstance().loadConf();
 }
 
 //! set snmp sendtrap function
 //! @param   snmp send trap function object
 //! @retrun  void
-void	l7vs::Logger::setSnmpSendtrap( const snmpSendtrapFuncType func ){
-	LoggerImpl::getInstance().setSnmpSendtrap( func );
+void    l7vs::Logger::setSnmpSendtrap(const snmpSendtrapFuncType func)
+{
+        LoggerImpl::getInstance().setSnmpSendtrap(func);
 }
 
