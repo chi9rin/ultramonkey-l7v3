@@ -128,12 +128,14 @@ protected:
         std::map<boost::thread::id, thread_data_ptr> session_thread_data_map;
         boost::mutex    session_thread_data_map_mutex;
 
-	typedef std::pair< boost::array<char,MAX_OPTION_SIZE>, std::list<boost::asio::ip::tcp::endpoint> > pattern_endpoint_pair;
-	typedef std::list< pattern_endpoint_pair > pattern_endpoint_pairlist;
-	typedef std::list< pattern_endpoint_pair >::iterator pattern_endpoint_pairlist_it;
-
-	pattern_endpoint_pairlist ptn_ep_pairlist;
-	std::map< boost::array<char,MAX_OPTION_SIZE>, boost::xpressive::sregex > keyary_sregex_converter_map; 
+	typedef std::map< boost::array< char, MAX_OPTION_SIZE >, std::list< boost::asio::ip::tcp::endpoint > > pattern_endpointlist_map;
+	typedef std::map< boost::array< char, MAX_OPTION_SIZE >, std::list< boost::asio::ip::tcp::endpoint > >::iterator pattern_endpointlist_map_it;
+	pattern_endpointlist_map ptn_eplist_map;
+	// for keep order '-P/--pattern-match' option value set & convert pattern to sregex
+	typedef std::pair< boost::array< char, MAX_OPTION_SIZE >, boost::xpressive::sregex > pattern_sregex_converter_pair;
+	typedef std::list< pattern_sregex_converter_pair > pattern_sregex_converter_pairlist;
+	typedef std::list< pattern_sregex_converter_pair >::iterator pattern_sregex_converter_pairlist_it;
+	pattern_sregex_converter_pairlist ptnsrgx_converter_pairlist;
 
 private: 
 	template < class T >typename T::endpoint stringtoEndpoint( const std::string &str, error_code &err );
@@ -158,7 +160,7 @@ private:
 	void dumpKeyary_endpointlist( int num );
 	void dumpRslist_it_list( void );
 	void dumpOptionString( const std::vector<std::string>& args );
-	void dumpKeyary_sregex_converter_map( void );
+	void dumpPtnsrgx_converter_pairlist( void );
 	void testVolume( void );
 public:
         static const std::string MODULE_NAME;

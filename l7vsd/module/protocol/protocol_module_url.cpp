@@ -34,10 +34,8 @@
 #include "protocol_module_url.h"
 #include "utility.h"
 
-
 #include <boost/lambda/lambda.hpp>
 #include <boost/lambda/if.hpp>
-
 
 namespace l7vs
 {
@@ -412,9 +410,11 @@ protocol_module_base::check_message_result protocol_module_url::check_parameter(
 	try {
 	        vec_str_it it = args.begin();
 	        vec_str_it it_end = args.end();
-		pattern_endpoint_pairlist ptn_ep_pairlist_for_check;
-		pattern_endpoint_pairlist_it ptn_ep_pairlist_it;
-		pattern_endpoint_pairlist_it ptn_ep_pairlist_it_end;
+		
+		pattern_endpointlist_map ptn_eplist_map_for_check;
+		pattern_endpointlist_map_it ptn_eplist_map_it;
+		pattern_endpointlist_map_it ptn_eplist_map_it_end;
+
 		boost::lambda::placeholder1_type X;
 
 	        //loop option strings
@@ -562,11 +562,10 @@ protocol_module_base::check_message_result protocol_module_url::check_parameter(
 					boost::array<char,MAX_OPTION_SIZE> ary_buf;
 					strcpy( ary_buf.begin(), it->c_str() );
 
-					ptn_ep_pairlist_it_end = ptn_ep_pairlist_for_check.end();
-					ptn_ep_pairlist_it = std::find_if( ptn_ep_pairlist_for_check.begin(), ptn_ep_pairlist_it_end,
-					 ( &X->*( &pattern_endpoint_pair::first ) == ary_buf ) );
-
-					if( ptn_ep_pairlist_it != ptn_ep_pairlist_it_end ){
+					ptn_eplist_map_it_end = ptn_eplist_map_for_check.end();
+					ptn_eplist_map_it = ptn_eplist_map_for_check.find( ary_buf );
+					
+					if( ptn_eplist_map_it != ptn_eplist_map_it_end ){
 						check_result.flag = false;
 						std::ostringstream ostr;						
 						ostr << "Pattern '" << *it << "' is already set.";
@@ -583,7 +582,7 @@ protocol_module_base::check_message_result protocol_module_url::check_parameter(
 						}else{							
 							check_result.flag = false;
 							std::ostringstream ostr;						
-							ostr << "You have to set option '-RS/--end-point' after '-P/--pattern-match'.(デバッグ用01)";
+							ostr << "You have to set option '-RS/--end-point' after '-P/--pattern-match'.";
 							check_result.message = ostr.str();
 							putLogError(9999, check_result.message, __FILE__, __LINE__);			
 							break;
@@ -596,17 +595,17 @@ protocol_module_base::check_message_result protocol_module_url::check_parameter(
                                         } else {											
 						check_result.flag = false;
 						std::ostringstream ostr;						
-						ostr << "You have to set option '-RS/--end-point' after '-P/--pattern-match'.(デバッグ用02)";
+						ostr << "You have to set option '-RS/--end-point' after '-P/--pattern-match'.";
 						check_result.message = ostr.str();
 						putLogError(9999, check_result.message, __FILE__, __LINE__);			
 						break;
       					}
 
-					ptn_ep_pairlist_for_check.push_back(
-						std::pair<
+					ptn_eplist_map_for_check.insert(
+						std::map<
 							boost::array< char, MAX_OPTION_SIZE >,
 							std::list< tcp_type::endpoint >
-						>( ary_buf, temp_endpoint_list )
+						>::value_type( ary_buf, temp_endpoint_list )
 					);
 
 				}
@@ -766,9 +765,9 @@ protocol_module_base::check_message_result protocol_module_url::set_parameter(co
 	try {
 	        vec_str_it it = args.begin();
 	        vec_str_it it_end = args.end();
-		pattern_endpoint_pairlist_it ptn_ep_pairlist_it;
-		pattern_endpoint_pairlist_it ptn_ep_pairlist_it_end;
-		boost::lambda::placeholder1_type X;
+		
+		pattern_endpointlist_map_it ptn_eplist_map_it;
+		pattern_endpointlist_map_it ptn_eplist_map_it_end;
 
 	        //loop option strings
 		while( it != it_end ){
@@ -920,16 +919,15 @@ protocol_module_base::check_message_result protocol_module_url::set_parameter(co
 					boost::array<char,MAX_OPTION_SIZE> ary_buf;
 					strcpy( ary_buf.begin(), it->c_str() );
 					
-					ptn_ep_pairlist_it_end = ptn_ep_pairlist.end();
-					ptn_ep_pairlist_it = std::find_if( ptn_ep_pairlist.begin(), ptn_ep_pairlist_it_end,
-					 ( &X->*( &pattern_endpoint_pair::first ) == ary_buf ) );
-
-					if( ptn_ep_pairlist_it != ptn_ep_pairlist_it_end ){
+					ptn_eplist_map_it = ptn_eplist_map.find( ary_buf );
+					ptn_eplist_map_it_end = ptn_eplist_map.end();
+					
+					if( ptn_eplist_map_it != ptn_eplist_map_it_end ){
 						check_result.flag = false;
 						std::ostringstream ostr;						
 						ostr << "Pattern '" << *it << "' is already set.";
 						check_result.message = ostr.str();
-						putLogError(9999, check_result.message, __FILE__, __LINE__);			
+						putLogError( 9999, check_result.message, __FILE__, __LINE__);			
 						break;
 					}
 
@@ -941,7 +939,7 @@ protocol_module_base::check_message_result protocol_module_url::set_parameter(co
 						}else{							
 							check_result.flag = false;
 							std::ostringstream ostr;						
-							ostr << "You have to set option '-RS/--end-point' after '-P/--pattern-match'.(デバッグ用01)";
+							ostr << "You have to set option '-RS/--end-point' after '-P/--pattern-match'.";
 							check_result.message = ostr.str();
 							putLogError(9999, check_result.message, __FILE__, __LINE__);			
 							break;
@@ -954,25 +952,25 @@ protocol_module_base::check_message_result protocol_module_url::set_parameter(co
                                         } else {											
 						check_result.flag = false;
 						std::ostringstream ostr;						
-						ostr << "You have to set option '-RS/--end-point' after '-P/--pattern-match'.(デバッグ用02)";
+						ostr << "You have to set option '-RS/--end-point' after '-P/--pattern-match'.";
 						check_result.message = ostr.str();
 						putLogError(9999, check_result.message, __FILE__, __LINE__);			
 						break;
       					}
 
-					ptn_ep_pairlist.push_back(
-						std::pair<
+					ptn_eplist_map.insert(
+						std::map<
 							boost::array< char, MAX_OPTION_SIZE >,
 							std::list< tcp_type::endpoint >
-						>( ary_buf, temp_endpoint_list )
+						>::value_type( ary_buf, temp_endpoint_list )
 					);
-
-					keyary_sregex_converter_map.insert(
-							std::map<
-								boost::array< char, MAX_OPTION_SIZE >,
-								sregex
-							>::value_type( ary_buf, sregex::compile( ary_buf.data() ) )
-						);
+					
+					ptnsrgx_converter_pairlist.push_back(
+						std::pair<
+							boost::array< char, MAX_OPTION_SIZE >,
+							sregex
+						>( ary_buf, sregex::compile( ary_buf.data() ) )
+					);
 
 				}
 	                        //next item not exist
@@ -1050,7 +1048,7 @@ protocol_module_base::check_message_result protocol_module_url::set_parameter(co
                 formatter % check_result.flag % check_result.message;
                 putLogDebug(100016, formatter.str(), __FILE__, __LINE__);
         }
-
+	
         return check_result;	
 
 }
@@ -2552,12 +2550,11 @@ protocol_module_base::EVENT_TAG protocol_module_url::handle_realserver_select(
                 }
 
 		//endpoint check
-		receive_data_it = session_data->receive_data_map.find(session_data->client_endpoint_tcp);
+		receive_data_it = session_data->receive_data_map.find( session_data->client_endpoint_tcp );
 		if (unlikely(receive_data_it == session_data->receive_data_map.end())) {
 			boost::format formatter("Invalid endpoint. thread id : %d.");
 			formatter % boost::this_thread::get_id();
 			putLogError(100043, formatter.str(), __FILE__, __LINE__);
-			session_thread_data_map_mutex.unlock();
 			throw - 1;
 		}
 
@@ -2567,7 +2564,7 @@ protocol_module_base::EVENT_TAG protocol_module_url::handle_realserver_select(
 		send_status_it it_end = recv_data.send_status_list.end();
 
 		//status list check
-		it = std::find_if(it, it_end, data_send_ok());
+		it = std::find_if( it, it_end, data_send_ok() );
 		if (unlikely(it == it_end)) {
 		        boost::format formatter("Sending possible data is not existed. thread id : %d.");
 		        formatter % boost::this_thread::get_id();
@@ -2576,40 +2573,47 @@ protocol_module_base::EVENT_TAG protocol_module_url::handle_realserver_select(
 		}
 
 		// endpoint decide
-		ret = find_uri(recv_data.receive_buffer + it->send_offset, it->send_possible_size, url_offset, url_offset_len);
+		ret = find_uri( recv_data.receive_buffer + it->send_offset, it->send_possible_size, url_offset, url_offset_len );
 		if( ret ){
 			std::string tempstr = recv_data.receive_buffer; 
-			pattern_endpoint_pairlist_it ptn_ep_pairlist_it = ptn_ep_pairlist.begin();
-			pattern_endpoint_pairlist_it ptn_ep_pairlist_it_end = ptn_ep_pairlist.end();
+			
+			pattern_sregex_converter_pairlist_it ptnsrgx_cvt_pairlist_it = ptnsrgx_converter_pairlist.begin();			
+			pattern_sregex_converter_pairlist_it ptnsrgx_cvt_pairlist_it_end = ptnsrgx_converter_pairlist.end();
 
 			sregex reg;
-			// indicate Real Server found or not found.
-			bool is_match = false;
+			// indicate client sends URL is matched 
+			bool is_regex_match = false;
+			// indicate Real Server found
+			bool is_realserver_match = false;
 
 			// search URL pattern
-			while( ptn_ep_pairlist_it != ptn_ep_pairlist_it_end ){
+			while( ptnsrgx_cvt_pairlist_it != ptnsrgx_cvt_pairlist_it_end ){
 
-				reg = keyary_sregex_converter_map[ ptn_ep_pairlist_it->first ];
+				reg = ptnsrgx_cvt_pairlist_it->second;
+				is_regex_match = regex_match( tempstr.substr( url_offset, url_offset_len ), reg );
 
-				if( regex_match( tempstr.substr( url_offset, url_offset_len ), reg ) ){
+				if( is_regex_match ){
+					std::list< boost::asio::ip::tcp::endpoint >::iterator ep_list_it
+						 = ( ptn_eplist_map.find( ptnsrgx_cvt_pairlist_it->first ) )->second.begin();
+					std::list< boost::asio::ip::tcp::endpoint >::iterator ep_list_it_end
+						 = ( ptn_eplist_map.find( ptnsrgx_cvt_pairlist_it->first ) )->second.end();
 					// find the rs_endpoint in the rs_list
 					{
 						rs_list_scoped_lock scoped_lock(rs_list_lock, rs_list_unlock);
-						std::list< boost::asio::ip::tcp::endpoint >::iterator ep_list_it = ptn_ep_pairlist_it->second.begin();
 
-						while( ep_list_it !=  ptn_ep_pairlist_it->second.end() ){
-
-							// check endpoint ( set by '-RS/--end-point' option and already set at Virtual Service )
+						// while( ep_list_it !=  ptn_ep_pairlist_it->second.end() ){
+						while( ep_list_it != ep_list_it_end ){
+							// check endpoint ( set by '-RS/--end-point' option and exist Real Server )
 							for( rs_list_itr = rs_list_begin(); rs_list_itr != rs_list_end(); rs_list_itr = rs_list_next( rs_list_itr ) ){
 								if ( *ep_list_it == rs_list_itr->tcp_endpoint && rs_list_itr->weight != 0 ) {
 									rslist_it_list.push_back( rs_list_itr );
-									is_match = true;
+									is_realserver_match = true;
 									break;
 								}
 							}
 							++ep_list_it;
 						}
-						if( is_match ){
+						if( is_realserver_match ){
 							// "rs_list_end()" is rslist_it_list's sentinel
 							rslist_it_list.push_back( rs_list_end() );
 							// call Schedule Module in this function.
@@ -2618,44 +2622,62 @@ protocol_module_base::EVENT_TAG protocol_module_url::handle_realserver_select(
 					}
 					rslist_it_list.clear();
 				}
-				if( is_match ){
+
+				if( is_realserver_match ){
 					break;
 				}
 
-				++ptn_ep_pairlist_it;
+				++ptnsrgx_cvt_pairlist_it;
 			}
 
-			if( is_match && rs_endpoint != tmp_endpoint ){
-				// get the endpoint successfullyi
-				session_data->target_endpoint = rs_endpoint;
-				status = REALSERVER_CONNECT;
+			if( is_regex_match ){
+				if( is_realserver_match && rs_endpoint != tmp_endpoint ){
+					// get the endpoint successfullyi
+					session_data->target_endpoint = rs_endpoint;
+					status = REALSERVER_CONNECT;					
+				}else{
+					// no endpoint found
+		                        // set sorry flag on
+		                        session_data->sorry_flag = SORRY_FLAG_ON;
+		                        /*-------- DEBUG LOG --------*/
+		                        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+		                                boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_url::"
+		                                                        "handle_realserver_select() : SORRY_FLAG_ON. thread id : %d.");
+		                                formatter % boost::this_thread::get_id();
+		                                putLogDebug(100076, formatter.str(), __FILE__, __LINE__);
+		                        }
+		                        /*------DEBUG LOG END------*/
+		                        status = SORRYSERVER_SELECT;
+				}
 			}else{
-				// No endpoint matched keyword.
-	                        //set end flag on
-	                        session_data->sorry_flag = SORRY_FLAG_ON;
-	                        /*-------- DEBUG LOG --------*/
-	                        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
-	                                boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_url::"
-	                                                        "handle_realserver_select() : SORRY_FLAG_ON. thread id : %d.");
-	                                formatter % boost::this_thread::get_id();
-	                                putLogDebug(100076, formatter.str(), __FILE__, __LINE__);
-	                        }
-	                        /*------DEBUG LOG END------*/
-	                        status = SORRYSERVER_SELECT;
+				// client sends URL is no matched
+				// set end flag on
+				session_data->end_flag = END_FLAG_ON;
+				/*-------- DEBUG LOG --------*/
+				if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+					boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_url::"
+				                                "handle_realserver_select() : END_FLAG_ON. thread id : %d.");
+				        formatter % boost::this_thread::get_id();
+				        putLogDebug(100229, formatter.str(), __FILE__, __LINE__);
+				}
+				/*------DEBUG LOG END------*/
+				status = FINALIZE;				
 			}
+
 		}
-		// URL Not found.
+		// URL Not found
 		else{
-			session_data->sorry_flag = SORRY_FLAG_ON;
-                        /*-------- DEBUG LOG --------*/
-                        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
-                                boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_url::"
-                                                        "handle_realserver_select() : SORRY_FLAG_ON. thread id : %d.");
-                                formatter % boost::this_thread::get_id();
-                                putLogDebug(100076, formatter.str(), __FILE__, __LINE__);
-                        }
-                        /*------DEBUG LOG END------*/
-			status = SORRYSERVER_SELECT;
+			// set end flag on
+			session_data->end_flag = END_FLAG_ON;
+			/*-------- DEBUG LOG --------*/
+			if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+				boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_url::"
+			                                "handle_realserver_select() : END_FLAG_ON. thread id : %d.");
+			        formatter % boost::this_thread::get_id();
+			        putLogDebug(100229, formatter.str(), __FILE__, __LINE__);
+			}
+			/*------DEBUG LOG END------*/
+			status = FINALIZE;				
 		}
 
         } catch (int e) {
@@ -7819,7 +7841,7 @@ std::list< realserver >::iterator protocol_module_url::next_rslist_it( std::list
         return *rslist_it_list_it;
 }  
 
-//! @takeda:schedule_tcpを無理やり使うための関数.この方法はひどいと思うが他の方法がわからない...
+//! @takeda:schedule_tcpを無理やり使うための関数...
 //! @param[in] thread_id
 //! @param[in] in_rslist_it_list : registered Real Servers ( This parameter is substantially 'const' in this function. )
 //! @param[out] rs_endpoint[out] : addressee Real Server
@@ -7847,8 +7869,8 @@ void protocol_module_url::useScheduleTCP(
 void protocol_module_url::dumpKeyary_endpointlist( int num )
 {
 
-	pattern_endpoint_pairlist_it it = ptn_ep_pairlist.begin();
-	pattern_endpoint_pairlist_it it_end = ptn_ep_pairlist.end();
+	pattern_endpointlist_map_it it = ptn_eplist_map.begin();
+	pattern_endpointlist_map_it it_end = ptn_eplist_map.end();
 
 	typedef std::list<boost::asio::ip::tcp::endpoint> eplist;
 	
@@ -7921,22 +7943,22 @@ void protocol_module_url::dumpOptionString( const std::vector<std::string>& args
 
 }
 
-void protocol_module_url::dumpKeyary_sregex_converter_map( void )
+void protocol_module_url::dumpPtnsrgx_converter_pairlist( void )
 {
-	putLogFatal(9999, "-------dumpKeyary_sregex_converter_map---------", __FILE__, __LINE__);
-
-	std::string str;
-
-	std::map< boost::array<char,MAX_OPTION_SIZE>, boost::xpressive::sregex >::iterator it = keyary_sregex_converter_map.begin();
-	std::map< boost::array<char,MAX_OPTION_SIZE>, boost::xpressive::sregex >::iterator end = keyary_sregex_converter_map.end();
-
-	while( it != end ){
-		str = it->first.data();
-		putLogFatal( 29290, "[ " + str + " ]", __FILE__, __LINE__ );
-		++it;		
-	}
-
-        putLogFatal(9999, "----------------------------------------------", __FILE__, __LINE__);
+//	putLogFatal(9999, "-------dumpPtnsrgx_converter_pairlist---------", __FILE__, __LINE__);
+//
+//	std::string str;
+//
+//	std::map< boost::array<char,MAX_OPTION_SIZE>, boost::xpressive::sregex >::iterator it = keyary_sregex_converter_map.begin();
+//	std::map< boost::array<char,MAX_OPTION_SIZE>, boost::xpressive::sregex >::iterator end = keyary_sregex_converter_map.end();
+//
+//	while( it != end ){
+//		str = it->first.data();
+//		putLogFatal( 29290, "[ " + str + " ]", __FILE__, __LINE__ );
+//		++it;		
+//	}
+//
+//        putLogFatal(9999, "----------------------------------------------", __FILE__, __LINE__);
 }
 
 void protocol_module_url::testVolume( void )
