@@ -68,6 +68,7 @@ public:
         unsigned long long qos_downstream;
         unsigned long long throughput_upstream;
         unsigned long long throughput_downstream;
+        unsigned long long session_thread_pool_size;
 
         std::string ssl_file_name;
 
@@ -99,6 +100,7 @@ public:
                    qos_downstream(0ULL),
                    throughput_upstream(0ULL),
                    throughput_downstream(0ULL),
+                   session_thread_pool_size(0),
                    access_log_flag(0),
                    socket_option_tcp_defer_accept(0),
                    socket_option_tcp_nodelay(0),
@@ -122,6 +124,7 @@ public:
                    qos_downstream(in.qos_downstream),
                    throughput_upstream(in.throughput_upstream),
                    throughput_downstream(in.throughput_downstream),
+                   session_thread_pool_size(in.session_thread_pool_size),
                    ssl_file_name(in.ssl_file_name),
                    access_log_flag(in.access_log_flag),
                    access_log_file_name(in.access_log_file_name),
@@ -164,6 +167,7 @@ public:
                 qos_downstream = in.qos_downstream;
                 throughput_upstream = in.throughput_upstream;
                 throughput_downstream = in.throughput_downstream;
+                session_thread_pool_size = in.session_thread_pool_size;
                 access_log_flag = in.access_log_flag;
                 ssl_file_name = in.ssl_file_name;
                 access_log_file_name = in.access_log_file_name;
@@ -205,6 +209,7 @@ public:
                     elem1.qos_downstream == elem2.qos_downstream &&
                     elem1.throughput_upstream == elem2.throughput_upstream &&
                     elem1.throughput_downstream == elem2.throughput_downstream &&
+                    elem1.session_thread_pool_size == elem2.session_thread_pool_size &&
                     elem1.access_log_flag == elem2.access_log_flag &&
                     elem1.ssl_file_name == elem2.ssl_file_name &&
                     elem1.access_log_file_name == elem2.access_log_file_name &&
@@ -265,6 +270,7 @@ public:
                     elem1.qos_downstream == elem2.qos_downstream &&
                     elem1.throughput_upstream == elem2.throughput_upstream &&
                     elem1.throughput_downstream == elem2.throughput_downstream &&
+                    elem1.session_thread_pool_size == elem2.session_thread_pool_size &&
                     elem1.access_log_flag == elem2.access_log_flag &&
                     elem1.ssl_file_name == elem2.ssl_file_name &&
                     elem1.access_log_file_name == elem2.access_log_file_name &&
@@ -368,6 +374,7 @@ public:
                                     "qos_downstream=%d, "
                                     "throughput_upstream=%d, "
                                     "throughput_downstream=%d, "
+                                    "session_thread_pool_size=%d, "
                                     "access_log_flag=%d, "
                                     "ssl_file_name=%s, "
                                     "access_log_file_name=%s, "
@@ -392,6 +399,7 @@ public:
                    % elem.qos_downstream
                    % elem.throughput_upstream
                    % elem.throughput_downstream
+                   % elem.session_thread_pool_size
                    % elem.access_log_flag
                    % elem.ssl_file_name
                    % elem.access_log_file_name
@@ -440,6 +448,7 @@ private:
                 ar &qos_downstream;
                 ar &throughput_upstream;
                 ar &throughput_downstream;
+                ar &session_thread_pool_size;
                 ar &access_log_flag;
                 ar &ssl_file_name;
                 ar &access_log_file_name;

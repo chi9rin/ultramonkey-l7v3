@@ -56,3 +56,4 @@ virtual  = 192.168.0.50:80
 	#accesslog_rotate_max_filesize     = 100M
 	#accesslog_rotate_rotation_timing  = month
 	#accesslog_rotate_rotation_timing_value = "1 23:59"
+	#session_thread_pool_size = 32
