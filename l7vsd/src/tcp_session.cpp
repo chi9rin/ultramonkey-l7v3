@@ -882,7 +882,6 @@ void tcp_session::up_thread_run()
         }
 
         up_thread_all_socket_close();
-        connecting_socket.reset();
 
         if (likely(protocol_module != NULL))    protocol_module->handle_session_finalize(up_thread_id, down_thread_id);
 
@@ -1414,25 +1413,8 @@ void tcp_session::up_thread_client_disconnect(const TCP_PROCESS_TYPE_TAG process
         } else {
                 client_ssl_socket.shutdown(ec);
                 if (ec == boost::asio::error::try_again) {
-#ifdef  DEBUG
-                        boost::format   fmt("Thread ID[%d] ssl_shutdown fail: %s");
-                        fmt % boost::this_thread::get_id() % ec.message();
-                        Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__);
-#endif
                         func_tag = UP_FUNC_CLIENT_DISCONNECT;
-                } else if (ec == boost::asio::error::eof) {
-#ifdef  DEBUG
-                        boost::format   fmt("Thread ID[%d] ssl_shutdown fail: %s");
-                        fmt % boost::this_thread::get_id() % ec.message();
-                        Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__);
-#endif
-                        func_tag = UP_FUNC_CLIENT_DISCONNECT_EVENT;
                 } else {
-#ifdef  DEBUG
-                        boost::format   fmt("Thread ID[%d] ssl_shutdown fail: %s");
-                        fmt % boost::this_thread::get_id() % ec.message();
-                        Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__);
-#endif
                         func_tag = UP_FUNC_CLIENT_DISCONNECT_EVENT;
                 }
         }
