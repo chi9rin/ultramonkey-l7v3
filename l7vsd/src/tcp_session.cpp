@@ -83,7 +83,7 @@ tcp_session::tcp_session(
         up_thread_module_event_map[protocol_module_base::REALSERVER_SELECT]             = UP_FUNC_REALSERVER_GET_DEST_EVENT;
         up_thread_module_event_map[protocol_module_base::REALSERVER_CONNECT]    = UP_FUNC_REALSERVER_CONNECT;
         up_thread_module_event_map[protocol_module_base::REALSERVER_SEND]               = UP_FUNC_REALSERVER_SEND;
-        up_thread_module_event_map[protocol_module_base::REALSERVER_DISCONNECT] = UP_FUNC_REALSERVER_ALL_DISCONNECT;
+        up_thread_module_event_map[protocol_module_base::REALSERVER_DISCONNECT] = UP_FUNC_REALSERVER_DISCONNECT;
         up_thread_module_event_map[protocol_module_base::SORRYSERVER_SELECT]    = UP_FUNC_SORRYSERVER_GET_DEST;
         up_thread_module_event_map[protocol_module_base::SORRYSERVER_CONNECT]   = UP_FUNC_SORRYSERVER_CONNECT;
         up_thread_module_event_map[protocol_module_base::SORRYSERVER_SEND]              = UP_FUNC_SORRYSERVER_SEND;
@@ -240,7 +240,7 @@ tcp_session::tcp_session(
         down_thread_module_event_map[protocol_module_base::CLIENT_DISCONNECT]           = DOWN_FUNC_CLIENT_DISCONNECT;
         down_thread_module_event_map[protocol_module_base::CLIENT_CONNECTION_CHECK]     = DOWN_FUNC_CLIENT_CONNECTION_CHK;
         down_thread_module_event_map[protocol_module_base::REALSERVER_RECV]                     = DOWN_FUNC_REALSERVER_RECEIVE;
-        down_thread_module_event_map[protocol_module_base::REALSERVER_DISCONNECT]       = DOWN_FUNC_REALSERVER_ALL_DISCONNECT;
+        down_thread_module_event_map[protocol_module_base::REALSERVER_DISCONNECT]       = DOWN_FUNC_REALSERVER_DISCONNECT;
         down_thread_module_event_map[protocol_module_base::SORRYSERVER_RECV]            = DOWN_FUNC_SORRYSERVER_RECEIVE;
         down_thread_module_event_map[protocol_module_base::SORRYSERVER_DISCONNECT]      = DOWN_FUNC_SORRYSERVER_MOD_DISCONNECT;
         down_thread_module_event_map[protocol_module_base::FINALIZE]                            = DOWN_FUNC_EXIT;
