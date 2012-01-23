@@ -2403,6 +2403,14 @@ void tcp_session::up_thread_sorryserver_connection_fail_event(const TCP_PROCESS_
                 formatter % boost::this_thread::get_id();
                 Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
         }
+
+        // up thread pause off
+        upthread_status  = UPTHREAD_ACTIVE;
+
+        //sorryserver socket clear
+        sorryserver_socket.reset();
+        sorryserver_endpoint = boost::asio::ip::tcp::endpoint();
+
 }
 //! up thread close sorryserver socket and raise sorryserver disconnect event message for up and down thread
 //! @param[in]        process_type is process type
