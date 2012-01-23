@@ -1674,7 +1674,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                                                         // no reschedule mode
                                                         // set end_flag ON and disconnect the client
                                                         threaddata->end_flag = END_FLAG_ON;
-                                                        status = CLIENT_DISCONNECT;
+                                                        status = FINALIZE;
                                                         /*-------- DEBUG LOG --------*/
                                                         if (unlikely(LOG_LV_DEBUG == getloglevel())) {
                                                                 boost::format formatter("function : protocol_module_base::EVENT_TAG "
@@ -1749,7 +1749,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_realserver_select(
                                                         // no reschedule mode
                                                         // set end_flag ON and disconnect the client
                                                         threaddata->end_flag = END_FLAG_ON;
-                                                        status = CLIENT_DISCONNECT;
+                                                        status = FINALIZE;
                                                         /*-------- DEBUG LOG --------*/
                                                         if (unlikely(LOG_LV_DEBUG == getloglevel())) {
                                                                 boost::format formatter("function : protocol_module_base::EVENT_TAG "
@@ -2340,7 +2340,7 @@ protocol_module_base::EVENT_TAG protocol_module_sslid::handle_sorryserver_connec
 
                 // set end_flag ON
                 threaddata->end_flag = END_FLAG_ON;
-                status = CLIENT_DISCONNECT;
+                status = FINALIZE;
 
                 /*-------- DEBUG LOG --------*/
                 if (unlikely(LOG_LV_DEBUG == getloglevel())) {

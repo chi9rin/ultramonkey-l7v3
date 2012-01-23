@@ -2088,7 +2088,7 @@ protocol_module_base::EVENT_TAG protocol_module_ip::handle_realserver_select(
                                 //reschedule is off
                                 else {
                                         //set return status
-                                        status = CLIENT_DISCONNECT;
+                                        status = FINALIZE;
                                 }
                         }
                 }
@@ -3112,7 +3112,7 @@ protocol_module_base::EVENT_TAG protocol_module_ip::handle_sorryserver_connectio
                 session_data_ptr = session_thread_it->second;
 
                 //set return status
-                status = CLIENT_DISCONNECT;
+                status = FINALIZE;
 
                 //set last status
                 session_data_ptr->last_status = status;
