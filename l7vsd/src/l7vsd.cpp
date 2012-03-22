@@ -49,7 +49,7 @@ l7vsd::l7vsd()
              exit_requested(0),
              received_sig(0)
 {
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 1, "l7vsd::l7vsd", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 99999, "l7vsd::l7vsd", __FILE__, __LINE__);
 
         option_dic["-h"]        = boost::bind(&l7vsd::parse_help, this, _1, _2, _3);
         option_dic["--help"]    = boost::bind(&l7vsd::parse_help, this, _1, _2, _3);
@@ -62,7 +62,7 @@ l7vsd::l7vsd()
 //! destructor
 l7vsd::~l7vsd()
 {
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 2, "l7vsd::~l7vsd", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 99999, "l7vsd::~l7vsd", __FILE__, __LINE__);
 }
 
 //! virtual_service list command
@@ -70,7 +70,7 @@ l7vsd::~l7vsd()
 //! @param[out]    error_code
 void    l7vsd::list_virtual_service(vselist_type *out_vslist, error_code &err)
 {
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 3, "l7vsd::list_virtual_service", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 99999, "l7vsd::list_virtual_service", __FILE__, __LINE__);
 
         boost::mutex::scoped_lock command_lock(command_mutex);
         boost::mutex::scoped_lock vslist_lock(vslist_mutex);
@@ -100,7 +100,7 @@ void    l7vsd::list_virtual_service(vselist_type *out_vslist, error_code &err)
                         debugstr << ": ";
                         ++i;
                 }
-                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 4, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 
@@ -111,7 +111,7 @@ void    l7vsd::list_virtual_service(vselist_type *out_vslist, error_code &err)
 //! @param[out]    error_code
 void    l7vsd::list_virtual_service_verbose(l7vsd_response *response, error_code &err)
 {
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 5, "l7vsd::list_virtual_service_verbose", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 99999, "l7vsd::list_virtual_service_verbose", __FILE__, __LINE__);
 
         boost::mutex::scoped_lock command_lock(command_mutex);
         boost::mutex::scoped_lock vslist_lock(vslist_mutex);
@@ -180,7 +180,7 @@ void    l7vsd::list_virtual_service_verbose(l7vsd_response *response, error_code
         if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_MAINTHREAD)) {
                 std::stringstream    debugstr;
                 debugstr << boost::format("l7vsd::list_virtual_service_verbose return value:%s") % *response;
-                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 6, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 
@@ -191,7 +191,7 @@ void    l7vsd::list_virtual_service_verbose(l7vsd_response *response, error_code
 //! @param[out]    error_code
 void    l7vsd::add_virtual_service(const virtualservice_element *in_vselement, error_code &err)
 {
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 7, "l7vsd::add_virtual_service", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 99999, "l7vsd::add_virtual_service", __FILE__, __LINE__);
 
         boost::mutex::scoped_lock command_lock(command_mutex);
         boost::mutex::scoped_lock vslist_lock(vslist_mutex);
@@ -263,7 +263,7 @@ void    l7vsd::add_virtual_service(const virtualservice_element *in_vselement, e
 
                         /*-------- DEBUG LOG --------*/
                         if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_MAINTHREAD)) {
-                                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 41, "out l7vsd::add_virtual_service", __FILE__, __LINE__);
+                                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 99999, "out l7vsd::add_virtual_service", __FILE__, __LINE__);
                         }
                         /*------ DEBUG LOG END ------*/
 
@@ -323,7 +323,7 @@ void    l7vsd::add_virtual_service(const virtualservice_element *in_vselement, e
 //! @param[out]    error_code
 void    l7vsd::del_virtual_service(const virtualservice_element *in_vselement, error_code &err)
 {
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 9, "l7vsd::del_virtual_service", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 99999, "l7vsd::del_virtual_service", __FILE__, __LINE__);
 
         boost::mutex::scoped_lock command_lock(command_mutex);
         boost::mutex::scoped_lock vslist_lock(vslist_mutex);
@@ -340,7 +340,7 @@ void    l7vsd::del_virtual_service(const virtualservice_element *in_vselement, e
                 std::stringstream    debugstr;
                 debugstr << "l7vsd::del_virtual_service arguments:";
                 debugstr << boost::format("*in_vselement=%s") % *in_vselement;
-                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 10, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 
@@ -400,7 +400,7 @@ void    l7vsd::del_virtual_service(const virtualservice_element *in_vselement, e
 //! @param[out]    error_code
 void    l7vsd::edit_virtual_service(const virtualservice_element *in_vselement, error_code &err)
 {
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 11, "l7vsd::edit_virtual_service", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 99999, "l7vsd::edit_virtual_service", __FILE__, __LINE__);
 
         boost::mutex::scoped_lock command_lock(command_mutex);
         boost::mutex::scoped_lock vslist_lock(vslist_mutex);
@@ -417,7 +417,7 @@ void    l7vsd::edit_virtual_service(const virtualservice_element *in_vselement, 
                 std::stringstream    debugstr;
                 debugstr << "l7vsd::edit_virtual_service arguments:";
                 debugstr << boost::format("*in_vselement=%s") % *in_vselement;
-                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 12, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 
@@ -490,7 +490,7 @@ void    l7vsd::add_real_server(const virtualservice_element *in_vselement, error
                 std::stringstream    debugstr;
                 debugstr << "l7vsd::add_real_server arguments:";
                 debugstr << boost::format("*in_vselement=%s") % *in_vselement;
-                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 14, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 
@@ -565,7 +565,7 @@ void    l7vsd::add_real_server(const virtualservice_element *in_vselement, error
 //! @param[out]    error_code
 void    l7vsd::del_real_server(const virtualservice_element *in_vselement, error_code &err)
 {
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 15, "l7vsd::del_real_server", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 99999, "l7vsd::del_real_server", __FILE__, __LINE__);
 
         boost::mutex::scoped_lock command_lock(command_mutex);
         boost::mutex::scoped_lock vslist_lock(vslist_mutex);
@@ -582,7 +582,7 @@ void    l7vsd::del_real_server(const virtualservice_element *in_vselement, error
                 std::stringstream    debugstr;
                 debugstr << "l7vsd::del_real_server arguments:";
                 debugstr << boost::format("*in_vselement=%s") % *in_vselement;
-                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 16, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 
@@ -655,7 +655,7 @@ void    l7vsd::del_real_server(const virtualservice_element *in_vselement, error
 //! @param[out]    error_code
 void    l7vsd::edit_real_server(const virtualservice_element *in_vselement, error_code &err)
 {
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 17, "l7vsd::edit_real_server", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 99999, "l7vsd::edit_real_server", __FILE__, __LINE__);
 
         boost::mutex::scoped_lock command_lock(command_mutex);
         boost::mutex::scoped_lock vslist_lock(vslist_mutex);
@@ -672,7 +672,7 @@ void    l7vsd::edit_real_server(const virtualservice_element *in_vselement, erro
                 std::stringstream    debugstr;
                 debugstr << "l7vsd::edit_real_server arguments:";
                 debugstr << boost::format("*in_vselement=%s") % *in_vselement;
-                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 18, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 
@@ -746,7 +746,7 @@ void    l7vsd::edit_real_server(const virtualservice_element *in_vselement, erro
 //! @param[out]    error_code
 void    l7vsd::flush_virtual_service(error_code &err)
 {
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 19, "l7vsd::flush_virtual_service", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 99999, "l7vsd::flush_virtual_service", __FILE__, __LINE__);
 
         boost::mutex::scoped_lock command_lock(command_mutex);
         boost::mutex::scoped_lock vslist_lock(vslist_mutex);
@@ -808,7 +808,7 @@ void    l7vsd::flush_virtual_service(error_code &err)
 //! @param[out]    error_code
 void    l7vsd::replication_command(const l7vsadm_request::REPLICATION_COMMAND_TAG *cmd, error_code &err)
 {
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 20, "l7vsd::replication_command", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 99999, "l7vsd::replication_command", __FILE__, __LINE__);
 
         boost::mutex::scoped_lock command_lock(command_mutex);
         boost::mutex::scoped_lock vslist_lock(vslist_mutex);
@@ -831,7 +831,7 @@ void    l7vsd::replication_command(const l7vsadm_request::REPLICATION_COMMAND_TA
                 std::stringstream    debugstr;
                 debugstr << "l7vsd::replication_command arguments:";
                 debugstr << boost::format("*cmd=%d") % *cmd;
-                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 21, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 
@@ -862,7 +862,7 @@ void    l7vsd::replication_command(const l7vsadm_request::REPLICATION_COMMAND_TA
 //! @param[out]    error_code
 void    l7vsd::set_loglevel(const LOG_CATEGORY_TAG *cat, const LOG_LEVEL_TAG *level, error_code &err)
 {
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 22, "l7vsd::set_loglevel", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 99999, "l7vsd::set_loglevel", __FILE__, __LINE__);
 
         boost::mutex::scoped_lock command_lock(command_mutex);
         boost::mutex::scoped_lock vslist_lock(vslist_mutex);
@@ -885,7 +885,7 @@ void    l7vsd::set_loglevel(const LOG_CATEGORY_TAG *cat, const LOG_LEVEL_TAG *le
                 std::stringstream    debugstr;
                 debugstr << "l7vsd::set_loglevel arguments:";
                 debugstr << boost::format("*cat=%d, level=%d") % *cat % *level;
-                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 23, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 
@@ -912,7 +912,7 @@ void    l7vsd::set_loglevel(const LOG_CATEGORY_TAG *cat, const LOG_LEVEL_TAG *le
 //! @param[out]    error_code
 void    l7vsd::reload_parameter(const PARAMETER_COMPONENT_TAG *comp, error_code &err)
 {
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 26, "l7vsd::reload_parameter", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 99999, "l7vsd::reload_parameter", __FILE__, __LINE__);
 
         boost::mutex::scoped_lock command_lock(command_mutex);
         boost::mutex::scoped_lock vslist_lock(vslist_mutex);
@@ -935,7 +935,7 @@ void    l7vsd::reload_parameter(const PARAMETER_COMPONENT_TAG *comp, error_code 
                 std::stringstream    debugstr;
                 debugstr << "l7vsd::reload_parameter arguments:";
                 debugstr << boost::format("*comp=%d") % *comp;
-                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 27, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 
@@ -964,7 +964,7 @@ void    l7vsd::reload_parameter(const PARAMETER_COMPONENT_TAG *comp, error_code 
 
                 } else {
                         std::string msg("parameter reload failed.");
-                        Logger::putLogError(LOG_CAT_L7VSD_PARAMETER, 7, msg, __FILE__, __LINE__);
+                        Logger::putLogError(LOG_CAT_L7VSD_PARAMETER, 8, msg, __FILE__, __LINE__);
                         err.setter(true, msg);
                         return;
                 }
@@ -980,7 +980,7 @@ void    l7vsd::reload_parameter(const PARAMETER_COMPONENT_TAG *comp, error_code 
 
                 if (!param.read_file(PARAM_COMP_LOGGER)) {
                         std::string msg("parameter reload failed.");
-                        Logger::putLogError(LOG_CAT_L7VSD_PARAMETER, 7, msg, __FILE__, __LINE__);
+                        Logger::putLogError(LOG_CAT_L7VSD_PARAMETER, 8, msg, __FILE__, __LINE__);
                         err.setter(true, msg);
                         return;
                 }
@@ -1003,7 +1003,7 @@ void    l7vsd::reload_parameter(const PARAMETER_COMPONENT_TAG *comp, error_code 
 }
 void    l7vsd::set_snmp_info(const snmp_info *info, error_code &err)
 {
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 42, "l7vsd::set_snmp_info", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 99999, "l7vsd::set_snmp_info", __FILE__, __LINE__);
 
         boost::mutex::scoped_lock command_lock(command_mutex);
 
@@ -1018,7 +1018,7 @@ void    l7vsd::set_snmp_info(const snmp_info *info, error_code &err)
         if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_MAINTHREAD)) {
                 std::stringstream    debugstr;
                 debugstr << boost::format("info=%s") % *info;
-                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 43, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 
@@ -1079,14 +1079,14 @@ l7vsd::vslist_type::iterator    l7vsd::search_vslist(
         const virtualservice_element &in_vselement,
         bool find_module_name) const
 {
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 28, "l7vsd::search_vslist", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 99999, "l7vsd::search_vslist", __FILE__, __LINE__);
 
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_MAINTHREAD)) {
                 std::stringstream    debugstr;
                 debugstr << "l7vsd::search_vslist arguments:";
                 debugstr << boost::format("in_vselement=%s") % in_vselement;
-                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 29, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 
@@ -1124,14 +1124,14 @@ l7vsd::vslist_type::iterator    l7vsd::search_vslist(
 //! @param[in]    vs_element
 void    l7vsd::release_virtual_service(const virtualservice_element &in_vselement) const
 {
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 30, "l7vsd::release_virtual_service", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 99999, "l7vsd::release_virtual_service", __FILE__, __LINE__);
 
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_MAINTHREAD)) {
                 std::stringstream    debugstr;
                 debugstr << "l7vsd::release_virtual_service arguments:";
                 debugstr << boost::format("in_vselement=%s") % in_vselement;
-                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 31, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 
@@ -1145,7 +1145,7 @@ void    l7vsd::release_virtual_service(const virtualservice_element &in_vselemen
 //! @return    vslist
 l7vsd::vslist_type    &l7vsd::get_virtualservice_list()
 {
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 32, "l7vsd::get_virtualservice_list", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 99999, "l7vsd::get_virtualservice_list", __FILE__, __LINE__);
 
         return vslist;
 }
@@ -1154,7 +1154,7 @@ l7vsd::vslist_type    &l7vsd::get_virtualservice_list()
 //! @return    vslist_mutex
 boost::mutex    &l7vsd::get_virtualservice_list_mutex()
 {
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 33, "l7vsd::get_virtualservice_list_mutex", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 99999, "l7vsd::get_virtualservice_list_mutex", __FILE__, __LINE__);
 
         return vslist_mutex;
 }
@@ -1172,13 +1172,13 @@ replication::REPLICATION_MODE_TAG l7vsd::get_replication_state() const
 //! @param[in]    argument value
 int    l7vsd::run(int argc, char *argv[])
 {
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 34, "l7vsd::run", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 99999, "l7vsd::run", __FILE__, __LINE__);
 
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSADM_COMMON)) {
                 std::stringstream    debugstr;
                 debugstr << boost::format("l7vsd::run arguments:%s") % argument_debug_dump(argc, argv);
-                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 35, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_MAINTHREAD, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 
@@ -1317,7 +1317,7 @@ int    l7vsd::run(int argc, char *argv[])
                 agent.start(err_code);
 
                 if (err_code) {
-                        logger.putLogError(LOG_CAT_L7VSD_MAINTHREAD, 8, "snmp function start failed.", __FILE__, __LINE__);
+                        logger.putLogError(LOG_CAT_L7VSD_MAINTHREAD, 9, "snmp function start failed.", __FILE__, __LINE__);
                 }
 
                 err_code.setter(false, "");
@@ -1332,7 +1332,7 @@ int    l7vsd::run(int argc, char *argv[])
 
                 if (err_code) {
                         std::string msg("Push trap message failed.");
-                        Logger::putLogError(LOG_CAT_L7VSD_MAINTHREAD, 9, msg, __FILE__, __LINE__);
+                        Logger::putLogError(LOG_CAT_L7VSD_MAINTHREAD, 131, msg, __FILE__, __LINE__);
                 }
 
                 // main loop
@@ -1418,7 +1418,7 @@ std::string    l7vsd::argument_debug_dump(int argc, char *argv[])
 //! @param[in]    argument value
 bool    l7vsd::check_options(int argc, char *argv[])
 {
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 36, "l7vsd::check_options", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 99999, "l7vsd::check_options", __FILE__, __LINE__);
 
         for (int pos = 1; pos < argc; ++pos) {    // check options.
                 parse_opt_map_type::iterator itr = option_dic.find(argv[pos]);
@@ -1441,7 +1441,7 @@ bool    l7vsd::check_options(int argc, char *argv[])
 //! @param[in]    argument value
 bool    l7vsd::parse_help(int &pos, int argc, char *argv[])
 {
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 37, "l7vsd::parse_help", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 99999, "l7vsd::parse_help", __FILE__, __LINE__);
 
         help = true;        //help_mode flag on
         return true;
@@ -1450,7 +1450,7 @@ bool    l7vsd::parse_help(int &pos, int argc, char *argv[])
 //! command debug parse
 bool    l7vsd::parse_debug(int &pos, int argc, char *argv[])
 {
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 38, "l7vsd::parse_help", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 99999, "l7vsd::parse_help", __FILE__, __LINE__);
         debug = true;
         return true;
 }
@@ -1459,7 +1459,7 @@ bool    l7vsd::parse_debug(int &pos, int argc, char *argv[])
 //! @return        usage string
 std::string    l7vsd::usage()
 {
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 39, "l7vsd::usage", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 99999, "l7vsd::usage", __FILE__, __LINE__);
 
         std::stringstream    stream;
         stream <<
@@ -1471,7 +1471,7 @@ std::string    l7vsd::usage()
 //! signal handler function
 void    l7vsd::sig_exit_handler()
 {
-        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 40, "l7vsd::sig_exit_handler", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_MAINTHREAD, 99999, "l7vsd::sig_exit_handler", __FILE__, __LINE__);
 
         sigset_t    sigmask;
         sigemptyset(&sigmask);

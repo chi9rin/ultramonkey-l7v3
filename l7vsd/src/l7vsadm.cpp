@@ -60,7 +60,7 @@ static int  received_sig = 0;
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_list_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 1, "l7vsadm::parse_list_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_list_func", __FILE__, __LINE__);
 
         request.command = cmd; // set command
         if (argc < 3) {
@@ -99,7 +99,7 @@ bool l7vs::l7vsadm::parse_list_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd,
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_list_numeric_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 2, "l7vsadm::parse_opt_list_numeric_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_list_numeric_func", __FILE__, __LINE__);
 
         numeric_flag = true; //numeric flag on.
         return true;
@@ -111,7 +111,7 @@ bool l7vs::l7vsadm::parse_opt_list_numeric_func(int &pos, int argc, char *argv[]
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_vs_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 3, "l7vsadm::parse_vs_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_vs_func", __FILE__, __LINE__);
 
         request.command = cmd; // set command
         if (l7vsadm_request::CMD_FLUSH_VS == cmd) {
@@ -427,7 +427,7 @@ bool l7vs::l7vsadm::parse_vs_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, i
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_vs_target_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 4, "l7vsadm::parse_opt_vs_target_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_vs_target_func", __FILE__, __LINE__);
 
         if (++pos >= argc) {
                 // target address and port are not specified
@@ -483,7 +483,7 @@ bool l7vs::l7vsadm::parse_opt_vs_target_func(int &pos, int argc, char *argv[])
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_vs_module_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 5, "l7vsadm::parse_opt_vs_module_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_vs_module_func", __FILE__, __LINE__);
         if (++pos >= argc) {
                 // target protomod name not specified.
                 std::string buf("protocol module name is not specified.(--proto-module)");
@@ -566,7 +566,7 @@ bool l7vs::l7vsadm::parse_opt_vs_module_func(int &pos, int argc, char *argv[])
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_vs_scheduler_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 6, "l7vsadm::parse_opt_vs_scheduler_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_vs_scheduler_func", __FILE__, __LINE__);
 
         if (++pos >= argc) {
                 // target scheduler name not specified.
@@ -613,7 +613,7 @@ bool l7vs::l7vsadm::parse_opt_vs_scheduler_func(int &pos, int argc, char *argv[]
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_vs_upper_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 7, "l7vsadm::parse_opt_vs_upper_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_vs_upper_func", __FILE__, __LINE__);
 
         if (++pos >= argc) {
                 // target max connection number not specified
@@ -648,7 +648,7 @@ bool l7vs::l7vsadm::parse_opt_vs_upper_func(int &pos, int argc, char *argv[])
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_vs_bypass_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 8, "l7vsadm::parse_opt_vs_bypass_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_vs_bypass_func", __FILE__, __LINE__);
 
         if (++pos >= argc) {
                 // sorryserver addr and port not specified
@@ -689,7 +689,7 @@ bool l7vs::l7vsadm::parse_opt_vs_bypass_func(int &pos, int argc, char *argv[])
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_vs_flag_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 9, "l7vsadm::parse_opt_vs_flag_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_vs_flag_func", __FILE__, __LINE__);
 
         if (++pos >= argc) {
                 // sorry flag is not specified
@@ -724,7 +724,7 @@ bool l7vs::l7vsadm::parse_opt_vs_flag_func(int &pos, int argc, char *argv[])
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_vs_fwdmode_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, /*XXX*/999, "l7vsadm::parse_opt_vs_fwdmode_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_vs_fwdmode_func", __FILE__, __LINE__);
 
         std::string opt(argv[pos]);
         if (opt == "--masq") {
@@ -754,7 +754,7 @@ bool l7vs::l7vsadm::parse_opt_vs_fwdmode_func(int &pos, int argc, char *argv[])
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_vs_qosup_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 10, "l7vsadm::parse_opt_vs_qosup_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_vs_qosup_func", __FILE__, __LINE__);
 
         if (++pos >= argc) {
                 // QoS upstream value is not specified.
@@ -827,7 +827,7 @@ bool l7vs::l7vsadm::parse_opt_vs_qosup_func(int &pos, int argc, char *argv[])
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_vs_qosdown_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 11, "l7vsadm::parse_opt_vs_qosdown_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_vs_qosdown_func", __FILE__, __LINE__);
 
         if (++pos >= argc) {
                 // QoS downstream value is not specified
@@ -900,7 +900,7 @@ bool l7vs::l7vsadm::parse_opt_vs_qosdown_func(int &pos, int argc, char *argv[])
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_vs_udp_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 12, "l7vsadm::parse_opt_vs_udp_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_vs_udp_func", __FILE__, __LINE__);
 
         virtualservice_element &elem = request.vs_element; // request virtualservice element reference get.
         elem.udpmode = true; // udpmode on.
@@ -943,7 +943,7 @@ bool l7vs::l7vsadm::parse_opt_vs_udp_func(int &pos, int argc, char *argv[])
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_vs_ssl_file_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 38, "l7vsadm::parse_opt_vs_ssl_file_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_vs_ssl_file_func", __FILE__, __LINE__);
 
         if (++pos >= argc) {
                 std::string buf("ssl config file is not specified.(--ssl)");
@@ -978,7 +978,7 @@ bool l7vs::l7vsadm::parse_opt_vs_ssl_file_func(int &pos, int argc, char *argv[])
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_vs_access_log_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 39, "l7vsadm::parse_opt_vs_access_log_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_vs_access_log_func", __FILE__, __LINE__);
 
         if (++pos >= argc) {
                 // access log flag is not specified
@@ -1011,7 +1011,7 @@ bool l7vs::l7vsadm::parse_opt_vs_access_log_func(int &pos, int argc, char *argv[
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_vs_access_log_logrotate_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 40, "l7vsadm::parse_opt_vs_accesslog_logrotate_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_vs_accesslog_logrotate_func", __FILE__, __LINE__);
 
         if (++pos >= argc) {
                 std::string buf("access log file is not specified.(--access-log-name)");
@@ -1099,7 +1099,7 @@ bool l7vs::l7vsadm::parse_opt_vs_access_log_logrotate_func(int &pos, int argc, c
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_vs_socket_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 41, "l7vsadm::parse_opt_vs_socket_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_vs_socket_func", __FILE__, __LINE__);
 
         if (++pos >= argc) {
                 std::string buf("socket option is not specified.(--sockopt)");
@@ -1191,7 +1191,7 @@ bool l7vs::l7vsadm::parse_opt_vs_socket_func(int &pos, int argc, char *argv[])
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_rs_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 13, "l7vsadm::parse_rs_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_rs_func", __FILE__, __LINE__);
 
         if (argc < 8) {
                 //argument num err
@@ -1355,7 +1355,7 @@ bool l7vs::l7vsadm::parse_rs_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, i
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_rs_weight_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 14, "l7vsadm::parse_opt_rs_weight_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_rs_weight_func", __FILE__, __LINE__);
 
         if (++pos >= argc) {
                 // weight value is not specified
@@ -1388,7 +1388,7 @@ bool l7vs::l7vsadm::parse_opt_rs_weight_func(int &pos, int argc, char *argv[])
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_rs_fwdmode_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, /*XXX*/999, "l7vsadm::parse_opt_rs_fwdmode_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_rs_fwdmode_func", __FILE__, __LINE__);
 
         std::string opt(argv[pos]);
         if (opt == "--masq") {
@@ -1419,7 +1419,7 @@ bool l7vs::l7vsadm::parse_opt_rs_fwdmode_func(int &pos, int argc, char *argv[])
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_rs_realserver_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 15, "l7vsadm::parse_opt_rs_realserver_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_rs_realserver_func", __FILE__, __LINE__);
 
         if (++pos >= argc) {
                 // realserver address is not specified
@@ -1477,7 +1477,7 @@ bool l7vs::l7vsadm::parse_opt_rs_realserver_func(int &pos, int argc, char *argv[
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_replication_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 16, "l7vsadm::parse_replication_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_replication_func", __FILE__, __LINE__);
 
         if (argc < 3 || argc > 4) {
                 //argument num err
@@ -1525,7 +1525,7 @@ bool l7vs::l7vsadm::parse_replication_func(l7vs::l7vsadm_request::COMMAND_CODE_T
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_replication_switch_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 17, "l7vsadm::parse_opt_replication_switch_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_replication_switch_func", __FILE__, __LINE__);
 
         if (request.replication_command != l7vsadm_request::REP_NONE) {
                 // double command target.
@@ -1560,7 +1560,7 @@ bool l7vs::l7vsadm::parse_opt_replication_switch_func(int &pos, int argc, char *
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_replication_start_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 18, "l7vsadm::parse_opt_replication_start_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_replication_start_func", __FILE__, __LINE__);
 
         request.replication_command = l7vsadm_request::REP_START;
         return true;
@@ -1571,7 +1571,7 @@ bool l7vs::l7vsadm::parse_opt_replication_start_func(int &pos, int argc, char *a
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_replication_stop_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 19, "l7vsadm::parse_opt_replication_stop_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_replication_stop_func", __FILE__, __LINE__);
 
         request.replication_command = l7vsadm_request::REP_STOP;
         return true;
@@ -1582,7 +1582,7 @@ bool l7vs::l7vsadm::parse_opt_replication_stop_func(int &pos, int argc, char *ar
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_replication_force_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 20, "l7vsadm::parse_opt_replication_force_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_replication_force_func", __FILE__, __LINE__);
 
         if (request.replication_command != l7vsadm_request::REP_NONE) {
                 // double command target.
@@ -1600,7 +1600,7 @@ bool l7vs::l7vsadm::parse_opt_replication_force_func(int &pos, int argc, char *a
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_replication_dump_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 21, "l7vsadm::parse_opt_replication_dump_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_replication_dump_func", __FILE__, __LINE__);
 
         if (request.replication_command != l7vsadm_request::REP_NONE) {
                 // double command target.
@@ -1619,7 +1619,7 @@ bool l7vs::l7vsadm::parse_opt_replication_dump_func(int &pos, int argc, char *ar
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_log_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 22, "l7vsadm::parse_log_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_log_func", __FILE__, __LINE__);
 
         if (argc != 6) {
                 //argument num err
@@ -1674,7 +1674,7 @@ bool l7vs::l7vsadm::parse_log_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, 
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_log_category_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 23, "l7vsadm::parse_opt_log_category_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_log_category_func", __FILE__, __LINE__);
 
         if (request.log_category != LOG_CAT_NONE) {
                 // double target commands.
@@ -1711,7 +1711,7 @@ bool l7vs::l7vsadm::parse_opt_log_category_func(int &pos, int argc, char *argv[]
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_log_level_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 24, "l7vsadm::parse_opt_log_level_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_log_level_func", __FILE__, __LINE__);
 
         if (request.log_level != LOG_LV_NONE) {
                 // double target commands.
@@ -1749,7 +1749,7 @@ bool l7vs::l7vsadm::parse_opt_log_level_func(int &pos, int argc, char *argv[])
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_snmp_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 25, "l7vsadm::parse_snmp_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_snmp_func", __FILE__, __LINE__);
 
         //Argument argc is illegal
         if (argc < 3) {
@@ -1788,7 +1788,7 @@ bool l7vs::l7vsadm::parse_snmp_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd,
 //! @param[in]    argument value
 bool    l7vs::l7vsadm::parse_opt_snmp_refresh_func(int &pos, int argc, char *argv[])
 {
-        Logger    logger(LOG_CAT_L7VSADM_COMMON, 42, "l7vsadm::parse_opt_snmp_refresh_func", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_snmp_refresh_func", __FILE__, __LINE__);
         if (request.snmpinfo.option_set_flag & snmp_info::SNMP_REFRESH_ALL_OPTION_FLAG
             || request.snmpinfo.option_set_flag & snmp_info::SNMP_REFRESH_OPTION_FLAG) {
                 // double target commands.
@@ -1845,7 +1845,7 @@ bool    l7vs::l7vsadm::parse_opt_snmp_refresh_func(int &pos, int argc, char *arg
 //! @param[in] argument value
 bool    l7vs::l7vsadm::parse_opt_snmp_vs_target_func(int &pos, int argc, char *argv[])
 {
-        Logger    logger(LOG_CAT_L7VSADM_COMMON, 43, "l7vsadm::parse_opt_vs_target_func", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_vs_target_func", __FILE__, __LINE__);
         if (request.snmpinfo.option_set_flag & snmp_info::SNMP_TCP_SERVICE_OPTION_FLAG) {
                 std::stringstream buf;
                 buf << "Option ";
@@ -1853,7 +1853,7 @@ bool    l7vs::l7vsadm::parse_opt_snmp_vs_target_func(int &pos, int argc, char *a
                 buf << " is conflict.";
 
                 l7vsadm_err.setter(true, buf.str());
-                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 131, buf.str(), __FILE__, __LINE__);
+                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 81, buf.str(), __FILE__, __LINE__);
                 return false;
         }
 
@@ -1861,7 +1861,7 @@ bool    l7vs::l7vsadm::parse_opt_snmp_vs_target_func(int &pos, int argc, char *a
                 //don't target recvaddress:port
                 std::string    buf("target endpoint is not specified.");
                 l7vsadm_err.setter(true, buf);
-                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 132, buf, __FILE__, __LINE__);
+                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 75, buf, __FILE__, __LINE__);
                 return false;
         }
 
@@ -1875,10 +1875,10 @@ bool    l7vs::l7vsadm::parse_opt_snmp_vs_target_func(int &pos, int argc, char *a
                 std::stringstream buf;
                 buf << "target endpoint parse error:" << err.get_message() << src_str;
                 l7vsadm_err.setter(true, buf.str());
-                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 133, buf.str(), __FILE__, __LINE__);
+                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, 76, buf.str(), __FILE__, __LINE__);
                 return false;
         }
-
+q
         request.snmpinfo.vs_endpoint = tmp_endpoint;
         request.snmpinfo.option_set_flag |= snmp_info::SNMP_TCP_SERVICE_OPTION_FLAG;
 
@@ -1891,7 +1891,7 @@ bool    l7vs::l7vsadm::parse_opt_snmp_vs_target_func(int &pos, int argc, char *a
 //! @param[in]    argument value
 bool    l7vs::l7vsadm::parse_opt_snmp_vs_module_func(int &pos, int argc, char *argv[])
 {
-        Logger    logger(LOG_CAT_L7VSADM_COMMON, 44, "l7vsadm::parse_opt_snmp_vs_module_func", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_snmp_vs_module_func", __FILE__, __LINE__);
 
         if (request.snmpinfo.option_set_flag & snmp_info::SNMP_PROTOCOL_MODULE_OPTION_FLAG) {
                 std::stringstream buf;
@@ -1950,7 +1950,7 @@ bool    l7vs::l7vsadm::parse_opt_snmp_vs_module_func(int &pos, int argc, char *a
 bool    l7vs::l7vsadm::parse_opt_snmp_flag_func(int &pos, int argc, char *argv[])
 {
         int tmp = 0;
-        Logger    logger(LOG_CAT_L7VSADM_COMMON, 45, "l7vsadm::parse_opt_snmp_flag_func", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_snmp_flag_func", __FILE__, __LINE__);
         if (request.snmpinfo.option_set_flag & snmp_info::SNMP_ENABLE_OPTION_FLAG) {
                 std::stringstream buf;
                 buf << "Option ";
@@ -1997,7 +1997,7 @@ bool    l7vs::l7vsadm::parse_opt_snmp_flag_func(int &pos, int argc, char *argv[]
 bool    l7vs::l7vsadm::parse_opt_snmp_interval_func(int &pos, int argc, char *argv[])
 {
         int tmp = 0;
-        Logger    logger(LOG_CAT_L7VSADM_COMMON, 46, "l7vs::l7vsadm::parse_opt_snmp_interval_func", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vs::l7vsadm::parse_opt_snmp_interval_func", __FILE__, __LINE__);
 
         if (request.snmpinfo.option_set_flag & snmp_info::SNMP_INTERVAL_OPTION_FLAG) {
                 std::stringstream buf;
@@ -2046,7 +2046,7 @@ bool    l7vs::l7vsadm::parse_opt_snmp_interval_func(int &pos, int argc, char *ar
 bool    l7vs::l7vsadm::parse_opt_snmp_log_trap_func(int &pos, int argc, char *argv[])
 {
         int tmp = 0;
-        Logger    logger(LOG_CAT_L7VSADM_COMMON, 47, "l7vs::l7vsadm::parse_opt_snmp_log_trap_func", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vs::l7vsadm::parse_opt_snmp_log_trap_func", __FILE__, __LINE__);
 
         if (request.snmpinfo.option_set_flag & snmp_info::SNMP_LOGTRAP_OPTION_FLAG) {
                 std::stringstream buf;
@@ -2095,7 +2095,7 @@ bool    l7vs::l7vsadm::parse_opt_snmp_log_trap_func(int &pos, int argc, char *ar
 //! @param[in]    argument value
 bool    l7vs::l7vsadm::parse_opt_snmp_log_trap_level_func(int &pos, int argc, char *argv[])
 {
-        Logger    logger(LOG_CAT_L7VSADM_COMMON, 48, "l7vs::l7vsadm::parse_opt_snmp_log_trap_level_func", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vs::l7vsadm::parse_opt_snmp_log_trap_level_func", __FILE__, __LINE__);
 
         if (request.snmpinfo.option_set_flag & snmp_info::SNMP_LOGTRAP_LEVEL_OPTION_FLAG) {
                 std::stringstream buf;
@@ -2138,7 +2138,7 @@ bool    l7vs::l7vsadm::parse_opt_snmp_log_trap_level_func(int &pos, int argc, ch
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_parameter_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 28, "l7vsadm::parse_parameter_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_parameter_func", __FILE__, __LINE__);
 
         if (argc != 4) {
                 //argument num err
@@ -2187,7 +2187,7 @@ bool l7vs::l7vsadm::parse_parameter_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_opt_parameter_reload_func(int &pos, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 29, "l7vsadm::parse_opt_parameter_reload_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_opt_parameter_reload_func", __FILE__, __LINE__);
 
         if (++pos >= argc) {
                 // reload component is not specified
@@ -2214,7 +2214,7 @@ bool l7vs::l7vsadm::parse_opt_parameter_reload_func(int &pos, int argc, char *ar
 //! @param[in] argument value
 bool l7vs::l7vsadm::parse_help_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd, int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 30, "l7vsadm::parse_help_func", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::parse_help_func", __FILE__, __LINE__);
 
         request.command = cmd;
 
@@ -2282,7 +2282,7 @@ bool l7vs::l7vsadm::parse_help_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd,
 //! usage function.
 std::string l7vs::l7vsadm::usage()
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 31, "l7vsadm::usage", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::usage", __FILE__, __LINE__);
 
         std::stringstream stream;
         stream <<
@@ -2318,7 +2318,7 @@ std::string l7vs::l7vsadm::usage()
 //! disp_list function
 void l7vs::l7vsadm::disp_list()
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 32, "l7vsadm::disp_list", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::disp_list", __FILE__, __LINE__);
 
         std::stringstream buf;
         buf << boost::format("Layer-7 Virtual Server version %s\n") % VERSION;
@@ -2357,7 +2357,7 @@ void l7vs::l7vsadm::disp_list()
 //! disp_list_key function
 void l7vs::l7vsadm::disp_list_key()
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 33, "l7vsadm::disp_list_key", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::disp_list_key", __FILE__, __LINE__);
 
         std::stringstream buf;
         buf << boost::format("Layer-7 Virtual Server version %s\n") % VERSION;
@@ -2410,7 +2410,7 @@ void l7vs::l7vsadm::disp_list_key()
 //! disp_list_verbose function
 void l7vs::l7vsadm::disp_list_verbose()
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 34, "l7vsadm::disp_list_verbose", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::disp_list_verbose", __FILE__, __LINE__);
 
         unsigned long long output_qos_upstream_value;
         unsigned long long output_qos_downstream_value;
@@ -2615,7 +2615,7 @@ l7vs::l7vsadm::l7vsadm()
             command_wait_interval(L7VSADM_DEFAULT_WAIT_INTERVAL),
             command_wait_count(L7VSADM_DEFAULT_WAIT_COUNT)
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 35, "l7vsadm::l7vsadm(constructor)", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::l7vsadm(constructor)", __FILE__, __LINE__);
 
         // create command dictionary.
         command_dic["-l"]               = boost::bind(&l7vsadm::parse_list_func, this, l7vsadm_request::CMD_LIST, _1, _2);
@@ -2874,7 +2874,7 @@ l7vs::l7vsadm::l7vsadm()
 //! Get l7vsadm parameter data
 void l7vs::l7vsadm::set_parameter()
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 36, "l7vsadm::set_parameter", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::set_parameter", __FILE__, __LINE__);
 
         // Get and Set l7vsadm all parameter value.
         Parameter param;
@@ -2934,13 +2934,13 @@ void l7vs::l7vsadm::set_parameter()
 //! l7vsadm command execute
 bool l7vs::l7vsadm::execute(int argc, char *argv[])
 {
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 37, "l7vsadm::execute", __FILE__, __LINE__);
+        Logger logger(LOG_CAT_L7VSADM_COMMON, 99999, "l7vsadm::execute", __FILE__, __LINE__);
 
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSADM_COMMON)) {
                 std::stringstream debugstr;
                 debugstr << boost::format("l7vsadm::execute arguments: %s") % argument_debug_dump(argc, argv);
-                Logger::putLogDebug(LOG_CAT_L7VSADM_COMMON, 38, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSADM_COMMON, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 
@@ -3074,7 +3074,7 @@ bool l7vs::l7vsadm::execute(int argc, char *argv[])
                         if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSADM_COMMON)) {
                                 std::stringstream debugstr;
                                 debugstr << boost::format("l7vsadm_send_request:%s") % request;
-                                Logger::putLogDebug(LOG_CAT_L7VSADM_COMMON, 39, debugstr.str(), __FILE__, __LINE__);
+                                Logger::putLogDebug(LOG_CAT_L7VSADM_COMMON, 99999, debugstr.str(), __FILE__, __LINE__);
                         }
                         /*------ DEBUG LOG END ------*/
 
@@ -3096,7 +3096,7 @@ bool l7vs::l7vsadm::execute(int argc, char *argv[])
                         if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSADM_COMMON)) {
                                 std::stringstream debugstr;
                                 debugstr << boost::format("l7vsadm_recv_response:%s") % response;
-                                Logger::putLogDebug(LOG_CAT_L7VSADM_COMMON, 40, debugstr.str(), __FILE__, __LINE__);
+                                Logger::putLogDebug(LOG_CAT_L7VSADM_COMMON, 99999, debugstr.str(), __FILE__, __LINE__);
                         }
                         /*------ DEBUG LOG END ------*/
 

@@ -50,7 +50,7 @@ namespace l7vs
  */
 void snmpagent_impl::process_mib_run()
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 19, "snmpagent_impl::process_mib_run", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "snmpagent_impl::process_mib_run", __FILE__, __LINE__);
 
         //create wait time
         timespec    wait_val;
@@ -82,7 +82,7 @@ void snmpagent_impl::process_mib_run()
  */
 void snmpagent_impl::trap_run()
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 20, "snmpagent_impl::trap_run", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "snmpagent_impl::trap_run", __FILE__, __LINE__);
 
         //create wait time
         timespec wait_val;
@@ -134,13 +134,13 @@ void snmpagent_impl::trap_run()
  */
 bool snmpagent_impl::check_timeout()
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 21, "snmpagent::check_timeout", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "snmpagent::check_timeout", __FILE__, __LINE__);
 
         if (interval.get() == 0) {
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SNMPAGENT)) {
                         std::string  debugstr =  "function : snmpagent_impl::check_timeout : timeout.";
-                        Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 22, debugstr, __FILE__, __LINE__);
+                        Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr, __FILE__, __LINE__);
                 }
                 /*------ DEBUG LOG END ------*/
 
@@ -157,7 +157,7 @@ bool snmpagent_impl::check_timeout()
                         /*-------- DEBUG LOG --------*/
                         if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SNMPAGENT)) {
                                 std::string  debugstr =  "function : snmpagent_impl::check_timeout : timeout.";
-                                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 23, debugstr, __FILE__, __LINE__);
+                                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr, __FILE__, __LINE__);
                         }
                         /*------ DEBUG LOG END ------*/
 
@@ -167,7 +167,7 @@ bool snmpagent_impl::check_timeout()
                         /*-------- DEBUG LOG --------*/
                         if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SNMPAGENT)) {
                                 std::string  debugstr =  "function : snmpagent_impl::check_timeout : not timeout.";
-                                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 24, debugstr, __FILE__, __LINE__);
+                                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr, __FILE__, __LINE__);
                         }
                         /*------ DEBUG LOG END ------*/
                         //not timeout
@@ -183,7 +183,7 @@ bool snmpagent_impl::check_timeout()
  */
 snmpagent_impl &snmpagent_impl::get_instance()
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 25, "snmpagent::get_instance", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "snmpagent::get_instance", __FILE__, __LINE__);
 
         static snmpagent_impl agent_impl;
         return agent_impl;
@@ -197,7 +197,7 @@ snmpagent_impl &snmpagent_impl::get_instance()
  */
 void snmpagent_impl::init(error_code &err)
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 26, "snmpagent_impl::init", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "snmpagent_impl::init", __FILE__, __LINE__);
 
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SNMPAGENT)) {
@@ -205,7 +205,7 @@ void snmpagent_impl::init(error_code &err)
                 debugstr << "snmpagent_impl::init arguments:";
                 debugstr << boost::format("err=%d") % (err ? true : false);
                 debugstr << boost::format(", err.message=%s") % err.get_message();
-                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 27, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 
@@ -257,7 +257,7 @@ void snmpagent_impl::init(error_code &err)
                         /*-------- DEBUG LOG --------*/
                         if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SNMPAGENT)) {
                                 std::string  debugstr =  "function : snmpagent_impl::init : call load_config().";
-                                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 28, debugstr, __FILE__, __LINE__);
+                                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr, __FILE__, __LINE__);
                         }
                         /*------ DEBUG LOG END ------*/
 
@@ -306,7 +306,7 @@ void snmpagent_impl::init(error_code &err)
                         /*-------- DEBUG LOG --------*/
                         if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SNMPAGENT)) {
                                 std::string  debugstr =  "function : snmpagent_impl::init : initialize success.";
-                                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 29, debugstr, __FILE__, __LINE__);
+                                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr, __FILE__, __LINE__);
                         }
                         /*------ DEBUG LOG END ------*/
                 }
@@ -326,7 +326,7 @@ void snmpagent_impl::init(error_code &err)
  */
 void snmpagent_impl::push_trapmessage(trapmessage &trapmessage, error_code &err)
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 30, "snmpagent_impl::push_trapmessage", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "snmpagent_impl::push_trapmessage", __FILE__, __LINE__);
 
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SNMPAGENT)) {
@@ -334,7 +334,7 @@ void snmpagent_impl::push_trapmessage(trapmessage &trapmessage, error_code &err)
                 debugstr << "snmpagent_impl::push_trapmessage arguments : ";
                 debugstr << boost::format("trapmessage.type=%d") % trapmessage.type;
                 debugstr << boost::format(", trapmessage.message=%s") % trapmessage.message;
-                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 31, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
         try {
@@ -370,14 +370,14 @@ void snmpagent_impl::push_trapmessage(trapmessage &trapmessage, error_code &err)
                                                 debugstr << "function : snmpagent_impl::push_trapmessage : trap message push back.";
                                                 debugstr << boost::format("trapmessage.type=%d") % trapmessage.type;
                                                 debugstr << boost::format(", trapmessage.message=%s") % trapmessage.message;
-                                                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 32, debugstr.str(), __FILE__, __LINE__);
+                                                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr.str(), __FILE__, __LINE__);
                                         }
                                         /*------ DEBUG LOG END ------*/
                                 } else {
                                         /*-------- DEBUG LOG --------*/
                                         if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SNMPAGENT)) {
                                                 std::string  debugstr =  "function : snmpagent_impl::push_trapmessage : trap message queue is overflow.";
-                                                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 33, debugstr, __FILE__, __LINE__);
+                                                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr, __FILE__, __LINE__);
                                         }
                                         /*------ DEBUG LOG END ------*/
                                 }
@@ -406,7 +406,7 @@ void snmpagent_impl::push_trapmessage(trapmessage &trapmessage, error_code &err)
  */
 void snmpagent_impl::start(error_code &err)
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 34, "snmpagent_impl::start", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "snmpagent_impl::start", __FILE__, __LINE__);
 
         if (vsd == NULL) {
                 //vsd pointer is NULL
@@ -421,7 +421,7 @@ void snmpagent_impl::start(error_code &err)
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SNMPAGENT)) {
                         std::string  debugstr =  "function : snmpagent_impl::start : snmp function was disabled.";
-                        Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 35, debugstr, __FILE__, __LINE__);
+                        Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr, __FILE__, __LINE__);
                 }
                 /*------ DEBUG LOG END ------*/
                 return;
@@ -432,7 +432,7 @@ void snmpagent_impl::start(error_code &err)
                 /*-------- DEBUG LOG --------*/
                 if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SNMPAGENT)) {
                         std::string  debugstr =  "function : snmpagent_impl::start : snmp function has already started.";
-                        Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 36, debugstr, __FILE__, __LINE__);
+                        Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr, __FILE__, __LINE__);
                 }
                 /*------ DEBUG LOG END ------*/
                 return;
@@ -488,7 +488,7 @@ void snmpagent_impl::start(error_code &err)
  */
 void snmpagent_impl::stop()
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 37, "snmpagent_impl::stop", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "snmpagent_impl::stop", __FILE__, __LINE__);
 
         enabled = FALSE;
 
@@ -524,7 +524,7 @@ void snmpagent_impl::stop()
  */
 void snmpagent_impl::enable()
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 38, "snmpagent_impl::enable", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "snmpagent_impl::enable", __FILE__, __LINE__);
 
         //set snmp function enable flag
         enabled = TRUE;
@@ -550,7 +550,7 @@ void snmpagent_impl::enable()
  */
 void snmpagent_impl::disable()
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 39, "snmpagent_impl::disable", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "snmpagent_impl::disable", __FILE__, __LINE__);
 
         //set snmp function enable flag
         enabled = FALSE;
@@ -568,7 +568,7 @@ void snmpagent_impl::disable()
  */
 void snmpagent_impl::logtrap_enable()
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 40, "snmpagent_impl::logtrap_enable", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "snmpagent_impl::logtrap_enable", __FILE__, __LINE__);
 
         logtrap_enabled = TRUE;
         Logger::logtrap_enable();
@@ -580,7 +580,7 @@ void snmpagent_impl::logtrap_enable()
  */
 void snmpagent_impl::logtrap_disable()
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 41, "snmpagent_impl::logtrap_disable", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "snmpagent_impl::logtrap_disable", __FILE__, __LINE__);
 
         logtrap_enabled = FALSE;
         Logger::logtrap_disable();
@@ -594,14 +594,14 @@ void snmpagent_impl::logtrap_disable()
  */
 void snmpagent_impl::set_logtrap_level(const LOG_LEVEL_TAG  in_level)
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 42, "snmpagent_impl::set_logtrap_level", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "snmpagent_impl::set_logtrap_level", __FILE__, __LINE__);
 
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SNMPAGENT)) {
                 std::stringstream    debugstr;
                 debugstr << "snmpagent_impl::set_logtrap_level arguments:";
                 debugstr << boost::format("in_level=%d") % in_level;
-                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 43, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 
@@ -617,14 +617,14 @@ void snmpagent_impl::set_logtrap_level(const LOG_LEVEL_TAG  in_level)
  */
 void snmpagent_impl::set_interval(const unsigned int in_interval)
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 44, "snmpagent_impl::set_interval", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "snmpagent_impl::set_interval", __FILE__, __LINE__);
 
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SNMPAGENT)) {
                 std::stringstream    debugstr;
                 debugstr << "snmpagent_impl::set_interval arguments:";
                 debugstr << boost::format("in_interval=%d") % in_interval;
-                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 45, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
         interval = in_interval;
@@ -637,7 +637,7 @@ void snmpagent_impl::set_interval(const unsigned int in_interval)
  */
 void snmpagent_impl::refresh_all_statistics()
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 46, "snmpagent_impl::refresh_all_statistics", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "snmpagent_impl::refresh_all_statistics", __FILE__, __LINE__);
 
         if (vsd == NULL) {
                 //mib collect failed
@@ -664,7 +664,7 @@ void snmpagent_impl::refresh_all_statistics()
                         if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SNMPAGENT)) {
                                 std::string  debugstr =  "function : snmpagent_impl::refresh_all_statistics :"
                                                          "stats_base::MODE_HTTP mode virtual service.";
-                                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 47, debugstr, __FILE__, __LINE__);
+                                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr, __FILE__, __LINE__);
                         }
                         /*------ DEBUG LOG END ------*/
 
@@ -685,7 +685,7 @@ void snmpagent_impl::refresh_all_statistics()
  */
 void snmpagent_impl::refresh_statistics(const boost::asio::ip::tcp::endpoint  &vs_endpoint, const std::string  &protocol)
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 48, "snmpagent_impl::refresh_statistics", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "snmpagent_impl::refresh_statistics", __FILE__, __LINE__);
 
         /*-------- DEBUG LOG --------*/
         if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SNMPAGENT)) {
@@ -697,7 +697,7 @@ void snmpagent_impl::refresh_statistics(const boost::asio::ip::tcp::endpoint  &v
                         debugstr << boost::format("vs_endpoint=%s:%d") % vs_endpoint.address().to_string() % vs_endpoint.port();
                 }
                 debugstr << boost::format(", protocol=%s") % protocol;
-                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 49, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr.str(), __FILE__, __LINE__);
         }
 
         if (vsd == NULL) {
@@ -724,7 +724,7 @@ void snmpagent_impl::refresh_statistics(const boost::asio::ip::tcp::endpoint  &v
                 if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SNMPAGENT)) {
                         std::string  debugstr =  "function : snmpagent_impl::refresh_statistics :"
                                                  "input virtual service has found.";
-                        Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 50, debugstr, __FILE__, __LINE__);
+                        Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr, __FILE__, __LINE__);
                 }
                 /*------ DEBUG LOG END ------*/
 
@@ -738,7 +738,7 @@ void snmpagent_impl::refresh_statistics(const boost::asio::ip::tcp::endpoint  &v
                         if (LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SNMPAGENT)) {
                                 std::string  debugstr =  "function : snmpagent_impl::refresh_statistics :"
                                                          "stats_base::MODE_HTTP mode virtual service.";
-                                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 51, debugstr, __FILE__, __LINE__);
+                                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr, __FILE__, __LINE__);
                         }
                         /*------ DEBUG LOG END ------*/
 
@@ -760,7 +760,7 @@ void snmpagent_impl::refresh_statistics(const boost::asio::ip::tcp::endpoint  &v
  */
 void snmpagent_impl::set_vsd_info(l7vsd *in_vsd)
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 52, "snmpagent_impl::set_vsd_info", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "snmpagent_impl::set_vsd_info", __FILE__, __LINE__);
 
         vsd = in_vsd;
 }
@@ -772,7 +772,7 @@ void snmpagent_impl::set_vsd_info(l7vsd *in_vsd)
  */
 snmp_info snmpagent_impl::get_snmp_info()
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 53, "snmpagent_impl::get_snmp_info", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "snmpagent_impl::get_snmp_info", __FILE__, __LINE__);
         snmp_info snmpinfo;
 
         //push the local variable into snmp info
@@ -792,7 +792,7 @@ snmp_info snmpagent_impl::get_snmp_info()
                 debugstr << "function : snmpagent_impl::get_snmp_info : snmpinfo : ";
                 debugstr << snmpinfo << ".";
 
-                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 54, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
         return snmpinfo;
@@ -805,7 +805,7 @@ snmp_info snmpagent_impl::get_snmp_info()
  */
 void snmpagent_impl::load_config()
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 55, "snmpagent_impl::load_config", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "snmpagent_impl::load_config", __FILE__, __LINE__);
         l7vs::Parameter        param;
         l7vs::error_code    err;
 
@@ -916,7 +916,7 @@ void snmpagent_impl::load_config()
                 debugstr << "trap_polling_interval = ["     << trap_polling_interval.get()       << "], ";
                 debugstr << "trap_queue_max_size = ["       << trap_queue_max_size.get()         << "]. ";
 
-                Logger::putLogDebug(l7vs::LOG_CAT_L7VSD_SNMPAGENT, 56, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(l7vs::LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 }
@@ -929,7 +929,7 @@ void snmpagent_impl::load_config()
  */
 void snmpagent_impl::collect_mibdata(error_code  &err)
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 57, "snmpagent_impl::collect_mibdata", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "snmpagent_impl::collect_mibdata", __FILE__, __LINE__);
 
         //check vsd pointer
         if (vsd == NULL) {
@@ -967,7 +967,7 @@ void snmpagent_impl::collect_mibdata(error_code  &err)
  */
 void snmpagent_impl::finalize()
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 58, "snmpagent_impl::finalize", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "snmpagent_impl::finalize", __FILE__, __LINE__);
 
         if (start_flag == true) {
                 stop();
@@ -987,7 +987,7 @@ void snmpagent_impl::finalize()
  */
 void snmpagent_impl::increment_getrequest_count()
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 59, "snmpagent_impl::increment_getrequest_count", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "snmpagent_impl::increment_getrequest_count", __FILE__, __LINE__);
         snmp_get_requests++;
 
         /*-------- DEBUG LOG --------*/
@@ -996,7 +996,7 @@ void snmpagent_impl::increment_getrequest_count()
                 debugstr << "function : snmpagent_impl::increment_getrequest_count : snmp_get_requests = ";
                 debugstr << snmp_get_requests.get() << ".";
 
-                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 60, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 }
@@ -1008,7 +1008,7 @@ void snmpagent_impl::increment_getrequest_count()
  */
 void snmpagent_impl::increment_setrequest_count()
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 61, "snmpagent_impl::increment_setrequest_count", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "snmpagent_impl::increment_setrequest_count", __FILE__, __LINE__);
         snmp_set_requests++;
 
         /*-------- DEBUG LOG --------*/
@@ -1017,7 +1017,7 @@ void snmpagent_impl::increment_setrequest_count()
                 debugstr << "function : snmpagent_impl::increment_getrequest_count : snmp_set_requests = ";
                 debugstr << snmp_set_requests.get() << ".";
 
-                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 62, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 }
@@ -1029,7 +1029,7 @@ void snmpagent_impl::increment_setrequest_count()
  */
 void snmpagent_impl::update_last_request_date()
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 59, "snmpagent_impl::update_last_request_date", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "snmpagent_impl::update_last_request_date", __FILE__, __LINE__);
         //update last request date
         request_last_date = time(NULL);
 
@@ -1039,7 +1039,7 @@ void snmpagent_impl::update_last_request_date()
                 debugstr << "function : snmpagent_impl::update_last_request_date : request_last_date = ";
                 debugstr << request_last_date.get() << ".";
 
-                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 60, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 }

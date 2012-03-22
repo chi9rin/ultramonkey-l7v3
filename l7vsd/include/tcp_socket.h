@@ -62,7 +62,7 @@ public:
                         if (unlikely(error_code)) {
                                 boost::format   fmt("Thread ID[%d] socket option(TCP_NODELAY) set failed");
                                 fmt % boost::this_thread::get_id();
-                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, 100, fmt.str(), __FILE__, __LINE__);
+                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, 101, fmt.str(), __FILE__, __LINE__);
                         }
                 }
                 // set TCP_CORK option
@@ -73,7 +73,7 @@ public:
                                 error_code = boost::system::error_code(errno, boost::asio::error::get_system_category());
                                 boost::format   fmt("Thread ID[%d] socket option(TCP_CORK) set failed");
                                 fmt % boost::this_thread::get_id();
-                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, 101, fmt.str(), __FILE__, __LINE__);
+                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, 102, fmt.str(), __FILE__, __LINE__);
                         }
                 }
         }
@@ -131,7 +131,7 @@ public:
                 if (error_code) {
                         boost::format   fmt("Thread ID[%d] open error : %s");
                         fmt % boost::this_thread::get_id() % error_code.message();
-                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, 100, fmt.str(), __FILE__, __LINE__);
+                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, 103, fmt.str(), __FILE__, __LINE__);
                 }
         }
 

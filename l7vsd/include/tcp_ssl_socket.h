@@ -76,7 +76,7 @@ public:
                 if (unlikely(error_code)) {
                         boost::format   fmt("Thread ID[%d] socket option(NON_BLOCKING_MODE) set fail : %s");
                         fmt % boost::this_thread::get_id() % error_code.message();
-                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, 100, fmt.str(), __FILE__, __LINE__);
+                        Logger::putLogError(LOG_CAT_L7VSD_SESSION, 104, fmt.str(), __FILE__, __LINE__);
                 }
                 // set TCP_NODELAY option
                 if (opt_info.nodelay_opt) {
@@ -85,7 +85,7 @@ public:
                         if (unlikely(error_code)) {
                                 boost::format   fmt("Thread ID[%d] socket option(TCP_NODELAY) set failed");
                                 fmt % boost::this_thread::get_id();
-                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, 100, fmt.str(), __FILE__, __LINE__);
+                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, 107, fmt.str(), __FILE__, __LINE__);
                         }
                 }
                 // set TCP_CORK
@@ -96,7 +96,7 @@ public:
                                 error_code = boost::system::error_code(errno, boost::asio::error::get_system_category());
                                 boost::format   fmt("Thread ID[%d] socket option(TCP_CORK) set failed");
                                 fmt % boost::this_thread::get_id();
-                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, 101, fmt.str(), __FILE__, __LINE__);
+                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, 108, fmt.str(), __FILE__, __LINE__);
                         }
                 }
         }
@@ -116,7 +116,7 @@ public:
                         if (error_code) {
                                 boost::format   fmt("Thread ID[%d] ssl_socket lowest_layer close fail: %s");
                                 fmt % boost::this_thread::get_id() % error_code.message();
-                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, 102, fmt.str(), __FILE__, __LINE__);
+                                Logger::putLogError(LOG_CAT_L7VSD_SESSION, 120, fmt.str(), __FILE__, __LINE__);
                         }
                 }
                 return error_code ? false : true;
@@ -213,7 +213,7 @@ public:
                 while (handshake_con > 0 || read_con > 0 || write_con > 0) {
                         boost::format   fmt("handshake_con : %d read_con = %d write_con = %d ");
                         fmt % handshake_con % read_con % write_con ;
-                        Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__);
+                        Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 99999, fmt.str(), __FILE__, __LINE__);
 
                         ssl_cond.wait(lock);
                 }

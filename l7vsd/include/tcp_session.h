@@ -599,9 +599,6 @@ protected:
         //! @param[in]        process_type is process type
         virtual void down_thread_exit(
                 const TCP_PROCESS_TYPE_TAG process_type);
-        //! down thread close all socket
-        virtual void down_thread_all_socket_close(void);
-
 
         //! down thread realserver check event
         virtual void down_thread_realserver_check(

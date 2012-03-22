@@ -49,7 +49,7 @@ const LOG_CATEGORY_TAG loggerCategorySysMem = LOG_CAT_L7VSADM_COMMON;
 schedule_module_control&
 schedule_module_control::getInstance()
 {
-        Logger logger(loggerCategory, 6, "schedule_module_control::getInstance", __FILE__, __LINE__);
+        Logger logger(loggerCategory, 99999, "schedule_module_control::getInstance", __FILE__, __LINE__);
         static    schedule_module_control    instance;
         return    instance;
 }
@@ -63,7 +63,7 @@ schedule_module_control::getInstance()
 void
 schedule_module_control::initialize(const std::string &infile_path)
 {
-        Logger logger(loggerCategory, 7, "schedule_module_control::initialize", __FILE__, __LINE__);
+        Logger logger(loggerCategory, 99999, "schedule_module_control::initialize", __FILE__, __LINE__);
         if (&infile_path != NULL) {
                 module_control_base::modulefile_path    = infile_path;
         }
@@ -78,7 +78,7 @@ schedule_module_control::initialize(const std::string &infile_path)
 void
 schedule_module_control::finalize()
 {
-        Logger logger(loggerCategory, 8, "schedule_module_control::finalize", __FILE__, __LINE__);
+        Logger logger(loggerCategory, 99999, "schedule_module_control::finalize", __FILE__, __LINE__);
 }
 
 /*!
@@ -91,7 +91,7 @@ schedule_module_control::finalize()
 schedule_module_base*
 schedule_module_control::load_module(const    std::string &modulename)
 {
-        Logger logger(loggerCategory, 9, "schedule_module_control::load_module", __FILE__, __LINE__);
+        Logger logger(loggerCategory, 99999, "schedule_module_control::load_module", __FILE__, __LINE__);
         schedule_module_base *return_value = NULL;
         boost::mutex::scoped_lock lock(loadmodule_map_mutex);
         name_module_info_map::iterator it = loadmodule_map.find(modulename);
@@ -151,7 +151,7 @@ schedule_module_control::load_module(const    std::string &modulename)
 void
 schedule_module_control::unload_module(schedule_module_base *module_ptr)
 {
-        Logger logger(loggerCategory, 10, "schedule_module_control::unload_module", __FILE__, __LINE__);
+        Logger logger(loggerCategory, 99999, "schedule_module_control::unload_module", __FILE__, __LINE__);
         if (module_ptr == NULL) {
                 std::string msg = "Arg(module_ptr) is NULL pointer.";
                 Logger::putLogError(loggerCategory, 11, msg, __FILE__, __LINE__);

@@ -41,7 +41,7 @@ namespace l7vs
  */
 void mibdata::update_vs_table(l7vsd *in_vsd, error_code  &err)
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 63, "mibdata::update_vs_table", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "mibdata::update_vs_table", __FILE__, __LINE__);
 
         if (in_vsd == NULL) {
                 std::string msg("in_vsd pointer is NULL.");
@@ -64,7 +64,7 @@ void mibdata::update_vs_table(l7vsd *in_vsd, error_code  &err)
                 std::stringstream    debugstr;
                 debugstr << "mibdata::update_vs_table arguments:";
                 debugstr << boost::format("in_vsd=%p") % in_vsd;
-                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 64, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 
@@ -161,7 +161,7 @@ void mibdata::update_vs_table(l7vsd *in_vsd, error_code  &err)
                                                 debugstr << "function : mibdata::update_vs_table : vs_table add row.";
                                                 debugstr << "vs_index=" << vs_index;
 
-                                                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 65, debugstr.str(), __FILE__, __LINE__);
+                                                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr.str(), __FILE__, __LINE__);
                                         }
                                         /*------ DEBUG LOG END ------*/
                                 }
@@ -336,7 +336,7 @@ void mibdata::update_vs_table(l7vsd *in_vsd, error_code  &err)
                 debugstr << "function : mibdata::update_vs_table : vs_table_size=";
                 debugstr << vs_table_size;
 
-                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 66, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 
@@ -353,7 +353,7 @@ void mibdata::update_vs_table(l7vsd *in_vsd, error_code  &err)
  */
 void mibdata::update_rs_table(const std::vector<rsdata>&  rs_table_tmp, error_code  &err)
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 67, "mibdata::update_rs_table", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "mibdata::update_rs_table", __FILE__, __LINE__);
 
         oid   index[1] = {0};
         int   rs_index = 1;
@@ -392,7 +392,7 @@ void mibdata::update_rs_table(const std::vector<rsdata>&  rs_table_tmp, error_co
                                         debugstr << "function : mibdata::update_rs_table : rs_table add row.";
                                         debugstr << "rs_index=" << rs_index;
 
-                                        Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 68, debugstr.str(), __FILE__, __LINE__);
+                                        Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr.str(), __FILE__, __LINE__);
                                 }
                                 /*------ DEBUG LOG END ------*/
                         }
@@ -417,7 +417,7 @@ void mibdata::update_rs_table(const std::vector<rsdata>&  rs_table_tmp, error_co
                 debugstr << "function : mibdata::update_rs_table : rs_table_size=";
                 debugstr << rs_table_size;
 
-                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 69, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 }
@@ -431,7 +431,7 @@ void mibdata::update_rs_table(const std::vector<rsdata>&  rs_table_tmp, error_co
  */
 void mibdata::update_replication_state(l7vsd *in_vsd , error_code  &err)
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 70, "mibdata::update_replication_state", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "mibdata::update_replication_state", __FILE__, __LINE__);
 
         if (in_vsd == NULL) {
                 std::string msg("in_vsd pointer is NULL.");
@@ -446,7 +446,7 @@ void mibdata::update_replication_state(l7vsd *in_vsd , error_code  &err)
                 std::stringstream    debugstr;
                 debugstr << "mibdata::update_replication_state arguments:";
                 debugstr << boost::format("in_vsd=%p") % in_vsd;
-                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 71, debugstr.str(), __FILE__, __LINE__);
+                Logger::putLogDebug(LOG_CAT_L7VSD_SNMPAGENT, 99999, debugstr.str(), __FILE__, __LINE__);
         }
         /*------ DEBUG LOG END ------*/
 
@@ -461,7 +461,7 @@ void mibdata::update_replication_state(l7vsd *in_vsd , error_code  &err)
  */
 mibdata &mibdata::get_instance()
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 72, "mibdata::get_instance", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "mibdata::get_instance", __FILE__, __LINE__);
         static mibdata data;
         return data;
 }
@@ -475,7 +475,7 @@ mibdata &mibdata::get_instance()
  */
 void mibdata::collect_mibdata(l7vsd *in_vsd, error_code  &err)
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 73, "mibdata::collect_mibdata", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "mibdata::collect_mibdata", __FILE__, __LINE__);
 
         if (in_vsd == NULL) {
                 std::string msg("in_vsd pointer is NULL.");
@@ -514,7 +514,7 @@ void mibdata::collect_mibdata(l7vsd *in_vsd, error_code  &err)
  */
 void mibdata::set_vs_table(netsnmp_table_data_set  *in_vs_table)
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 74, "mibdata::set_vs_table", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "mibdata::set_vs_table", __FILE__, __LINE__);
         vs_table = in_vs_table;
 }
 
@@ -526,7 +526,7 @@ void mibdata::set_vs_table(netsnmp_table_data_set  *in_vs_table)
  */
 void mibdata::set_rs_table(netsnmp_table_data_set  *in_rs_table)
 {
-        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 75, "mibdata::set_rs_table", __FILE__, __LINE__);
+        Logger    logger(LOG_CAT_L7VSD_SNMPAGENT, 99999, "mibdata::set_rs_table", __FILE__, __LINE__);
         rs_table = in_rs_table;
 }
 }
