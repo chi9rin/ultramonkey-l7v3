@@ -1420,8 +1420,6 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_client_recv(
                                         data_remain_size = it->unsend_size;
                                         break;
                                 }
-
-                                ++it;
                         }
                         /*-------- DEBUG LOG --------*/
                         if (unlikely(LOG_LV_DEBUG == getloglevel())) {
@@ -4255,8 +4253,6 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_realserver_r
                                 data_remain_size = it->unsend_size;
                                 break;
                         }
-
-                        ++it;
                 }
                 /*-------- DEBUG LOG --------*/
                 if (unlikely(LOG_LV_DEBUG == getloglevel())) {
@@ -5226,8 +5222,6 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                                 data_remain_size = it->unsend_size;
                                 break;
                         }
-
-                        ++it;
                 }
                 /*-------- DEBUG LOG --------*/
                 if (unlikely(LOG_LV_DEBUG == getloglevel())) {
