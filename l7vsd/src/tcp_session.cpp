@@ -897,7 +897,19 @@ void tcp_session::up_thread_run()
 
         if (ssl_flag) {
                 client_ssl_socket.wait_async_event_all_end();
-                client_ssl_socket.clear_socket();
+                upthread_status = UPTHREAD_LOCK;
+                parent_dispatcher.post(boost::bind(&tcp_session::up_thread_client_ssl_socket_clear_socket_handler,this));
+                boost::mutex::scoped_lock lock(upthread_status_mutex);
+                while (unlikely(upthread_status == UPTHREAD_LOCK)) {
+                        to_time(LOCKTIMEOUT, xt);
+                        upthread_status_cond.timed_wait(lock, xt);
+                        tcp_thread_message *msg = up_thread_message_que.pop();
+                        if (msg) {      // message is alive.
+                                up_thread_next_call_function.second(LOCAL_PROC);
+                                delete msg;
+                                msg = NULL;
+                        }
+                }       // lockmode while loop end.
         }
 
         upthread_status = UPTHREAD_SLEEP;
@@ -1193,7 +1205,7 @@ void tcp_session::up_thread_client_accept_fail_event(const TCP_PROCESS_TYPE_TAG 
 
                 boost::format   fmt("Thread ID[%d] tcp_ssl_socket::handshake[%s]");
                 fmt % boost::this_thread::get_id() % handshake_error_code.message();
-                Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 71, fmt.str(), __FILE__, __LINE__);
+                Logger::putLogError(LOG_CAT_L7VSD_SESSION, 71, fmt.str(), __FILE__, __LINE__);
 
         }
         up_thread_next_call_function = up_thread_function_array[func_tag];
@@ -4027,6 +4039,30 @@ void tcp_session::down_thread_sorryserver_async_read_some_handler(const boost::s
 #endif
         while (!down_thread_message_que.push(mes)) {}
         downthread_status_cond.notify_one();
+}
+
+void tcp_session::up_thread_client_ssl_socket_clear_socket_handler()
+{
+        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+                boost::format formatter("Thread ID[%d] FUNC IN up_thread_client_ssl_socket_clear_socket_handler");
+                formatter % boost::this_thread::get_id();
+                Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, formatter.str(), __FILE__, __LINE__);
+        }
+
+        client_ssl_socket.clear_socket();
+
+        tcp_thread_message *mes = new tcp_thread_message();
+        mes->message = up_que_function_map[UP_FUNC_PAUSE_OFF_EVENT];
+#ifdef  DEBUG
+        mes->func_tag_name = func_tag_to_string(UP_FUNC_PAUSE_OFF_EVENT);
+        {
+                boost::format   fmt("Thread ID[%d] up_queue.push : %s");
+                fmt % boost::this_thread::get_id() % func_tag_to_string(UP_FUNC_PAUSE_OFF_EVENT);
+                Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__);
+        }
+#endif
+        while (!up_thread_message_que.push(mes)) {}
+        upthread_status_cond.notify_one();
 }
 
 void tcp_session::down_thread_sorryserver_handle_async_read_some(tcp_session::TCP_PROCESS_TYPE_TAG)

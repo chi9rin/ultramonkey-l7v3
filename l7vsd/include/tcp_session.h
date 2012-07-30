@@ -542,6 +542,7 @@ protected:
         virtual void down_thread_client_handle_async_write_some(const TCP_PROCESS_TYPE_TAG);
         virtual void down_thread_sorryserver_async_read_some_handler(const boost::system::error_code &error_code, std::size_t len);
         virtual void down_thread_sorryserver_handle_async_read_some(const TCP_PROCESS_TYPE_TAG);
+	virtual void up_thread_client_ssl_socket_clear_socket_handler();
 
         //! down thread receive from realserver and raise module event of handle_realserver_recv
         //! @param[in]        process_type is process type
