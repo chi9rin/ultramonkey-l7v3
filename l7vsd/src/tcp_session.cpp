@@ -3716,8 +3716,8 @@ void tcp_session::up_thread_realserver_handle_async_write_some(const tcp_session
                                                 data_size - send_data_size
                                         ),
                                         handler);
-			else
-				func_tag = UP_FUNC_REALSERVER_DISCONNECT;
+                        else
+                                func_tag = UP_FUNC_REALSERVER_DISCONNECT;
                 } else {
                         func_tag = UP_FUNC_REALSERVER_DISCONNECT;
                         boost::format fmt("Thread ID[%d] realserver send error: %s");
@@ -3898,7 +3898,7 @@ void tcp_session::down_thread_realserver_handle_async_read_some(const tcp_sessio
                                 realserver_socket->async_read_some(boost::asio::buffer(down_thread_data_dest_side.get_data()), handler);
                         else
                                 func_tag = DOWN_FUNC_REALSERVER_DISCONNECT;
-                        realserver_socket_mutex.lock();
+                        realserver_socket_mutex.unlock();
                 } else { //recv error
                         func_tag = DOWN_FUNC_REALSERVER_DISCONNECT;
                         boost::format   fmt("Thread ID[%d] down_thread_realserver_handle_async_read_some recv error:%s");
