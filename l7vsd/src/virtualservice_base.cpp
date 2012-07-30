@@ -69,6 +69,7 @@ l7vs::virtualservice_base::virtualservice_base(const l7vs::l7vsd &invsd,
         upqos_alert_flag = false;
         downqos_alert_flag = false;
         sessionpool_alert_flag = false;
+        adm_cmd_wait_flag = false;
 
         rs_list.clear();
         protomod = NULL;

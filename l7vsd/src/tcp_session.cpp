@@ -595,7 +595,9 @@ void tcp_session::set_virtual_service_message(const TCP_VIRTUAL_SERVICE_MESSAGE_
                         fmt % boost::this_thread::get_id();
                         Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__);
                 }
-                break;
+                //break;
+                realserver_remove(endpoint_); 
+                return;
         case SORRY_STATE_ENABLE:
                 //----Debug log----------------------------------------------------------------------
                 if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
@@ -1199,22 +1201,40 @@ void tcp_session::up_thread_client_accept_fail_event(const TCP_PROCESS_TYPE_TAG 
 
 //! real server remove
 //! @param[in]        target endpoint
-void tcp_session::realserver_remove(endpoint &target_endpoint)
+void tcp_session::realserver_remove(const endpoint &target_endpoint)
 {
+
+        if (target_endpoint != realserver_endpoint && target_endpoint != connecting_endpoint) return;
+
         tcp_thread_message *up_msg = new tcp_thread_message;
-        up_thread_function_pair up_func = up_thread_function_array[UP_FUNC_REALSERVER_CHECK];
+        up_thread_function_pair up_func = up_thread_function_array[UP_FUNC_EXIT];
         up_msg->message = up_func.second;
         up_msg->endpoint_info = target_endpoint;
 #ifdef  DEBUG
-        up_msg->func_tag_name = func_tag_to_string(UP_FUNC_REALSERVER_CHECK);
+        up_msg->func_tag_name = func_tag_to_string(UP_FUNC_EXIT);
         {
                 boost::format   fmt("Thread ID[%d] up_queue.push : %s");
-                fmt % boost::this_thread::get_id() % func_tag_to_string(UP_FUNC_REALSERVER_CHECK);
+                fmt % boost::this_thread::get_id() % func_tag_to_string(UP_FUNC_EXIT);
                 Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__);
         }
 #endif
         while (!up_thread_message_que.push(up_msg)) {}
         upthread_status_cond.notify_one();
+
+        tcp_thread_message *down_msg = new tcp_thread_message;
+        down_thread_function_pair down_func = down_thread_function_array[DOWN_FUNC_EXIT];
+        down_msg->message = down_func.second;
+        down_msg->endpoint_info = target_endpoint;
+#ifdef  DEBUG
+        down_msg->func_tag_name = func_tag_to_string(DOWN_FUNC_EXIT);
+        {
+                boost::format   fmt("Thread ID[%d] down_queue.push : %s");
+                fmt % boost::this_thread::get_id() % func_tag_to_string(DOWN_FUNC_EXIT);
+                Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__);
+        }
+#endif
+        while (!down_thread_message_que.push(down_msg)) {}
+        downthread_status_cond.notify_one();
 }
 
 

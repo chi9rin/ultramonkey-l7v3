@@ -129,7 +129,7 @@ public:
         void down_thread_run();
         //! realserver remove
         //! @param[in] target endpoint
-        void realserver_remove(boost::asio::ip::tcp::endpoint &);
+        void realserver_remove(const boost::asio::ip::tcp::endpoint &);
 protected:
         typedef data_buff_base<boost::asio::ip::tcp>            tcp_data;
         typedef boost::asio::ip::tcp::endpoint endpoint;
