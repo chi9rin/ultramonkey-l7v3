@@ -1,3 +1,16 @@
+[Aug. 1 2012] 3.0.4-rc1 Hiroaki Nakano
+  - #27216 Fixed No responce when realserver is all down.
+  - #27223 Fixed SIGSEGV when SorryServer turns on.
+  - #29127 Relaxed restrictions on module name.
+  - #29128 Continued service check.
+  - #29142 Fixed crash when realserver cut off on SSL socket.
+  - #29143 Fixed SSL async handshake error.
+  - #29144 Fixed SSL clear socket error.
+  - #29147 Fixed coding error of mutex.unlock.
+  - #29150 Insert socket cancel before shutdown.
+  - Delete disuse code.
+  - Rename define.
+
 [Dec. 20 2011] 3.0.3-1 HIBARI Michiro
   - Fixed packet broken bug.
 
