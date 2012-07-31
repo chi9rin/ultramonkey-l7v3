@@ -892,9 +892,7 @@ sub validate_config {
             }
         }
         elsif ($name eq 'scheduler') {
-            my $valid_scheduler = qr{lc|rr|wrr};
-            $value = lc $value;
-            if (!defined $value || $value !~ /^(?:$valid_scheduler)$/) {
+            if ( $value =~ /[^a-z]/ ) {
                 config_error($line, 'ERR0105', $config);
             }
         }
@@ -933,35 +931,16 @@ sub validate_config {
             }
         }
         elsif ($name eq 'module') {
-            ## V3  Un-offering (url,pfileter).
-            my %key_option = ( url         => ['--pattern-match', '--uri-pattern-match', '--host-pattern-match'],
-                               sessionless => [],
-                               ip          => [],
-                               sslid       => [],
-                             );
             my $module = undef;
             my $option = undef;
-            my $key    = q{};
             if (defined $value) {
                 $value =~ s/["']//g;
                 ($module, $option) = split /\s+/, $value, 2;
             }
-            $module = lc $module;
-            if ( !defined $module || !exists $key_option{$module} ) {
+            if ( $module =~ /[^a-z]/ ) {
                 config_error($line, 'ERR0111', $config);
             }
-            for my $key_opt ( @{$key_option{$module}} ) {
-                if (defined $option && $option =~ /$key_opt\s+(\S+)/) {
-                    $key .= q{ } if $key;
-                    $key .= $key_opt . q{ } . $1;
-                }
-            }
-            if ( !$key && @{$key_option{$module}} ) {
-                # when omit cookie module key option
-                my $key_opt = join q{' or `}, @{$key_option{$module}};
-                config_error($line, 'ERR0112', $module, $key_opt, $config);
-            }
-            $value = {name => $module, option => $option, key => $key};
+            $value = {name => $module, option => $option};
         }
         elsif ($name eq 'sorryserver') {
             my $forward = 'masq';
@@ -2137,9 +2116,9 @@ sub health_check {
         my $service_status = &$health_check_func($v, $r);
         
         if ($service_status == $SERVICE_DOWN) {
+            undef $r->{num_connects};
             if (!defined $current_status || $current_status == $SERVICE_UP) {
                 $r->{fail_counts}++;
-                undef $r->{num_connects};
                 if ($r->{fail_counts} >= $v->{checkcount}) {
                     ld_log( _message( 'ERR0602', get_ip_port($r) ) );
                     service_set($v_r_list, 'down');
@@ -4291,15 +4270,14 @@ sub _message_only {
         ERR0103 => "Invalid value (set any word) `%s'.",
         ERR0104 => "Invalid value (set `custom', `connect', `negotiate', `ping', `off', `on' "
                  . "or positive number) `%s'.",
-        ERR0105 => "Invalid value (set `lc', `rr' or `wrr') `%s'.",
+        ERR0105 => "Invalid schedule module (should be only lowercase letters (a-z)) `%s'.",
         ERR0106 => "Invalid value (set `http', `https', `ftp', `smtp', `pop', `imap', "
                  . "`ldap', `nntp', `dns', `mysql', `pgsql', `sip', or `none') `%s'.",
         ERR0107 => "Invalid value (forwarding mode must be `masq' or `tproxy') `%s'.",
         ERR0108 => "Invalid port number `%s'.",
         ERR0109 => "Invalid protocol (protocol must be `tcp') `%s'.",
         ERR0110 => "Invalid HTTP method (set `GET' or `HEAD') `%s'.",
-        ERR0111 => "Invalid module (set `url', `pfilter', `ip', `sslid' or `sessionless') `%s'.",
-        # ERR0111 => "Invalid module (set `cinsert', `cpassive', `crewrite', `url', `pfilter', `ip', `sslid' or `sessionless') `%s'.",
+        ERR0111 => "Invalid protocol module (should be only lowercase letters (a-z)) `%s'.",
         ERR0112 => "Invalid module key option (`%s' module must set `%s' option) `%s'.",
         ERR0113 => "Invalid QoS value (set 0 or 1-999[KMG]. must specify unit(KMG)) `%s'.",
         ERR0114 => "Invalid address `%s'.",
