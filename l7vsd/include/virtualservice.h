@@ -268,6 +268,10 @@ protected:
         bool downqos_alert_flag;        //! downstream QoS alert flag
         bool sessionpool_alert_flag;    //! sessionpool alert flag
 
+        bool adm_cmd_wait_flag;         //! wait for l7vsadm done
+        boost::mutex adm_cmd_wait_flag_mutex;
+        boost::condition adm_cmd_wait_flag_cond;
+ 
         void         load_parameter(l7vs::error_code &);
 
         virtual void handle_replication_interrupt(

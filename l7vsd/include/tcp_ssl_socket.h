@@ -131,7 +131,7 @@ public:
 
         virtual std::size_t     read_some(const boost::asio::mutable_buffers_1 &buffers, boost::system::error_code &error_code) {
                 boost::mutex::scoped_lock       lock(ssl_mutex);
-                if (write_con > 0) {
+                if (write_con > 0 || handshake_con > 0) {
                         error_code = boost::asio::error::try_again;
                         return 0;
                 }
@@ -150,7 +150,7 @@ public:
         virtual size_t   write_some(const boost::asio::const_buffers_1 &buffer, boost::system::error_code &error_code) {
                 boost::mutex::scoped_lock       lock(ssl_mutex);
 
-                if (read_con > 0) {
+                if (read_con > 0 || handshake_con > 0) {
                         error_code = boost::asio::error::try_again;
                         return 0;
                 }

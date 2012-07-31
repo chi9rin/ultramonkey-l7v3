@@ -352,6 +352,13 @@ void l7vs::virtualservice_tcp::handle_accept(const l7vs::session_thread_control 
                 return;
         }
 
+        {
+		boost::mutex::scoped_lock       lock(adm_cmd_wait_flag_mutex);
+                if (unlikely(adm_cmd_wait_flag)){
+			adm_cmd_wait_flag_cond.wait(lock);
+		}
+        }
+
         session_thread_control *stc_ptr_noconst = const_cast<session_thread_control *>(stc_ptr);
 
         if (unlikely(err == boost::asio::error::operation_aborted)) {   // nomal exit case
@@ -1290,9 +1297,6 @@ void l7vs::virtualservice_tcp::add_realserver(const l7vs::virtualservice_element
                 }
         }
 
-        //pause active sessions
-        active_sessions.do_all(boost::bind(&session_thread_control::session_pause_on, _1));
-
         //add realserver
         for (std::vector<realserver_element>::iterator itr = in_element.realserver_vector.begin();
              itr != in_element.realserver_vector.end();
@@ -1304,9 +1308,6 @@ void l7vs::virtualservice_tcp::add_realserver(const l7vs::virtualservice_element
                 rs.fwdmode = itr->fwdmode;
                 rs_list.push_back(rs);
         }
-
-        //run active sessions
-        active_sessions.do_all(boost::bind(&session_thread_control::session_pause_off, _1));
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                 boost::format formatter("out_function: void virtualservice_tcp::add_realserver( "
@@ -1384,8 +1385,11 @@ void l7vs::virtualservice_tcp::edit_realserver(const l7vs::virtualservice_elemen
                 }
         }
 
-        //pause active sessions
-        active_sessions.do_all(boost::bind(&session_thread_control::session_pause_on, _1));
+        //lock adm_cmd_wait_flag on
+        adm_cmd_wait_flag_mutex.lock();
+        adm_cmd_wait_flag = true;
+        adm_cmd_wait_flag_cond.notify_one();
+        adm_cmd_wait_flag_mutex.unlock();
 
         //edit realserver
         for (std::vector<realserver_element>::iterator itr = in_element.realserver_vector.begin();
@@ -1406,8 +1410,11 @@ void l7vs::virtualservice_tcp::edit_realserver(const l7vs::virtualservice_elemen
                 }
         }
 
-        //run active sessions
-        active_sessions.do_all(boost::bind(&session_thread_control::session_pause_off, _1));
+        //lock adm_cmd_wait_flag off
+        adm_cmd_wait_flag_mutex.lock();
+        adm_cmd_wait_flag = false;
+        adm_cmd_wait_flag_cond.notify_one();
+        adm_cmd_wait_flag_mutex.unlock();
 
         err.setter(false, "");
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
@@ -1486,8 +1493,11 @@ void l7vs::virtualservice_tcp::del_realserver(const l7vs::virtualservice_element
                 }
         }
 
-        //pause active sessions
-        active_sessions.do_all(boost::bind(&session_thread_control::session_pause_on, _1));
+        //lock adm_cmd_wait_flag on
+        adm_cmd_wait_flag_mutex.lock();
+        adm_cmd_wait_flag = true;
+        adm_cmd_wait_flag_cond.notify_one();
+        adm_cmd_wait_flag_mutex.unlock();
 
         //del realserver
         for (std::vector<realserver_element>::iterator itr = in_element.realserver_vector.begin();
@@ -1503,8 +1513,11 @@ void l7vs::virtualservice_tcp::del_realserver(const l7vs::virtualservice_element
                 }
         }
 
-        //run active sessions
-        active_sessions.do_all(boost::bind(&session_thread_control::session_pause_off, _1));
+        //lock adm_cmd_wait_flag off
+        adm_cmd_wait_flag_mutex.lock();
+        adm_cmd_wait_flag = false;
+        adm_cmd_wait_flag_cond.notify_one();
+        adm_cmd_wait_flag_mutex.unlock();
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                 boost::format formatter("out_function: void virtualservice_tcp::del_realserver( "
