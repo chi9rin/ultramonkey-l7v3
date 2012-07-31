@@ -3692,8 +3692,8 @@ void tcp_session::up_thread_realserver_handle_async_write_some(const tcp_session
                                                 data_size - send_data_size
                                         ),
                                         handler);
-			else
-				func_tag = UP_FUNC_REALSERVER_DISCONNECT;
+                        else
+                                func_tag = UP_FUNC_REALSERVER_DISCONNECT;
                 } else {
                         func_tag = UP_FUNC_REALSERVER_DISCONNECT;
                         boost::format fmt("Thread ID[%d] realserver send error: %s");

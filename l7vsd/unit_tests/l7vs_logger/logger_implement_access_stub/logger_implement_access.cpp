@@ -49,68 +49,68 @@ bool l7vs::logger_implement_access::rtn_setAcLoggerConf_flag;
 
 
 l7vs::logger_implement_access::logger_implement_access(const std::string &access_log_file_name)
-            :rotate_default_flag( false ),
-            access_cnt(1)
+        : rotate_default_flag(false),
+          access_cnt(1)
 {
-    access_log_file_name_ = access_log_file_name;
-    aclog_args.clear();
-    
-}
-
-
-bool l7vs::logger_implement_access::init(const bool rotate_default_flag,const appender_property& access_log_default_property,accesslog_rotate_map_type& rotatedata)
-{
-    bool rtn = l7vs::logger_implement_access::rtn_init_flag;
-    
-    return (rtn);
+        access_log_file_name_ = access_log_file_name;
+        aclog_args.clear();
 
 }
 
 
-bool l7vs::logger_implement_access::setAcLoggerConf(const appender_property& access_log_default_property,accesslog_rotate_map_type& rotatedata)
+bool l7vs::logger_implement_access::init(const bool rotate_default_flag, const appender_property &access_log_default_property, accesslog_rotate_map_type &rotatedata)
 {
-    bool rtn = l7vs::logger_implement_access::rtn_setAcLoggerConf_flag;
+        bool rtn = l7vs::logger_implement_access::rtn_init_flag;
 
-    return(rtn);
+        return (rtn);
+
+}
+
+
+bool l7vs::logger_implement_access::setAcLoggerConf(const appender_property &access_log_default_property, accesslog_rotate_map_type &rotatedata)
+{
+        bool rtn = l7vs::logger_implement_access::rtn_setAcLoggerConf_flag;
+
+        return(rtn);
 
 }
 
 
 void l7vs::logger_implement_access::addRef()
 {
-    access_cnt++;
+        access_cnt++;
 }
 
 
 void l7vs::logger_implement_access::releaseRef()
 {
-    access_cnt--;
+        access_cnt--;
 }
 
 
-bool l7vs::logger_implement_access::operator<=(const int access_num )
+bool l7vs::logger_implement_access::operator<=(const int access_num)
 {
-    return( access_cnt <= access_num );
+        return(access_cnt <= access_num);
 }
 
 std::string l7vs::logger_implement_access::getAcLogFileName()
 {
-    return( access_log_file_name_ ); 
+        return(access_log_file_name_);
 }
 
 
 bool l7vs::logger_implement_access::checkRotateParameterComp(accesslog_rotate_map_type &rotatedata)
 {
-    bool rtn = l7vs::logger_implement_access::rtn_checkRotateParameterComp_flag;
-    
-    return(rtn);
+        bool rtn = l7vs::logger_implement_access::rtn_checkRotateParameterComp_flag;
+
+        return(rtn);
 }
 
 bool l7vs::logger_implement_access::is_rotate_default_flag()
 {
-    bool rtn = rotate_default_flag;
+        bool rtn = rotate_default_flag;
 
-    return(rtn);
+        return(rtn);
 }
 
 // ログフォーマット 2008/12/07 20:08:31 [INFO] [[AccessLog] (CL)192.168.2.1 --> 192.168.2.2 --UM-- 192.168.1.101:37259 --> (RS-DST)192.168.1.106:80 ]
@@ -125,30 +125,30 @@ bool l7vs::logger_implement_access::is_rotate_default_flag()
  * @retrun  void
  */
 void l7vs::logger_implement_access::putLog(
-                            const std::string& vsinfo,
-                            const std::string& cl_con_org,
-                            const std::string& rs_con_org,
-                            const std::string& rs_con_dest,
-                            const std::string& msg){
+        const std::string &vsinfo,
+        const std::string &cl_con_org,
+        const std::string &rs_con_org,
+        const std::string &rs_con_dest,
+        const std::string &msg)
+{
 
-    std::stringstream    buf;
-    buf << boost::format( "[ [AccessLog] (CL)%s --> %s --UM-- %s --> (RS-DST)%s %s]" )
-        % LOGGER_ACCESS_PROCESS_ID
-        % vsinfo
-        % cl_con_org
-        % rs_con_org
-        % rs_con_dest
-        % msg;
+        std::stringstream    buf;
+        buf << boost::format("[ [AccessLog] (CL)%s --> %s --UM-- %s --> (RS-DST)%s %s]")
+            % LOGGER_ACCESS_PROCESS_ID
+            % vsinfo
+            % cl_con_org
+            % rs_con_org
+            % rs_con_dest
+            % msg;
 
-    try {
-        log4cxx::Logger::getLogger( access_log_file_name_ )->forcedLog(    log4cxx::Level::getInfo(),
-                                                                    buf.str(),
-                                                                    log4cxx::spi::LocationInfo("", "", 0));
-    }
-    catch (const std::exception& ex) {
-        std::ostringstream oss;
-        oss << "Logging Error (Access Log) : " << ex.what();
-        std::cout << oss.str() << "¥n";
-    }
+        try {
+                log4cxx::Logger::getLogger(access_log_file_name_)->forcedLog(log4cxx::Level::getInfo(),
+                                buf.str(),
+                                log4cxx::spi::LocationInfo("", "", 0));
+        } catch (const std::exception &ex) {
+                std::ostringstream oss;
+                oss << "Logging Error (Access Log) : " << ex.what();
+                std::cout << oss.str() << "¥n";
+        }
 
 }

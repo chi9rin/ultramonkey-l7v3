@@ -26,10 +26,11 @@
 
 #include "ssl_protocol_module_base_test.cpp"
 
-test_suite*    init_unit_test_suite( int argc, char* argv[] ){
+test_suite    *init_unit_test_suite(int argc, char *argv[])
+{
 
-    ssl_protocol_module_base_test_main();
+        ssl_protocol_module_base_test_main();
 
-    return 0;
+        return 0;
 }
 

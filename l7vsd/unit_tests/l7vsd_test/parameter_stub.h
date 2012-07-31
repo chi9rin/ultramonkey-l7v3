@@ -32,128 +32,130 @@
 #include <boost/noncopyable.hpp>
 #include <boost/thread.hpp>
 
-namespace l7vs{
+namespace l7vs
+{
 
 
-class ParameterImpl : private boost::noncopyable {
+class ParameterImpl : private boost::noncopyable
+{
 protected:
-    typedef    std::map< std::string, int >               int_map_type;
-    typedef    std::multimap< std::string, std::string >  multistring_map_type;
+        typedef    std::map< std::string, int >               int_map_type;
+        typedef    std::multimap< std::string, std::string >  multistring_map_type;
 
-    //! parameter data of multi string
-    multistring_map_type                    multistringMap;
-    //! parameter data of int
-    int_map_type                            intMap;
-    //! create mutex
-    boost::mutex                            create_mutex;
-    //! read / write mutex
-    boost::mutex                            param_mutex;
-    //! componenttag to section name map
-    std::map< PARAMETER_COMPONENT_TAG, std::string >
-                                            tag_section_table_map;
-    //! constractor
-    ParameterImpl(){}
-    //! destractor
-    ~ParameterImpl(){}
+        //! parameter data of multi string
+        multistring_map_type                    multistringMap;
+        //! parameter data of int
+        int_map_type                            intMap;
+        //! create mutex
+        boost::mutex                            create_mutex;
+        //! read / write mutex
+        boost::mutex                            param_mutex;
+        //! componenttag to section name map
+        std::map< PARAMETER_COMPONENT_TAG, std::string >
+        tag_section_table_map;
+        //! constractor
+        ParameterImpl() {}
+        //! destractor
+        ~ParameterImpl() {}
 public:
-    //! instansgetter
-    //! @return instance
-    static ParameterImpl & get_instance(){
-        static ParameterImpl instance;
-        return instance;
-    }
-
-    //! initialize
-    //! @return true success
-    //! @return false failer
-    bool init();
-
-    //! initialize(file designation)
-    //! @param[in]    component tag
-    //! @param[in]    file name
-    //! @return true success
-    //! @return false failer
-    bool init( const PARAMETER_COMPONENT_TAG, const std::string& );
-
-    //! target component read
-    //! @param[in]    component tag
-    //! @param[in]    file name
-    //! @return false failer
-    //! @return true success
-    bool    read_file( const PARAMETER_COMPONENT_TAG, const std::string& );
-
-    //! int value getter
-    //! @param[in]    component tag
-    //! @param[in]    keystring
-    //! @param[out]   errorcode
-    //! @param[in]    file name
-    //! @return int value
-    int get_int( const PARAMETER_COMPONENT_TAG,
-                 const std::string&,
-                 error_code&,
-                 const std::string& );
-
-    //! string value getter
-    //! @param[in]    component tag
-    //! @param[in]    keystring
-    //! @param[out]   errorcode
-    //! @param[in]    file name
-    //! @return string value
-    std::string get_string( const PARAMETER_COMPONENT_TAG,
-                            const std::string&,
-                            error_code&,
-                            const std::string& );
-
-    //! multistring value getter
-    //! @param[in]    component tag
-    //! @param[in]    keystring
-    //! @param[inout] string vector
-    //! @param[out]   errorcode
-    //! @param[in]    file name
-    //! @return       void
-    void get_multistring( const PARAMETER_COMPONENT_TAG,
-                          const std::string&,
-                          std::vector<std::string>&,
-                          error_code&,
-                          const std::string& );
-
-
-
-    void set_int( const l7vs::PARAMETER_COMPONENT_TAG comp,
-                                  const std::string& key,
-                                  int set_value,
-                                  l7vs::error_code& err,
-                                  const std::string& file_name ){
-        // find section
-        std::map<PARAMETER_COMPONENT_TAG, std::string>::iterator
-            section_table_iterator = tag_section_table_map.find( comp );
-        int_map_type::iterator intmap_iterator =
-            intMap.find( file_name + "#" + section_table_iterator->second + "." + key );
-        if( intmap_iterator != intMap.end() ) {
-            intmap_iterator->second = set_value;
-        } else {
-            std::string str_key = file_name + "#" + section_table_iterator->second + "." + key;
-            std::pair< std::string, int > add_para;
-            add_para.first = str_key;
-            add_para.second = set_value;
-            intMap.insert(add_para);
-
+        //! instansgetter
+        //! @return instance
+        static ParameterImpl &get_instance() {
+                static ParameterImpl instance;
+                return instance;
         }
-    };
 
-    void rm_int_parameter( const l7vs::PARAMETER_COMPONENT_TAG comp,
-                                  const std::string& key,
-                                  l7vs::error_code& err,
-                                  const std::string& file_name ){
-        // find section
-        std::map<PARAMETER_COMPONENT_TAG, std::string>::iterator
-            section_table_iterator = tag_section_table_map.find( comp );
-        int_map_type::iterator intmap_iterator =
-            intMap.find( file_name +"#" + section_table_iterator->second + "." + key );
-        if( intmap_iterator != intMap.end() ) {
-            intMap.erase( file_name +"#" + section_table_iterator->second + "." + key);
-        }
-    };
+        //! initialize
+        //! @return true success
+        //! @return false failer
+        bool init();
+
+        //! initialize(file designation)
+        //! @param[in]    component tag
+        //! @param[in]    file name
+        //! @return true success
+        //! @return false failer
+        bool init(const PARAMETER_COMPONENT_TAG, const std::string &);
+
+        //! target component read
+        //! @param[in]    component tag
+        //! @param[in]    file name
+        //! @return false failer
+        //! @return true success
+        bool    read_file(const PARAMETER_COMPONENT_TAG, const std::string &);
+
+        //! int value getter
+        //! @param[in]    component tag
+        //! @param[in]    keystring
+        //! @param[out]   errorcode
+        //! @param[in]    file name
+        //! @return int value
+        int get_int(const PARAMETER_COMPONENT_TAG,
+                    const std::string &,
+                    error_code &,
+                    const std::string &);
+
+        //! string value getter
+        //! @param[in]    component tag
+        //! @param[in]    keystring
+        //! @param[out]   errorcode
+        //! @param[in]    file name
+        //! @return string value
+        std::string get_string(const PARAMETER_COMPONENT_TAG,
+                               const std::string &,
+                               error_code &,
+                               const std::string &);
+
+        //! multistring value getter
+        //! @param[in]    component tag
+        //! @param[in]    keystring
+        //! @param[inout] string vector
+        //! @param[out]   errorcode
+        //! @param[in]    file name
+        //! @return       void
+        void get_multistring(const PARAMETER_COMPONENT_TAG,
+                             const std::string &,
+                             std::vector<std::string>&,
+                             error_code &,
+                             const std::string &);
+
+
+
+        void set_int(const l7vs::PARAMETER_COMPONENT_TAG comp,
+                     const std::string &key,
+                     int set_value,
+                     l7vs::error_code &err,
+                     const std::string &file_name) {
+                // find section
+                std::map<PARAMETER_COMPONENT_TAG, std::string>::iterator
+                section_table_iterator = tag_section_table_map.find(comp);
+                int_map_type::iterator intmap_iterator =
+                        intMap.find(file_name + "#" + section_table_iterator->second + "." + key);
+                if (intmap_iterator != intMap.end()) {
+                        intmap_iterator->second = set_value;
+                } else {
+                        std::string str_key = file_name + "#" + section_table_iterator->second + "." + key;
+                        std::pair< std::string, int > add_para;
+                        add_para.first = str_key;
+                        add_para.second = set_value;
+                        intMap.insert(add_para);
+
+                }
+        };
+
+        void rm_int_parameter(const l7vs::PARAMETER_COMPONENT_TAG comp,
+                              const std::string &key,
+                              l7vs::error_code &err,
+                              const std::string &file_name) {
+                // find section
+                std::map<PARAMETER_COMPONENT_TAG, std::string>::iterator
+                section_table_iterator = tag_section_table_map.find(comp);
+                int_map_type::iterator intmap_iterator =
+                        intMap.find(file_name + "#" + section_table_iterator->second + "." + key);
+                if (intmap_iterator != intMap.end()) {
+                        intMap.erase(file_name + "#" + section_table_iterator->second + "." + key);
+                }
+        };
 };
 
 }
@@ -195,92 +197,94 @@ public:
 #define PARAMETER_FILE "/etc/l7vs/l7vs.cf"
 #endif //PARAMETER_FILE
 
-namespace l7vs{
+namespace l7vs
+{
 
 
 //! @class Parameter
 //! @brief configure file controller
 //! @brief set key to get value.
-class Parameter{
+class Parameter
+{
 public:
-    Parameter();                            //!< default constractor
-    ~Parameter();                           //!< default destractor
+        Parameter();                            //!< default constractor
+        ~Parameter();                           //!< default destractor
 
-    //! initialize(file designation)
-    //! @param[in]    component tag
-    //! @param[in]    file name
-    //! @return true success
-    //! @return false failer
-    bool init( const PARAMETER_COMPONENT_TAG, const std::string& );
+        //! initialize(file designation)
+        //! @param[in]    component tag
+        //! @param[in]    file name
+        //! @return true success
+        //! @return false failer
+        bool init(const PARAMETER_COMPONENT_TAG, const std::string &);
 
-    //! reload file function
-    //! @param[in]    parameter conponent tag
-    //! @param[in]    configuration filename
-    //!                   default:PARAMETER_FILE
-    //! @return true  success file read
-    //! @return false failure file read
-    bool read_file(const PARAMETER_COMPONENT_TAG,
-                   const std::string& = PARAMETER_FILE );
+        //! reload file function
+        //! @param[in]    parameter conponent tag
+        //! @param[in]    configuration filename
+        //!                   default:PARAMETER_FILE
+        //! @return true  success file read
+        //! @return false failure file read
+        bool read_file(const PARAMETER_COMPONENT_TAG,
+                       const std::string& = PARAMETER_FILE);
 
-    //! parameter int value getter
-    //! @param[in]    parametercategory
-    //! @param[in]    parameter key
-    //! @param[out]   error code
-    //! @param[in]    configuration filename
-    //!                   default:PARAMETER_FILE
-    //! @return int value
-    int get_int(const PARAMETER_COMPONENT_TAG,
-                const std::string&,
-                error_code&,
-                const std::string& = PARAMETER_FILE );
+        //! parameter int value getter
+        //! @param[in]    parametercategory
+        //! @param[in]    parameter key
+        //! @param[out]   error code
+        //! @param[in]    configuration filename
+        //!                   default:PARAMETER_FILE
+        //! @return int value
+        int get_int(const PARAMETER_COMPONENT_TAG,
+                    const std::string &,
+                    error_code &,
+                    const std::string& = PARAMETER_FILE);
 
-    //! parameter string value getter
-    //! @param[in]    parametercategory
-    //! @param[in]    parameter key
-    //! @param[out]   error code
-    //! @param[in]    configuration filename
-    //!                   default:PARAMETER_FILE
-    //! @return string value
-    std::string get_string(const PARAMETER_COMPONENT_TAG,
-                           const std::string&,
-                           error_code&,
-                           const std::string& = PARAMETER_FILE );
+        //! parameter string value getter
+        //! @param[in]    parametercategory
+        //! @param[in]    parameter key
+        //! @param[out]   error code
+        //! @param[in]    configuration filename
+        //!                   default:PARAMETER_FILE
+        //! @return string value
+        std::string get_string(const PARAMETER_COMPONENT_TAG,
+                               const std::string &,
+                               error_code &,
+                               const std::string& = PARAMETER_FILE);
 
-    //! parameter multistring value getter
-    //! @param[in]    parametercategory
-    //! @param[in]    parameter key
-    //! @param[inout] string vector
-    //! @param[out]   error code
-    //! @param[in]    configuration filename
-    //!                   default:PARAMETER_FILE
-    //! @return string value
-    void get_multistring(const PARAMETER_COMPONENT_TAG,
-                         const std::string&,
-                         std::vector<std::string>&,
-                         error_code&,
-                         const std::string& = PARAMETER_FILE );
+        //! parameter multistring value getter
+        //! @param[in]    parametercategory
+        //! @param[in]    parameter key
+        //! @param[inout] string vector
+        //! @param[out]   error code
+        //! @param[in]    configuration filename
+        //!                   default:PARAMETER_FILE
+        //! @return string value
+        void get_multistring(const PARAMETER_COMPONENT_TAG,
+                             const std::string &,
+                             std::vector<std::string>&,
+                             error_code &,
+                             const std::string& = PARAMETER_FILE);
 
 
-    void set_int( const l7vs::PARAMETER_COMPONENT_TAG comp,
-                                  const std::string& key,
-                                  int set_value,
-                                  l7vs::error_code& err,
-                                  const std::string& file_name = PARAMETER_FILE  ){
-        ParameterImpl& impl = ParameterImpl::get_instance();
-        impl.set_int( comp, key, set_value, err ,file_name);
-    };
+        void set_int(const l7vs::PARAMETER_COMPONENT_TAG comp,
+                     const std::string &key,
+                     int set_value,
+                     l7vs::error_code &err,
+                     const std::string &file_name = PARAMETER_FILE) {
+                ParameterImpl &impl = ParameterImpl::get_instance();
+                impl.set_int(comp, key, set_value, err , file_name);
+        };
 
-    void rm_int_parameter( const l7vs::PARAMETER_COMPONENT_TAG comp,
-                                  const std::string& key,
-                                  l7vs::error_code& err,
-                                  const std::string& file_name = PARAMETER_FILE  ){
-        ParameterImpl& impl = ParameterImpl::get_instance();
-        impl.rm_int_parameter( comp, key, err ,file_name);
-    };
+        void rm_int_parameter(const l7vs::PARAMETER_COMPONENT_TAG comp,
+                              const std::string &key,
+                              l7vs::error_code &err,
+                              const std::string &file_name = PARAMETER_FILE) {
+                ParameterImpl &impl = ParameterImpl::get_instance();
+                impl.rm_int_parameter(comp, key, err , file_name);
+        };
 
 
 };
 
 } //namespace l7vs
-    
+
 #endif //PARAMETER_H
