@@ -105,6 +105,7 @@ public:
         virtual bool close(boost::system::error_code   &error_code) {
                 boost::mutex::scoped_lock       lock(ssl_mutex);
                 if (my_socket->lowest_layer().is_open()) {
+                        my_socket->lowest_layer().cancel(error_code);
                         my_socket->lowest_layer().shutdown(boost::asio::ip::tcp::socket::shutdown_both, error_code);
                         if (unlikely(error_code)) {
                                 boost::format   fmt("Thread ID[%d] ssl_socket lowest_layer shutdown fail: %s");
@@ -125,6 +126,7 @@ public:
 
         virtual bool shutdown(boost::system::error_code &error_code) {
                 boost::mutex::scoped_lock        lock(ssl_mutex);
+                my_socket->lowest_layer().cancel(error_code);
                 my_socket->shutdown(error_code);
                 return error_code ? false : true;
         }

@@ -94,6 +94,7 @@ public:
 
         virtual bool shutdown(boost::system::error_code &error_code) {
                 rd_scoped_lock  lock(close_mutex);
+                my_socket->cancel(error_code);
                 my_socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both, error_code);
                 return error_code ? false : true;
         }
@@ -101,7 +102,10 @@ public:
         // close
         virtual bool close(boost::system::error_code &error_code) {
                 rd_scoped_lock  lock(close_mutex);
-                if (is_open()) my_socket->close(error_code);
+                if (is_open()){
+                        my_socket->cancel(error_code);
+                        my_socket->close(error_code);
+                }
                 return error_code ? false : true;
         }
 
