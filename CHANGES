@@ -1,3 +1,6 @@
+[Aug. 6 2012] 3.0.4-1 Takeda Kenji
+  - Change version "3.0.4-rc1" to "3.0.4-1".
+
 [Aug. 1 2012] 3.0.4-rc1 Hiroaki Nakano
   - #27216 Fixed No responce when realserver is all down.
   - #27223 Fixed SIGSEGV when SorryServer turns on.
