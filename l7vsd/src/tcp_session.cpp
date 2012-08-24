@@ -1205,7 +1205,7 @@ void tcp_session::up_thread_client_accept_fail_event(const TCP_PROCESS_TYPE_TAG 
 
                 boost::format   fmt("Thread ID[%d] tcp_ssl_socket::handshake[%s]");
                 fmt % boost::this_thread::get_id() % handshake_error_code.message();
-                Logger::putLogError(LOG_CAT_L7VSD_SESSION, 71, fmt.str(), __FILE__, __LINE__);
+                Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 71, fmt.str(), __FILE__, __LINE__);
 
         }
         up_thread_next_call_function = up_thread_function_array[func_tag];
