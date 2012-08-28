@@ -905,7 +905,7 @@ void tcp_session::up_thread_run()
                         upthread_status_cond.timed_wait(lock, xt);
                         tcp_thread_message *msg = up_thread_message_que.pop();
                         if (msg) {      // message is alive.
-                                up_thread_next_call_function.second(LOCAL_PROC);
+                                msg->message(MESSAGE_PROC);
                                 delete msg;
                                 msg = NULL;
                         }
