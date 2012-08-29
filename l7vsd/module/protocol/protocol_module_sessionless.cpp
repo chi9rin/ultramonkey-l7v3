@@ -3868,7 +3868,7 @@ protocol_module_base::EVENT_TAG protocol_module_sessionless::handle_sorryserver_
                 }
                 /*------DEBUG LOG END------*/
 
-                status = CLIENT_DISCONNECT;
+                status = FINALIZE;
         } catch (int e) {
                 /*-------- DEBUG LOG --------*/
                 if (unlikely(LOG_LV_DEBUG == getloglevel())) {

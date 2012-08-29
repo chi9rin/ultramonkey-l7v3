@@ -106,13 +106,6 @@ public:
                 boost::mutex::scoped_lock       lock(ssl_mutex);
                 if (my_socket->lowest_layer().is_open()) {
                         my_socket->lowest_layer().cancel(error_code);
-                        my_socket->lowest_layer().shutdown(boost::asio::ip::tcp::socket::shutdown_both, error_code);
-                        if (unlikely(error_code)) {
-                                boost::format   fmt("Thread ID[%d] ssl_socket lowest_layer shutdown fail: %s");
-                                fmt % boost::this_thread::get_id() % error_code.message();
-                                Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__);
-                        }
-
                         my_socket->lowest_layer().close(error_code);
                         if (error_code) {
                                 boost::format   fmt("Thread ID[%d] ssl_socket lowest_layer close fail: %s");
