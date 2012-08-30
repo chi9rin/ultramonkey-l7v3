@@ -901,14 +901,15 @@ void tcp_session::up_thread_run()
                 parent_dispatcher.post(boost::bind(&tcp_session::up_thread_client_ssl_socket_clear_socket_handler,this));
                 boost::mutex::scoped_lock lock(upthread_status_mutex);
                 while (unlikely(upthread_status == UPTHREAD_LOCK)) {
-                        to_time(LOCKTIMEOUT, xt);
-                        upthread_status_cond.timed_wait(lock, xt);
                         tcp_thread_message *msg = up_thread_message_que.pop();
                         if (msg) {      // message is alive.
                                 msg->message(MESSAGE_PROC);
                                 delete msg;
                                 msg = NULL;
-                        }
+                        }else{
+                                to_time(LOCKTIMEOUT, xt);
+                                upthread_status_cond.timed_wait(lock, xt);
+			}
                 }       // lockmode while loop end.
         }
 
