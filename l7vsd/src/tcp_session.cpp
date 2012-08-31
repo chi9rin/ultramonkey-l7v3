@@ -897,11 +897,20 @@ void tcp_session::up_thread_run()
 
         if (ssl_flag) {
                 client_ssl_socket.wait_async_event_all_end();
+
+                // clear messages
+
+                tcp_thread_message *msg = up_thread_message_que.pop();
+                while (msg) {
+                        delete msg;
+                        msg = up_thread_message_que.pop();
+                }
+
                 upthread_status = UPTHREAD_LOCK;
                 parent_dispatcher.post(boost::bind(&tcp_session::up_thread_client_ssl_socket_clear_socket_handler,this));
                 boost::mutex::scoped_lock lock(upthread_status_mutex);
                 while (unlikely(upthread_status == UPTHREAD_LOCK)) {
-                        tcp_thread_message *msg = up_thread_message_que.pop();
+                        msg = up_thread_message_que.pop();
                         if (msg) {      // message is alive.
                                 msg->message(MESSAGE_PROC);
                                 delete msg;
