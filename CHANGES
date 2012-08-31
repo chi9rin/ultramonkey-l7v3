@@ -2,6 +2,7 @@
   - Fixed LogLevel at #29144 patch.
   - Fixed next_call_function to msg->message at #29144 patch.
   - Improved socket closing operation at #29144 patch.
+  - Fixed message queue is cleared before clear socket message posting.
 
 [Aug. 6 2012] 3.0.4-1 Takeda Kenji
   - Change version "3.0.4-rc1" to "3.0.4-1".
