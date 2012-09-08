@@ -59,6 +59,14 @@
 #            Add custom healthcheck.
 #            (checktype=custom, customcheck=exec_command)
 #            - 2009/02/14 NTT COMWARE
+#   3.0.0-1: Add code related to l7vsd v3.0.0. See below.
+#             - Add accesslog option.
+#             - Add tproxy option.
+#   3.0.4-1: Change module check rule. Allow module name
+#            [a-z]+.        
+#   3.1.0-1: Add code related to l7vsd v3.1.0. See below.
+#             - Add session_thread_pool_size option.
+#
 
 use 5.006;
 use strict;
@@ -77,8 +85,8 @@ use Socket;
 use Socket6;
 
 # current version
-our $VERSION     = '3.0.0-0';
-our $COPYRIGHT   = 'Copyright (C) 2010 NTT COMWARE CORPORATION';
+our $VERSION     = '3.1.0-1';
+our $COPYRIGHT   = 'Copyright (C) 2012 NTT COMWARE CORPORATION';
 
 # default global config values
 our %GLOBAL = (
