@@ -1,7 +1,7 @@
 AC_PREREQ(2.59)
 AC_INIT(l7vsd)
 PACKAGENAME=l7vsd
-VERSION=3.1.0
+VERSION=3.0.4
 
 AM_INIT_AUTOMAKE($PACKAGENAME, $VERSION, no-define )
 AC_CONFIG_SRCDIR([config.h.in])
@@ -57,7 +57,6 @@ else
 	AC_SUBST( libdir, [/usr/lib] )
 	AC_SUBST( CXXFLAGS, -march=i686 )
 fi
-AC_SUBST( includedir, [/usr/include] )
 
 AC_ARG_WITH(
 	l7vs-moddir,
@@ -65,16 +64,6 @@ AC_ARG_WITH(
 								[default=LIBDIR/l7vs] ],
 	[	l7vs_moddir="$withval" ],
 	[	l7vs_moddir="${libdir}/l7vs" ]
-)
-
-AC_ARG_WITH(
-        l7vs-includedir,
-        [       --with-l7vs-includedir=DIR      l7vs headerfile is to be installed in DIR.
-
-                                                                [default=INCLUDEDIR/l7vs]
-],
-        [       l7vs_includedir="$withval" ],
-        [       l7vs_includedir="${includedir}/l7vs" ]
 )
 
 AC_ARG_WITH(
@@ -105,7 +94,6 @@ AC_SUBST(CC,g++)
 AC_SUBST(exec_prefix, [/usr] )
 AC_SUBST(l7vsadm_sockdir)
 AC_SUBST(l7vs_moddir)
-AC_SUBST(l7vs_includedir) 
 AC_SUBST(l7vs_max_buffer_size)
 AC_SUBST(l7vs_config)
 AC_SUBST(MANDIR)

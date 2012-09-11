@@ -59,14 +59,6 @@
 #            Add custom healthcheck.
 #            (checktype=custom, customcheck=exec_command)
 #            - 2009/02/14 NTT COMWARE
-#   3.0.0-1: Add code related to l7vsd v3.0.0. See below.
-#             - Add accesslog option.
-#             - Add tproxy option.
-#   3.0.4-1: Change module check rule. Allow module name
-#            [a-z]+.        
-#   3.1.0-1: Add code related to l7vsd v3.1.0. See below.
-#             - Add session_thread_pool_size option.
-#
 
 use 5.006;
 use strict;
@@ -85,8 +77,8 @@ use Socket;
 use Socket6;
 
 # current version
-our $VERSION     = '3.1.0-1';
-our $COPYRIGHT   = 'Copyright (C) 2012 NTT COMWARE CORPORATION';
+our $VERSION     = '3.0.0-0';
+our $COPYRIGHT   = 'Copyright (C) 2010 NTT COMWARE CORPORATION';
 
 # default global config values
 our %GLOBAL = (
@@ -138,7 +130,6 @@ our %VIRTUAL = (
     accesslog_rotate_max_filesize          => undef,
     accesslog_rotate_rotation_timing       => undef,
     accesslog_rotate_rotation_timing_value => undef,
-    session_thread_pool_size               => undef,
     other_virtual_key                      => undef,
     # can override
     checkcount          => undef,
@@ -1061,11 +1052,6 @@ sub validate_config {
                 config_error($line, 'ERR0129', $config);
             }
         }
-        elsif ($name eq 'session_thread_pool_size') {
-            if (!defined $value || $value !~ /^\d+$/ || $value == 0 ) {
-                config_error($line, 'ERR0101', $config);
-            }
-        }
     }
 
     return ($name, $value);
@@ -1404,13 +1390,6 @@ sub ld_setup {
                     $option_key_flag = 1;
                 }
                 if ( $option_key_flag == 0 ) {
-                    $v->{other_virtual_key} .= ' none';
-                }
-                if ( defined $v->{session_thread_pool_size} ) {
-                    $v->{option}{flags} .= ' --session-thread-pool-size ' . $v->{session_thread_pool_size};
-                    $v->{other_virtual_key} .= ' ' . $v->{session_thread_pool_size};
-                }
-                else {
                     $v->{other_virtual_key} .= ' none';
                 }
             }
@@ -5010,11 +4989,6 @@ FORMAT: B<"HH:mm">
 =item B<accesslog_rotate_rotation_timing=hour>
 
 FORMAT: B<"mm">
-
-Defines the size each of session_thread_pool_size.
-Default is session_thread_pool_size parameter at l7vs.cf.
-
-=item B<session_thread_pool_size = >I<n>
 
 =back
 

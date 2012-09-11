@@ -798,13 +798,7 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
 
         //create session pool
         {
-                int session_pool_size;
-                if (element.session_thread_pool_size > 0) {
-                        session_pool_size = element.session_thread_pool_size;
-                } else {
-                        session_pool_size = param_data.session_pool_size;
-                }
-                for (int i = 0; i < session_pool_size; ++i) {
+                for (int i = 0; i < param_data.session_pool_size; ++i) {
                         try {
                                 tcp_session *sess = new tcp_session(*this,
                                                                     *dispatcher,

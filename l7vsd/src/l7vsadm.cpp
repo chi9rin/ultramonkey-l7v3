@@ -1185,40 +1185,6 @@ bool l7vs::l7vsadm::parse_opt_vs_socket_func(int &pos, int argc, char *argv[])
         return true;
 
 }
-//! virtualservice option session_thread_pool_size function
-//! @param[in] argument position
-//! @param[in] argument count
-//! @param[in] argument value
-bool l7vs::l7vsadm::parse_opt_vs_session_thread_pool_size_func(int &pos, int argc, char *argv[])
-{
-        Logger logger(LOG_CAT_L7VSADM_COMMON, 10, "l7vsadm::parse_opt_vs_session_thread_pool_size_func", __FILE__, __LINE__);
-        if (++pos >= argc) {
-                // session_thread_pool_size is not specified.
-                std::string buf("session_thread_pool_size is not specified.(--session-thread-pool-size)");
-                l7vsadm_err.setter(true, buf);
-                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, /* fix me */999, buf, __FILE__, __LINE__);
-                return false;
-        }
-        try {
-                virtualservice_element &elem = request.vs_element; // request virtualservice element reference get.
-                std::string tmp = argv[pos];
-                unsigned long long ullval = boost::lexical_cast<unsigned long long> (argv[pos]);
-                if (ullval < 1) {
-                        std::string buf("session-thread-pool-size is too small.(--session-thread-pool-size)");
-                        l7vsadm_err.setter(true, buf);
-                        Logger::putLogError(LOG_CAT_L7VSADM_PARSE, /* fix me */999, buf, __FILE__, __LINE__);
-                        return false;
-                }
-                elem.session_thread_pool_size = ullval; // set session_thread_pool_size
-        } catch (boost::bad_lexical_cast &ex) {
-                std::string buf("invalid session-thread-pool-size.(--session-thiread-pool-size)");
-                l7vsadm_err.setter(true, buf);
-                Logger::putLogError(LOG_CAT_L7VSADM_PARSE, /* fix me */999, buf, __FILE__, __LINE__);
-                return false;
-        }
-        return true;
-}
-
 //! realserver command parsing.
 //! @param[in] request command
 //! @param[in] argument count
@@ -2292,7 +2258,6 @@ bool l7vs::l7vsadm::parse_help_func(l7vs::l7vsadm_request::COMMAND_CODE_TAG cmd,
                   "  --access-log       -L access-log-flag     access log flag 0(none) or 1(output)\n"
                   "  --access-log-name  -a access-log-file     access log file\n"
                   "                        [logrotate-args]\n"
-                  "  --session-thread-pool-size val-size       set session_thread_pool_size\n"
                   "  --real-server      -r server-address      server-address is host:port\n"
                   "  --weight           -w weight              scheduling weight set to real server\n"
                   "  --tproxy                                  set real server connection to IP transparent mode.\n"
@@ -2326,7 +2291,6 @@ std::string l7vs::l7vsadm::usage()
                "          [-s scheduler] [-u connection-count] [-b sorry-server] [--masq|tproxy]\n"
                "          [-f sorry-flag] [-Q QoSval-up] [-q QoSval-down] [-z ssl-config-file]\n"
                "          [-O socket-option] [-L access-log-flag] [-a access-log-file [logrotate-args]]\n"
-               "          [--session-thread-pool-size val-size]\n"
                "  l7vsadm -E -t service-address -m proto-module [module-args]\n"
                "          [-s scheduler] [-u connection-count] [-b sorry-server] [--masq|tproxy]\n"
                "          [-f sorry-flag] [-Q QoSval-up] [-q QoSval-down] [-L access-log-flag]\n"
@@ -2718,7 +2682,6 @@ l7vs::l7vsadm::l7vsadm()
         vs_option_dic["--access-log"]      = boost::bind(&l7vsadm::parse_opt_vs_access_log_func, this, _1, _2, _3);
         vs_option_dic["-a"]                = boost::bind(&l7vsadm::parse_opt_vs_access_log_logrotate_func, this, _1, _2, _3);
         vs_option_dic["--access-log-name"] = boost::bind(&l7vsadm::parse_opt_vs_access_log_logrotate_func, this, _1, _2, _3);
-        vs_option_dic["--session-thread-pool-size"] = boost::bind(&l7vsadm::parse_opt_vs_session_thread_pool_size_func, this, _1, _2, _3);
 
         // create realserver option dictionary
         rs_option_dic["-t"]             = boost::bind(&l7vsadm::parse_opt_vs_target_func, this, _1, _2, _3);
