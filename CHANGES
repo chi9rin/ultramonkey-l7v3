@@ -1,6 +1,7 @@
 [Sep. 8 2012] 3.1.0-1 HIBARI Michiro
   - Add "session_thread_pool_size" option for l7vsadm and l7directord.
   - Change spec file. Make devel package.
+  - Fixed bug: Evaluated the header section with the body section in HTTP negotiate check.
 
 [Aug. 30 2012] 3.0.4-2 Hiroaki Nakano
   - Fixed LogLevel at #29144 patch.

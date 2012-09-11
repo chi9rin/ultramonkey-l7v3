@@ -2405,14 +2405,15 @@ sub check_http {
         $status_line = $res->status_line;
         $status_line =~ s/[\r\n]//g;
 
+        my $response = $v->{httpmethod} eq "HEAD" ? $res->as_string : $res->content;
         my $recstr = $r->{receive};
         if (!$res->is_success) {
             ld_log( _message( 'WRN1102', $status_line, $r->{server}{ip}, $port ) ) if (!defined $status || $status eq $SERVICE_UP);
             return $SERVICE_DOWN;
         }
-            elsif (defined $recstr && $res->as_string !~ /$recstr/) {
+            elsif (defined $recstr && $response !~ /$recstr/) {
             ld_log( _message( 'WRN1103', $recstr, $r->{server}{ip}, $port ) ) if (!defined $status || $status eq $SERVICE_UP);
-            ld_debug(3, "Headers " . $res->headers->as_string);
+            ld_debug(3, "HTTP Response " . $response);
             ld_debug(2, "check_http: $r->{url} is down\n");
             return $SERVICE_DOWN;
         }
