@@ -1,4 +1,9 @@
+[Sep. 8 2012] 3.1.0-1 HIBARI Michiro
+  - Add "session_thread_pool_size" option for l7vsadm and l7directord.
+  - Change spec file. Make devel package.
+
 [Aug. 30 2012] 3.0.4-2 Hiroaki Nakano
+  - Fixed LogLevel at #29144 patch.
   - Fixed LogLevel at #29144 patch.
   - Fixed next_call_function to msg->message at #29144 patch.
   - Improved socket closing operation at #29144 patch.
