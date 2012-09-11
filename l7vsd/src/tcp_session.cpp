@@ -58,6 +58,8 @@ tcp_session::tcp_session(
         parent_dispatcher(session_io),
         parent_service(vs),
         exit_flag(0),
+        server_connected_flag(false),
+        server_connect_time_out(DEFAULT_SERVER_CONNECT_TIMEOUT),
         upthread_status(UPTHREAD_SLEEP),
         downthread_status(DOWNTHREAD_SLEEP),
         protocol_module(NULL),
@@ -412,6 +414,7 @@ session_result_message tcp_session::initialize()
         msg.flag = false;
         msg.message = "";
         exit_flag = 0;
+        server_connected_flag = false;
         up_thread_id = boost::thread::id();
         down_thread_id = boost::thread::id();
         upthread_status = UPTHREAD_SLEEP;
@@ -444,6 +447,12 @@ session_result_message tcp_session::initialize()
         if ((likely(!vs_err)) && (int_val > 0)) {
                 downstream_buffer_size = int_val;
         }
+
+        int_val = param.get_int(PARAM_COMP_SESSION, SERVER_CONNECT_TIMEOUT, vs_err);
+        if ((likely(!vs_err)) && (int_val >= 0)) {
+                server_connect_time_out = int_val;
+        }
+
         protocol_module = parent_service.get_protocol_module();
 
         if (unlikely(protocol_module == NULL)) {
@@ -824,6 +833,19 @@ void tcp_session::up_thread_run()
                                                 }
                                         }
                                 }
+                                if (!server_connected_flag && server_connect_time_out != 0) {
+                                        boost::xtime    now_time;
+                                        boost::xtime_get(&now_time, boost::TIME_UTC);
+                                        if ((now_time.sec - client_connected_time.sec) > server_connect_time_out) {     // timeout detect.
+                                                boost::system::error_code error_code;
+                                                client_socket.close(error_code);
+                                                if (error_code) {
+                                                        boost::format   fmt("Thread ID[%d] client socket close fail when realserver select timeout : %s");
+                                                        fmt % boost::this_thread::get_id() % error_code.message();
+                                                        Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 0, fmt.str(), __FILE__, __LINE__);
+                                                }
+                                        }
+                                }
                         }
                 }       // lockmode while loop end.
 
@@ -1107,6 +1129,7 @@ void tcp_session::up_thread_client_accept(const TCP_PROCESS_TYPE_TAG process_typ
                                                   this,
                                                   boost::asio::placeholders::error));
         } else {
+                boost::xtime_get(&client_connected_time, boost::TIME_UTC);
                 upthread_status = UPTHREAD_ACTIVE;
         }
         up_thread_next_call_function = up_thread_function_array[func_tag];
@@ -1832,6 +1855,8 @@ void tcp_session::up_thread_realserver_connect_event(const TCP_PROCESS_TYPE_TAG 
                 }
         }
 
+        server_connected_flag = true;
+
         //set realserver socket send buffer size
         if (likely(upstream_buffer_size > 0)) {
                 boost::asio::socket_base::send_buffer_size      buf_size(upstream_buffer_size);
@@ -2346,6 +2371,8 @@ void tcp_session::up_thread_sorryserver_connect_event(const TCP_PROCESS_TYPE_TAG
         }
 
         boost::system::error_code       error_code;
+
+        server_connected_flag = true;
 
         // set sorryserver socket receive buffer size
         if (likely(downstream_buffer_size > 0)) {

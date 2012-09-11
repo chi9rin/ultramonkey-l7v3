@@ -40,8 +40,10 @@
 #include "virtualservice_element.h"
 
 #define TCP_SESSION_THREAD_STATE_BIT    8
+#define DEFAULT_SERVER_CONNECT_TIMEOUT  30
 #define PARAM_UP_BUFFER_SIZE            "upstream_buffer_size"
 #define PARAM_DOWN_BUFFER_SIZE          "downstream_buffer_size"
+#define SERVER_CONNECT_TIMEOUT          "server_connect_timeout"
 
 namespace l7vs
 {
@@ -257,6 +259,13 @@ protected:
         volatile int exit_flag;
         //! thread main loop exit flag update mutex
         wr_mutex exit_flag_update_mutex;
+
+        //!  client connected time
+        boost::xtime    client_connected_time;
+        //! target server connected flag
+        bool server_connected_flag;
+        //! server connect timeout
+        int server_connect_time_out;
 
         //! upthread_status_tag
         enum UPTHREAD_STATUS_TAG {
