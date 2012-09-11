@@ -1,0 +1,24 @@
+Sample source of schedule module for UltraMonkey-L7 .
+This is random scheduler.
+
+== Files ==
+./schedule
+configure.in
+Makefile.am
+schedule_module_rnd.cpp
+schedule_module_rnd.h
+
+== Set up ==
+*please install um-l7 devel package before compile.
+
+cp -r ./schedule /path/to/develop
+cd /path/to/develop/schedule
+autoreconf -ifv
+./configure
+make
+make install
+
+== How to use this module ==
+l7vsadm -A -t VIP:PORT -m PROTO_MOD -s rnd
+
+

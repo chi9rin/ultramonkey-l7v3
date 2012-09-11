@@ -1,5 +1,6 @@
 %define l7vs_moddir	%{_libdir}/l7vs
 %define l7vs_logdir	%{_localstatedir}/log/l7vs
+%define l7vs_includedir %{_includedir}/l7vs
 %define l7vsadm_sockdir	%{_localstatedir}/run/l7vs
 %define l7vs_maxvs	64
 
@@ -14,12 +15,34 @@ Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildRequires: glib2-devel
 AutoReqProv: no
+Requires: boost >= 1.41.0
+Requires: apache-log4cxx >= 0.10.0
+Requires: apr
+Requires: apr-util
+Requires: openssl
+Requires: net-snmp
+Requires: perl
+Requires: perl-libwww-perl
+Requires: perl-Crypt-SSLeay
+Requires: perl-Net-SSLeay
+Requires: perl-IO-Socket-SSL
+Requires: perl-IO-Socket-INET6
 
 %define hb2_tempdir	/usr/share/doc/%{name}-%{version}-%{release}/heartbeat-ra
 %define mibs_tempdir	/usr/share/doc/%{name}-%{version}-%{release}/mibs
+%define moduledevel_tempdir	/usr/share/doc/%{name}-%{version}-%{release}/moduledevel
 
 %description
 Layer-7 load balancing daemon
+
+%package devel
+Summary:        Header files for UltraMonkeyl7's module
+Group:          Development/Libraries
+Requires:       %{name} = %{version}-%{release}
+
+%description devel
+This is the development package that provides header files
+for UltraMonkeyl7's module.
 
 %prep
 %setup -q
@@ -41,6 +64,9 @@ mkdir -p ${RPM_BUILD_ROOT}%{l7vs_logdir}
 mkdir -p ${RPM_BUILD_ROOT}%{l7vsadm_sockdir}
 mkdir -p ${RPM_BUILD_ROOT}%{hb2_tempdir}
 mkdir -p ${RPM_BUILD_ROOT}%{mibs_tempdir}
+mkdir -p ${RPM_BUILD_ROOT}%{moduledevel_tempdir}
+mkdir -p ${RPM_BUILD_ROOT}%{moduledevel_tempdir}/sample
+mkdir -p ${RPM_BUILD_ROOT}%{l7vs_includedir}
 
 # bin
 install -c -m 755 -D l7vsd/src/l7vsd ${RPM_BUILD_ROOT}%{_sbindir}/l7vsd
@@ -80,6 +106,34 @@ install -c -m 755 -D doc/heartbeat-ra/VIPcheck ${RPM_BUILD_ROOT}%{hb2_tempdir}/V
 # mib file
 install -c -m 644 -D doc/mibs/ULTRAMONKEY-L7-MIB.txt ${RPM_BUILD_ROOT}%{mibs_tempdir}/ULTRAMONKEY-L7-MIB.txt
 
+# header for devel
+install -c -m 644 -D l7vsd/include/protocol_module_base.h ${RPM_BUILD_ROOT}%{l7vs_includedir}/protocol_module_base.h
+install -c -m 644 -D l7vsd/include/schedule_module_base.h ${RPM_BUILD_ROOT}%{l7vs_includedir}/schedule_module_base.h
+install -c -m 644 -D l7vsd/include/module_base.h ${RPM_BUILD_ROOT}%{l7vs_includedir}/module_base.h
+install -c -m 644 -D l7vsd/include/utility.h ${RPM_BUILD_ROOT}%{l7vs_includedir}/utility.h
+install -c -m 644 -D l7vsd/include/logger.h ${RPM_BUILD_ROOT}%{l7vs_includedir}/logger.h
+install -c -m 644 -D l7vsd/include/logger_enum.h ${RPM_BUILD_ROOT}%{l7vs_includedir}/logger_enum.h
+install -c -m 644 -D l7vsd/include/trapmessage.h ${RPM_BUILD_ROOT}%{l7vs_includedir}/trapmessage.h
+install -c -m 644 -D l7vsd/include/error_code.h ${RPM_BUILD_ROOT}%{l7vs_includedir}/error_code.h
+install -c -m 644 -D l7vsd/include/atomic.h ${RPM_BUILD_ROOT}%{l7vs_includedir}/atomic.h
+install -c -m 644 -D l7vsd/include/wrlock.h ${RPM_BUILD_ROOT}%{l7vs_includedir}/wrlock.h
+install -c -m 644 -D l7vsd/include/replication.h ${RPM_BUILD_ROOT}%{l7vs_includedir}/replication.h
+install -c -m 644 -D l7vsd/include/realserver.h ${RPM_BUILD_ROOT}%{l7vs_includedir}/realserver.h
+install -c -m 644 -D l7vsd/include/realserver_element.h ${RPM_BUILD_ROOT}%{l7vs_includedir}/realserver_element.h
+install -c -m 644 -D l7vsd/include/endpoint.h ${RPM_BUILD_ROOT}%{l7vs_includedir}/endpoint.h
+install -c -m 644 -D doc/moduledevel/sample/protocol/README ${RPM_BUILD_ROOT}%{moduledevel_tempdir}/sample/protocol/README
+install -c -m 644 -D doc/moduledevel/sample/protocol/Makefile.am ${RPM_BUILD_ROOT}%{moduledevel_tempdir}/sample/protocol/Makefile.am
+install -c -m 644 -D doc/moduledevel/sample/protocol/configure.in ${RPM_BUILD_ROOT}%{moduledevel_tempdir}/sample/protocol/configure.in
+install -c -m 644 -D doc/moduledevel/sample/protocol/http_protocol_module_base.cpp ${RPM_BUILD_ROOT}%{moduledevel_tempdir}/sample/protocol/http_protocol_module_base.cpp
+install -c -m 644 -D doc/moduledevel/sample/protocol/http_protocol_module_base.h ${RPM_BUILD_ROOT}%{moduledevel_tempdir}/sample/protocol/http_protocol_module_base.h
+install -c -m 644 -D doc/moduledevel/sample/protocol/protocol_module_simple.cpp ${RPM_BUILD_ROOT}%{moduledevel_tempdir}/sample/protocol/protocol_module_simple.cpp
+install -c -m 644 -D doc/moduledevel/sample/protocol/protocol_module_simple.h ${RPM_BUILD_ROOT}%{moduledevel_tempdir}/sample/protocol/protocol_module_simple.h
+install -c -m 644 -D doc/moduledevel/sample/schedule/README ${RPM_BUILD_ROOT}%{moduledevel_tempdir}/sample/schedule/README
+install -c -m 644 -D doc/moduledevel/sample/schedule/Makefile.am ${RPM_BUILD_ROOT}%{moduledevel_tempdir}/sample/schedule/Makefile.am
+install -c -m 644 -D doc/moduledevel/sample/schedule/configure.in ${RPM_BUILD_ROOT}%{moduledevel_tempdir}/sample/schedule/configure.in
+install -c -m 644 -D doc/moduledevel/sample/schedule/schedule_module_rnd.cpp ${RPM_BUILD_ROOT}%{moduledevel_tempdir}/sample/schedule/schedule_module_rnd.cpp
+install -c -m 644 -D doc/moduledevel/sample/schedule/schedule_module_rnd.h ${RPM_BUILD_ROOT}%{moduledevel_tempdir}/sample/schedule/schedule_module_rnd.h
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -112,9 +166,30 @@ fi
 %dir %{mibs_tempdir}
 %config(noreplace) %{mibs_tempdir}/*
 
+%files devel
+%defattr(-, root, root, 0755)
+%dir %{_includedir}/l7vs
+%{_includedir}/l7vs/protocol_module_base.h
+%{_includedir}/l7vs/schedule_module_base.h
+%{_includedir}/l7vs/module_base.h
+%{_includedir}/l7vs/utility.h
+%{_includedir}/l7vs/logger.h
+%{_includedir}/l7vs/logger_enum.h
+%{_includedir}/l7vs/trapmessage.h
+%{_includedir}/l7vs/error_code.h
+%{_includedir}/l7vs/atomic.h
+%{_includedir}/l7vs/wrlock.h
+%{_includedir}/l7vs/replication.h
+%{_includedir}/l7vs/realserver.h
+%{_includedir}/l7vs/realserver_element.h
+%{_includedir}/l7vs/endpoint.h
+%dir %{moduledevel_tempdir}
+%{moduledevel_tempdir}/*
+
 %changelog
 * Sat Sep 8 2012 HIBARI Michiro  <l05102@shibaura-it.ac.jp> 3.1.0-devel
 - Update for 3.1.0-devel
+- Change spec file for generate devel package.
 
 * Fri Aug 31 2012 Hiroaki Nakano  <nakano.hiroaki@nttcom.co.jp> 3.0.4-2
 - Update for 3.0.4-2

@@ -1,7 +1,7 @@
 AC_PREREQ(2.59)
 AC_INIT(l7vsd)
-PACKAGENAME=l7vsd
-VERSION=3.1.0
+PACKAGENAME=ultramonkeyl7-mod-random-1.0.0
+VERSION=1.0.0
 
 AM_INIT_AUTOMAKE($PACKAGENAME, $VERSION, no-define )
 AC_CONFIG_SRCDIR([config.h.in])
@@ -25,17 +25,9 @@ AC_CHECK_LIB(boost_thread-mt, main, :,
 	[AC_MSG_ERROR( l7vsd require boost library. )] )
 AC_CHECK_LIB(boost_system-mt, main, :,
 	[AC_MSG_ERROR( l7vsd require boost library. )] )
-AC_CHECK_LIB([netsnmp], main, :,
-	[AC_MSG_ERROR( l7vsd require netsnmp library. )] )
 
 # Checks for header files.
 AC_CHECK_HEADERS([limits.h unistd.h])
-
-# Checks for declarations.
-AC_CHECK_DECLS([IP_TRANSPARENT], [], [], [[
-	#include <sys/socket.h>
-	#include <linux/in.h>
-]])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
@@ -68,21 +60,11 @@ AC_ARG_WITH(
 )
 
 AC_ARG_WITH(
-        l7vs-includedir,
-        [       --with-l7vs-includedir=DIR      l7vs headerfile is to be installed in DIR.
-
-                                                                [default=INCLUDEDIR/l7vs]
-],
-        [       l7vs_includedir="$withval" ],
-        [       l7vs_includedir="${includedir}/l7vs" ]
-)
-
-AC_ARG_WITH(
-	l7vsadm-sockdir,
-	[	--with-l7vsadm-sockdir=DIR	l7vsadm sockfile PATH.
-									[default=/var/run/l7vs] ],
-	[	l7vsadm_sockdir="$withval" ],
-	[	l7vsadm_sockdir="/var/run/l7vs" ]
+	l7vs-includedir,
+	[	--with-l7vs-includedir=DIR	l7vs headerfile is to be installed in DIR.
+								[default=INCLUDEDIR/l7vs] ],
+	[	l7vs_includedir="$withval" ],
+	[	l7vs_includedir="${includedir}/l7vs" ]
 )
 
 AC_ARG_WITH(
@@ -93,37 +75,15 @@ AC_ARG_WITH(
 	[	l7vs_max_buffer_size=4096 ]
 )
 
-AC_ARG_WITH(
-	l7vs-config-dir,
-	[	--with-l7vs-config-dir=DIR	l7vs configfile PATH.
-									[default=/etc/l7vs/l7vs.cf] ],
-	[	l7vs_config="$withval" ],
-	[	l7vs_config="/etc/l7vs/l7vs.cf"	]
-)
 
 AC_SUBST(CC,g++)
 AC_SUBST(exec_prefix, [/usr] )
-AC_SUBST(l7vsadm_sockdir)
 AC_SUBST(l7vs_moddir)
-AC_SUBST(l7vs_includedir) 
+AC_SUBST(l7vs_includedir)
 AC_SUBST(l7vs_max_buffer_size)
-AC_SUBST(l7vs_config)
 AC_SUBST(MANDIR)
-AC_SUBST(external_agent_libs, `net-snmp-config --external-agent-libs`)
 AC_SUBST(ultramonkeyl7_version,ultramonkeyl7-$VERSION)
 
-AC_CONFIG_FILES([doc/Makefile]
-                [doc/conf/Makefile]
-                [doc/sslfiles/Makefile]
-                [doc/heartbeat-ra/Makefile]
-		[doc/mibs/Makefile]
-                [l7directord/Makefile]
-                [l7vsd/Makefile]
-                [l7vsd/init.d/Makefile]
-                [l7vsd/module/Makefile]
-                [l7vsd/module/protocol/Makefile]
-                [l7vsd/module/schedule/Makefile]
-                [l7vsd/src/Makefile]
-                [Makefile])
+AC_CONFIG_FILES([Makefile])
 
 AC_OUTPUT
