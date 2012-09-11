@@ -286,6 +286,8 @@ protected:
         bool parse_opt_vs_access_log_logrotate_func(int &, int, char*[]);
         //! virtualservice option socket option function
         bool parse_opt_vs_socket_func(int &, int, char*[]);
+        //! virtualservice option session thread pool size function
+        bool parse_opt_vs_session_thread_pool_size_func(int &, int, char*[]);
         // realserver option function
         //! realserver weight set
         bool parse_opt_rs_weight_func(int &, int, char*[]);
