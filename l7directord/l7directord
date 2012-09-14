@@ -1408,10 +1408,6 @@ sub ld_setup {
                 }
                 if ( defined $v->{session_thread_pool_size} ) {
                     $v->{option}{flags} .= ' --session-thread-pool-size ' . $v->{session_thread_pool_size};
-                    $v->{other_virtual_key} .= ' ' . $v->{session_thread_pool_size};
-                }
-                else {
-                    $v->{other_virtual_key} .= ' none';
                 }
             }
     
