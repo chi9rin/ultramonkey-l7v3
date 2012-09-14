@@ -942,6 +942,7 @@ sub validate_config {
         elsif ($name eq 'module') {
             my $module = undef;
             my $option = undef;
+            my $key = q{};
             if (defined $value) {
                 $value =~ s/["']//g;
                 ($module, $option) = split /\s+/, $value, 2;
@@ -949,7 +950,7 @@ sub validate_config {
             if ( $module =~ /[^a-z]/ ) {
                 config_error($line, 'ERR0111', $config);
             }
-            $value = {name => $module, option => $option};
+            $value = {name => $module, option => $option, key => $key};
         }
         elsif ($name eq 'sorryserver') {
             my $forward = 'masq';
