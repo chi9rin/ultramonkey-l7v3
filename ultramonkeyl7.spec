@@ -16,7 +16,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildRequires: glib2-devel
 AutoReqProv: no
 Requires: boost >= 1.41.0
-Requires: apache-log4cxx >= 0.10.0
+Requires: log4cxx >= 0.10.0
 Requires: apr
 Requires: apr-util
 Requires: openssl
