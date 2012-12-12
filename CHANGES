@@ -1,3 +1,6 @@
+[Dec. 12 2012] 3.0.4-3 Hiroaki Nakano
+  - Fixed breaking HTTP header over MAX_BUFFER_SIZE on ip module.(#30300 patch)
+
 [Aug. 30 2012] 3.0.4-2 Hiroaki Nakano
   - Fixed LogLevel at #29144 patch.
   - Fixed next_call_function to msg->message at #29144 patch.
