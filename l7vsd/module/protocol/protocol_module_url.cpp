@@ -685,14 +685,6 @@ protocol_module_base::check_message_result protocol_module_url::set_parameter(co
                 std::string > & args)
 {
 
-	/* 基本的にcheck_parameterと同じ。ただし、
-	 * ・check_parameter時から不要なコードに関してはコメントアウト
-	 * ・check_parameter時から追加したコードに関してはその旨をコメント
-	 * という形で編集しておく。2011/11/30 10:15
-	 * 
-	 * データ構造の変更に伴うコード修正を行った 2011/12/10 17:59
-	 */
-        
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel())) {
                 boost::format formatter("in_function : protocol_module_base::check_message_result "
@@ -760,7 +752,7 @@ protocol_module_base::check_message_result protocol_module_url::set_parameter(co
 	typedef boost::asio::ip::tcp tcp_type;	
 
         //set forwarded flag true
-        forwarded_for = FORWARDED_FOR_ON; // @taeda:単なる間違い記述？
+        forwarded_for = FORWARDED_FOR_ON;
 
 	try {
 	        vec_str_it it = args.begin();
@@ -1048,7 +1040,7 @@ protocol_module_base::check_message_result protocol_module_url::set_parameter(co
                 formatter % check_result.flag % check_result.message;
                 putLogDebug(100016, formatter.str(), __FILE__, __LINE__);
         }
-	
+
         return check_result;	
 
 }
@@ -2491,7 +2483,6 @@ protocol_module_base::EVENT_TAG protocol_module_url::handle_client_recv(const bo
 protocol_module_base::EVENT_TAG protocol_module_url::handle_realserver_select(
         const boost::thread::id thread_id, boost::asio::ip::tcp::endpoint &rs_endpoint)
 { 
-
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel())) {
                 boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_url::"
@@ -2636,9 +2627,42 @@ protocol_module_base::EVENT_TAG protocol_module_url::handle_realserver_select(
 					session_data->target_endpoint = rs_endpoint;
 					status = REALSERVER_CONNECT;					
 				}else{
-					// no endpoint found
+					// endpoint not found
 		                        // set sorry flag on
 		                        session_data->sorry_flag = SORRY_FLAG_ON;
+
+        				CHECK_RESULT_TAG check_result;
+                                        // check http method
+                                        check_result = check_http_method( recv_data.receive_buffer + it->send_offset, it->send_possible_size );
+                                        /*-------- DEBUG LOG --------*/
+                                        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+                                                boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_url::"
+                                                                        "handle_realserver_select() : call check_http_method : "
+                                                                        "return_value = %d. thread id : %d.");
+                                                formatter % check_result % boost::this_thread::get_id();
+                                                putLogDebug(100061, formatter.str(), __FILE__, __LINE__);
+                                        }
+                                        /*------DEBUG LOG END------*/
+
+                                        // check http method result is CHECK_OK
+                                        if (check_result == CHECK_OK) {
+                                                //check http version
+                                                check_result = check_http_version( recv_data.receive_buffer + it->send_offset, it->send_possible_size );
+                                                /*-------- DEBUG LOG --------*/
+                                                if (unlikely(LOG_LV_DEBUG == getloglevel())) {
+                                                        boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_url::"
+                                                                                "handle_realserver_select() : call check_http_version : "
+                                                                                "return_value = %d. thread id : %d.");
+                                                        formatter % check_result % boost::this_thread::get_id();
+                                                        putLogDebug(100062, formatter.str(), __FILE__, __LINE__);
+                                                }
+                                                /*------DEBUG LOG END------*/
+                                        }
+
+					if( check_result == CHECK_OK ){
+						it->edit_division = EDIT_DIVISION_EDIT;
+					}
+
 		                        /*-------- DEBUG LOG --------*/
 		                        if (unlikely(LOG_LV_DEBUG == getloglevel())) {
 		                                boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_url::"
@@ -2647,6 +2671,9 @@ protocol_module_base::EVENT_TAG protocol_module_url::handle_realserver_select(
 		                                putLogDebug(100076, formatter.str(), __FILE__, __LINE__);
 		                        }
 		                        /*------DEBUG LOG END------*/
+
+					putLogError(9999, "There is no realserver on list.", __FILE__, __LINE__);
+
 		                        status = SORRYSERVER_SELECT;
 				}
 			}else{
@@ -2688,8 +2715,8 @@ protocol_module_base::EVENT_TAG protocol_module_url::handle_realserver_select(
                         formatter % e % boost::this_thread::get_id();
                         putLogDebug(100077, formatter.str(), __FILE__, __LINE__);
                 }
-                status = FINALIZE;
                 /*------DEBUG LOG END------*/
+                status = FINALIZE;
         } catch (const std::exception &ex) {
                 std::cerr << "protocol_module_url::handle_realserver_select() : exception : error = " << ex.what() << "." << std::endl;
                 boost::format formatter("function : protocol_module_base::EVENT_TAG protocol_module_url::"
@@ -3602,7 +3629,6 @@ protocol_module_base::EVENT_TAG protocol_module_url::handle_sorryserver_select(
 protocol_module_base::EVENT_TAG protocol_module_url::handle_sorryserver_connect(
         const boost::thread::id thread_id, boost::array<char, MAX_BUFFER_SIZE>& sendbuffer, size_t &datalen)
 {
-
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel())) {
                 boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_url::"
@@ -3693,6 +3719,7 @@ protocol_module_base::EVENT_TAG protocol_module_url::handle_sorryserver_connect(
                                 edata.replace_size = 0;
                                 //search uri
                                 if (strlen(sorry_uri.data()) > 0) {
+
                                         ret = find_uri(recv_data.receive_buffer + it->send_offset, it->send_possible_size, url_offset,
                                                        url_offset_len);
                                         /*-------- DEBUG LOG --------*/
@@ -4160,7 +4187,6 @@ handle_sorryserver_connect_out:
 protocol_module_base::EVENT_TAG protocol_module_url::handle_sorryserver_connection_fail(
         const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint &sorry_endpoint)
 {
-
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel())) {
                 boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_url::"
@@ -4200,7 +4226,7 @@ protocol_module_base::EVENT_TAG protocol_module_url::handle_sorryserver_connecti
                 }
                 /*------DEBUG LOG END------*/
 
-                status = CLIENT_DISCONNECT;
+                status = FINALIZE;
         } catch (int e) {
                 /*-------- DEBUG LOG --------*/
                 if (unlikely(LOG_LV_DEBUG == getloglevel())) {
@@ -4428,7 +4454,6 @@ protocol_module_base::EVENT_TAG protocol_module_url::handle_realserver_recv(
         const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint &rs_endpoint, const boost::array < char,
         MAX_BUFFER_SIZE > & recvbuffer, const size_t recvlen)
 {
-	
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel())) {
                 size_t buffer_size = recvbuffer.size() < recvlen ? recvbuffer.size() : recvlen;
@@ -5410,7 +5435,6 @@ protocol_module_base::EVENT_TAG protocol_module_url::handle_sorryserver_recv(
         const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint &sorry_endpoint, const boost::array <
         char, MAX_BUFFER_SIZE > & recvbuffer, const size_t recvlen)
 {
-
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel())) {
                 size_t buffer_size = recvbuffer.size() < recvlen ? recvbuffer.size() : recvlen;
@@ -6576,7 +6600,6 @@ protocol_module_base::EVENT_TAG protocol_module_url::handle_client_select(
 protocol_module_base::EVENT_TAG protocol_module_url::handle_client_send(
         const boost::thread::id thread_id)
 {
-
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel())) {
                 boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_url::"
@@ -6744,7 +6767,6 @@ protocol_module_base::EVENT_TAG protocol_module_url::handle_client_disconnect(
 protocol_module_base::EVENT_TAG protocol_module_url::handle_sorry_enable(
         const boost::thread::id thread_id)
 {
-
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel())) {
                 boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_url::"
@@ -6997,7 +7019,6 @@ protocol_module_base::EVENT_TAG protocol_module_url::handle_sorry_enable(
 protocol_module_base::EVENT_TAG protocol_module_url::handle_sorry_disable(
         const boost::thread::id thread_id)
 {
-
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel())) {
                 boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_url::"
@@ -7252,7 +7273,6 @@ protocol_module_base::EVENT_TAG protocol_module_url::handle_sorry_disable(
 protocol_module_base::EVENT_TAG protocol_module_url::handle_realserver_disconnect(
         const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint &rs_endpoint)
 {
-
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel())) {
                 boost::format formatter("in_function : protocol_module_base::EVENT_TAG protocol_module_url::"
@@ -7430,7 +7450,6 @@ protocol_module_base::EVENT_TAG protocol_module_url::handle_realserver_disconnec
 protocol_module_base::EVENT_TAG protocol_module_url::handle_sorryserver_disconnect(
         const boost::thread::id thread_id, const boost::asio::ip::tcp::endpoint &sorry_endpoint)
 {
-
         /*-------- DEBUG LOG --------*/
         if (unlikely(LOG_LV_DEBUG == getloglevel())) {
                 boost::format

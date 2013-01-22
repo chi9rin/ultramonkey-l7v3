@@ -32,7 +32,7 @@
 #include <boost/algorithm/string.hpp>
 #include <sstream>
 #include <boost/xpressive/xpressive.hpp>
-#include "../../l7vsd/include/error_code.h"
+#include "error_code.h"
 
 #ifndef PROTOCOL_MODULE_URL_H
 #define PROTOCOL_MODULE_URL_H
