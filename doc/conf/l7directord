@@ -1,0 +1,3 @@
+/var/log/l7directord.log {
+        missingok
+}
