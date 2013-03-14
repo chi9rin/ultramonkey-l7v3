@@ -451,6 +451,8 @@ protected:
         session_map_type            active_sessions;
         l7vs::atomic<unsigned long long>
         active_count;
+        session_thread_control      *waiting_stc;
+        //! session_thread_control waiting accept
 
         bool                        defer_accept_opt;
         //! is set option TCP_DEFER_ACCEPT

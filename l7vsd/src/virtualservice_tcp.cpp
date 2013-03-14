@@ -432,6 +432,7 @@ void l7vs::virtualservice_tcp::handle_accept(const l7vs::session_thread_control 
         stc_ptr_noconst->session_access_log_output_mode_change(access_log_flag);
 
         active_sessions.insert(tmp_session, stc_ptr_noconst);
+        waiting_stc = NULL;
 
         //check sorry flag and status
         if (unlikely(
@@ -502,6 +503,7 @@ void l7vs::virtualservice_tcp::handle_accept(const l7vs::session_thread_control 
         boost::mutex::scoped_lock down_wait_lk(stc_ptr_register_accept->get_downthread_mutex());
 
         waiting_session = stc_ptr_register_accept->get_session().get();
+        waiting_stc = stc_ptr_register_accept;
 
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                 boost::format fmt1("active session thread id = %d");
@@ -914,7 +916,7 @@ void l7vs::virtualservice_tcp::finalize(l7vs::error_code &err)
                 delete stc;
                 stc = NULL;
                 if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
-                        boost::format fmt("join pool session: pool_sessions.size = %d");
+                        boost::format fmt("join pool session: pool_session.size = %d");
                         fmt % pool_sessions.size();
                         Logger::putLogDebug(LOG_CAT_L7VSD_VIRTUALSERVICE, 55, fmt.str(),
                                             __FILE__, __LINE__);
@@ -923,6 +925,9 @@ void l7vs::virtualservice_tcp::finalize(l7vs::error_code &err)
         //waiting session delete
         delete waiting_session;
         waiting_session = NULL;
+
+        //waiting thread delete
+        waiting_stc->join();
 
         //unload ProtocolModule
         if (protomod) {
@@ -1591,6 +1596,7 @@ void l7vs::virtualservice_tcp::run()
         } while (!stc_ptr);
 
         waiting_session  = stc_ptr->get_session().get();
+        waiting_stc = stc_ptr;
 
         if (!ssl_virtualservice_mode_flag) {
                 acceptor_->async_accept(waiting_session->get_client_socket().get_socket(),
