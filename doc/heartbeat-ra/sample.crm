@@ -1,0 +1,167 @@
+### Cluster Option ###
+property no-quorum-policy="ignore" \
+	stonith-enabled="false" \
+	startup-fencing="false" \
+	stonith-timeout="750s" \
+	crmd-transition-delay=2s
+
+### Resource Defaults ###
+rsc_defaults resource-stickiness="INFINITY" \
+	migration-threshold="1"
+
+### Clone Configuration ###
+clone clnL7vsd \
+	prmL7vsd
+
+clone clnPingd \
+	prmPingd
+
+clone clnDiskd \
+	prmDiskd
+
+### Group Configuration ###
+group grpUltraMonkey \
+	prmVIPcheck \
+	prmVIP \
+	prmL7directord
+#group grpStonith1 \
+#	prmStonith1-1 \
+#	prmStonith1-2 \
+#	prmStonith1-3
+
+#group grpStonith2 \
+#	prmStonith2-1 \
+#	prmStonith2-2 \
+#	prmStonith2-3
+
+### Primitive Configuration ###
+primitive prmVIPcheck ocf:heartbeat:VIPcheck \
+	params \
+		target_ip="" \
+		count="1" \
+		wait="10" \
+	op start interval="0s" timeout="90s" on-fail="restart" start_delay="4sÅg
+
+primitive prmVIP1 ocf:heartbeat:IPaddr2 \
+	params \
+		ip="" \
+		nic="" \
+		cidr_netmask="" \
+	op start interval="0s" timeout="60s" on-fail="restart" \
+	op monitor interval="10s" timeout="60s" on-fail="restart" \
+	op stop interval="0s" timeout="60s" on-fail="fence"
+
+primitive prmL7directord ocf:heartbeat:L7directord \
+	op start interval="0s" timeout="60s" on-fail="restart" \
+	op monitor interval="10s" timeout="60s" on-fail="restart" \
+	op stop interval="0s" timeout="60s" on-fail="fence"
+
+primitive prmL7vsd ocf:heartbeat:L7vsd \
+	op start interval="0s" timeout="60s" on-fail="restart" \
+	op monitor interval="10s" timeout="60s" on-fail="restart" \
+	op stop interval="0s" timeout="60s" on-fail="fence"
+
+primitive prmPingd ocf:pacemaker:pingd \
+	params \
+		name="default_ping_set" \
+		host_list="" \
+		multiplier="100" \
+	op start interval="0s" timeout="60s" on-fail="restart" \
+	op monitor interval="10s" timeout="60s" on-fail="restart" \
+	op stop interval="0s" timeout="60s" on-fail="ignore"
+
+primitive prmDiskd ocf:pacemaker:diskd \
+	params \
+		name="diskcheck_status_internal" \
+		device="" \
+		interval="10" \
+	op start interval="0s" timeout="60s" on-fail="restart" \
+	op monitor interval="10s" timeout="60s" on-fail="restart" \
+	op stop interval="0s" timeout="60s" on-fail="ignore"
+
+#primitive prmStonith1-1 stonith:external/stonith-helper \
+#	params \
+#		priority="1" \
+#		stonith-timeout="40s" \
+#		hostlist="" \
+#		dead_check_target="" \
+#		standby_check_command="/usr/sbin/crm_resource -r prmVIP -W | grep -q `hostname`" \
+#	op start interval="0s" timeout="60s" \
+#	op monitor interval="10s" timeout="60s" \
+#	op stop interval="0s" timeout="60s"
+
+#primitive prmStonith1-2 stonith:external/ipmi \
+#	params \
+#	       passwd="" \
+#	       ipaddr="" \
+#	       priority="2" \
+#	       userid="" \
+#	       hostname="" \
+#	       interface="" \
+#	       stonith-timeout="60s" \
+#	op start interval="0s" timeout="60s" \
+#	op monitor interval="3600s" timeout="60s" \
+#	op stop interval="0s" timeout="60s"
+
+#primitive prmStonith1-3 stonith:meatware \
+#	params \
+#		priority="3" \
+#		stonith-timeout="600s" \
+#		hostlist="" \
+#	op start interval="0s" timeout="60s" \
+#	op monitor interval="3600s" timeout="60s" \
+#	op stop interval="0s" timeout="60s"
+
+#primitive prmStonith2-1 stonith:external/stonith-helper \
+#	params \
+#		priority="1" \
+#		stonith-timeout="40s" \
+#		hostlist="" \
+#		dead_check_target="" \
+#		standby_check_command="/usr/sbin/crm_resource -r prmVIP -W | grep -q `hostname`" \
+#	op start interval="0s" timeout="60s" \
+#	op monitor interval="10s" timeout="60s" \
+#	op stop interval="0s" timeout="60s"
+
+#primitive prmStonith2-2 stonith:external/ipmi \
+#	params \
+#	       passwd="" \
+#	       ipaddr="" \
+#	       priority="2" \
+#	       userid="" \
+#	       hostname="" \
+#	       interface="" \
+#	       stonith-timeout="60s" \
+#	op start interval="0s" timeout="60s" \
+#	op monitor interval="3600s" timeout="60s" \
+#	op stop interval="0s" timeout="60s"
+
+#primitive prmStonith2-3 stonith:meatware \
+#	params \
+#		priority="3" \
+#		stonith-timeout="600s" \
+#		hostlist="" \
+#	op start interval="0s" timeout="60s" \
+#	op monitor interval="3600s" timeout="60s" \
+#	op stop interval="0s" timeout="60s"
+
+### Resource Location ###
+location rsc_location-grpUltraMonkey-1 grpUltraMonkey \
+	rule 200: #uname eq  \
+	rule 100: #uname eq  \
+	rule -INFINITY: not_defined default_ping_set or default_ping_set lt 100 \
+	rule -INFINITY: not_defined diskcheck_status_internal or diskcheck_status_internal eq ERROR
+#location rsc_location-grpStonith1-2 grpStonith1 \
+#	rule -INFINITY: #uname eq 
+#location rsc_location-grpStonith2-3 grpStonith2 \
+#	rule -INFINITY: #uname eq 
+
+### Resource Colocation ###
+colocation rsc_colocation-grpUltraMonkey-clnPingd-1 INFINITY: grpUltraMonkey clnPingd
+colocation rsc_colocation-grpUltraMonkey-clnDiskd-2 INFINITY: grpUltraMonkey clnDiskd
+colocation rsc_colocation-grpUltraMonkey-clnL7vsd-3 INFINITY: grpUltraMonkey clnL7vsd
+
+### Resource Order ###
+order rsc_order-clnPingd-grpUltraMonkey-1 0: clnPingd grpUltraMonkey symmetrical=false
+order rsc_order-clnDiskd-grpUltraMonkey-2 0: clnDiskd grpUltraMonkey symmetrical=false
+order rsc_order-clnL7vsd-grpUltraMonkey-3 0: clnL7vsd grpUltraMonkey symmetrical=true
