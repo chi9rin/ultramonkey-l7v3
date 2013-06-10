@@ -30,6 +30,7 @@
 #include <boost/format.hpp>
 #include <sys/socket.h>
 #include <linux/version.h>
+#include <pthread.h>
 
 #include "virtualservice.h"
 #include "logger_enum.h"
@@ -550,6 +551,8 @@ void l7vs::virtualservice_tcp::handle_accept(const l7vs::session_thread_control 
  */
 void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
 {
+        int ret = 0;
+
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                 boost::format formatter("in_function: void virtualservice_tcp::initialize( "
                                         "l7vs::error_code& err )");
@@ -826,7 +829,16 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
                                 session_thread_control *p_stc = new session_thread_control(
                                         sess, vsnic_cpumask, rsnic_cpumask, -1);
 
-                                p_stc->start_thread();
+                                ret = p_stc->start_thread();
+                                if (ret == ESRCH) {
+                                        continue;
+                                } else if (ret == EPERM) {
+                                        //Error
+                                        Logger::putLogError(LOG_CAT_L7VSD_VIRTUALSERVICE, 999, "Not super user authority",
+                                                            __FILE__, __LINE__);
+                                        err.setter(true, "set pthread schedule parameter.");
+                                        throw;
+                                }
                                 while (!pool_sessions.push(p_stc)) {}
                         } catch (...) {
                                 Logger::putLogFatal(

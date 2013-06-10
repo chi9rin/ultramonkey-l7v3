@@ -120,7 +120,7 @@ public:
         }
 
         //! create up down thread
-        void start_thread();
+        int start_thread();
 
         //! session shared ptr getter
         //! @return session shared ptr

@@ -356,7 +356,6 @@ protocol_module_base::check_message_result protocol_module_sessionless::check_pa
         //set check result true
         check_message_result check_result;
         check_result.flag = true;
-        bool forward_checked = false;
         bool sorryuri_checked = false;
         bool stats_checked = false;
 
@@ -405,13 +404,8 @@ protocol_module_base::check_message_result protocol_module_sessionless::check_pa
                 vec_str_it it_end = args.end();
                 //loop option strings
                 for (; it != it_end; ++it) {
-                        //option string = "-F"
-                        if (*it == "-F" || *it == "--forwarded-for") {
-                                //set forward flag  ON
-                                forward_checked = true;
-                        }
                         //option string = "-S"
-                        else if (*it == "-S" || *it == "--sorry-uri") {
+                        if (*it == "-S" || *it == "--sorry-uri") {
                                 //set sorryURI flag OFF
                                 if (!sorryuri_checked) {
                                         //next item exist

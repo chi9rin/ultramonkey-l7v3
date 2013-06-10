@@ -343,9 +343,8 @@ bool l7vs::LoggerImpl::init()
         }
 
         // get hostname
-        int        ret = 0;
         char    buff[HOST_NAME_MAX];
-        ret = gethostname(buff, HOST_NAME_MAX);
+        gethostname(buff, HOST_NAME_MAX);
         hostname = buff;
 
         initialized = true;

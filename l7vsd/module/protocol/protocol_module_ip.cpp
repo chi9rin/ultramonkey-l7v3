@@ -324,7 +324,6 @@ protocol_module_base::check_message_result protocol_module_ip::check_parameter(c
         bool timeout_flag = false;
         bool reschedule_flag = false;
         bool no_reschedule_flag = false;
-        bool forward_checked = false;
         bool sorryuri_checked = false;
         bool stats_checked = false;
 
@@ -446,11 +445,6 @@ protocol_module_base::check_message_result protocol_module_ip::check_parameter(c
                                         putLogError(600004, check_result.message, __FILE__, __LINE__);
                                         break;
                                 }
-                        }
-                        //option string = "-F"
-                        else if (*it == "-F" || *it == "--forwarded-for") {
-                                //set forward flag  ON
-                                forward_checked = true;
                         }
                         //option string = "-S"
                         else if (*it == "-S" || *it == "--sorry-uri") {
@@ -5657,11 +5651,6 @@ bool protocol_module_ip::put_data_into_sendbuffer(
                         buffer_element.first += sendbuffer_rest_size;
                         buffer_element.second -= sendbuffer_rest_size;
                         sendbuffer_rest_size = 0;
-
-                        //add remain item
-                        data_ptr->buffer_sequence.push_back(buffer_element);
-                        //delete the item
-                        data_ptr->buffer_sequence.pop_front();
                         break;
                 }
         }
