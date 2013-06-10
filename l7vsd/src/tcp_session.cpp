@@ -813,7 +813,12 @@ void tcp_session::up_thread_run()
                                 }       //message alive end.
                                 if (ssl_flag && up_thread_next_call_function.first == UP_FUNC_CLIENT_ACCEPT_EVENT) {     //handshake timeout check
                                         boost::xtime    now_time;
+#if BOOST_VERSION >= 105000
+                                        boost::xtime_get(&now_time, boost::TIME_UTC_);
+#else
                                         boost::xtime_get(&now_time, boost::TIME_UTC);
+#endif
+
                                         if ((now_time.sec - start_handshake_time.sec) > ssl_handshake_time_out) {        // timeout detect.
                                                 boost::system::error_code error_code;
                                                 client_ssl_socket.close(error_code);
@@ -1101,7 +1106,12 @@ void tcp_session::up_thread_client_accept(const TCP_PROCESS_TYPE_TAG process_typ
         if (ssl_flag) {
                 upthread_status = UPTHREAD_LOCK;
                 // try ssl handshake
+#if BOOST_VERSION >= 105000
+                boost::xtime_get(&start_handshake_time, boost::TIME_UTC_);
+#else
                 boost::xtime_get(&start_handshake_time, boost::TIME_UTC);
+#endif
+
                 client_ssl_socket.setoption(error_code);
                 client_ssl_socket.async_handshake(boost::bind(&tcp_session::up_thread_client_handshake_handle,
                                                   this,
@@ -4140,7 +4150,12 @@ void tcp_session::down_thread_sorryserver_handle_async_read_some(tcp_session::TC
 //! milliseconds to boost::xtime converter
 void tcp_session::to_time(int in, boost::xtime &xt)
 {
+#if BOOST_VERSION >= 105000
+        boost::xtime_get(&xt, boost::TIME_UTC_);
+#else
         boost::xtime_get(&xt, boost::TIME_UTC);
+#endif
+
         xt.sec += (in / 1000);
         xt.nsec += (in % 1000) * 1000000;
         if (xt.nsec >= 1000000000) {

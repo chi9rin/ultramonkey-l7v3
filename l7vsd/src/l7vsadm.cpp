@@ -3002,7 +3002,12 @@ bool l7vs::l7vsadm::execute(int argc, char *argv[])
 
                         // Lock retrying.
                         boost::xtime xt;
+#if BOOST_VERSION >= 105000
+                        xtime_get(&xt, boost::TIME_UTC_);
+#else
                         xtime_get(&xt, boost::TIME_UTC);
+#endif
+
                         xt.sec += command_wait_interval;
                         boost::thread::sleep(xt);
                 }
