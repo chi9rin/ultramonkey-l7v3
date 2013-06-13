@@ -1,4 +1,4 @@
-%define l7vs_moddir	%{_libdir}/l7vs
+Name:		%define l7vs_moddir	%{_libdir}/l7vs
 %define l7vs_logdir	%{_localstatedir}/log/l7vs
 %define l7vs_includedir %{_includedir}/l7vs
 %define l7vsadm_sockdir	%{_localstatedir}/run/l7vs
@@ -217,3 +217,45 @@ fi
 
 * Thu Aug  6 2009 TATEISHI Katsuyuki <kt@wheel.jp> 2.1.2-2atfix
 - rpmlint free
+
+Version:	
+Release:	1%{?dist}
+Summary:	
+
+Group:		
+License:	
+URL:		
+Source0:	
+BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
+BuildRequires:	
+Requires:	
+
+%description
+
+
+%prep
+%setup -q
+
+
+%build
+%configure
+make %{?_smp_mflags}
+
+
+%install
+rm -rf $RPM_BUILD_ROOT
+make install DESTDIR=$RPM_BUILD_ROOT
+
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+
+%files
+%defattr(-,root,root,-)
+%doc
+
+
+
+%changelog
