@@ -93,8 +93,8 @@ protected:
                         hash = cl_endpoint.address().to_v4().to_ulong() * GOLDEN_RATIO_PRIME;
                 } else {
                         boost::asio::ip::address_v6::bytes_type v6_bytes = cl_endpoint.address().to_v6().to_bytes();
-                        boost::asio::ip::address_v4::bytes_type v4_bytes = {{v6_bytes[12], v6_bytes[13], v6_bytes[14], v6_bytes[15]}};
-                        boost::asio::ip::address_v4::address_v4 v4_address = boost::asio::ip::address_v4::address_v4(v4_bytes);
+                        const boost::asio::ip::address_v4::bytes_type v4_bytes = {{v6_bytes[12], v6_bytes[13], v6_bytes[14], v6_bytes[15]}};
+                        boost::asio::ip::address_v4 v4_address(v4_bytes);
                         hash = v4_address.to_ulong() * GOLDEN_RATIO_PRIME;
 
                 }

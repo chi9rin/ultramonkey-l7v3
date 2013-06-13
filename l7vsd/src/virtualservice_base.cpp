@@ -481,7 +481,7 @@ cpu_set_t    l7vs::virtualservice_base::get_cpu_mask(std::string    nic_name)
         map< size_t, string >    cpu_nic_map;
         string                    buff;
         ifstream                ifs("/proc/interrupts");
-        unsigned int            target_interrupt;
+        //unsigned int            target_interrupt;
         size_t                    target_cpuid = 0;
         cpu_set_t                mask;
         sched_getaffinity(0, sizeof(cpu_set_t), &mask);
@@ -503,7 +503,8 @@ cpu_set_t    l7vs::virtualservice_base::get_cpu_mask(std::string    nic_name)
                 algorithm::split(split_vec, buff, algorithm::is_any_of(":"));
                 if (!split_vec.size()) return mask;     // cannot split interrupt
                 algorithm::trim(split_vec[0]);
-                target_interrupt = lexical_cast<unsigned int>(split_vec[0]);
+                //target_interrupt = lexical_cast<unsigned int>(split_vec[0]);
+                lexical_cast<unsigned int>(split_vec[0]);
                 for (size_t i = 0; i < cpu_nic_map.size(); ++i) {
                         size_t    start_position = 4 + (i * 11);
                         size_t    end_position = 11;
