@@ -106,7 +106,12 @@ void    session_thread_control::upstream_run()
                 if (state == WAIT) {    // after create or session end. this thread is pooling mode
                         boost::mutex::scoped_lock    lock(upthread_condition_mutex);
                         boost::xtime    wait;
+#if BOOST_VERSION >= 105000
+                        boost::xtime_get(&wait, boost::TIME_UTC_);
+#else
                         boost::xtime_get(&wait, boost::TIME_UTC);
+#endif
+
                         wait.sec += 1;
                         upthread_running_mutex.unlock();
                         upthread_condition.timed_wait(lock, wait);   // thread is condition wait( start at notify_all() )
@@ -169,7 +174,12 @@ void    session_thread_control::downstream_run()
                         boost::mutex::scoped_lock    lock(downthread_condition_mutex);
 //             downthread_condition.wait( lock ); // thread is condition wait( start at notify_all() )
                         boost::xtime    wait;
+#if BOOST_VERSION >= 105000
+                        boost::xtime_get(&wait, boost::TIME_UTC_);
+#else
                         boost::xtime_get(&wait, boost::TIME_UTC);
+#endif
+
                         wait.sec += 1;
                         downthread_running_mutex.unlock();
                         downthread_condition.timed_wait(lock, wait);   // thread is condition wait( start at notify_all() )
