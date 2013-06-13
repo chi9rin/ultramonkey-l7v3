@@ -37,34 +37,34 @@ group grpUltraMonkey \
 ### Primitive Configuration ###
 primitive prmVIPcheck ocf:heartbeat:VIPcheck \
 	params \
-		target_ip="" \
+		target_ip="MODIFY_TARGET_VIP" \
 		count="1" \
 		wait="10" \
-	op start interval="0s" timeout="90s" on-fail="restart" start_delay="4sÅg
+	op start interval="0s" timeout="90s" on-fail="restart" start_delay="4s"
 
-primitive prmVIP1 ocf:heartbeat:IPaddr2 \
+primitive prmVIP ocf:heartbeat:IPaddr2 \
 	params \
-		ip="" \
-		nic="" \
-		cidr_netmask="" \
+		ip="MODIFY_VIP_IP" \
+		nic="MODIFY_VIP_NIC" \
+		cidr_netmask="MODIFY_VIP_NETMASK" \
 	op start interval="0s" timeout="60s" on-fail="restart" \
 	op monitor interval="10s" timeout="60s" on-fail="restart" \
-	op stop interval="0s" timeout="60s" on-fail="fence"
+	op stop interval="0s" timeout="60s" on-fail="block"
 
 primitive prmL7directord ocf:heartbeat:L7directord \
 	op start interval="0s" timeout="60s" on-fail="restart" \
 	op monitor interval="10s" timeout="60s" on-fail="restart" \
-	op stop interval="0s" timeout="60s" on-fail="fence"
+	op stop interval="0s" timeout="60s" on-fail="block"
 
 primitive prmL7vsd ocf:heartbeat:L7vsd \
 	op start interval="0s" timeout="60s" on-fail="restart" \
 	op monitor interval="10s" timeout="60s" on-fail="restart" \
-	op stop interval="0s" timeout="60s" on-fail="fence"
+	op stop interval="0s" timeout="60s" on-fail="block"
 
 primitive prmPingd ocf:pacemaker:pingd \
 	params \
 		name="default_ping_set" \
-		host_list="" \
+		host_list="MODIFY_PING_TARGET_IP" \
 		multiplier="100" \
 	op start interval="0s" timeout="60s" on-fail="restart" \
 	op monitor interval="10s" timeout="60s" on-fail="restart" \
@@ -73,7 +73,7 @@ primitive prmPingd ocf:pacemaker:pingd \
 primitive prmDiskd ocf:pacemaker:diskd \
 	params \
 		name="diskcheck_status_internal" \
-		device="" \
+		device="MODIFY_TARGET_DISK_DEV" \
 		interval="10" \
 	op start interval="0s" timeout="60s" on-fail="restart" \
 	op monitor interval="10s" timeout="60s" on-fail="restart" \
@@ -83,8 +83,8 @@ primitive prmDiskd ocf:pacemaker:diskd \
 #	params \
 #		priority="1" \
 #		stonith-timeout="40s" \
-#		hostlist="" \
-#		dead_check_target="" \
+#		hostlist="MODIFY_PRYMARY_HOST" \
+#		dead_check_target="MODIFY_TARGET_IP MODIFY_TARGET_IP ..." \
 #		standby_check_command="/usr/sbin/crm_resource -r prmVIP -W | grep -q `hostname`" \
 #	op start interval="0s" timeout="60s" \
 #	op monitor interval="10s" timeout="60s" \
@@ -92,12 +92,12 @@ primitive prmDiskd ocf:pacemaker:diskd \
 
 #primitive prmStonith1-2 stonith:external/ipmi \
 #	params \
-#	       passwd="" \
-#	       ipaddr="" \
+#	       passwd="MODIFY_IPMI_PASSWORD" \
+#	       ipaddr="MODIFY_IPMI_IP" \
 #	       priority="2" \
-#	       userid="" \
-#	       hostname="" \
-#	       interface="" \
+#	       userid="MODIFY_IPMI_USER" \
+#	       hostname="MODIFY_PRYMARY_HOST" \
+#	       interface="MODIFY_IPMI_INTERFACE" \
 #	       stonith-timeout="60s" \
 #	op start interval="0s" timeout="60s" \
 #	op monitor interval="3600s" timeout="60s" \
@@ -107,7 +107,7 @@ primitive prmDiskd ocf:pacemaker:diskd \
 #	params \
 #		priority="3" \
 #		stonith-timeout="600s" \
-#		hostlist="" \
+#		hostlist="MODIFY_PRYMARY_HOST" \
 #	op start interval="0s" timeout="60s" \
 #	op monitor interval="3600s" timeout="60s" \
 #	op stop interval="0s" timeout="60s"
@@ -116,8 +116,8 @@ primitive prmDiskd ocf:pacemaker:diskd \
 #	params \
 #		priority="1" \
 #		stonith-timeout="40s" \
-#		hostlist="" \
-#		dead_check_target="" \
+#		hostlist="MODIFY_SECONDARY_HOST" \
+#		dead_check_target="MODIFY_TARGET_IP MODIFY_TARGET_IP ..." \
 #		standby_check_command="/usr/sbin/crm_resource -r prmVIP -W | grep -q `hostname`" \
 #	op start interval="0s" timeout="60s" \
 #	op monitor interval="10s" timeout="60s" \
@@ -125,12 +125,12 @@ primitive prmDiskd ocf:pacemaker:diskd \
 
 #primitive prmStonith2-2 stonith:external/ipmi \
 #	params \
-#	       passwd="" \
-#	       ipaddr="" \
+#	       passwd="MODIFY_IPMI_PASSWORD" \
+#	       ipaddr="MODIFY_IPMI_IP" \
 #	       priority="2" \
-#	       userid="" \
-#	       hostname="" \
-#	       interface="" \
+#	       userid="MODIFY_IPMI_USER" \
+#	       hostname="MODIFY_SECONDARY_HOST" \
+#	       interface="MODIFY_IPMI_INTERFACE" \
 #	       stonith-timeout="60s" \
 #	op start interval="0s" timeout="60s" \
 #	op monitor interval="3600s" timeout="60s" \
@@ -140,21 +140,21 @@ primitive prmDiskd ocf:pacemaker:diskd \
 #	params \
 #		priority="3" \
 #		stonith-timeout="600s" \
-#		hostlist="" \
+#		hostlist="MODIFY_SECONDARY_HOST" \
 #	op start interval="0s" timeout="60s" \
 #	op monitor interval="3600s" timeout="60s" \
 #	op stop interval="0s" timeout="60s"
 
 ### Resource Location ###
 location rsc_location-grpUltraMonkey-1 grpUltraMonkey \
-	rule 200: #uname eq  \
-	rule 100: #uname eq  \
+	rule 200: #uname eq MODIFY_PRYMARY_HOST \
+	rule 100: #uname eq MODIFY_SECONDARY_HOST \
 	rule -INFINITY: not_defined default_ping_set or default_ping_set lt 100 \
 	rule -INFINITY: not_defined diskcheck_status_internal or diskcheck_status_internal eq ERROR
 #location rsc_location-grpStonith1-2 grpStonith1 \
-#	rule -INFINITY: #uname eq 
+#	rule -INFINITY: #uname eq MODIFY_PRYMARY_HOST
 #location rsc_location-grpStonith2-3 grpStonith2 \
-#	rule -INFINITY: #uname eq 
+#	rule -INFINITY: #uname eq MODIFY_SECONDARY_HOST
 
 ### Resource Colocation ###
 colocation rsc_colocation-grpUltraMonkey-clnPingd-1 INFINITY: grpUltraMonkey clnPingd
