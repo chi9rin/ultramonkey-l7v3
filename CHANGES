@@ -4,6 +4,9 @@
   - Fixed bug: Evaluated the header section with the body section in HTTP negotiate check.
   - Add "server_connect_timeout" option at l7vsd.cf.
 
+[Dec. 12 2012] 3.0.4-3 Hiroaki Nakano
+  - Fixed breaking HTTP header over MAX_BUFFER_SIZE on ip module.(#30300 patch)
+
 [Aug. 30 2012] 3.0.4-2 Hiroaki Nakano
   - Fixed LogLevel at #29144 patch.
   - Fixed LogLevel at #29144 patch.
