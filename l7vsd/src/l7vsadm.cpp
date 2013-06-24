@@ -2993,13 +2993,14 @@ bool l7vs::l7vsadm::execute(int argc, char *argv[])
         set_parameter();
 
         // Get l7vsadm execute file path from /proc/(pid)/exe (symbolic link)
+        ssize_t ret;
         char l7vsadm_file_path[256];
         memset(l7vsadm_file_path, 0, sizeof(l7vsadm_file_path));
-        readlink("/proc/self/exe", l7vsadm_file_path, sizeof(l7vsadm_file_path));
+        ret = readlink("/proc/self/exe", l7vsadm_file_path, sizeof(l7vsadm_file_path));
 
         // L7vsadm command conflict check. (Try l7vsadm execute file lock)
         file_lock lock(l7vsadm_file_path, l7vsadm_err);
-        if (l7vsadm_err) {
+        if (l7vsadm_err || ret == -1) {
                 std::cerr << "COMMON ERROR: " << l7vsadm_err.get_message() << std::endl;
                 Logger::putLogError(LOG_CAT_L7VSADM_COMMON, 2, l7vsadm_err.get_message(), __FILE__, __LINE__);
                 return false;
