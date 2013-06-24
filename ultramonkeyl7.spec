@@ -1,4 +1,4 @@
-Name:		%define l7vs_moddir	%{_libdir}/l7vs
+%define l7vs_moddir	%{_libdir}/l7vs
 %define l7vs_logdir	%{_localstatedir}/log/l7vs
 %define l7vs_includedir %{_includedir}/l7vs
 %define l7vsadm_sockdir	%{_localstatedir}/run/l7vs
