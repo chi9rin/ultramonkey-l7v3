@@ -1,8 +1,16 @@
-[Sep. 8 2012] 3.1.0-1 HIBARI Michiro
+[Sep. 8 2012] 3.1.0-1 HIBARI Michiro, Hiroaki Nakano
   - Add "session_thread_pool_size" option for l7vsadm and l7directord.
   - Change spec file. Make devel package.
   - Fixed bug: Evaluated the header section with the body section in HTTP negotiate check.
   - Add "server_connect_timeout" option at l7vsd.cf.
+  - #30844 Fixed man isn't installed.
+  - #30845 Fixed config file of log-rotation isn't installed. 
+  - #30846 Add CRM sample file for Pacemaker.
+  - #30847 Support cross operation on Pacemaker. 
+  - #30993 Fixed compailing error of gcc4.6.
+  - #31199 Fixed remaining threads when deleted virtual service.
+  - #31200 Fixed segmantaion fault when deleted virtual service.
+  - #31545 Fixed bulding error of boost 1.50 upper.
 
 [Dec. 12 2012] 3.0.4-3 Hiroaki Nakano
   - Fixed breaking HTTP header over MAX_BUFFER_SIZE on ip module.(#30300 patch)
