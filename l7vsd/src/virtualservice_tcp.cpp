@@ -903,11 +903,6 @@ void l7vs::virtualservice_tcp::initialize(l7vs::error_code &err)
 void l7vs::virtualservice_tcp::finalize(l7vs::error_code &err)
 {
 
-        //stop all active sessions
-        {
-                active_sessions.do_all(boost::bind(&session_thread_control::session_stop, _1));
-        }
-
         if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_VIRTUALSERVICE))) {
                 boost::format formatter("in_function: void virtualservice_tcp::finalize( "
                                         "l7vs::error_code& err )");
