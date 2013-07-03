@@ -39,6 +39,7 @@ start() {
     else
 	echo "done."
 	pidof $PROG > $PIDFILE
+	mkdir -p `dirname $LOCKFILE`
 	touch $LOCKFILE
     fi
 

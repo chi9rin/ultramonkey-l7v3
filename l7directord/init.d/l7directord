@@ -39,6 +39,7 @@ case "$1" in
   start)
         action "Starting l7directord ... " /usr/sbin/l7directord start
 	if [ $? -eq 0 ]; then
+	    mkdir -p `dirname $LOCKFILE`
 	    touch $LOCKFILE
 	fi
 	;;
