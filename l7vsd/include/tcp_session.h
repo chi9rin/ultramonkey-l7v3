@@ -40,7 +40,7 @@
 #include "virtualservice_element.h"
 
 #define TCP_SESSION_THREAD_STATE_BIT    8
-#define DEFAULT_SERVER_CONNECT_TIMEOUT  30
+#define DEFAULT_SERVER_CONNECT_TIMEOUT  0
 #define PARAM_UP_BUFFER_SIZE            "upstream_buffer_size"
 #define PARAM_DOWN_BUFFER_SIZE          "downstream_buffer_size"
 #define SERVER_CONNECT_TIMEOUT          "server_connect_timeout"
