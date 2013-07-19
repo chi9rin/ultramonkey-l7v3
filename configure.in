@@ -51,27 +51,27 @@ AC_FUNC_STRFTIME
 AC_CHECK_FUNCS([gethostname localtime_r memset])
 
 # application-specific option
-if test `uname -m` == "x86_64"; then
-	AC_SUBST( libdir, [/usr/lib64] )
-else
-	AC_SUBST( libdir, [/usr/lib] )
-	AC_SUBST( CXXFLAGS, -march=i686 )
-fi
-AC_SUBST( includedir, [/usr/include] )
+#if test `uname -m` == "x86_64"; then
+#	AC_SUBST( libdir, [/usr/lib64] )
+#else
+#	AC_SUBST( libdir, [/usr/lib] )
+#	AC_SUBST( CXXFLAGS, -march=i686 )
+#fi
+#AC_SUBST( includedir, [${prefix}/include] )
 
 AC_ARG_WITH(
 	l7vs-moddir,
 	[	--with-l7vs-moddir=DIR	l7vs module is to be installed in DIR.
-								[default=LIBDIR/l7vs] ],
+								[default=${libdir}/l7vs] ],
 	[	l7vs_moddir="$withval" ],
 	[	l7vs_moddir="${libdir}/l7vs" ]
 )
 
 AC_ARG_WITH(
         l7vs-includedir,
-        [       --with-l7vs-includedir=DIR      l7vs headerfile is to be installed in DIR.
+        [        --with-l7vs-includedir=DIR      l7vs headerfile is to be installed in DIR.
 
-                                                                [default=INCLUDEDIR/l7vs]
+                                                                [default=${includedir}/l7vs]
 ],
         [       l7vs_includedir="$withval" ],
         [       l7vs_includedir="${includedir}/l7vs" ]
@@ -80,9 +80,9 @@ AC_ARG_WITH(
 AC_ARG_WITH(
 	l7vsadm-sockdir,
 	[	--with-l7vsadm-sockdir=DIR	l7vsadm sockfile PATH.
-									[default=/var/run/l7vs] ],
+									[default=${localstatedir}/run/l7vs] ],
 	[	l7vsadm_sockdir="$withval" ],
-	[	l7vsadm_sockdir="/var/run/l7vs" ]
+	[	l7vsadm_sockdir="${localstatedir}/run/l7vs" ]
 )
 
 AC_ARG_WITH(
@@ -96,13 +96,13 @@ AC_ARG_WITH(
 AC_ARG_WITH(
 	l7vs-config-dir,
 	[	--with-l7vs-config-dir=DIR	l7vs configfile PATH.
-									[default=/etc/l7vs/l7vs.cf] ],
+									[default=${sysconfdir}/l7vs] ],
 	[	l7vs_config="$withval" ],
-	[	l7vs_config="/etc/l7vs/l7vs.cf"	]
+	[	l7vs_config="${sysconfdir}/l7vs"	]
 )
 
 AC_SUBST(CC,g++)
-AC_SUBST(exec_prefix, [/usr] )
+#AC_SUBST(exec_prefix, [/usr] )
 AC_SUBST(l7vsadm_sockdir)
 AC_SUBST(l7vs_moddir)
 AC_SUBST(l7vs_includedir) 
@@ -118,6 +118,10 @@ AC_CONFIG_FILES([doc/Makefile]
                 [doc/heartbeat-ra/Makefile]
 		[doc/mibs/Makefile]
 		[doc/man/Makefile]
+		[doc/moduledevel/Makefile]
+		[doc/moduledevel/sample/Makefile]
+		[doc/moduledevel/sample/protocol/Makefile]
+		[doc/moduledevel/sample/schedule/Makefile]
                 [l7directord/Makefile]
                 [l7vsd/Makefile]
                 [l7vsd/init.d/Makefile]
@@ -125,6 +129,7 @@ AC_CONFIG_FILES([doc/Makefile]
                 [l7vsd/module/protocol/Makefile]
                 [l7vsd/module/schedule/Makefile]
                 [l7vsd/src/Makefile]
+		[l7vsd/include/Makefile]
                 [Makefile])
 
 AC_OUTPUT

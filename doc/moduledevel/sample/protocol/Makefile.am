@@ -1,24 +1,13 @@
 AUTOMAKE_OPTIONS = foreign
-L7VS_MODDIR      = @l7vs_moddir@
-L7VS_INCLUDEDIR  = @l7vs_includedir@
-MAX_BUFFER_SIZE  = @l7vs_max_buffer_size@
 
-AM_CPPFLAGS      = \
-	-g -O2 -fno-strict-aliasing -Wall -Werror -fPIC -pthread \
-	-I$(L7VS_INCLUDEDIR) \
-	-DMAX_BUFFER_SIZE=$(MAX_BUFFER_SIZE)
-
-lib_LTLIBRARIES = \
-        libprotomod_simple.la
-
-libprotomod_simple_la_SOURCES = \
-	protocol_module_base.h \
-	http_protocol_module_base.h \
-	http_protocol_module_base.cpp \
-	protocol_module_simple.cpp
+UML7_VERSION = @ultramonkeyl7_version@
+MODDEV_TEMPDIR = @prefix@/share/doc/${UML7_VERSION}/moduledevel
 
 install:
-	cp ./.libs/libprotomod_simple.so ./.libs/protomod_simple.so && \
-	$(INSTALL) -m 755 -d $(L7VS_MODDIR)
-	$(INSTALL) -m 755 -D \
-		./.libs/protomod_simple.so $(L7VS_MODDIR)
+	install -c -m 644 -D ./README ${MODDEV_TEMPDIR}/sample/protocol/README
+	install -c -m 644 -D ./Makefile.am.sample ${MODDEV_TEMPDIR}/sample/protocol/Makefile.am
+	install -c -m 644 -D ./configure.in ${MODDEV_TEMPDIR}/sample/protocol/configure.in
+	install -c -m 644 -D ./http_protocol_module_base.cpp ${MODDEV_TEMPDIR}/sample/protocol/http_protocol_module_base.cpp
+	install -c -m 644 -D ./http_protocol_module_base.h ${MODDEV_TEMPDIR}/sample/protocol/http_protocol_module_base.h
+	install -c -m 644 -D ./protocol_module_simple.cpp ${MODDEV_TEMPDIR}/sample/protocol/protocol_module_simple.cpp
+	install -c -m 644 -D ./protocol_module_simple.h ${MODDEV_TEMPDIR}/sample/protocol/protocol_module_simple.h
