@@ -57,7 +57,7 @@ for UltraMonkeyl7's module.
         --includedir=${RPM_BUILD_ROOT}%{_includedir} \
         --libdir=${RPM_BUILD_ROOT}%{_libdir}
 
-make
+make %{?_smp_mflags}
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
