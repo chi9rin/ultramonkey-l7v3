@@ -5009,12 +5009,12 @@ FORMAT: B<"HH:mm">
 
 FORMAT: B<"mm">
 
-Defines the size each of session_thread_pool_size.
-Default is session_thread_pool_size parameter at l7vs.cf.
+=back
 
 =item B<session_thread_pool_size = >I<n>
 
-=back
+Defines the size each of session_thread_pool_size.
+Default is session_thread_pool_size parameter at l7vs.cf.
 
 =back
 

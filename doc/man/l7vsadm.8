@@ -1,10 +1,13 @@
-.TH L7VSADM 8 "10 Feb 2010" "UltraMonkey-L7"
+.TH L7VSADM 8 "25 Jul 2013" "UltraMonkey-L7"
 .SH NAME
 .B l7vsadm
 \- UltraMonkey-L7 administration tool
 .SH SYNOPSIS
 .B l7vsadm
-[\-A | \-E] \-t \fIservice\-address\fR:\fIserivice\-port\fR \-m \fIproto\-module\fR [\fImodule\-args\fR] [\-s \fIscheduler\fR] [\-u \fIconnection\-count\fR] [\-b \fIsorry\-server\fR] [\-f \fIsorry\-flag\fR] [\-Q \fIQoSval\-service\fR] [\-q \fIQoSval\-clients\fR]
+\-A \-t \fIservice\-address\fR:\fIserivice\-port\fR \-m \fIproto\-module\fR [\fImodule\-args\fR] [\-s \fIscheduler\fR] [\-u \fIconnection\-count\fR] [\-b \fIsorry\-server\fR] [\-f \fIsorry\-flag\fR] [\-Q \fIQoSval\-service\fR] [\-q \fIQoSval\-clients\fR] [\-\-session\-thread\-pool\-size]
+
+.B l7vsadm
+\-E \-t \fIservice\-address\fR:\fIserivice\-port\fR \-m \fIproto\-module\fR [\fImodule\-args\fR] [\-s \fIscheduler\fR] [\-u \fIconnection\-count\fR] [\-b \fIsorry\-server\fR] [\-f \fIsorry\-flag\fR] [\-Q \fIQoSval\-service\fR] [\-q \fIQoSval\-clients\fR]
 
 .B l7vsadm
 \-D \-t \fIservice\-address\fR:\fIserivice\-port\fR  \-m \fIproto\-module\fR [\fImodule\-args\fR]
@@ -175,6 +178,10 @@ Set QoS(client->realserver) limit.
 .TP
 .B "\-q, \-\-qos\-down \fIQoSVal\-down\fR"
 Set QoS(realserver->client) limit.
+
+.TP
+.B "\-\-session\-thread\-pool\-size"
+Set session_thread_pool_size.
 
 .TP
 .B "\-r, \-\-real\-server \fIserver\-address\fR"
