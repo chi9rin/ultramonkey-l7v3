@@ -1,13 +1,13 @@
-.TH L7VSADM 8 "25 Jul 2013" "UltraMonkey-L7"
+.TH L7VSADM 8 "26 Jul 2013" "UltraMonkey-L7"
 .SH NAME
 .B l7vsadm
 \- UltraMonkey-L7 administration tool
 .SH SYNOPSIS
 .B l7vsadm
-\-A \-t \fIservice\-address\fR:\fIserivice\-port\fR \-m \fIproto\-module\fR [\fImodule\-args\fR] [\-s \fIscheduler\fR] [\-u \fIconnection\-count\fR] [\-b \fIsorry\-server\fR] [\-f \fIsorry\-flag\fR] [\-Q \fIQoSval\-service\fR] [\-q \fIQoSval\-clients\fR] [\-\-session\-thread\-pool\-size]
+\-A \-t \fIservice\-address\fR:\fIserivice\-port\fR \-m \fIproto\-module\fR [\fImodule\-args\fR] [\-s \fIscheduler\fR] [\-u \fIconnection\-count\fR] [\-b \fIsorry\-server\fR] [\-\-masq|tproxy] [\-f \fIsorry\-flag\fR] [\-Q \fIQoSval\-up\fR] [\-q \fIQoSval\-down\fR] [\-z \fIssl\-config\-file\fR] [\-O \fIsocket\-option\fR] [\-L \fIaccess\-log\-flag\fR] [\-a \fIaccess\-log\-file\fR [\fIlogrotate-args\fR]] [\-\-session\-thread\-pool\-size]
 
 .B l7vsadm
-\-E \-t \fIservice\-address\fR:\fIserivice\-port\fR \-m \fIproto\-module\fR [\fImodule\-args\fR] [\-s \fIscheduler\fR] [\-u \fIconnection\-count\fR] [\-b \fIsorry\-server\fR] [\-f \fIsorry\-flag\fR] [\-Q \fIQoSval\-service\fR] [\-q \fIQoSval\-clients\fR]
+\-E \-t \fIservice\-address\fR:\fIserivice\-port\fR \-m \fIproto\-module\fR [\fImodule\-args\fR] [\-s \fIscheduler\fR] [\-u \fIconnection\-count\fR] [\-b \fIsorry\-server\fR] [\-\-masq|tproxy] [\-f \fIsorry\-flag\fR] [\-Q \fIQoSval\-up\fR] [\-q \fIQoSval\-down\fR] [\-L \fIaccess\-log\-flag\fR]
 
 .B l7vsadm
 \-D \-t \fIservice\-address\fR:\fIserivice\-port\fR  \-m \fIproto\-module\fR [\fImodule\-args\fR]
@@ -16,7 +16,7 @@
 \-C
 
 .B l7vsadm
-[\-a | \-e] -t \fIservice\-address\fR:\fIserivice\-port\fR  \-m \fIproto\-module\fR [\fImodule\-args\fR] \-r \fIserver\-address\fR:\fIserver\-port\fR  [\-w \fIweight\fR]
+[\-a | \-e] -t \fIservice\-address\fR:\fIserivice\-port\fR  \-m \fIproto\-module\fR [\fImodule\-args\fR] \-r \fIserver\-address\fR:\fIserver\-port\fR  [\-w \fIweight\fR] [\-\-masq|tproxy]
 
 .B l7vsadm
 \-d \-t \fIservice\-address\fR:\fIserivice\-port\fR  \-m \fIproto\-module\fR [\fImodule\-args\fR] \-r \fIserver\-address\fR:\fIserver\-port\fR 
@@ -26,6 +26,9 @@
 
 .B l7vsadm
 \-L \-c \fIlog\-category\fR \-l \fIlog\-level\fR
+
+.B l7vsadm
+\-S [\-f \fIsnmp\-flag\fR] [\-i \fIupdate\-interval\fR] [\-t \fIlog\-trap\-flag\fR] [\-l \fIlog\-trap\-level\fR] | \-r [\-t \fIservice\-address\fR \-m \fIproto\-module\fR]
 
 .B l7vsadm
 \-P \-r \fIreload\-parameter\fR
@@ -102,6 +105,10 @@ Edit replication function. This option must be using with \fB\-L\fR or \fB\-P\fR
 Edit logging level. Must be used with \fB\-c\fR option.
 
 .TP
+.B "\-S, \-\-snmp"
+Control SNMP Agent-function.
+
+.TP
 .B "\-P, \-\-parameter"
 Reload configuration file. Must be used with \fB\-r\fR option.
 
@@ -155,7 +162,7 @@ Specify the scheduler module.
 Set up maximum connection limit.
 
 .br
-\fIconnection\-count\fR := { 0 - 10000 }
+\fIconnection\-count\fR := { 0 - 100000 }
 
 .TP
 .B "\-b, \-\-bypass \fIsorry\-server\fR"
@@ -163,6 +170,14 @@ Set up sorry server.
 
 .br
 \fIsorry\-server\fR := { IPv4ADDR | HOSTNAME }:{PORTNUM | SERVICENAME }
+
+.TP
+.B "\-\-tproxy"
+Set sorry server connection to IP transparent mode.
+
+.TP
+.B "\-\-masq"
+Set sorry server connection to IP masquerade mode.
 
 .TP
 .B "\-f, \-\-flag \fIsorry\-flag\fR"
@@ -184,18 +199,54 @@ Set QoS(realserver->client) limit.
 Set session_thread_pool_size.
 
 .TP
+.B "\-z, \-\-ssl \fISSL\-config\-file\fR"
+Set path to SSL configuration file(Use SSL).
+
+.TP
+.B "\-O, \-\-sockopt \fIsocket\-option\fR"
+deferaccept,nodelay,cork,quickackon or quickackoff set to socket.
+
+.br
+\fIsocket\-option\fR := see the operation manual.
+
+.TP
+.B "\-L, \-\-access\-log \fIaccess\-log\-flag\fR"
+Switch access log mode. When \fIaccess\-log\-flag\fR is 1 output log.
+
+.br
+\fIaccess\-log\-flag\fR := { 0(none) | 1(output) }
+
+.TP
+.B "\-a, \-\-access\-log\-name \fIaccess\-log\-file\fR \fI[logrotate\-args]\fR"
+Set access\-log file name.
+
+.br
+\fIaccess\-log\-file\fR := /path/to/access\-log\-file
+
+.br
+\fIlogrotate\-args\fR := see the operation manual.
+
+.TP
 .B "\-r, \-\-real\-server \fIserver\-address\fR"
 Specify the real server.
 
 .br
-\fIsorry\-server\fR := { IPv4ADDR | HOSTNAME }:{PORTNUM | SERVICENAME }
+\fIreal\-server\fR := { IPv4ADDR | HOSTNAME }:{PORTNUM | SERVICENAME }
 
 .TP
 .B "\-w, \-\-weight \fIweight\fR"
 Set up weight value.
 
 .TP
-.B "\-s, \-\-status \fIreplication\-switch\fR"
+.B "\-\-tproxy"
+Set real server connection to IP transparent mode.
+
+.TP
+.B "\-\-masq"
+Set real server connection to IP masquerade mode.
+
+.TP
+.B "\-s, \-\-switch \fIreplication\-switch\fR"
 Switch replication system.
 
 .br
@@ -236,6 +287,34 @@ Reload configuration file.
 .B "\-n, \-\-numeric"
 Don't resolve hostname and service name when listing the virtual services and real server.
 
+.TP
+.B "\-f, \-\-flag \fIsnmp\-flag\fR"
+Start or stop snmp function.
+
+.br
+\fIsnmp\-flag\fR := { 0(off) | 1(on) }
+
+.TP
+.B "\-i, \-\-interval \fIupdate\-interval\fR"
+Set collect snmp cache collect interval(s).
+
+.TP
+.B "\-t, \-\-logtrap \fIlog\-trap\-flag\fR"
+Start or stop log trap function.
+
+.br
+\fIlog\-trap\-flag\fR := { 0(off) | 1(on) }
+
+.TP
+.B "\-l, \-\-logtraplevel \fIlog\-trap\-level\fR"
+Set log trap level for snmp.
+
+.br
+\fIlog\-trap\-level\fR := { 0(off) | 1(on) }
+
+.TP
+.B "\-r, \-\-refresh"
+Clear statistic info for snmp.
 
 .SH SEE ALSO
 .BR l7vsd (8)
