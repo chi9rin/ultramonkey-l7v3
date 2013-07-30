@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS = foreign
 
 UML7_VERSION = @ultramonkeyl7_version@
-HB2_TEMPDIR  = @prefix@/share/doc/$(UML7_VERSION)/heartbeat-ra
+HB2_TEMPDIR  = ${prefix}/share/doc/$(UML7_VERSION)/heartbeat-ra
 
 install:
 	$(INSTALL) -b -m 644 -D ./logd.cf $(HB2_TEMPDIR)/logd.cf
