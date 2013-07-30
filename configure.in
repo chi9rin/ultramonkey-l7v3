@@ -50,15 +50,6 @@ AC_FUNC_MKTIME
 AC_FUNC_STRFTIME
 AC_CHECK_FUNCS([gethostname localtime_r memset])
 
-# application-specific option
-#if test `uname -m` == "x86_64"; then
-#	AC_SUBST( libdir, [/usr/lib64] )
-#else
-#	AC_SUBST( libdir, [/usr/lib] )
-#	AC_SUBST( CXXFLAGS, -march=i686 )
-#fi
-#AC_SUBST( includedir, [${prefix}/include] )
-
 AC_ARG_WITH(
 	l7vs-moddir,
 	[	--with-l7vs-moddir=DIR	l7vs module is to be installed in DIR.
@@ -102,7 +93,6 @@ AC_ARG_WITH(
 )
 
 AC_SUBST(CC,g++)
-#AC_SUBST(exec_prefix, [/usr] )
 AC_SUBST(l7vsadm_sockdir)
 AC_SUBST(l7vs_moddir)
 AC_SUBST(l7vs_includedir) 

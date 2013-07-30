@@ -6,7 +6,7 @@ noinst_LIBRARIES = \
 	libl7vsd_logger.a \
 	libl7vsadm_logger.a
 
-PARAMETER_FILE = @l7vs_config@
+PARAMETER_FILE = @l7vs_config@/l7vs.cf
 
 libl7vsd_parameter_a_SOURCES = \
 	../include/parameter_enum.h \

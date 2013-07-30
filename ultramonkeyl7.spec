@@ -48,14 +48,11 @@ for UltraMonkeyl7's module.
 %setup -q
 
 %build
-%configure \
-        --prefix=${RPM_BUILD_ROOT}%{_prefix} \
-        --sbindir=${RPM_BUILD_ROOT}%{_sbindir} \
-        --sysconfdir=${RPM_BUILD_ROOT}%{_sysconfdir} \
-        --localstatedir=${RPM_BUILD_ROOT}%{_localstatedir} \
-	--mandir=${RPM_BUILD_ROOT}%{_mandir} \
-        --includedir=${RPM_BUILD_ROOT}%{_includedir} \
-        --libdir=${RPM_BUILD_ROOT}%{_libdir}
+./configure \
+	--prefix=%{_prefix} \
+	--sysconfdir=%{_sysconfdir} \
+	--localstatedir=%{_localstatedir} \
+	--libdir=%{_libdir}
 
 make %{?_smp_mflags}
 
@@ -76,7 +73,9 @@ mkdir -p ${RPM_BUILD_ROOT}%{_mandir}/man8
 mkdir -p ${RPM_BUILD_ROOT}%{moduledevel_tempdir}
 mkdir -p ${RPM_BUILD_ROOT}%{_includedir}
 
-make install 
+%makeinstall \
+	L7VS_CONF_DIR=${RPM_BUILD_ROOT}%{_sysconfdir}/l7vs \
+	L7VS_MODDIR=${RPM_BUILD_ROOT}%{l7vs_moddir}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
