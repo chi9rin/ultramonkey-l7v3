@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = foreign
 
-L7VS_SSL_CONFDIR = @sysconfdir@/l7vs/sslproxy
+L7VS_SSL_CONFDIR = ${sysconfdir}/l7vs/sslproxy
 
 install:
 	$(INSTALL) -b -m 644 -D ./root.pem $(L7VS_SSL_CONFDIR)/root.pem

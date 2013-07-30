@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS = foreign
 
 UML7_VERSION = @ultramonkeyl7_version@
-MODDEV_TEMPDIR = @prefix@/share/doc/${UML7_VERSION}/moduledevel
+MODDEV_TEMPDIR = ${prefix}/share/doc/${UML7_VERSION}/moduledevel
 
 install:
 	install -c -m 644 -D ./README ${MODDEV_TEMPDIR}/sample/schedule/README

@@ -1,9 +1,9 @@
 AUTOMAKE_OPTIONS = foreign
 
 L7VS_CONF_DIR       = @l7vs_config@
-L7DIRECTORD_CONFDIR = @sysconfdir@/ha.d/conf
-L7VS_SSL_CONFDIR    = @sysconfdir@/l7vs/sslproxy
-L7DIRECTORD_LOGROTATEDIR = @sysconfdir@/logrotate.d
+L7DIRECTORD_CONFDIR = ${sysconfdir}/ha.d/conf
+L7VS_SSL_CONFDIR    = ${sysconfdir}/l7vs/sslproxy
+L7DIRECTORD_LOGROTATEDIR = ${sysconfdir}/logrotate.d
 
 install:
 	$(INSTALL) -b -m 644 -D ./l7vs.cf $(L7VS_CONF_DIR)/l7vs.cf
