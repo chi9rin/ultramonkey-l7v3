@@ -944,7 +944,6 @@ sub validate_config {
             my $option = undef;
             my $key = q{};
             if (defined $value) {
-                $value =~ s/["']//g;
                 ($module, $option) = split /\s+/, $value, 2;
             }
             if ( $module =~ /[^a-z]/ ) {
@@ -1034,7 +1033,6 @@ sub validate_config {
         }
         elsif ($name eq 'accesslog_rotate_rotation_timing_value') {
             my $check = undef;
-            $value =~ s/["']//g;
             if (!defined $value ) {
                 config_error($line, 'ERR0129', $config);
             }
