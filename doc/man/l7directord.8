@@ -327,13 +327,11 @@ check if a server is alive. They override the request-receive pair in the
 virtual server section. These two strings must be quoted. If the request
 string starts with \fIhttp://...\fR the IP-address and port of the real server
 is overridden, otherwise the IP-address and port of the real server is used.
-.IP "\fBmodule =\fR \fIproto-module module-args [opt\-module\-args]\fR" 4
-.IX Item "module = proto-module module-args [opt-module-args]"
+.IP "\fBmodule =\fR \fIproto-module [opt\-module\-args]\fR" 4
+.IX Item "module = proto-module [opt-module-args]"
 Indicates the module parameter of \fBl7directord\fR. Here \fBproto-module\fR
-denotes the protocol module name (For example, pfilter). \fBmodule-args\fR denotes the
-arguments for the protocol module (For example, \-\-pattern\-match '*.html*').
-\&\fBmodule-args\fR is optional only when set \fBsessionless\fR, \fBip\fR and \fBsslid\fR module to \fBproto-module\fR.
-The last argument is optional (For example, \-\-reschedule).
+denotes the protocol module name (For example, sessionless).
+The last argument \&\fBopt-module-args\fR is optional (For example, \-\-reschedule).
 .Sh "More than one of these entries may be inside a virtual section:"
 .IX Subsection "More than one of these entries may be inside a virtual section:"
 .IP "\fBmaxconn =\fR \fIn\fR" 4

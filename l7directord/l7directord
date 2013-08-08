@@ -4745,13 +4745,11 @@ virtual server section. These two strings must be quoted. If the request
 string starts with I<http://...> the IP-address and port of the real server
 is overridden, otherwise the IP-address and port of the real server is used.
 
-=item B<module => I<proto-module module-args [opt-module-args]>
+=item B<module => I<proto-module [opt-module-args]>
 
 Indicates the module parameter of B<l7directord>. Here B<proto-module>
-denotes the protocol module name (For example, pfilter). B<module-args> denotes the
-arguments for the protocol module (For example, --pattern-match '*.html*').
-B<module-args> is optional only when set B<sessionless>, B<ip> and B<sslid> module to B<proto-module>.
-The last argument is optional (For example, --reschedule).
+denotes the protocol module name (For example, sessionless).
+The last argument B<opt-module-args> is optional (For example, --reschedule).
 
 =back
 
