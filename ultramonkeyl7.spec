@@ -96,7 +96,7 @@ fi
 %defattr(-, root, root, 0755)
 %{_sbindir}/*
 %{l7vs_moddir}/*
-%{_sysconfdir}/init.d/*
+%{_sysconfdir}/rc.d/init.d/*
 %dir %{l7vs_moddir}
 %dir %{l7vs_logdir}
 %dir %{_sysconfdir}/l7vs
