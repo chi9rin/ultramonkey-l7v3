@@ -14,7 +14,7 @@ System requirements
 
           CPU : Intel x86 and x86_64 or compatible architecture processors
 
-       Memory : 2 GB(recommended)
+       Memory : 4 GB(recommended)
 
     Libraries : log4cxx(C++ Logging Libraries) boost(C++ Template Libraries)
     
