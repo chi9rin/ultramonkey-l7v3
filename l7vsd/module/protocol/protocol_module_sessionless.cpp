@@ -404,6 +404,11 @@ protocol_module_base::check_message_result protocol_module_sessionless::check_pa
                 vec_str_it it_end = args.end();
                 //loop option strings
                 for (; it != it_end; ++it) {
+                        //option string = "-F"
+                        if (*it == "-F" || *it == "--forwarded-for") {
+                                //set forward flag ON
+                                continue;
+                        }
                         //option string = "-S"
                         if (*it == "-S" || *it == "--sorry-uri") {
                                 //set sorryURI flag OFF
