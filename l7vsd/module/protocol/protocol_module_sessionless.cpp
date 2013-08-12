@@ -410,7 +410,7 @@ protocol_module_base::check_message_result protocol_module_sessionless::check_pa
                                 continue;
                         }
                         //option string = "-S"
-                        if (*it == "-S" || *it == "--sorry-uri") {
+                        else if (*it == "-S" || *it == "--sorry-uri") {
                                 //set sorryURI flag OFF
                                 if (!sorryuri_checked) {
                                         //next item exist
