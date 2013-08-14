@@ -447,7 +447,7 @@ protocol_module_base::check_message_result protocol_module_ip::check_parameter(c
                                 }
                         }
                         //option string = "-F"
-                        if (*it == "-F" || *it == "--forwarded-for") {
+                        else if (*it == "-F" || *it == "--forwarded-for") {
                                 //set forward flag ON
                                 ++it;
                                 continue;
