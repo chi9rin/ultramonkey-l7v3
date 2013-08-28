@@ -446,6 +446,12 @@ protocol_module_base::check_message_result protocol_module_ip::check_parameter(c
                                         break;
                                 }
                         }
+                        //option string = "-F"
+                        else if (*it == "-F" || *it == "--forwarded-for") {
+                                //set forward flag ON
+                                ++it;
+                                continue;
+                        }
                         //option string = "-S"
                         else if (*it == "-S" || *it == "--sorry-uri") {
                                 //set sorryURI flag OFF
