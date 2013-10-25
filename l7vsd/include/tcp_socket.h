@@ -139,7 +139,7 @@ public:
                 }
         }
 
-#ifdef  IP_TRANSPARENT
+#if defined(IP_TRANSPARENT) || defined(IPV6_TRANSPARENT)
         virtual void    set_transparent(const boost::asio::ip::tcp::endpoint &client_endpoint, boost::system::error_code &error_code) {
                 int ip_socket_level;
                 client_endpoint.address().is_v4()
@@ -147,7 +147,12 @@ public:
                                     : ip_socket_level = SOL_IPV6;
                 // set IP_TRANSPARENT
                 int on = 1;
-                int err = ::setsockopt(my_socket->native(), ip_socket_level, IP_TRANSPARENT, &on, sizeof(on));
+                int err = 0;
+                if (ip_socket_level == SOL_IP) {
+                        err = ::setsockopt(my_socket->native(), ip_socket_level, IP_TRANSPARENT, &on, sizeof(on));
+                } else if (ip_socket_level == SOL_IPV6) {
+                        err = ::setsockopt(my_socket->native(), ip_socket_level, IPV6_TRANSPARENT, &on, sizeof(on));
+                }
                 if (err) {
                         error_code = boost::system::error_code(errno, boost::asio::error::get_system_category());
                         return;
@@ -157,6 +162,7 @@ public:
                 my_socket->bind(client_endpoint, error_code);
         }
 #endif
+
 protected:
         virtual void set_quickack(boost::system::error_code &error_code) {
                 int err = ::setsockopt(my_socket->native(), IPPROTO_TCP, TCP_QUICKACK, &opt_info.quickack_val, sizeof(opt_info.quickack_val));

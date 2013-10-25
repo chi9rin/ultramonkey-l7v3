@@ -29,13 +29,7 @@ AC_CHECK_LIB([netsnmp], main, :,
 	[AC_MSG_ERROR( l7vsd require netsnmp library. )] )
 
 # Checks for header files.
-AC_CHECK_HEADERS([limits.h unistd.h])
-
-# Checks for declarations.
-AC_CHECK_DECLS([IP_TRANSPARENT], [], [], [[
-	#include <sys/socket.h>
-	#include <linux/in.h>
-]])
+AC_CHECK_HEADERS([limits.h unistd.h sys/socket.h linux/in.h linux/in6.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
