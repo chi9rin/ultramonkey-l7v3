@@ -67,7 +67,7 @@ END
 ###############################
 l7vsd_start() {
         ocf_log info "l7vsd is starting ..."
-        l7vsd_monitor
+        l7vsd_monitor info
         RET=$?
         if [ $RET -eq $OCF_SUCCESS ]; then
                 ocf_log info "l7vsd is already running."
@@ -182,6 +182,12 @@ l7vsd_status(){
 # Get Resource Monitor Method
 ###############################
 l7vsd_monitor() {
+	local loglevel
+	loglevel=${1:-err}
+	if ocf_is_probe; then
+		loglevel="info"
+	fi
+
 	isRunning;
 	RET=$?
 	if [ $RET -eq 1 ]; then
@@ -195,7 +201,7 @@ l7vsd_monitor() {
 		fi
 	elif [ $RET -eq 0 ]; then
 		MSG="l7vsd is not running."
-		outputLog err ${OCF_NOT_RUNNING} ${MSG}
+		outputLog $loglevel ${OCF_NOT_RUNNING} ${MSG}
 		return $OCF_NOT_RUNNING
 	fi
 	MSG="l7vsd does not work. (ps=$RET) "
