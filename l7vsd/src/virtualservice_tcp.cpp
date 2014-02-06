@@ -935,12 +935,10 @@ void l7vs::virtualservice_tcp::finalize(l7vs::error_code &err)
                                             __FILE__, __LINE__);
                 }
         }
-        //waiting session delete
-        delete waiting_session;
-        waiting_session = NULL;
-
-        //waiting thread delete
+        //release waiting session
         waiting_stc->join();
+        delete waiting_stc;
+        waiting_stc = NULL;
 
         //unload ProtocolModule
         if (protomod) {
