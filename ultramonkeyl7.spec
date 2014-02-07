@@ -6,8 +6,8 @@
 
 Summary: The Layer-7 Virtual Server
 Name: ultramonkeyl7
-Version: 3.1.0
-Release: 1%{?dist}
+Version: 3.1.1
+Release: devel%{?dist}
 License: LGPLv2.1
 Group: System Environment/Daemons
 URL: http://sourceforge.jp/projects/ultramonkey-l7/
@@ -133,6 +133,10 @@ fi
 %{moduledevel_tempdir}/*
 
 %changelog
+* Fri Feb 7 2014 Hiroaki Nakano <nakano.hiroaki@nttcom.co.jp> 3.1.1-devel
+- Update for 3.1.1-devel
+- Bugfix
+
 * Sat Sep 8 2012 HIBARI Michiro  <l05102@shibaura-it.ac.jp> 3.1.0-devel
 - Update for 3.1.0-devel
 - Change spec file for generate devel package.
