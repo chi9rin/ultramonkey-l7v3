@@ -145,6 +145,12 @@ l7directord_status(){
 # Get Resource Monitor Method
 ###############################
 l7directord_monitor() {
+	local loglevel
+	loglevel=${1:-err}
+	if ocf_is_probe; then
+		loglevel="info"
+	fi
+
 	isRunning;
 	RET=$?
 	if [ $RET -eq 1 ]; then
@@ -158,7 +164,7 @@ l7directord_monitor() {
 		fi
 	elif [ $RET -eq 0 ]; then
 		MSG="l7direcotrd is not running."
-		outputLog err ${OCF_NOT_RUNNING} ${MSG}
+		outputLog $loglevel ${OCF_NOT_RUNNING} ${MSG}
 		return ${OCF_NOT_RUNNING}
 	fi
 	MSG="l7direcotrd does not work. (ps=$RET) "
@@ -171,7 +177,7 @@ l7directord_monitor() {
 ###############################
 l7directord_start() {
 	outputLog info "l7directord is starting ..."
-	l7directord_monitor
+	l7directord_monitor info
 	RET=$?
 	if [ $RET -eq ${OCF_SUCCESS} ]; then
 		MSG="l7directord is already running."
