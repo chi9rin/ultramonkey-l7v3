@@ -1530,8 +1530,9 @@ void l7vs::virtualservice_tcp::del_realserver(const l7vs::virtualservice_element
                 for (std::list<realserver>::iterator rs_itr = rs_list.begin();
                      rs_itr != rs_list.end(); ++rs_itr) {
                         if (itr->tcp_endpoint == rs_itr->tcp_endpoint) {
+                                boost::asio::ip::tcp::endpoint del_endpoint = rs_itr->tcp_endpoint;
                                 rs_list.erase(rs_itr);
-                                active_sessions.do_all(boost::bind(&session_thread_control::session_realserver_remove, _1, rs_itr->tcp_endpoint));
+                                active_sessions.do_all(boost::bind(&session_thread_control::session_realserver_remove, _1, del_endpoint));
                                 break;
                         }
                 }
