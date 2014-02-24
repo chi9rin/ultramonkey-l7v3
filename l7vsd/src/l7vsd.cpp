@@ -249,7 +249,7 @@ void    l7vsd::add_virtual_service(const virtualservice_element *in_vselement, e
                 try {
 
                         // create thread and run
-                        vs_threads.create_thread(boost::bind(&virtual_service::run, vsptr));
+                        (*vsptr).vs_thread_ptr =  boost::shared_ptr<boost::thread>(vs_threads.create_thread(boost::bind(&virtual_service::run, vsptr)));
 
                 } catch (...) {
                         std::stringstream    buf;
@@ -348,6 +348,8 @@ void    l7vsd::del_virtual_service(const virtualservice_element *in_vselement, e
         if (vslist.end() !=  vsitr) {
                 // vs stop
                 (*vsitr)->stop();
+                (*vsitr)->vs_thread_ptr->join();
+                vs_threads.remove_thread((*vsitr)->vs_thread_ptr.get());
                 // vs finalize
                 (*vsitr)->finalize(err);
 
