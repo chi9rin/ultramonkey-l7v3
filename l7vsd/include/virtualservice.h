@@ -621,6 +621,8 @@ public:
         void run();
         void stop();
 
+        boost::shared_ptr<boost::thread> vs_thread_ptr;
+
         void connection_active(const boost::asio::ip::tcp::endpoint &);
         void connection_inactive(const boost::asio::ip::tcp::endpoint &);
         void release_session(const tcp_session *session_ptr);
