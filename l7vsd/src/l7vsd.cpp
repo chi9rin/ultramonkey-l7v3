@@ -793,13 +793,13 @@ void    l7vsd::flush_virtual_service(error_code &err)
 
                         // vs stop
                         (*itr)->stop();
+                        // join virtualservice threads
+                        (*itr)->vs_thread_ptr->join();
+                        vs_threads.remove_thread((*itr)->vs_thread_ptr.get());
                         // vs finalize
                         (*itr)->finalize(err);
                 }
         }
-
-        // join virtualservice threads
-        vs_threads.join_all();
 
         // replication switch to slave
         rep->switch_to_slave();
