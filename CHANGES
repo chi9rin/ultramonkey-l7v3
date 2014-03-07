@@ -1,3 +1,7 @@
+[Mar. 9 2014] 3.1.1-1 HIBARI Michiro, Hiroaki Nakano
+  - #33102 fix memory leak.
+  - #33255 fix accessing endpoint at deleted realserver.
+
 [Sep. 8 2012] 3.1.0-1 HIBARI Michiro, Hiroaki Nakano
   - Add "session_thread_pool_size" option for l7vsadm and l7directord.
   - Change spec file. Make devel package.
