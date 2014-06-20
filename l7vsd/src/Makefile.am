@@ -173,6 +173,7 @@ l7vsd_LDADD = \
 	-lboost_system-mt \
 	-lboost_serialization-mt \
 	-lnetsnmpmibs -lnetsnmpagent -lnetsnmphelpers -lnetsnmp \
+	-lpthread \
 	@external_agent_libs@
 
 l7vsadm_CPPFLAGS = \
@@ -197,6 +198,7 @@ l7vsadm_LDADD = \
 	libl7vsadm_parameter.a \
 	-llog4cxx \
 	-lrt \
+	-lpthread \
 	-lboost_thread-mt \
 	-lboost_system-mt \
 	-lboost_serialization-mt \

@@ -840,7 +840,11 @@ void tcp_session::up_thread_run()
                                 }
                                 if (!server_connected_flag && server_connect_time_out != 0) {
                                         boost::xtime    now_time;
+#if BOOST_VERSION >= 105000
+                                        boost::xtime_get(&now_time, boost::TIME_UTC_);
+#else
                                         boost::xtime_get(&now_time, boost::TIME_UTC);
+#endif
                                         if ((now_time.sec - client_connected_time.sec) > server_connect_time_out) {     // timeout detect.
                                                 boost::system::error_code error_code;
                                                 client_socket.close(error_code);
@@ -1139,7 +1143,11 @@ void tcp_session::up_thread_client_accept(const TCP_PROCESS_TYPE_TAG process_typ
                                                   this,
                                                   boost::asio::placeholders::error));
         } else {
-                boost::xtime_get(&client_connected_time, boost::TIME_UTC);
+#if BOOST_VERSION >= 105000
+                boost::xtime_get(&start_handshake_time, boost::TIME_UTC_);
+#else
+                boost::xtime_get(&start_handshake_time, boost::TIME_UTC);
+#endif
                 upthread_status = UPTHREAD_ACTIVE;
         }
         up_thread_next_call_function = up_thread_function_array[func_tag];
