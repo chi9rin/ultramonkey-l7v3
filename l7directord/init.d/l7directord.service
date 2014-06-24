@@ -1,0 +1,14 @@
+[Unit]
+Description=UltraMonkey-L7 healthcheck daemon
+After=syslog.target network.target nss-lookup.service
+
+[Service]
+Type=forking
+EnvironmentFile=/etc/ha.d/conf/l7directord.cf
+ExecStart=/usr/sbin/l7directord start
+ExecReload=/usr/sbin/l7directord reload
+ExecStop=/usr/sbin/l7directord stop
+PIDFile=/var/run/l7directord.l7directord.pid
+
+[Install]
+WantedBy=multi-user.target

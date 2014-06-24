@@ -1,0 +1,14 @@
+[Unit]
+Description=UltraMonkey-L7 loadbalancing daemon
+After=syslog.target network.target nss-lookup.service
+
+[Service]
+Type=oneshot
+# LimitNOFILE=65536
+EnvironmentFile=/etc/l7vs/l7vs.cf
+ExecStart=/usr/sbin/l7vsd
+ExecStop=/bin/kill $MAINPID
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
