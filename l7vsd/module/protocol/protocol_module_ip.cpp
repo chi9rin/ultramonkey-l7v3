@@ -5657,6 +5657,11 @@ bool protocol_module_ip::put_data_into_sendbuffer(
                         buffer_element.first += sendbuffer_rest_size;
                         buffer_element.second -= sendbuffer_rest_size;
                         sendbuffer_rest_size = 0;
+
+                        //add remain item
+                        data_ptr->buffer_sequence.push_back(buffer_element);
+                        //delete the item
+                        data_ptr->buffer_sequence.pop_front();
                         break;
                 }
         }
