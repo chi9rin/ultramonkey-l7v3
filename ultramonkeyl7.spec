@@ -6,7 +6,7 @@
 
 Summary: The Layer-7 Virtual Server
 Name: ultramonkeyl7
-Version: 3.1.1
+Version: 3.1.2
 Release: 1%{?dist}
 License: LGPLv2.1
 Group: System Environment/Daemons
