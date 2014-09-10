@@ -1,3 +1,6 @@
+[Sep. 11 2014] 3.1.2-1 HIBARI Michiro, Hiroaki Nakano
+  - Fixed degraded bug: re-patch for fixed #30300.
+
 [Mar. 9 2014] 3.1.1-1 HIBARI Michiro, Hiroaki Nakano
   - #33102 fix memory leak.
   - #33255 fix accessing endpoint at deleted realserver.

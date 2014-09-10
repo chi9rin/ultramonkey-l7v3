@@ -133,6 +133,11 @@ fi
 %{moduledevel_tempdir}/*
 
 %changelog
+* Wed Sep 11 2014 Hiroaki Nakano <nakano.hiroaki@nttcom.co.jp> 3.1.2-1
+- Update for 3.1.2-1
+- Marge from 3.1.2-devel to master. And modefy version.
+- Fixed degraded bug: re-patch for fixed ticket 30300.
+
 * Fri Mar 7 2014 Hiroaki Nakano <nakano.hiroaki@nttcom.co.jp> 3.1.1-1
 - Update for 3.1.1-1
 - Marge from 3.1.1-devel to master. And modefy version.
