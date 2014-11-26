@@ -38,6 +38,7 @@ class   tcp_ssl_socket : public basic_tcp_socket< ssl_socket >
 public:
         // typedef
         typedef boost::function< void (const boost::system::error_code &) > async_handshake_handler_t;
+        typedef boost::function< void (const boost::system::error_code &) > async_shutdown_handler_t;
 
         // constructor
         tcp_ssl_socket(
@@ -124,6 +125,14 @@ public:
                 return error_code ? false : true;
         }
 
+        virtual void async_shutdown(async_handshake_handler_t  handler) {
+                boost::mutex::scoped_lock       lock(ssl_mutex);
+                boost::system::error_code       error_code;
+                shutdown_con++;
+                my_socket->lowest_layer().cancel(error_code);
+                my_socket->async_shutdown(ssl_strand.wrap(handler));
+        }
+
         virtual std::size_t     read_some(const boost::asio::mutable_buffers_1 &buffers, boost::system::error_code &error_code) {
                 boost::mutex::scoped_lock       lock(ssl_mutex);
                 if (write_con > 0 || handshake_con > 0) {
@@ -203,9 +212,19 @@ public:
                 return write_con;
         }
 
+        void decrement_shutdown_con() {
+                boost::mutex::scoped_lock       lock(ssl_mutex);
+                shutdown_con--;
+                ssl_cond.notify_one();
+        }
+
+        int get_shutdown_con() {
+                return shutdown_con;
+        }
+
         void wait_async_event_all_end() {
                 boost::mutex::scoped_lock       lock(ssl_mutex);
-                while (handshake_con > 0 || read_con > 0 || write_con > 0) {
+                while (handshake_con > 0 || read_con > 0 || write_con > 0 || shutdown_con > 0) {
                         boost::format   fmt("handshake_con : %d read_con = %d write_con = %d ");
                         fmt % handshake_con % read_con % write_con ;
                         Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__);
@@ -225,6 +244,7 @@ protected:
         int handshake_con;
         int read_con;
         int write_con;
+        int shutdown_con;
 
         virtual void set_quickack(boost::system::error_code &error_code) {
                 int err = ::setsockopt(my_socket->lowest_layer().native(), IPPROTO_TCP, TCP_QUICKACK, &opt_info.quickack_val, sizeof(opt_info.quickack_val));

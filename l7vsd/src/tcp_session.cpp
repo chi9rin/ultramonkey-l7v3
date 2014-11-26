@@ -1494,7 +1494,12 @@ void tcp_session::up_thread_client_disconnect(const TCP_PROCESS_TYPE_TAG process
                         fmt % boost::this_thread::get_id() % ec.message();
                         Logger::putLogInfo(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__);
 #endif
-                        func_tag = UP_FUNC_CLIENT_DISCONNECT;
+                        upthread_status = UPTHREAD_LOCK;
+                        tcp_ssl_socket::async_shutdown_handler_t   handler;
+                        handler = boost::bind(&tcp_session::up_thread_client_disconnect_handler, this, boost::asio::placeholders::error);
+                        client_ssl_socket.async_shutdown(handler);
+                        up_thread_next_call_function = up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT_EVENT];
+                        return;
                 } else if (ec == boost::asio::error::eof) {
 #ifdef  DEBUG
                         boost::format   fmt("Thread ID[%d] ssl_shutdown fail: %s");
@@ -4119,6 +4124,37 @@ void tcp_session::down_thread_sorryserver_async_read_some_handler(const boost::s
 #endif
         while (!down_thread_message_que.push(mes)) {}
         downthread_status_cond.notify_one();
+}
+
+void tcp_session::up_thread_client_disconnect_handler(const boost::system::error_code &error_code)
+{
+        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+        	boost::format   fmt("Thread ID[%d] FUNC IN up_thread_client_disconnect_handler");
+        	fmt % boost::this_thread::get_id();
+        	Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__);
+        }
+
+        client_ssl_socket.decrement_shutdown_con();
+
+        tcp_thread_message     *up_msg = new tcp_thread_message();
+        if (error_code == boost::asio::error::try_again) {
+        	tcp_ssl_socket::async_shutdown_handler_t   handler;
+        	handler = boost::bind(&tcp_session::up_thread_client_disconnect_handler, this, boost::asio::placeholders::error);
+        	client_ssl_socket.async_shutdown(handler);
+                up_thread_next_call_function = up_thread_function_array[UP_FUNC_CLIENT_DISCONNECT_EVENT];
+        	return;
+        } else {
+        	up_msg->message = up_que_function_map[UP_FUNC_CLIENT_DISCONNECT_EVENT];
+        	while (!up_thread_message_que.push(up_msg)) {}
+        }
+
+        upthread_status_cond.notify_one();
+
+        if (unlikely(LOG_LV_DEBUG == Logger::getLogLevel(LOG_CAT_L7VSD_SESSION))) {
+        	boost::format   fmt("Thread ID[%d] FUNC OUT up_thread_client_disconnect_handler");
+        	fmt % boost::this_thread::get_id() ;
+        	Logger::putLogDebug(LOG_CAT_L7VSD_SESSION, 999, fmt.str(), __FILE__, __LINE__);
+        }
 }
 
 void tcp_session::up_thread_client_ssl_socket_clear_socket_handler()
